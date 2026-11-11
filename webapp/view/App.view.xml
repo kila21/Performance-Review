@@ -1,0 +1,26 @@
+<mvc:View
+  controllerName="performance.review.controller.App"
+  xmlns="sap.m"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:tnt="sap.tnt"
+>
+  <tnt:ToolPage id="toolPage">
+    <tnt:header>
+      <tnt:ToolHeader>
+        <Title text="{i18n>appTitle}" level="H1" />
+      </tnt:ToolHeader>
+    </tnt:header>
+    <tnt:mainContents>
+      <Page title="{i18n>appTitle}" showHeader="false">
+        <content>
+          <MessageStrip
+            text="SAPUI5 TypeScript scaffold is running with sap.m, sap.ui.core, sap.tnt and sap.ui.codeeditor."
+            type="Success"
+            showIcon="true"
+            class="sapUiMediumMargin"
+          />
+        </content>
+      </Page>
+    </tnt:mainContents>
+  </tnt:ToolPage>
+</mvc:View>

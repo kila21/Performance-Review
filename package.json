@@ -1,0 +1,35 @@
+{
+  "name": "performance-review",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "start": "ui5 serve --port 8080 -o index.html",
+    "build": "ui5 build --clean-dest",
+    "ts-typecheck": "tsc --noEmit",
+    "lint": "eslint webapp",
+    "ui5lint": "ui5lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kila21/Performance-Review.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kila21/Performance-Review/issues"
+  },
+  "homepage": "https://github.com/kila21/Performance-Review#readme",
+  "devDependencies": {
+    "@sapui5/types": "^1.154.0",
+    "@ui5/cli": "^4.0.73",
+    "@ui5/linter": "^1.23.8",
+    "eslint": "^10.14.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.2",
+    "ui5-middleware-livereload": "^3.4.0",
+    "ui5-tooling-transpile": "^3.14.1"
+  }
+}
