@@ -1,0 +1,62 @@
+{
+  "id": "javascript",
+  "title": "JavaScript",
+  "groups": [
+    {
+      "id": "javascript-core",
+      "title": "JavaScript Core",
+      "topics": [
+        { "id": "syntax", "title": "Syntax", "file": "syntax.json", "questionCount": 6, "resources": [] },
+        { "id": "arrays", "title": "Arrays", "file": "arrays.json", "questionCount": 16, "resources": [] },
+        { "id": "functions", "title": "Functions", "file": "functions.json", "questionCount": 19, "resources": [] },
+        { "id": "scope-closure", "title": "Scope & closure", "file": "scope-closure.json", "questionCount": 6, "resources": [] },
+        {
+          "id": "async-behavior",
+          "title": "Async behavior",
+          "file": "async-behavior.json",
+          "questionCount": 5,
+          "resources": [
+            { "type": "video", "title": "What the heck is the event loop anyway? | Philip Roberts | JSConf EU", "url": "https://youtu.be/8aGhZQkoFbQ" },
+            { "type": "video", "title": "Jake Archibald: In The Loop - JSConf.Asia", "url": "https://youtu.be/cCOL7MC4Pl0" },
+            { "type": "video", "title": "Broken Promises", "url": "https://youtu.be/e3Nh350b6S4" },
+            { "type": "web-resource", "title": "Async/await: 6 причин забыть о промисах", "url": "https://habr.com/ru/company/ruvds/blog/326074/" }
+          ]
+        },
+        {
+          "id": "data-types",
+          "title": "Data types",
+          "file": "data-types.json",
+          "questionCount": 13,
+          "resources": [
+            { "type": "web-resource", "title": "Symbols and their purpose", "url": "https://www.keithcirkel.co.uk/metaprogramming-in-es6-symbols/" },
+            { "type": "web-resource", "title": "Type coercion explained", "url": "https://www.freecodecamp.org/news/js-type-coercion-explained-27ba3d9a2839/" }
+          ]
+        },
+        { "id": "expressions-operators", "title": "Expressions & operators", "file": "expressions-operators.json", "questionCount": 15, "resources": [] },
+        { "id": "objects", "title": "Objects", "file": "objects.json", "questionCount": 8, "resources": [] },
+        { "id": "error-handling", "title": "Error handling", "file": "error-handling.json", "questionCount": 6, "resources": [] },
+        {
+          "id": "misc",
+          "title": "Misc",
+          "file": "misc.json",
+          "questionCount": 3,
+          "resources": [
+            { "type": "web-resource", "title": "JS Info: Modules", "url": "https://javascript.info/modules" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "javascript-in-web-browser",
+      "title": "JavaScript in WebBrowser",
+      "topics": [
+        { "id": "dom", "title": "DOM", "file": "dom.json", "questionCount": 12, "resources": [] },
+        { "id": "event-handling", "title": "Event handling", "file": "event-handling.json", "questionCount": 3, "resources": [] },
+        { "id": "networking", "title": "Networking", "file": "networking.json", "questionCount": 4, "resources": [] },
+        { "id": "client-side-data-storage", "title": "Client Side data storage", "file": "client-side-data-storage.json", "questionCount": 2, "resources": [] },
+        { "id": "web-apis-interfaces", "title": "Web APIs / interfaces", "file": "web-apis-interfaces.json", "questionCount": 1, "resources": [] },
+        { "id": "browser-misc", "title": "Misc", "file": "browser-misc.json", "questionCount": 2, "resources": [] }
+      ]
+    }
+  ]
+}

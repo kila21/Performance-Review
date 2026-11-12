@@ -1,0 +1,274 @@
+{
+  "topicId": "arrays",
+  "title": "Arrays",
+  "questions": [
+    {
+      "id": "what-is-an-array",
+      "title": "What is an array in JavaScript, and what is it used for?",
+      "description": "An array is a special kind of variable that can hold many values together, in one place. Each value inside the array is called an item or an element. Every item has a position number, called an index. The first item has index 0, the second item has index 1, and so on. We use arrays when we need to keep a list of related things, for example a list of names, a list of numbers, or a list of tasks. Instead of creating many separate variables, we put all the values inside one array, and then we can read, add, or remove items in an easy way.",
+      "keyPoints": [
+        "An array stores an ordered list of values in one variable.",
+        "Items are accessed by a numeric index, starting at 0.",
+        "Arrays can hold any type of value, including mixed types."
+      ],
+      "examples": [
+        { "title": "Creating and reading an array", "language": "javascript", "code": "const fruits = [\"apple\", \"banana\", \"cherry\"];\n\nconsole.log(fruits[0]); // \"apple\"\nconsole.log(fruits.length); // 3" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "array-data-types",
+      "title": "What kind of data can you store in a JavaScript array?",
+      "description": "A JavaScript array can store any kind of value. You can put numbers, strings, booleans, objects, functions, or even other arrays inside one array. The array does not check the type of the values, so you can also mix different types together in the same array. For example, one array can have a number, then a string, then an object, all in the same list. This is very flexible, but if you mix too many types without a good reason, your code can become harder to read and understand.",
+      "keyPoints": [
+        "Arrays are not limited to one data type.",
+        "You can store numbers, strings, booleans, objects, functions and even arrays inside an array.",
+        "Mixing types works, but keep it readable and intentional."
+      ],
+      "examples": [
+        { "title": "An array with mixed types", "language": "javascript", "code": "const mixed = [1, \"two\", true, { id: 4 }, [5, 6]];\n\nconsole.log(mixed[3]); // { id: 4 }" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "array-vs-object",
+      "title": "When should you use an array instead of a plain object?",
+      "description": "Arrays and objects are both used to store multiple values, but they fit different situations. You should use an array when you have a list of values, and the order of the values is important. You get each value by its position (its index), like the first item, the second item, and so on. You should use an object when every value has its own name, called a key, and the order does not matter. For example, a list of test scores fits well in an array, because the order can be important. But information about one student, like name and age, fits better in an object, because each value already has a clear name.",
+      "keyPoints": [
+        "Arrays fit ordered lists, accessed by index (0, 1, 2, ...).",
+        "Objects fit named data, accessed by key (like user.name).",
+        "Arrays have built-in methods (map, filter, forEach...) made for looping over ordered items."
+      ],
+      "examples": [
+        { "title": "Array vs object for the same data", "language": "javascript", "code": "// Order matters, access by position\nconst scores = [90, 85, 77];\n\n// Each value has a name, order doesn't matter\nconst user = { name: \"Ana\", age: 28 };" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "creating-arrays",
+      "title": "What are the different ways to create an array, and which one should you use?",
+      "description": "There are a few ways to create an array in JavaScript. The easiest and most common way is the array literal, with square brackets, like const arr = [1, 2, 3]. This way is simple and clear, and it is the recommended way for real projects. Another way is the Array constructor, using the keyword new, like new Array(). This method has a confusing problem: if you give it only one number, like new Array(3), it creates an empty array with length 3, not an array that contains the value 3. If you give it more than one value, like new Array(1, 2, 3), it works as you expect, and creates [1, 2, 3]. Because of this strange behavior, most developers avoid the Array constructor, and use the array literal [] instead. Array.of() and Array.from() are two more options, used mainly to build an array from existing values or from a list-like value.",
+      "keyPoints": [
+        "Array literal [ ] is the simplest, most common and recommended way.",
+        "new Array() works, but new Array(3) creates an empty array with length 3 instead of the array [3].",
+        "Array.of() always creates an array from its arguments, avoiding that trap.",
+        "Array.from() builds an array from an iterable or array-like value."
+      ],
+      "examples": [
+        { "title": "Literal vs constructor", "language": "javascript", "code": "const a = [1, 2, 3];        // [1, 2, 3]\nconst b = new Array(3);     // [ <3 empty items> ], length 3\nconst c = Array.of(3);      // [3]" }
+      ],
+      "assignment": {
+        "task": "Write a function makeArrayOfZeros(n) that returns an array of n zeros, for example makeArrayOfZeros(4) should return [0, 0, 0, 0]. Use new Array(n) only to set the length, then fill it.",
+        "starterCode": "function makeArrayOfZeros(n) {\n  // your code here\n}\n\nconsole.log(makeArrayOfZeros(4)); // [0, 0, 0, 0]",
+        "solution": "function makeArrayOfZeros(n) {\n  return new Array(n).fill(0);\n}\n\nconsole.log(makeArrayOfZeros(4)); // [0, 0, 0, 0]"
+      }
+    },
+    {
+      "id": "multidimensional-arrays",
+      "title": "How do you create a multidimensional array in JavaScript?",
+      "description": "JavaScript does not have a special type for multidimensional arrays, like a table or a grid. Instead, we create an array that holds other arrays inside it. Each inner array can represent one row of data. This is called an array of arrays, and it is the normal way to build something like a matrix or a grid in JavaScript. To read or change one value, you need two indexes: one for the row, and one for the column. For example, matrix[0][1] means \"go to the first row, then the second value in that row\". You can also add more levels if you need a deeper structure, but this makes the code harder to read, so use it only when you really need it.",
+      "keyPoints": [
+        "A multidimensional array is simply an array whose items are arrays.",
+        "Use matrix[row][col] to read or set a specific value.",
+        "You can nest as many levels as you need, but keep it readable."
+      ],
+      "examples": [
+        { "title": "A 2D array (matrix)", "language": "javascript", "code": "const matrix = [\n  [1, 2, 3],\n  [4, 5, 6],\n  [7, 8, 9]\n];\n\nconsole.log(matrix[1][2]); // 6" }
+      ],
+      "assignment": {
+        "task": "Write a function sumDiagonal(matrix) that returns the sum of the main diagonal of a square matrix (matrix[0][0] + matrix[1][1] + matrix[2][2] + ...).",
+        "starterCode": "function sumDiagonal(matrix) {\n  // your code here\n}\n\nconst matrix = [\n  [1, 2, 3],\n  [4, 5, 6],\n  [7, 8, 9]\n];\nconsole.log(sumDiagonal(matrix)); // 15",
+        "solution": "function sumDiagonal(matrix) {\n  let sum = 0;\n  for (let i = 0; i < matrix.length; i++) {\n    sum += matrix[i][i];\n  }\n  return sum;\n}\n\nconst matrix = [\n  [1, 2, 3],\n  [4, 5, 6],\n  [7, 8, 9]\n];\nconsole.log(sumDiagonal(matrix)); // 15"
+      }
+    },
+    {
+      "id": "array-length",
+      "title": "What does the length property of an array do?",
+      "description": "The length property tells you how many items are currently stored in an array. It is a number, and it is always equal to the highest index used in the array, plus one. For example, if an array has 5 items, length will be 5, and the last item will be at index 4 (5 minus 1). You can use length in many situations: to check if an array is empty (length === 0), to control a loop that goes through all the items, or even to make the array shorter. If you set arr.length to a smaller number, JavaScript will remove the extra items at the end of the array.",
+      "keyPoints": [
+        "arr.length returns the number of items in the array.",
+        "arr.length === 0 means the array is empty.",
+        "Setting arr.length = n removes any items from index n onward."
+      ],
+      "examples": [
+        { "title": "Reading and using length", "language": "javascript", "code": "const list = [1, 2, 3, 4, 5];\nconsole.log(list.length); // 5\n\nlist.length = 3;\nconsole.log(list); // [1, 2, 3]" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "basic-array-methods",
+      "title": "What do the common built-in array methods (push, pop, slice, splice, etc.) do?",
+      "description": "JavaScript arrays come with many built-in methods, so you do not need to write your own code for common tasks. Here is a simple explanation of the most important ones. push and pop add or remove an item at the end of the array. unshift and shift add or remove an item at the start of the array. indexOf and lastIndexOf help you find the position of a value, searching from the beginning or from the end. join turns the whole array into one string, with a separator between the items. slice makes a copy of part of the array, and it does not change the original array. splice is different: it changes the original array, by removing items, adding items, or both. concat joins two or more arrays together, and gives you a new array. sort changes the order of the items, based on rules that you can control. reverse simply reverses the order of the items. Finally, Array.isArray checks if a value is really an array, which is useful when you are not sure what type of data you have.",
+      "keyPoints": [
+        "push / pop — add or remove an item at the end of the array.",
+        "unshift / shift — add or remove an item at the start of the array.",
+        "indexOf / lastIndexOf — find the position of a value, searching from the start or the end.",
+        "join — combine all items into one string, separated by a chosen character.",
+        "slice — returns a shallow copy of part of the array, without changing the original.",
+        "splice — changes the original array by removing and/or inserting items.",
+        "concat — combines two or more arrays into a new array.",
+        "sort — reorders the items in place, based on a comparison.",
+        "reverse — reverses the order of items in place.",
+        "Array.isArray — checks whether a value is an array.",
+        "By default, sort() turns items into strings and compares them as text, not as numbers. This means [10, 9, 1].sort() gives [1, 10, 9], not [1, 9, 10]. To sort numbers correctly, pass a compare function, like (a, b) => a - b."
+      ],
+      "examples": [
+        { "title": "push/pop vs unshift/shift", "language": "javascript", "code": "const stack = [1, 2];\nstack.push(3);     // [1, 2, 3]\nstack.pop();       // [1, 2]\nstack.unshift(0);  // [0, 1, 2]\nstack.shift();     // [1, 2]" },
+        { "title": "slice vs splice", "language": "javascript", "code": "const arr = [1, 2, 3, 4, 5];\nconst copy = arr.slice(1, 3);   // [2, 3], arr unchanged\narr.splice(1, 2, \"a\", \"b\");      // arr becomes [1, \"a\", \"b\", 4, 5]" },
+        { "title": "Default sort() vs numeric sort()", "language": "javascript", "code": "console.log([10, 9, 1].sort());               // [1, 10, 9]\nconsole.log([10, 9, 1].sort((a, b) => a - b)); // [1, 9, 10]" }
+      ],
+      "assignment": {
+        "task": "Write a function removeFirstAndLast(arr) that returns a new array without its first and last item, using slice (don't change the input array). removeFirstAndLast([1,2,3,4]) should return [2,3].",
+        "starterCode": "function removeFirstAndLast(arr) {\n  // your code here\n}\n\nconsole.log(removeFirstAndLast([1, 2, 3, 4])); // [2, 3]",
+        "solution": "function removeFirstAndLast(arr) {\n  return arr.slice(1, arr.length - 1);\n}\n\nconsole.log(removeFirstAndLast([1, 2, 3, 4])); // [2, 3]"
+      }
+    },
+    {
+      "id": "functional-array-methods",
+      "title": "What do the functional array methods (map, filter, reduce, etc.) do, and why are they considered immutable?",
+      "description": "Functional array methods are special methods that take a function as input, and run that function for every item in the array. The important thing about most of these methods is that they do not change the original array. Instead, they give back a new array or a new single value. This idea is called immutability, which simply means \"the original data stays the same\". forEach runs a function for every item, but it does not create a new array. filter creates a new array with only the items that pass a test (a condition you write). find returns the first item that passes a test, or undefined if nothing matches. map creates a new array where every item has been changed by a function. some and every check if at least one item, or all items, pass a test. reduce and reduceRight combine all the items into one single value, for example a total sum, going from left to right or from right to left. Because most of these methods give back something new, instead of changing the original array, your code becomes safer and easier to understand.",
+      "keyPoints": [
+        "forEach — runs a function for each item, returns nothing (no new array).",
+        "filter — builds a new array with only the items that pass a test.",
+        "find — returns the first item that passes a test, or undefined.",
+        "map — builds a new array by transforming every item.",
+        "some / every — check if at least one, or all, items pass a test.",
+        "reduce / reduceRight — combine all items into a single value, going left-to-right or right-to-left.",
+        "Most of these do not change (mutate) the original array — they return something new."
+      ],
+      "examples": [
+        { "title": "map + filter", "language": "javascript", "code": "const prices = [10, 25, 5, 40];\nconst affordable = prices.filter(p => p < 30).map(p => p * 0.9);\nconsole.log(affordable); // [9, 22.5, 4.5]" },
+        { "title": "reduce to get a total", "language": "javascript", "code": "const prices = [10, 25, 5];\nconst total = prices.reduce((sum, price) => sum + price, 0);\nconsole.log(total); // 40" }
+      ],
+      "assignment": {
+        "task": "Given an array of product prices, write a function totalAfterDiscount(prices, discount) that returns the total price after applying a percentage discount to every price. Use map and reduce, not a for loop.",
+        "starterCode": "function totalAfterDiscount(prices, discount) {\n  // your code here\n}\n\nconsole.log(totalAfterDiscount([10, 20, 30], 10)); // 54",
+        "solution": "function totalAfterDiscount(prices, discount) {\n  return prices\n    .map(price => price * (1 - discount / 100))\n    .reduce((sum, price) => sum + price, 0);\n}\n\nconsole.log(totalAfterDiscount([10, 20, 30], 10)); // 54"
+      }
+    },
+    {
+      "id": "accessing-array-items",
+      "title": "How do you get an item from an array?",
+      "description": "There are a few simple ways to get a value from an array. The most common way is to use square brackets with the index number. For example, arr[0] gives you the first item, because arrays start counting from 0. If you want the last item, you can use arr.at(-1), which is shorter than writing arr[arr.length - 1]. Another useful technique is called destructuring. It lets you take values out of an array and put them directly into separate variables, in one line of code. For example, const [first, second] = arr gives you the first and second item of the array as two new variables.",
+      "keyPoints": [
+        "arr[0] gets the first item; indexes start at 0.",
+        "arr.at(-1) gets the last item, without calculating arr.length - 1.",
+        "Array destructuring lets you assign items to variables in one line."
+      ],
+      "examples": [
+        { "title": "Index, at(), and destructuring", "language": "javascript", "code": "const colors = [\"red\", \"green\", \"blue\"];\n\nconsole.log(colors[0]);     // \"red\"\nconsole.log(colors.at(-1)); // \"blue\"\n\nconst [first, , third] = colors;\nconsole.log(first, third); // \"red\" \"blue\"" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "inserting-array-items",
+      "title": "How do you add a new item to an array?",
+      "description": "You can add a new item to an array in different ways, depending on where you want to add it, and whether you want to change the original array or not. push(item) adds a new item at the end of the array, and it changes the original array. unshift(item) adds a new item at the beginning, and it also changes the original array. splice(index, 0, item) can insert an item at any position you choose, again changing the original array. If you do not want to change the original array, you can use the spread operator, like [...arr, newItem]. This creates a brand new array, with all the old items plus the new one, while the original array stays the same.",
+      "keyPoints": [
+        "push(item) adds an item to the end.",
+        "unshift(item) adds an item to the start.",
+        "splice(index, 0, item) inserts an item at a specific position.",
+        "[...arr, item] creates a new array with the item added, without changing the original."
+      ],
+      "examples": [
+        { "title": "Adding items", "language": "javascript", "code": "const arr = [1, 2, 3];\n\narr.push(4);              // [1, 2, 3, 4]\nconst arr2 = [...arr, 5]; // [1, 2, 3, 4, 5], arr unchanged" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "iterating-arrays",
+      "title": "What are the ways to loop through an array?",
+      "description": "Looping through an array means going through every item, one by one, usually to read it or to do something with it. JavaScript gives you a few ways to do this. A classic for loop, like for (let i = 0; i < arr.length; i++), gives you full control, and you always know the current index. A for...of loop, like for (const item of arr), is simpler to write when you only need the value, and you do not care about the index. The forEach method, like arr.forEach(item => ...), runs a function for every item, but it has one limitation: you cannot stop it early with break, unlike a normal for loop.",
+      "keyPoints": [
+        "for (let i = 0; i < arr.length; i++) gives full control, including the index.",
+        "for (const item of arr) loops directly over the values.",
+        "arr.forEach(item => ...) runs a callback per item, but you can't break out of it early."
+      ],
+      "examples": [
+        { "title": "for vs for...of vs forEach", "language": "javascript", "code": "const nums = [1, 2, 3];\n\nfor (let i = 0; i < nums.length; i++) {\n  console.log(i, nums[i]);\n}\n\nfor (const n of nums) {\n  console.log(n);\n}\n\nnums.forEach(n => console.log(n));" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "array-like-objects",
+      "title": "What is an array-like object, and how do you turn it into a real array?",
+      "description": "An array-like object looks similar to a real array, because it has a length property and items you can access by index. However, it is not a true array, so it does not have array methods like map, filter, or push. Some common examples of array-like objects are: a string (which has indexed characters and a length), the old arguments object inside a regular function, and a NodeList, which you get when you select many elements from the DOM. If you want to use real array methods on these values, you need to convert them first. You can do this with Array.from(arrayLike), which creates a true array from an array-like value. The spread operator, like [...arrayLike], can also do the same thing, as long as the value can be looped over (is iterable).",
+      "keyPoints": [
+        "Array-like objects have length and indexed values, but no array methods.",
+        "Common examples: strings, the arguments object, NodeList from the DOM.",
+        "Array.from(arrayLike) converts it into a true array.",
+        "The spread operator [...arrayLike] does the same for iterable array-likes."
+      ],
+      "examples": [
+        { "title": "Converting array-like values", "language": "javascript", "code": "function sumArgs() {\n  const args = Array.from(arguments);\n  return args.reduce((a, b) => a + b, 0);\n}\n\nconsole.log(sumArgs(1, 2, 3));  // 6\nconsole.log(Array.from(\"abc\")); // [\"a\", \"b\", \"c\"]" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "sparse-arrays",
+      "title": "What is a sparse array, and how does its length property behave?",
+      "description": "A sparse array is an array that has \"holes\" in it, which means some positions (indexes) do not have a real value. This can happen in a few ways. For example, if you write new Array(5), you get an array with length 5, but all 5 positions are empty holes, not real values. Another way is to assign a value far beyond the current length, like arr[10] = \"x\" on an array that only had 3 items before. This creates holes between index 3 and index 9. Even with holes, the length property still works in the same way: it always equals the highest used index, plus one. Sparse arrays can cause confusing bugs, so it is good to understand how they are created and how they behave.",
+      "keyPoints": [
+        "A sparse array has gaps (holes) instead of real values at some indexes.",
+        "new Array(5) creates a sparse array with length 5 and no real items.",
+        "Assigning arr[10] on a shorter array also creates holes between the old end and index 10.",
+        "length always reflects the highest index + 1, holes included."
+      ],
+      "examples": [
+        { "title": "Creating a sparse array", "language": "javascript", "code": "const arr = [1, 2, 3];\narr[6] = 7;\n\nconsole.log(arr.length); // 7\nconsole.log(arr);        // [1, 2, 3, <3 empty items>, 7]" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "array-constructor-pitfalls",
+      "title": "Why is new Array() often considered a bad practice?",
+      "description": "The Array constructor, used with new Array(), is considered a bad practice because its behavior depends on how many arguments you give it, and this can be confusing. If you give it exactly one number, like new Array(7), it does not create an array that contains the number 7. Instead, it creates an empty array with length 7, full of holes. But if you give it two or more numbers, like new Array(7, 2), it behaves in a completely different way, and creates the array [7, 2], with those exact values inside. This inconsistency can easily cause bugs, especially for developers who do not know about it. Because of this, most developers prefer the simple array literal syntax, like [7], which always behaves in a clear and predictable way.",
+      "keyPoints": [
+        "new Array(7) creates an empty array with length 7 — not an array containing 7.",
+        "new Array(7, 2) creates [7, 2] — totally different behavior for two arguments.",
+        "The literal [] (or Array.of()) is predictable and should be preferred."
+      ],
+      "examples": [
+        { "title": "Inconsistent constructor behavior", "language": "javascript", "code": "console.log(new Array(7));    // [ <7 empty items> ]\nconsole.log(new Array(7, 2)); // [7, 2]\nconsole.log([7]);             // [7]" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "chaining-array-methods",
+      "title": "What does it mean to chain array methods, and how do you do it?",
+      "description": "Chaining array methods means calling several array methods one after another, in a single expression. This works because many array methods, like filter, map, and sort, give back a new array as their result. Since the result is still an array, you can immediately call another array method on it, without saving it in a separate variable first. For example, you can filter an array to remove items you do not need, then map it to change each remaining item, then use reduce to combine everything into one final value. Chaining usually makes code shorter and easier to read than writing many separate loops. It is also a good idea to filter out items you do not need as early as possible, because this can make the rest of the chain faster, especially for big arrays.",
+      "keyPoints": [
+        "filter, map, and sort return arrays, so another array method can be called right after them.",
+        "Chaining reads like a pipeline: start with the data, then transform it step by step.",
+        "Filtering out unneeded items before mapping can make the chain faster on large arrays."
+      ],
+      "examples": [
+        { "title": "Chaining filter, map and reduce", "language": "javascript", "code": "const orders = [10, 0, 25, 0, 5];\n\nconst total = orders\n  .filter(amount => amount > 0)\n  .map(amount => amount * 1.2)\n  .reduce((sum, amount) => sum + amount, 0);\n\nconsole.log(total); // 48" }
+      ],
+      "assignment": {
+        "task": "Given an array of numbers, write a function sumOfSquaresOfEvens(nums) that returns the sum of the squares of only the even numbers, using a single chain of filter, map and reduce.",
+        "starterCode": "function sumOfSquaresOfEvens(nums) {\n  // your code here\n}\n\nconsole.log(sumOfSquaresOfEvens([1, 2, 3, 4, 5])); // 20 (2*2 + 4*4)",
+        "solution": "function sumOfSquaresOfEvens(nums) {\n  return nums\n    .filter(n => n % 2 === 0)\n    .map(n => n * n)\n    .reduce((sum, n) => sum + n, 0);\n}\n\nconsole.log(sumOfSquaresOfEvens([1, 2, 3, 4, 5])); // 20"
+      }
+    },
+    {
+      "id": "es2015-array-methods",
+      "title": "What do the modern (ES2015+) array methods like includes, flat and fill do?",
+      "description": "Starting from ES2015 (also called ES6) and later versions, JavaScript added several new array methods that make common tasks easier. fill(value) replaces all, or part, of the array with one fixed value. copyWithin() copies part of the array to another position, inside the same array. findIndex() works like find, but instead of giving back the matching item, it gives back the index (position) of that item. flat(depth) takes a nested array (an array inside an array) and flattens it into one simple array; the depth value controls how many levels you want to flatten. flatMap() is a mix of map and flat: it first maps every item, and then flattens the result by one level. includes(value) checks if the array contains a specific value, and returns true or false; unlike indexOf, it can correctly find NaN inside the array. Finally, entries(), keys(), and values() give you special tools (called iterators) to loop through index-value pairs, only the indexes, or only the values of the array.",
+      "keyPoints": [
+        "fill(value) — fills all or part of the array with a fixed value.",
+        "copyWithin() — copies part of the array to another position in the same array.",
+        "findIndex() — like find, but returns the index of the match instead of the value.",
+        "flat(depth) — flattens nested arrays into a single level (depth controls how deep).",
+        "flatMap() — maps every item, then flattens the result by one level.",
+        "includes(value) — checks if the array contains a value (and correctly handles NaN, unlike indexOf).",
+        "entries() / keys() / values() — return iterators over [index, value] pairs, indexes, or values."
+      ],
+      "examples": [
+        { "title": "flat and flatMap", "language": "javascript", "code": "const nested = [1, [2, 3], [4, [5]]];\nconsole.log(nested.flat());  // [1, 2, 3, 4, [5]]\nconsole.log(nested.flat(2)); // [1, 2, 3, 4, 5]\n\nconst pairs = [[1, 2], [3, 4]];\nconsole.log(pairs.flatMap(([a, b]) => [a, b, a + b])); // [1, 2, 3, 3, 4, 7]" },
+        { "title": "includes vs indexOf with NaN", "language": "javascript", "code": "const list = [1, NaN, 3];\nconsole.log(list.indexOf(NaN));  // -1 (can't find it)\nconsole.log(list.includes(NaN)); // true" }
+      ],
+      "assignment": null
+    }
+  ]
+}

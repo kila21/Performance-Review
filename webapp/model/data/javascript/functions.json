@@ -1,0 +1,309 @@
+{
+  "topicId": "functions",
+  "title": "Functions",
+  "questions": [
+    {
+      "id": "what-is-a-function",
+      "title": "What is a function in JavaScript, and what is its purpose?",
+      "description": "A function is a reusable block of code that performs a task. You give a function a set of input values, called parameters, and the function can give you back a result, using the keyword return. The main purpose of functions is to avoid writing the same code again and again. Instead, you write the logic once, inside a function, and then you can run (call) that function as many times as you need, with different input values each time. Functions also help you organize your code into small, clear, named pieces, which makes the whole program easier to read and understand.",
+      "keyPoints": [
+        "A function is a block of code that you can run (call) whenever you need it.",
+        "Functions can accept input values, called parameters, and can give back a result with return.",
+        "The main purpose of functions is to avoid repeating the same code many times.",
+        "Functions also help organize code into small, clear, named pieces."
+      ],
+      "examples": [
+        { "title": "A simple function with parameters and a return value", "language": "javascript", "code": "function add(a, b) {\n  return a + b;\n}\n\nconsole.log(add(2, 3)); // 5" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "function-declaration-vs-expression",
+      "title": "What is the difference between a function declaration and a function expression?",
+      "description": "A function declaration is written using the function keyword as its own statement, like function greet() { ... }. JavaScript hoists function declarations completely, which means it moves them to the top of their scope before running the code. Because of this, you can call a function declaration even before the line where it is written. A function expression is different: it is a function that is assigned to a variable, like const greet = function () { ... }. A function expression is only available after the line where it is assigned runs, even though the variable itself might be hoisted. If you try to call it earlier, your code will fail.",
+      "keyPoints": [
+        "A function declaration uses the function keyword on its own, like function greet() {}.",
+        "Function declarations are hoisted completely, so you can call them before their line in the code.",
+        "A function expression assigns a function to a variable, like const greet = function () {}.",
+        "A function expression only works after the line where it is assigned has already run."
+      ],
+      "examples": [
+        { "title": "Calling a declaration early works, an expression does not", "language": "javascript", "code": "console.log(greetDeclared()); // \"Hi!\" — works, because function declarations are hoisted\n\nfunction greetDeclared() {\n  return \"Hi!\";\n}\n\nconst greetExpression = function () {\n  return \"Hello!\";\n};\n\nconsole.log(greetExpression()); // \"Hello!\" — works, but only after this line has run" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "function-context",
+      "title": "What is the context (this) of a function, and how do you know its value in a given situation?",
+      "description": "The context of a function is the value of the special keyword this inside it. this usually refers to the object that the function is working for, at the moment it is called. The value of this is decided mainly by how a function is called, not by where the function was written. If you call a function as a method, like user.greet(), then this points to user. If you call a plain function on its own, this does not point to any specific object you created, and can even be undefined in modern strict code. Arrow functions are special: they do not have their own this at all, and they simply use the this value from the code around them, at the place where the arrow function is written.",
+      "keyPoints": [
+        "this refers to the object that \"owns\" the current function call.",
+        "The value of this depends on how a function is called, not where it was defined.",
+        "Calling obj.method() sets this to obj.",
+        "Arrow functions do not have their own this; they use the this from the surrounding code."
+      ],
+      "examples": [
+        { "title": "this inside a method", "language": "javascript", "code": "const user = {\n  name: \"Ana\",\n  greet() {\n    return `Hi, I'm ${this.name}`;\n  },\n};\n\nconsole.log(user.greet()); // \"Hi, I'm Ana\"" },
+        { "title": "An arrow function keeps the outer this", "language": "javascript", "code": "const counter = {\n  count: 0,\n  incrementWithArrow() {\n    return () => {\n      this.count++; // the arrow function keeps \"this\" from incrementWithArrow\n    };\n  },\n};\n\nconst addOne = counter.incrementWithArrow();\naddOne();\naddOne();\nconsole.log(counter.count); // 2" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "setting-function-context",
+      "title": "What are the different ways to set the context (this) of a function: call, apply, and bind?",
+      "description": "JavaScript gives you three built-in ways to control what this will be inside a function, instead of relying only on how it is called. call(thisValue, arg1, arg2, ...) runs the function immediately, and sets this to the value you give it, with the rest of the arguments listed one by one. apply(thisValue, argsArray) does exactly the same thing as call, but you pass the arguments as a single array, instead of listing them one by one. bind(thisValue) is different from the other two: it does not run the function right away. Instead, it returns a brand new function, with this permanently locked to the value you gave it, so you can call that new function later, as many times as you like, and this will always stay the same.",
+      "keyPoints": [
+        "call(obj, a, b) runs the function right away, with this set to obj.",
+        "apply(obj, [a, b]) does the same as call, but the arguments are given as one array.",
+        "bind(obj) does not run the function; it returns a new function, with this locked to obj forever.",
+        "You can call the function returned by bind later, and this will always stay the same."
+      ],
+      "examples": [
+        { "title": "call, apply, and bind", "language": "javascript", "code": "function introduce(greeting) {\n  return `${greeting}, I am ${this.name}`;\n}\n\nconst user = { name: \"Ana\" };\n\nconsole.log(introduce.call(user, \"Hi\"));       // \"Hi, I am Ana\"\nconsole.log(introduce.apply(user, [\"Hello\"])); // \"Hello, I am Ana\"\n\nconst boundIntroduce = introduce.bind(user);\nconsole.log(boundIntroduce(\"Hey\")); // \"Hey, I am Ana\"" }
+      ],
+      "assignment": {
+        "task": "The function invokeLater below calls a function without its original object, so counter.logCount loses its \"this\" and logs undefined instead of 5. Fix the last line using bind, so it correctly logs 5.",
+        "starterCode": "const counter = {\n  count: 5,\n  logCount: function () {\n    console.log(this.count);\n  },\n};\n\nfunction invokeLater(fn) {\n  fn();\n}\n\ninvokeLater(counter.logCount); // currently logs undefined, should log 5",
+        "solution": "const counter = {\n  count: 5,\n  logCount: function () {\n    console.log(this.count);\n  },\n};\n\nfunction invokeLater(fn) {\n  fn();\n}\n\ninvokeLater(counter.logCount.bind(counter)); // 5"
+      }
+    },
+    {
+      "id": "arguments-keyword",
+      "title": "What is the arguments keyword, and when can it be useful?",
+      "description": "Inside a regular function (not an arrow function), you automatically get access to a special value called arguments. It is an array-like object that holds every argument passed into that function call, even if there are more arguments than named parameters. arguments is useful when you want a function to accept any number of inputs, without knowing in advance how many there will be. One thing to remember is that arguments is not a true array, so it does not have array methods like map or filter directly. If you need those, you first need to convert it into a real array, for example with Array.from(arguments). Also, arrow functions do not have their own arguments object at all.",
+      "keyPoints": [
+        "arguments is an array-like object holding every argument passed to a function call.",
+        "It is available inside regular functions, but not inside arrow functions.",
+        "It is useful when a function needs to work with any number of arguments.",
+        "arguments is not a real array, so you need Array.from(arguments) to use array methods like map or reduce."
+      ],
+      "examples": [
+        { "title": "Summing any number of arguments", "language": "javascript", "code": "function sumAll() {\n  const nums = Array.from(arguments);\n  return nums.reduce((total, n) => total + n, 0);\n}\n\nconsole.log(sumAll(1, 2, 3));       // 6\nconsole.log(sumAll(10, 20, 30, 40)); // 100" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "optional-arguments",
+      "title": "How do you deal with optional arguments in a JavaScript function?",
+      "description": "A parameter is optional if the person calling the function does not always need to pass a value for it. The easiest way to handle this is to give the parameter a default value, directly in the function definition, like function greet(name = \"friend\"). This default value is used only when the argument is missing, or when it is passed as undefined. Another common approach is to check the value manually inside the function body, for example with an if statement, or with the nullish coalescing operator (??), which gives you a fallback value when the original one is null or undefined.",
+      "keyPoints": [
+        "You can give a parameter a default value directly in the function definition, like function greet(name = \"friend\").",
+        "The default value is used only when the argument is missing, or passed as undefined.",
+        "You can also check and set a fallback value manually, inside the function body, using an if statement or the ?? operator."
+      ],
+      "examples": [
+        { "title": "A default parameter value", "language": "javascript", "code": "function greet(name = \"friend\") {\n  return `Hello, ${name}!`;\n}\n\nconsole.log(greet());      // \"Hello, friend!\"\nconsole.log(greet(\"Ana\")); // \"Hello, Ana!\"" },
+        { "title": "A manual fallback with ??", "language": "javascript", "code": "function createUser(name, age) {\n  age = age ?? 18; // use 18 if age is null or undefined\n  return { name, age };\n}\n\nconsole.log(createUser(\"Ana\", 30)); // { name: 'Ana', age: 30 }\nconsole.log(createUser(\"Leo\"));     // { name: 'Leo', age: 18 }" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "callback-pattern-and-anonymous-functions",
+      "title": "What is a callback pattern, and what is an anonymous (lambda) function?",
+      "description": "A callback is a function that you pass as an argument into another function, so that the other function can call it later, often after finishing some task. This pattern is very common in JavaScript, for example with array methods like forEach and map, or with asynchronous tasks. An anonymous function is simply a function that does not have a name. Anonymous functions are often written directly at the place where they are needed, especially as callbacks, because they do not need to be reused anywhere else in the code. Anonymous functions are sometimes also called lambda functions, a term that comes from other programming languages.",
+      "keyPoints": [
+        "A callback is a function passed as an argument to another function, to be run later.",
+        "Callbacks are common with array methods (forEach, map) and with asynchronous tasks.",
+        "An anonymous function is a function without a name.",
+        "Anonymous functions are often written directly as callbacks, since they usually don't need to be reused elsewhere."
+      ],
+      "examples": [
+        { "title": "Passing an anonymous function as a callback", "language": "javascript", "code": "function processNumbers(numbers, callback) {\n  for (const n of numbers) {\n    callback(n);\n  }\n}\n\nprocessNumbers([1, 2, 3], function (n) {\n  console.log(n * n);\n});\n// 1\n// 4\n// 9" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "arrow-functions",
+      "title": "What are arrow functions, and how are they different from normal functions?",
+      "description": "Arrow functions are a shorter way to write a function, using the => symbol instead of the function keyword, like (a, b) => a + b. Besides being shorter to write, arrow functions behave differently from normal functions in a few important ways. They do not have their own this value; instead, they always use the this from the surrounding code, at the place where they are written. They also do not have their own arguments object. Finally, you cannot use the new keyword with an arrow function to create an object from it, the way you can with a normal function. Because of this, arrow functions are a great fit for short callbacks, and for cases where you want to keep the this value from the outer code, but they are not a good fit for object methods or constructors.",
+      "keyPoints": [
+        "Arrow functions use a shorter syntax: (a, b) => a + b.",
+        "They do not have their own this; they always use the this from the surrounding code.",
+        "They do not have their own arguments object.",
+        "You cannot use new with an arrow function."
+      ],
+      "examples": [
+        { "title": "A short arrow function", "language": "javascript", "code": "const double = (n) => n * 2;\n\nconsole.log(double(5)); // 10" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "when-to-extract-a-function",
+      "title": "What are the signs that a piece of code should be moved into its own function?",
+      "description": "There are a few common signs that tell you a piece of code should become its own function. First, if you notice the same code written more than once, in different places, it is a good idea to move it into one function, and call that function wherever you need it, instead of repeating yourself. Second, if a block of code does one clear, separate task, giving that block a name as a function usually makes the whole program easier to read. Third, if a piece of code is getting long, or hard to follow at a glance, splitting it into smaller functions, each with a clear purpose, makes it easier to understand and to fix later. Finally, if you want to test one piece of logic by itself, separately from the rest of the program, it almost always needs to be its own function.",
+      "keyPoints": [
+        "If the same code appears more than once, move it into a function to avoid repeating yourself.",
+        "If a block of code does one clear task, turning it into a named function improves readability.",
+        "If code is getting long or hard to follow, splitting it into smaller functions helps.",
+        "If you want to test a piece of logic separately, it should usually be its own function."
+      ],
+      "examples": [
+        { "title": "Removing duplicated code with a function", "language": "javascript", "code": "// Before: the same calculation is repeated\nconst priceA = 100 - 100 * 0.1;\nconst priceB = 50 - 50 * 0.1;\nconsole.log(priceA, priceB); // 90 45\n\n// After: the calculation is moved into one function\nfunction applyDiscount(price, discount) {\n  return price - price * discount;\n}\nconsole.log(applyDiscount(100, 0.1), applyDiscount(50, 0.1)); // 90 45" }
+      ],
+      "assignment": {
+        "task": "The code below repeats the same area calculation twice. Refactor it by writing one function computeArea(width, height), and use it for both rectangles.",
+        "starterCode": "const areaA = 4 * 5;\nconst areaB = 7 * 2;\nconsole.log(areaA, areaB); // 20 14",
+        "solution": "function computeArea(width, height) {\n  return width * height;\n}\n\nconsole.log(computeArea(4, 5), computeArea(7, 2)); // 20 14"
+      }
+    },
+    {
+      "id": "function-prototype",
+      "title": "What is a function's prototype, and when can it be useful?",
+      "description": "Every regular function in JavaScript automatically gets a property called prototype, which is simply an object. This becomes useful when the function is used as a constructor, together with the new keyword. Every new object created by that constructor gets linked to the constructor's prototype object. This means you can put shared methods on the prototype, one single time, and every object created by that constructor will be able to use those methods, without each object needing its own separate copy. This saves memory, especially if you plan to create many objects from the same constructor.",
+      "keyPoints": [
+        "Every regular function has a prototype property, which is just an object.",
+        "When you use the function as a constructor with new, the new object gets linked to that prototype object.",
+        "Methods placed on the prototype are shared by every object created by that constructor.",
+        "This avoids each object needing its own private copy of the same method, and saves memory."
+      ],
+      "examples": [
+        { "title": "Sharing a method through the prototype", "language": "javascript", "code": "function Person(name) {\n  this.name = name;\n}\n\nPerson.prototype.greet = function () {\n  return `Hi, I'm ${this.name}`;\n};\n\nconst ana = new Person(\"Ana\");\nconst leo = new Person(\"Leo\");\n\nconsole.log(ana.greet()); // \"Hi, I'm Ana\"\nconsole.log(leo.greet()); // \"Hi, I'm Leo\"\nconsole.log(ana.greet === leo.greet); // true (both share the same function)" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "function-as-constructor",
+      "title": "How does a function behave when it is used as a constructor, with new?",
+      "description": "When you put the keyword new in front of a function call, JavaScript does a few things automatically, before and after running the function's code. First, it creates a brand new, empty object. Then, it sets this inside the function to point to that new object. The function's code then usually runs normally, setting properties on this, to prepare the new object. Finally, JavaScript automatically returns that new object for you, unless the function explicitly returns a different object by itself. This pattern is how you create many similar objects from one function, which is often called a constructor function.",
+      "keyPoints": [
+        "new creates a brand new, empty object before running the function.",
+        "this inside the function points to that new object.",
+        "The function usually sets properties on this to prepare the new object.",
+        "The new object is returned automatically, unless the function explicitly returns a different object."
+      ],
+      "examples": [
+        { "title": "A simple constructor function", "language": "javascript", "code": "function Person(name, age) {\n  this.name = name;\n  this.age = age;\n}\n\nconst ana = new Person(\"Ana\", 28);\nconsole.log(ana.name, ana.age);     // \"Ana\" 28\nconsole.log(ana instanceof Person); // true" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "function-as-method",
+      "title": "How does a function behave when it is used as a method of an object?",
+      "description": "A method is simply a function that is stored as a property on an object. When you call it using the object, like counter.increment(), the this value inside that function is automatically set to counter. This lets the method read and change the other properties on the same object, using this. It is important to know that the same function can behave differently depending on how you call it: if you take a method out of its object and call it completely on its own, without the object in front of it, it usually loses its connection to this object, and this will no longer point to it.",
+      "keyPoints": [
+        "A method is a function stored as a property on an object.",
+        "When you call obj.method(), this inside the function refers to obj.",
+        "This lets the method read and change other properties on the same object.",
+        "If you call the same function alone, without the object in front, it usually loses its connection to this object."
+      ],
+      "examples": [
+        { "title": "A method using this", "language": "javascript", "code": "const counter = {\n  count: 0,\n  increment() {\n    this.count++;\n    return this.count;\n  },\n};\n\nconsole.log(counter.increment()); // 1\nconsole.log(counter.increment()); // 2" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "instanceof-operator",
+      "title": "What does the instanceof operator do?",
+      "description": "The instanceof operator checks whether an object was created from a particular constructor or class. It looks at the chain of prototypes connected to the object, to see if the constructor's prototype appears somewhere in that chain. The result of instanceof is always a boolean value: true if the object was created from that constructor (or from something that inherits from it), and false if it was not.",
+      "keyPoints": [
+        "instanceof checks if an object was created using a specific constructor or class.",
+        "It returns true or false.",
+        "It works by checking the object's prototype chain for a connection to the constructor's prototype.",
+        "It also returns true for objects created from a class that extends (inherits from) the constructor you check against."
+      ],
+      "examples": [
+        { "title": "Checking with instanceof", "language": "javascript", "code": "class Animal {}\nclass Dog extends Animal {}\n\nconst rex = new Dog();\n\nconsole.log(rex instanceof Dog);    // true\nconsole.log(rex instanceof Animal); // true\nconsole.log(rex instanceof Array);  // false" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "iife",
+      "title": "What is an IIFE (Immediately Invoked Function Expression), and when can it be useful?",
+      "description": "An IIFE is a function that is defined and called in one single step, instead of being defined first and called separately later. The usual way to write one is to wrap a function expression in parentheses, and then immediately call it by adding another pair of parentheses right after: (function () { ... })(). The main reason to use an IIFE is to create a private scope: any variable declared inside it cannot be seen or used outside of it, so it cannot accidentally conflict with other variables in your program. IIFEs were especially popular before JavaScript had block-scoped variables (let, const) and modules, but you can still see them used today for small, one-time setup code.",
+      "keyPoints": [
+        "An IIFE is a function that is defined and called immediately, in one single step.",
+        "The typical syntax wraps the function in parentheses, then calls it right away: (function () { ... })().",
+        "An IIFE creates a private scope, so its variables cannot leak into (or conflict with) the surrounding code.",
+        "IIFEs were especially useful before let, const and modules existed, and are still used sometimes for one-time setup code."
+      ],
+      "examples": [
+        { "title": "An IIFE with a private variable", "language": "javascript", "code": "const result = (function () {\n  const secret = 42;\n  return secret * 2;\n})();\n\nconsole.log(result);        // 84\nconsole.log(typeof secret); // \"undefined\" (secret stayed private inside the IIFE)" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "callback-hell",
+      "title": "What is the \"Callback Hell\" problem?",
+      "description": "Callback Hell happens when you need to run several tasks one after another, and each task depends on the result of the one before it, using callbacks. Every new task's callback is written nested inside the previous callback, which creates code that gets more and more indented, step by step, looking like a staircase or a pyramid. This makes the code hard to read, and it also makes error handling difficult, because every level of nesting may need its own separate error check. Callback Hell was a common problem in older asynchronous JavaScript code. Modern tools like Promises and the async/await syntax were created partly to solve this exact problem, by letting developers write the same kind of step-by-step logic in a flatter, more readable way.",
+      "keyPoints": [
+        "Callback Hell happens when callbacks are nested inside other callbacks, several levels deep.",
+        "The resulting code looks like a staircase, and becomes harder to read with every extra level.",
+        "Error handling becomes harder too, since each level may need its own check.",
+        "Promises and async/await were created partly to solve this problem, with flatter, more readable code."
+      ],
+      "examples": [
+        { "title": "A nested callback \"pyramid\"", "language": "javascript", "code": "function getUser(id, callback) {\n  callback({ id, name: \"Ana\" });\n}\nfunction getOrders(user, callback) {\n  callback([{ id: 1, total: 20 }]);\n}\nfunction getOrderDetails(order, callback) {\n  callback({ ...order, status: \"shipped\" });\n}\n\ngetUser(1, (user) => {\n  getOrders(user, (orders) => {\n    getOrderDetails(orders[0], (details) => {\n      console.log(details); // { id: 1, total: 20, status: 'shipped' }\n    });\n  });\n});" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "recursion",
+      "title": "What is recursion, and how do you use it?",
+      "description": "Recursion is when a function calls itself, in order to solve a smaller version of the same problem. A recursive function always needs what is called a base case: a simple situation where the function can give a direct answer, without calling itself again. Without a base case, the function would keep calling itself forever, and your program would eventually crash with a \"stack overflow\" error. Recursion is especially useful for problems that naturally repeat on smaller pieces of themselves, like calculating a factorial, or working with data that contains other data inside it, such as nested arrays or nested folders.",
+      "keyPoints": [
+        "Recursion is when a function calls itself, to work on a smaller version of the same problem.",
+        "A recursive function needs a base case: a simple condition where it stops and returns a direct answer.",
+        "Without a base case, a recursive function would call itself forever, and crash with a stack overflow error.",
+        "Recursion fits well with problems that repeat on smaller pieces of themselves, like a factorial or nested data."
+      ],
+      "examples": [
+        { "title": "A factorial with recursion", "language": "javascript", "code": "function factorial(n) {\n  if (n <= 1) return 1; // base case\n  return n * factorial(n - 1);\n}\n\nconsole.log(factorial(5)); // 120" }
+      ],
+      "assignment": {
+        "task": "Write a recursive function sumArray(arr) that returns the sum of all numbers in an array, without using a loop or array methods like reduce.",
+        "starterCode": "function sumArray(arr) {\n  // your code here\n}\n\nconsole.log(sumArray([1, 2, 3, 4])); // 10",
+        "solution": "function sumArray(arr) {\n  if (arr.length === 0) return 0; // base case\n  return arr[0] + sumArray(arr.slice(1));\n}\n\nconsole.log(sumArray([1, 2, 3, 4])); // 10"
+      }
+    },
+    {
+      "id": "function-hoisting",
+      "title": "How does hoisting work for function declarations?",
+      "description": "A function declaration, written with the function keyword as its own statement, is hoisted completely, body included, to the top of its scope. This means you can call such a function before the line where it is actually written in your code, and it will still work correctly, because JavaScript already knows about the whole function before running anything. This is different from a function expression, where a function is assigned to a variable. In that case, only the variable declaration might be hoisted, not the function itself, so calling it before the assignment line will fail.",
+      "keyPoints": [
+        "Function declarations are hoisted completely, body included, to the top of their scope.",
+        "You can call a function declaration before the line where it is written in the file.",
+        "Function expressions do not get this same full hoisting.",
+        "Calling a function expression before it is assigned will fail, because the function itself is not ready yet."
+      ],
+      "examples": [
+        { "title": "Calling a hoisted function, then an expression too early", "language": "javascript", "code": "console.log(sayBye()); // \"Bye!\" — works even though sayBye is called before its definition below\n\nfunction sayBye() {\n  return \"Bye!\";\n}\n\ntry {\n  sayHiExpr(); // this fails, because sayHiExpr is in its \"temporal dead zone\"\n} catch (error) {\n  console.log(error instanceof ReferenceError); // true\n}\n\nconst sayHiExpr = function () {\n  return \"Hi!\";\n};" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "call-stack",
+      "title": "What is a call stack, and when is this knowledge useful?",
+      "description": "The call stack is an internal structure that JavaScript uses to keep track of which functions are currently running, and in what order. Every time a function is called, it gets added (pushed) on top of the stack. When that function finishes, it gets removed (popped) from the stack, and control goes back to whichever function called it. Understanding the call stack is useful in a few situations. It helps you read error messages, because a stack trace shows you the chain of function calls that led to the error. It also helps you understand recursion: if a recursive function never reaches its base case, it keeps adding itself to the stack, until the stack gets full and the program crashes with a \"stack overflow\" error.",
+      "keyPoints": [
+        "The call stack keeps track of all the functions that are currently running, in order.",
+        "When a function is called, it is added to the top of the stack; when it finishes, it is removed.",
+        "A stack trace in an error message shows the chain of calls that led to the error, which helps you find the problem.",
+        "Recursion without a base case keeps adding calls to the stack, until it overflows."
+      ],
+      "examples": [
+        { "title": "Watching the order of calls on the stack", "language": "javascript", "code": "function first() {\n  console.log(\"enter first\");\n  second();\n  console.log(\"exit first\");\n}\n\nfunction second() {\n  console.log(\"enter second\");\n  third();\n  console.log(\"exit second\");\n}\n\nfunction third() {\n  console.log(\"enter third\");\n}\n\nfirst();\n// \"enter first\"\n// \"enter second\"\n// \"enter third\"\n// \"exit second\"\n// \"exit first\"" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "rest-parameters",
+      "title": "What are rest parameters, and when are they useful?",
+      "description": "Rest parameters let a function accept any number of arguments, and collect them into a real array. You write them by adding three dots (...) before the last parameter's name, like function sum(...numbers). This is different from the older arguments object: rest parameters give you a true array, with every array method available, like map, filter, and reduce. You can also combine a rest parameter with normal named parameters; in that case, the rest parameter only collects whatever arguments are left over, after the named ones. The same three-dot syntax can also be used in destructuring, to collect the remaining items from an array, or the remaining properties from an object, into a new array or object.",
+      "keyPoints": [
+        "Rest parameters use ... before the last parameter name, and collect the rest of the arguments into a real array.",
+        "Unlike the old arguments object, rest parameters give you a true array, with all array methods available.",
+        "You can combine rest parameters with normal named parameters; the rest parameter only collects what is left over.",
+        "The same ... syntax works in destructuring too, to collect the rest of an array or object."
+      ],
+      "examples": [
+        { "title": "A function with rest parameters", "language": "javascript", "code": "function sum(...numbers) {\n  return numbers.reduce((total, n) => total + n, 0);\n}\n\nconsole.log(sum(1, 2, 3)); // 6\nconsole.log(sum(10, 20));  // 30" },
+        { "title": "Rest syntax in destructuring", "language": "javascript", "code": "const [first, ...rest] = [1, 2, 3, 4];\nconsole.log(first, rest); // 1 [ 2, 3, 4 ]\n\nconst { a, ...others } = { a: 1, b: 2, c: 3 };\nconsole.log(a, others); // 1 { b: 2, c: 3 }" }
+      ],
+      "assignment": {
+        "task": "Write a function averageScore(name, ...scores) that returns a string like \"Ana: 90\", where 90 is the average of all the scores passed after the name.",
+        "starterCode": "function averageScore(name, ...scores) {\n  // your code here\n}\n\nconsole.log(averageScore(\"Ana\", 80, 90, 100)); // \"Ana: 90\"",
+        "solution": "function averageScore(name, ...scores) {\n  const total = scores.reduce((sum, s) => sum + s, 0);\n  return `${name}: ${total / scores.length}`;\n}\n\nconsole.log(averageScore(\"Ana\", 80, 90, 100)); // \"Ana: 90\""
+      }
+    }
+  ]
+}

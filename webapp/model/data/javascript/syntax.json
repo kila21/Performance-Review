@@ -1,0 +1,113 @@
+{
+  "topicId": "syntax",
+  "title": "Syntax",
+  "questions": [
+    {
+      "id": "comments-syntax",
+      "title": "What are the different ways to write comments in JavaScript?",
+      "description": "A comment is text in your code that JavaScript does not run. Comments are used to explain code to other developers, or to yourself in the future. JavaScript supports three common comment styles. A single-line comment starts with two slashes, //, and everything after it, until the end of the line, is ignored. A multi-line comment starts with /* and ends with */, and it can cover many lines. JSDoc is a special style of multi-line comment, starting with /**, used to describe what a function does: its parameters, and what it returns. Many code editors can read JSDoc comments and show helpful hints while you type.",
+      "keyPoints": [
+        "A single-line comment starts with // and goes until the end of the line.",
+        "A multi-line comment starts with /* and ends with */, and can cover several lines.",
+        "JSDoc is a special multi-line comment, starting with /**, used to describe a function's parameters and return value.",
+        "Comments are ignored when the code runs, and they are only meant for developers who read the code."
+      ],
+      "examples": [
+        { "title": "Single-line and multi-line comments", "language": "javascript", "code": "// This is a single-line comment\nconst x = 5;\n\n/*\n  This is a\n  multi-line comment\n*/\nconsole.log(x); // 5" },
+        { "title": "A JSDoc comment for a function", "language": "javascript", "code": "/**\n * Adds two numbers together.\n * @param {number} a - the first number\n * @param {number} b - the second number\n * @returns {number} the sum of a and b\n */\nfunction add(a, b) {\n  return a + b;\n}\n\nconsole.log(add(2, 3)); // 5" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "data-literals-syntax",
+      "title": "What are the basic data literal syntaxes in JavaScript (numbers, strings, objects, etc.)?",
+      "description": "A literal is a way to write a fixed value directly in your code, instead of calculating it. JavaScript has literals for many kinds of values. null is a literal for \"no value\". true and false are boolean literals. Numbers can be written in different forms: decimal (123), binary with a 0b prefix, octal with a 0o prefix, hexadecimal with a 0x prefix, BigInt with an n at the end for very large integers, and numeric separators, where you can use underscores like 1_000_000 to make big numbers easier to read. Objects are written with curly braces { }, and arrays with square brackets [ ]. Strings can use single quotes, double quotes, or backticks, and they can also contain escape sequences, like \\xNN for a hexadecimal character code, or \\uNNNN for a Unicode character code. A template literal is a string written between backticks, and it allows you to insert variables directly inside the text using ${ }. Finally, a regular expression literal is written between two slashes, like /abc/, and it is used to search for patterns inside text.",
+      "keyPoints": [
+        "null and booleans (true / false) are the simplest literals.",
+        "Numbers can be written as decimal, binary (0b), octal (0o), hexadecimal (0x), BigInt (with n), or with underscore separators for readability.",
+        "Objects use { } and arrays use [ ].",
+        "Strings can use quotes or backticks, and can include escape sequences like \\xNN or \\uNNNN.",
+        "Template literals (backticks) let you insert variables directly inside text with ${ }.",
+        "Regular expression literals are written between slashes, like /abc/, and are used to match patterns in text."
+      ],
+      "examples": [
+        { "title": "Different number literal forms", "language": "javascript", "code": "console.log(0b101);    // 5  (binary)\nconsole.log(0o17);     // 15 (octal)\nconsole.log(0xff);     // 255 (hexadecimal)\nconsole.log(1_000_000); // 1000000 (numeric separator)\nconsole.log(10n);      // 10n (BigInt)" },
+        { "title": "Template literal and regular expression literal", "language": "javascript", "code": "const name = \"Ana\";\nconsole.log(`Hello, ${name}!`); // \"Hello, Ana!\"\n\nconst pattern = /\\d+/;\nconsole.log(pattern.test(\"Room 42\")); // true" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "loop-syntax",
+      "title": "What are the different loop syntaxes in JavaScript?",
+      "description": "A loop repeats a piece of code several times. JavaScript has a few kinds of loops, and each one fits a different situation. A for loop is the most flexible one: you control the starting point, the condition to keep going, and how the loop moves forward, all in one line. A for...of loop goes directly through the values of something iterable, like an array or a string, without needing an index. A for...in loop goes through the keys (property names) of an object. for await...of is a special version of for...of, used to loop through asynchronous data, one value at a time, waiting for each one. A while loop keeps running as long as a condition stays true, and it checks the condition before running the code. A do...while loop is similar, but it checks the condition after running the code at least once. Inside any loop, break stops the loop completely, and continue skips to the next iteration without finishing the current one.",
+      "keyPoints": [
+        "for gives full control: a starting point, a condition, and a step, all in one line.",
+        "for...of loops directly over the values of an iterable, like an array or a string.",
+        "for...in loops over the keys (property names) of an object.",
+        "for await...of loops over asynchronous values, one at a time.",
+        "while checks its condition before each run; do...while checks it after, so the code runs at least once.",
+        "break stops a loop completely; continue skips directly to the next iteration."
+      ],
+      "examples": [
+        { "title": "for vs for...of vs for...in", "language": "javascript", "code": "const colors = [\"red\", \"green\", \"blue\"];\n\nfor (let i = 0; i < colors.length; i++) {\n  console.log(i, colors[i]);\n}\n\nfor (const color of colors) {\n  console.log(color);\n}\n\nconst user = { name: \"Ana\", age: 28 };\nfor (const key in user) {\n  console.log(key, user[key]);\n}" },
+        { "title": "while, break and continue", "language": "javascript", "code": "let n = 0;\nwhile (n < 5) {\n  n++;\n  if (n === 2) continue; // skip printing 2\n  if (n === 4) break;    // stop the loop at 4\n  console.log(n);\n}" }
+      ],
+      "assignment": {
+        "task": "Write a function listEvenKeys(obj) that uses a for...in loop to print every key of the object whose value is an even number.",
+        "starterCode": "function listEvenKeys(obj) {\n  // your code here\n}\n\nlistEvenKeys({ a: 1, b: 2, c: 4, d: 7 }); // should log \"b\" and \"c\"",
+        "solution": "function listEvenKeys(obj) {\n  for (const key in obj) {\n    if (obj[key] % 2 === 0) {\n      console.log(key);\n    }\n  }\n}\n\nlistEvenKeys({ a: 1, b: 2, c: 4, d: 7 });\n// \"b\"\n// \"c\""
+      }
+    },
+    {
+      "id": "block-statement",
+      "title": "What is a block statement in JavaScript?",
+      "description": "A block statement is a group of statements written between curly braces { }. It lets you treat several lines of code as one single unit. You will usually see a block right after an if, else, for, while, or function, but you can also write a plain block on its own, just to group code together. One important thing about blocks is that they create their own scope for let and const. This means a let or const variable declared inside a block only exists inside that block, and it disappears once the block ends. The older keyword var does not follow this rule, and it ignores block boundaries completely.",
+      "keyPoints": [
+        "A block statement groups several lines of code between { } into one unit.",
+        "Blocks are commonly used after if, else, for, while, and function.",
+        "A block creates its own scope for let and const, but not for var.",
+        "A let or const variable declared inside a block cannot be used outside that block."
+      ],
+      "examples": [
+        { "title": "A block creates scope for let", "language": "javascript", "code": "{\n  let secret = \"hidden\";\n  console.log(secret); // \"hidden\"\n}\n\nconsole.log(typeof secret); // \"undefined\" (secret does not exist here)" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "conditions-syntax",
+      "title": "What is the syntax for conditional statements in JavaScript (if...else, switch)?",
+      "description": "Conditional statements let your code make decisions and run different code depending on a condition. The if statement runs a block of code only if a condition is true. You can add else if to check another condition, and a final else to run code when none of the earlier conditions matched. The switch statement is a different way to check one value against several possible options, using case. Each case needs a break at the end, or the code will continue running into the next case by accident (this is called \"falling through\"). The default case runs when none of the other cases match, similar to an else.",
+      "keyPoints": [
+        "if runs code only when its condition is true.",
+        "else if checks another condition, and else runs when nothing else matched.",
+        "switch compares one value against several case options.",
+        "Each case usually needs a break, or the code keeps running into the next case.",
+        "default in a switch works like else: it runs when no case matched."
+      ],
+      "examples": [
+        { "title": "if / else if / else", "language": "javascript", "code": "function describe(temp) {\n  if (temp < 0) {\n    return \"freezing\";\n  } else if (temp < 20) {\n    return \"cold\";\n  } else {\n    return \"warm\";\n  }\n}\n\nconsole.log(describe(-5)); // \"freezing\"\nconsole.log(describe(25)); // \"warm\"" },
+        { "title": "switch / case / break / default", "language": "javascript", "code": "function dayType(day) {\n  switch (day) {\n    case \"Saturday\":\n    case \"Sunday\":\n      return \"weekend\";\n    default:\n      return \"weekday\";\n  }\n}\n\nconsole.log(dayType(\"Sunday\")); // \"weekend\"\nconsole.log(dayType(\"Monday\")); // \"weekday\"" }
+      ],
+      "assignment": {
+        "task": "Rewrite this if/else if/else chain as a switch statement that returns the same results.",
+        "starterCode": "function sizeLabel(size) {\n  if (size === \"S\") {\n    return \"Small\";\n  } else if (size === \"M\") {\n    return \"Medium\";\n  } else if (size === \"L\") {\n    return \"Large\";\n  } else {\n    return \"Unknown\";\n  }\n}\n\nconsole.log(sizeLabel(\"M\")); // \"Medium\"",
+        "solution": "function sizeLabel(size) {\n  switch (size) {\n    case \"S\":\n      return \"Small\";\n    case \"M\":\n      return \"Medium\";\n    case \"L\":\n      return \"Large\";\n    default:\n      return \"Unknown\";\n  }\n}\n\nconsole.log(sizeLabel(\"M\")); // \"Medium\""
+      }
+    },
+    {
+      "id": "choosing-the-right-loop",
+      "title": "What is the purpose of each loop type, and when should you use each one?",
+      "description": "Choosing the right loop makes your code clearer and helps you avoid mistakes. Use a for loop when you need full control, for example when you need to know the exact index, or when you want to go through the array backward, or skip certain items. Use a for...of loop when you simply need to go through each value of an array or another iterable, without caring about the index. Use a for...in loop only for looping over the keys of a plain object, not for arrays, because it can behave in unexpected ways with arrays. Use a while or do...while loop when you do not know in advance how many times you need to repeat something, and the loop should continue only as long as a certain condition stays true, for example, while waiting for user input.",
+      "keyPoints": [
+        "for: best when you need an index, or need to control the loop in a special way.",
+        "for...of: best for simply going through the values of an array or another iterable.",
+        "for...in: best for looping over the keys of a plain object, not recommended for arrays.",
+        "while / do...while: best when the number of repeats is unknown, and depends on a condition."
+      ],
+      "examples": [
+        { "title": "Picking for...of for an array, for...in for an object", "language": "javascript", "code": "const fruits = [\"apple\", \"banana\"];\nfor (const fruit of fruits) {\n  console.log(fruit);\n}\n\nconst prices = { apple: 2, banana: 1 };\nfor (const name in prices) {\n  console.log(name, prices[name]);\n}" }
+      ],
+      "assignment": null
+    }
+  ]
+}

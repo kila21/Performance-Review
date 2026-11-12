@@ -1,0 +1,100 @@
+{
+  "topicId": "scope-closure",
+  "title": "Scope & closure",
+  "questions": [
+    {
+      "id": "lexical-environment-and-scope",
+      "title": "What is a lexical environment, and what is a scope in JavaScript?",
+      "description": "A lexical environment is an internal structure that JavaScript creates to store variables. A new lexical environment is created every time a function runs, or a block of code (like inside an if or a for) executes. Each lexical environment also keeps a link to its outer (parent) environment. Scope is simply the part of the code where a certain variable can be used. JavaScript scope is called \"lexical\" because it depends on where the code is physically written, not on where a function is called from.",
+      "keyPoints": [
+        "A lexical environment is created every time a function runs, or a block executes.",
+        "It stores the local variables, and also a link to the outer (parent) lexical environment.",
+        "Scope is the part of the code where a variable can be used.",
+        "JavaScript scope depends on where the code is written, not on where a function is called from."
+      ],
+      "examples": [
+        { "title": "A variable used inside a nested function", "language": "javascript", "code": "function outer() {\n  const message = \"Hello\";\n\n  function inner() {\n    console.log(message);\n  }\n\n  inner();\n}\n\nouter(); // \"Hello\"" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "nested-lexical-environments",
+      "title": "What are nested lexical environments, and what problems can they cause?",
+      "description": "When you write a function inside another function, you create nested lexical environments. Each inner function is linked to the lexical environment of the function around it, which is linked to the one around that, and so on, up to the global scope. This is called a chain. When JavaScript needs to find a variable, it looks in the current lexical environment first, and if it does not find it there, it moves up the chain, one level at a time, until it finds the variable or reaches the global scope. Deep nesting (many functions inside functions) can make code harder to read, and it can also cause a problem called shadowing, where an inner variable has the same name as an outer one and hides it by accident. To reduce these problems, try to keep the nesting shallow, give your variables clear and different names, and split large nested functions into smaller, separate functions.",
+      "keyPoints": [
+        "Nested lexical environments form a chain, where each inner one is linked to its outer one.",
+        "Looking for a variable means JavaScript searches up this chain, until it finds the variable or reaches the global scope.",
+        "Deep nesting makes code harder to read, and can cause shadowing (an inner variable hiding an outer one with the same name).",
+        "To avoid problems, keep nesting shallow, use clear variable names, and split big nested functions into smaller ones."
+      ],
+      "examples": [
+        { "title": "Shadowing a variable", "language": "javascript", "code": "function outer() {\n  const value = \"outer value\";\n\n  function inner() {\n    const value = \"inner value\"; // this hides (shadows) the outer \"value\"\n    console.log(value);\n  }\n\n  inner();\n  console.log(value);\n}\n\nouter();\n// \"inner value\"\n// \"outer value\"" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "global-vs-local-scope",
+      "title": "What is the difference between global scope and local scope?",
+      "description": "Global scope is the outer-most scope in your code. A variable declared in the global scope, outside of any function or block, can be used anywhere in the file. Local scope is created inside a function or a block, and variables declared there can only be used inside that function or block, not outside it. Code that runs inside a local scope can still read variables from the global scope, as long as a local variable with the same name does not hide (shadow) it. If you need to access the global scope directly, you can use the special object called globalThis.",
+      "keyPoints": [
+        "Global scope is the outer-most scope; anything declared there can be used anywhere in the file.",
+        "Local scope is created inside a function or a block, and its variables cannot be used outside it.",
+        "Local code can read global variables, unless a local variable with the same name hides them.",
+        "globalThis gives you direct access to the global scope, in any JavaScript environment."
+      ],
+      "examples": [
+        { "title": "Reading a global variable from a local scope", "language": "javascript", "code": "const appName = \"MyApp\";\n\nfunction greet() {\n  console.log(`Welcome to ${appName}`);\n}\n\ngreet(); // \"Welcome to MyApp\"" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "hoisting",
+      "title": "What is hoisting, and what problems can it cause if you don't understand it?",
+      "description": "Hoisting means that JavaScript processes variable and function declarations before it actually runs the code, line by line. Because of this, you can sometimes use a variable or a function before the line where it is written. The behavior is different depending on how you declared the variable. A var variable is hoisted and starts with the value undefined, so using it before its real line does not throw an error, but gives you undefined, which can hide bugs in your code. A function declaration is hoisted completely, together with its whole body, so you can call the function before the line where it is written. let and const are hoisted too, but they stay in something called the \"temporal dead zone\" until their declaration line runs. If you try to use a let or const variable before that line, JavaScript throws an error, instead of silently giving you undefined.",
+      "keyPoints": [
+        "Hoisting means declarations are processed before the code runs line by line.",
+        "var variables are hoisted and start as undefined, so using one too early gives undefined, not an error.",
+        "Function declarations are hoisted completely, so you can call them before their line in the code.",
+        "let and const are hoisted too, but using them before their declaration line throws an error (the \"temporal dead zone\")."
+      ],
+      "examples": [
+        { "title": "var hoisting vs function hoisting", "language": "javascript", "code": "console.log(score); // undefined (var is hoisted, but not its value)\nvar score = 10;\n\nsayHi(); // \"Hi!\" (function declarations are hoisted completely)\nfunction sayHi() {\n  console.log(\"Hi!\");\n}" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "lexical-environment-creation",
+      "title": "What creates a new lexical environment: functions and blocks as scope?",
+      "description": "There are two main ways a new lexical environment is created in JavaScript. The first way is by calling a function: every time a function runs, a brand new lexical environment is created for that call, and this is called function scope. The second way is by entering a block of code written between curly braces { }, for example inside an if, a for, or just a plain block; this is called block scope. The important detail is that only let and const respect block scope. The older keyword var does not respect block scope at all — a var variable always belongs to the nearest function (or to the global scope, if it is not inside any function).",
+      "keyPoints": [
+        "Calling a function creates a new lexical environment, called function scope, fresh every time it runs.",
+        "A block of code inside { } also creates a lexical environment, called block scope.",
+        "let and const respect block scope: they only exist inside the block where they are declared.",
+        "var ignores block scope completely, and belongs to the nearest function or to the global scope."
+      ],
+      "examples": [
+        { "title": "Block scope with let vs var", "language": "javascript", "code": "if (true) {\n  let blockScoped = \"only inside this block\";\n  var notBlockScoped = \"leaks outside the block\";\n}\n\nconsole.log(notBlockScoped); // \"leaks outside the block\"\nconsole.log(typeof blockScoped); // \"undefined\" (blockScoped does not exist here)" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "variable-declarations-and-scope",
+      "title": "How do var, let, and const behave differently with scope?",
+      "description": "var, let, and const all create variables, but they behave differently when it comes to scope. var is scoped to the whole function it is written in (or to the global scope, if it is outside any function), and it completely ignores blocks like if or for. let is scoped to the exact block where it is written, and it can be reassigned to a new value, but it cannot be declared again with the same name in the same scope. const works like let for scope, but once you give a const variable a value, you cannot assign it a new value later; however, if the value is an object or an array, you can still change its contents. These differences become very important inside loops, because each loop iteration can create a new block scope for let and const, but not for var.",
+      "keyPoints": [
+        "var is scoped to the whole function (or the global scope), and it ignores blocks like if or for.",
+        "let is scoped to its own block, and it can be reassigned, but not re-declared in the same scope.",
+        "const is block-scoped like let, but it cannot be reassigned after it gets its first value.",
+        "Inside a loop, let creates a brand new variable for every iteration, while var shares the same single variable across all iterations."
+      ],
+      "examples": [
+        { "title": "var vs let inside a loop (closures)", "language": "javascript", "code": "const funcsWithVar = [];\nfor (var i = 0; i < 3; i++) {\n  funcsWithVar.push(function () {\n    return i;\n  });\n}\nconsole.log(funcsWithVar.map((f) => f())); // [3, 3, 3]\n\nconst funcsWithLet = [];\nfor (let j = 0; j < 3; j++) {\n  funcsWithLet.push(function () {\n    return j;\n  });\n}\nconsole.log(funcsWithLet.map((f) => f())); // [0, 1, 2]" }
+      ],
+      "assignment": {
+        "task": "The code below should create three functions that return 0, 1 and 2, but it actually returns [3, 3, 3] for every function. Explain why this happens, and fix the code by changing var to the correct keyword.",
+        "starterCode": "const funcs = [];\nfor (var i = 0; i < 3; i++) {\n  funcs.push(function () {\n    return i;\n  });\n}\nconsole.log(funcs.map((f) => f())); // should log [0, 1, 2]",
+        "solution": "const funcs = [];\nfor (let i = 0; i < 3; i++) {\n  funcs.push(function () {\n    return i;\n  });\n}\nconsole.log(funcs.map((f) => f())); // [0, 1, 2]\n\n// var is scoped to the whole function, so all three functions shared\n// the same \"i\", which was 3 after the loop finished.\n// let creates a brand new \"i\" for every loop iteration, so each\n// function keeps (closes over) its own separate value."
+      }
+    }
+  ]
+}
