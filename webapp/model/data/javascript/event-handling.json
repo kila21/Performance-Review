@@ -1,0 +1,66 @@
+{
+  "topicId": "event-handling",
+  "title": "Event handling",
+  "questions": [
+    {
+      "id": "browser-event-types",
+      "title": "What are the different types of browser events (keyboard, mouse, forms, etc.)?",
+      "description": "The browser fires events to let your code react to things that happen on the page, like the user clicking something, typing, or a page finishing loading. There are several common categories. Mouse events (like click, mouseover, mousedown) fire from mouse actions. Keyboard events (like keydown, keyup) fire when the user presses or releases a key. Form events (like submit, change, input) fire from form controls. Focus events (focus, blur) fire when an element gains or loses focus. Drag & drop events (like dragstart, drop) fire during a drag-and-drop interaction. Network events (like load, error) fire when a resource, such as an image or script, finishes loading or fails. Document load events (like DOMContentLoaded) fire once the whole page has finished loading.",
+      "keyPoints": [
+        "Mouse events (click, mouseover, mousedown) fire from mouse actions.",
+        "Keyboard events (keydown, keyup) fire when a key is pressed or released.",
+        "Form events (submit, change, input) fire from form controls.",
+        "Focus events (focus, blur) fire when an element gains or loses focus.",
+        "Drag & drop events (dragstart, drop) fire during a drag-and-drop interaction.",
+        "Network events (load, error) fire when a resource finishes loading or fails; document load events fire when the whole page is ready."
+      ],
+      "examples": [
+        {
+          "title": "Grouping event names by category",
+          "language": "javascript",
+          "code": "const eventCategories = {\n  mouse: [\"click\", \"mouseover\", \"mousedown\"],\n  keyboard: [\"keydown\", \"keyup\"],\n  form: [\"submit\", \"change\", \"input\"]\n};\n\nconsole.log(eventCategories.mouse); // [ 'click', 'mouseover', 'mousedown' ]"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "registering-events",
+      "title": "What are the different ways to register an event listener in JavaScript?",
+      "description": "There are three common ways to attach an event handler to an element. The oldest way is an inline HTML attribute, like onclick=\"...\", which mixes JavaScript directly into your HTML and is considered bad practice today. A second way is assigning a function to a property, like element.onclick = function () { ... }; this only allows one handler at a time, because assigning a new function replaces the old one. The modern, recommended way is element.addEventListener(\"click\", handlerFunction), which lets you attach many handlers for the same event on the same element, and lets you remove one specific handler later with removeEventListener, without affecting the others.",
+      "keyPoints": [
+        "Inline HTML attributes (onclick=\"...\") mix JavaScript with HTML and are considered bad practice today.",
+        "Assigning a function to a property like element.onclick only allows one handler at a time; a new assignment replaces the old one.",
+        "element.addEventListener(\"click\", fn) is the modern, recommended way: you can add many handlers for the same event.",
+        "A handler added with addEventListener can later be removed on its own, with removeEventListener, without touching the other handlers."
+      ],
+      "examples": [
+        {
+          "title": "Simulating multiple listeners on one event",
+          "language": "javascript",
+          "code": "const listeners = [];\n\nfunction addListener(fn) {\n  listeners.push(fn);\n}\n\nfunction fireEvent(value) {\n  listeners.forEach((fn) => fn(value));\n}\n\naddListener((v) => console.log(\"first handler:\", v));\naddListener((v) => console.log(\"second handler:\", v));\nfireEvent(\"clicked\");\n// \"first handler:\" \"clicked\"\n// \"second handler:\" \"clicked\""
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "event-firing-mechanism",
+      "title": "What happens when a browser event fires: the handler's argument, this, propagation, and default actions?",
+      "description": "When an event fires, the browser calls your handler function and passes it one argument: an event object, describing what happened. Inside a regular (non-arrow) handler function, the special keyword this refers to the element the listener was attached to. If several listeners are registered for the same event on the same element, they run in the order they were added (this is called calling precedence). Events usually travel through the page in two phases: first down from the root to the target (capturing), then back up from the target to the root (bubbling) -- calling stopPropagation() stops this travel, and stopImmediatePropagation() also stops any other listeners on that same element from running. Finally, calling preventDefault() cancels the event's default action, like stopping a link from navigating, or a form from submitting.",
+      "keyPoints": [
+        "The browser calls your handler with one argument: the event object, describing what happened.",
+        "Inside a regular function handler, this refers to the element the listener is attached to (not true for arrow functions).",
+        "Multiple listeners on the same element run in the order they were registered.",
+        "Events usually bubble up from the target element to its parents; stopPropagation() stops this, stopImmediatePropagation() also stops other listeners on the same element.",
+        "preventDefault() cancels the event's default action, like a link navigating or a form submitting."
+      ],
+      "examples": [
+        {
+          "title": "Simulating bubbling order",
+          "language": "javascript",
+          "code": "function simulateBubble(path, handlers) {\n  for (const el of path) {\n    if (handlers[el]) handlers[el](el);\n  }\n}\n\nsimulateBubble([\"button\", \"div\", \"body\"], {\n  button: (el) => console.log(\"handler on\", el),\n  div: (el) => console.log(\"handler on\", el)\n});\n// \"handler on\" \"button\"\n// \"handler on\" \"div\""
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

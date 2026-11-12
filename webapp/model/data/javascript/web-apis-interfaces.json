@@ -1,0 +1,29 @@
+{
+  "topicId": "web-apis-interfaces",
+  "title": "Web APIs / interfaces",
+  "questions": [
+    {
+      "id": "browser-apis-overview",
+      "title": "What are the basic browser APIs and interfaces every developer should know?",
+      "description": "Besides the core JavaScript language, the browser gives you many built-in objects and APIs that let your code interact with the page, the window, and the user's device. The window object is the main global object in a browser; almost everything else (like document) hangs off of it. Timers, like setTimeout and setInterval, let you run code after a delay or repeatedly. The history object lets you move between pages the user has already visited, like going back or forward. The location object holds information about the current URL, and can also be used to navigate to a new page. The navigator object gives information about the browser itself (like its name or language). The screen object gives information about the user's physical screen (like its width and height). Browsers also let you open and manage multiple windows or frames, and the File API lets JavaScript read files that the user has selected, for example from an input element of type \"file\".",
+      "keyPoints": [
+        "window is the main global object in the browser; most other browser APIs hang off of it.",
+        "Timers (setTimeout, setInterval) run code after a delay or repeatedly.",
+        "history lets you move between pages the user has already visited (back/forward).",
+        "location holds the current URL and can be used to navigate to a new page.",
+        "navigator gives information about the browser itself.",
+        "screen gives information about the user's physical screen.",
+        "Browsers also support working with multiple windows or frames.",
+        "The File API lets JavaScript read files the user has selected (for example, from a file input)."
+      ],
+      "examples": [
+        {
+          "title": "A timer, and other interfaces (conceptual)",
+          "language": "javascript",
+          "code": "setTimeout(() => {\n  console.log(\"Ran after 10ms\"); // \"Ran after 10ms\"\n}, 10);\n\n// Other browser-only interfaces, used directly in a web page:\n// window.innerWidth, location.href, navigator.userAgent, screen.width, history.back()"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

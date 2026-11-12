@@ -1,0 +1,28 @@
+<mvc:View
+  controllerName="performance.review.controller.Topics"
+  xmlns="sap.m"
+  xmlns:mvc="sap.ui.core.mvc"
+>
+  <VBox
+    items="{path: 'index>/groups', templateShareable: false}"
+    class="sapUiResponsiveMargin"
+  >
+    <Panel
+      headerText="{index>title}"
+      class="sapUiResponsiveMargin"
+      width="auto"
+    >
+      <List items="{path: 'index>topics', templateShareable: false}" mode="None" showSeparators="Inner">
+        <items>
+          <StandardListItem
+            icon="sap-icon://course-book"
+            title="{index>title}"
+            info="{parts: [{path: 'index>questionCount'}, {path: 'i18n>questionsCountPattern'}], formatter: '.formatter.questionCountText'}"
+            type="Active"
+            press="onTopicPress"
+          />
+        </items>
+      </List>
+    </Panel>
+  </VBox>
+</mvc:View>

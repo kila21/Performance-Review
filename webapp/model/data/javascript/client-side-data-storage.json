@@ -1,0 +1,49 @@
+{
+  "topicId": "client-side-data-storage",
+  "title": "Client Side data storage",
+  "questions": [
+    {
+      "id": "local-session-storage",
+      "title": "How do localStorage and sessionStorage work, and what are their limits?",
+      "description": "localStorage and sessionStorage are both part of the Storage API, and they let you save small pieces of text data directly in the browser, without needing a server. They work almost the same way: you use setItem(key, value) to save a value, getItem(key) to read it back, and removeItem(key) to delete it. The difference is how long the data stays. localStorage keeps the data even after you close the browser and open it again later. sessionStorage only keeps the data for as long as that one browser tab stays open. Both can only store strings, so if you want to save an object or an array, you need to convert it to a string first (usually with JSON.stringify), and convert it back when you read it (with JSON.parse). They also have a storage limit, usually a few megabytes per website, depending on the browser.",
+      "keyPoints": [
+        "setItem(key, value), getItem(key), and removeItem(key) are the main methods for both.",
+        "localStorage keeps data even after the browser is closed and reopened.",
+        "sessionStorage only keeps data for as long as the current tab stays open.",
+        "Both only store strings, so objects/arrays need JSON.stringify() to save and JSON.parse() to read back.",
+        "Storage is limited, usually a few megabytes per website."
+      ],
+      "examples": [
+        {
+          "title": "Saving and reading an object (the JSON part works anywhere)",
+          "language": "javascript",
+          "code": "const user = { name: \"Ana\", age: 28 };\n\n// In a browser, you would write:\n// localStorage.setItem(\"user\", JSON.stringify(user));\n// const saved = JSON.parse(localStorage.getItem(\"user\"));\n\nconst saved = JSON.parse(JSON.stringify(user));\nconsole.log(saved); // { name: 'Ana', age: 28 }"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "cookies",
+      "title": "What are cookies, and how do you work with them in JavaScript?",
+      "description": "A cookie is a small piece of text data that a website can store in the browser, similar to localStorage, but with one big difference: cookies are also automatically sent to the server with every HTTP request to that website. This makes cookies useful for things like keeping a user logged in, or remembering a setting, because the server can read the cookie on every request without JavaScript having to do anything extra. You can read and write cookies from JavaScript using document.cookie, but the format is a bit awkward: all cookies are stored together in one single string, separated by semicolons, so you usually need a small helper function to work with just one cookie. Cookies can also have an expiration date, and extra safety flags like secure (only sent over HTTPS) or httpOnly (cannot be read from JavaScript at all, only sent by the browser automatically).",
+      "keyPoints": [
+        "A cookie is a small piece of text, similar to localStorage, but it is also sent to the server with every request automatically.",
+        "Cookies are common for things like login sessions and remembering user settings.",
+        "document.cookie gives access to all cookies as one combined string, separated by semicolons.",
+        "Cookies can have an expiration date, and extra safety flags like secure or httpOnly."
+      ],
+      "examples": [
+        {
+          "title": "Reading a cookie value from the cookie string",
+          "language": "javascript",
+          "code": "function getCookie(cookieString, name) {\n  const pairs = cookieString.split(\"; \");\n  const found = pairs.find((pair) => pair.startsWith(`${name}=`));\n  return found ? found.split(\"=\")[1] : undefined;\n}\n\n// In the browser, cookieString would come from document.cookie\nconst cookieString = \"theme=dark; userId=42\";\nconsole.log(getCookie(cookieString, \"userId\")); // \"42\""
+        }
+      ],
+      "assignment": {
+        "task": "Write a function getCookieNames(cookieString) that returns an array of all cookie names from a cookie string like \"theme=dark; userId=42\". getCookieNames(\"theme=dark; userId=42\") should return [\"theme\", \"userId\"].",
+        "starterCode": "function getCookieNames(cookieString) {\n  // your code here\n}\n\nconsole.log(getCookieNames(\"theme=dark; userId=42\")); // [ 'theme', 'userId' ]",
+        "solution": "function getCookieNames(cookieString) {\n  return cookieString.split(\"; \").map((pair) => pair.split(\"=\")[0]);\n}\n\nconsole.log(getCookieNames(\"theme=dark; userId=42\")); // [ 'theme', 'userId' ]"
+      }
+    }
+  ]
+}

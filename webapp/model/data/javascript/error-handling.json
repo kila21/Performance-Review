@@ -1,0 +1,100 @@
+{
+  "topicId": "error-handling",
+  "title": "Error handling",
+  "questions": [
+    {
+      "id": "try-catch-finally",
+      "title": "What is the try / catch / finally statement, and how does it work?",
+      "description": "The try / catch / finally statement lets you run code that might fail, and handle the failure instead of letting your program crash. The try block contains the code that might throw an error. If an error happens anywhere inside try, JavaScript immediately stops running the rest of that block and jumps to the catch block, which receives the error as a parameter. The finally block, if you add one, always runs after try and catch are done, no matter what happened — even if an error was thrown, or if the try block returned a value. This makes finally a good place for cleanup code, like closing a connection or hiding a loading message.",
+      "keyPoints": [
+        "The try block contains the code that might fail.",
+        "If an error happens inside try, JavaScript jumps straight to the catch block, skipping the rest of try.",
+        "The catch block receives the error as a parameter and can handle it however you want.",
+        "The finally block always runs after, whether or not an error happened, and is useful for cleanup code."
+      ],
+      "examples": [
+        { "title": "try / catch / finally", "language": "javascript", "code": "try {\n  throw new Error(\"Oops!\");\n} catch (error) {\n  console.log(\"Caught:\", error.message);\n} finally {\n  console.log(\"Done trying.\");\n}" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "throw-keyword",
+      "title": "What does the throw keyword do, and when should you use it?",
+      "description": "The throw keyword lets you manually create and raise an error anywhere in your code. As soon as JavaScript reaches a throw statement, it stops running the current function immediately, and looks for the nearest catch block, going up through whatever called that function. You are technically allowed to throw any value, like a plain string or number, but the recommended practice is to always throw an Error object (or something that extends it), because Error objects come with useful built-in properties like message and stack. If no catch block exists anywhere up the chain of function calls, the error reaches the top of the program and crashes it (or shows up as an unhandled error).",
+      "keyPoints": [
+        "throw stops the current code immediately, and looks for a catch block to handle the error.",
+        "You can throw any value, but throwing an Error object is the recommended practice.",
+        "An Error object has useful properties, like message (a description) and stack (where it happened).",
+        "If nothing catches the error, it crashes the program or appears as an unhandled error."
+      ],
+      "examples": [
+        { "title": "Throwing and catching a custom check", "language": "javascript", "code": "function checkAge(age) {\n  if (age < 0) {\n    throw new Error(\"Age cannot be negative\");\n  }\n  return age;\n}\n\ntry {\n  checkAge(-5);\n} catch (error) {\n  console.log(error.message); // \"Age cannot be negative\"\n}" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "error-object",
+      "title": "What properties and methods does an error object have, and how can they be useful?",
+      "description": "When you create an error with new Error(\"some message\"), you get an object with a few useful built-in properties. message holds a short, readable description of what went wrong, which is usually the text you passed in. name tells you what type of error it is, like \"Error\", \"TypeError\", or \"RangeError\". stack is a string that shows the chain of function calls that led to the error, which is very helpful when you are debugging and need to find out where something went wrong. You can read all of these properties later, for example inside a catch block, to decide how to react to the error.",
+      "keyPoints": [
+        "message holds a short, readable description of what went wrong.",
+        "name tells you the type of error, like \"Error\", \"TypeError\", or \"RangeError\".",
+        "stack shows the chain of function calls that led to the error, which helps with debugging.",
+        "You can read these properties inside a catch block to decide how to handle the error."
+      ],
+      "examples": [
+        { "title": "Reading an error object's properties", "language": "javascript", "code": "const error = new Error(\"Something failed\");\nconsole.log(error.message); // \"Something failed\"\nconsole.log(error.name); // \"Error\"\nconsole.log(typeof error.stack); // \"string\"" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "common-standard-errors",
+      "title": "What are the common built-in error types in JavaScript?",
+      "description": "JavaScript comes with several built-in error types, and each one is used for a different kind of mistake. A TypeError happens when a value is used in a way that does not match its type, for example trying to call something that is not a function. A ReferenceError happens when you try to use a variable that does not exist, or access a let/const variable before it has been declared. A SyntaxError happens when code (or text passed to something like JSON.parse) is not written correctly and cannot be understood. A RangeError happens when a number is outside of an allowed range, for example trying to create an array with an invalid length. Knowing these names helps you understand error messages faster, and lets you write catch blocks that react differently depending on the type of error.",
+      "keyPoints": [
+        "TypeError — a value is used in a way that does not match its type, like calling a non-function.",
+        "ReferenceError — a variable does not exist, or is used before its declaration runs.",
+        "SyntaxError — code (or text given to JSON.parse) is not written correctly.",
+        "RangeError — a number is outside of an allowed range, like an invalid array length."
+      ],
+      "examples": [
+        { "title": "Triggering a TypeError and a RangeError", "language": "javascript", "code": "try {\n  const greet = \"hello\";\n  greet(); // greet is not a function\n} catch (error) {\n  console.log(error.name); // \"TypeError\"\n}\n\ntry {\n  new Array(-1); // invalid array length\n} catch (error) {\n  console.log(error.name); // \"RangeError\"\n}" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "custom-errors",
+      "title": "How do you define a custom error, and why would you do that?",
+      "description": "You can create your own error type by writing a class that extends the built-in Error class. This is useful because it lets you add extra information to the error, like a specific error code or extra data about what went wrong, and it also lets your code check the error type later using instanceof. This way, different kinds of problems can be handled differently, instead of treating every error the same way.",
+      "keyPoints": [
+        "A custom error is a class that extends Error.",
+        "Inside the constructor, call super(message) first, to set up the standard Error behavior.",
+        "A custom error can carry extra information relevant to your app, like an error code.",
+        "instanceof lets your code tell different custom error types apart, and react differently to each."
+      ],
+      "examples": [
+        { "title": "A custom ValidationError class", "language": "javascript", "code": "class ValidationError extends Error {\n  constructor(message) {\n    super(message);\n    this.name = \"ValidationError\";\n  }\n}\n\ntry {\n  throw new ValidationError(\"Invalid email\");\n} catch (error) {\n  console.log(error instanceof ValidationError); // true\n  console.log(error.message); // \"Invalid email\"\n}" }
+      ],
+      "assignment": {
+        "task": "Write a custom error class NotFoundError that extends Error and sets this.name to \"NotFoundError\". Then write a function findUser(id) that returns { id, name: \"Ana\" } when id is 1, and throws a NotFoundError with the message `User ${id} not found` otherwise.",
+        "starterCode": "class NotFoundError extends Error {\n  // your code here\n}\n\nfunction findUser(id) {\n  // your code here\n}\n\ntry {\n  findUser(5);\n} catch (error) {\n  console.log(error.name, error.message);\n}",
+        "solution": "class NotFoundError extends Error {\n  constructor(message) {\n    super(message);\n    this.name = \"NotFoundError\";\n  }\n}\n\nfunction findUser(id) {\n  if (id !== 1) {\n    throw new NotFoundError(`User ${id} not found`);\n  }\n  return { id, name: \"Ana\" };\n}\n\ntry {\n  findUser(5);\n} catch (error) {\n  console.log(error.name, error.message); // \"NotFoundError\" \"User 5 not found\"\n}"
+      }
+    },
+    {
+      "id": "error-propagation",
+      "title": "How do errors propagate across the call stack?",
+      "description": "When an error is thrown inside a function and nothing catches it right there, it does not just disappear — it moves up (\"propagates\") to whatever function called it, then to whatever called that one, and so on. This continues until the error reaches a catch block that can handle it, or until it reaches the very top of the program, where it crashes the program or gets logged as an unhandled error. Understanding this is useful because it means you do not need a try/catch in every single function. Often it is cleaner to let an error travel up, and catch it in just one place, higher up the call stack, where you can decide how to respond.",
+      "keyPoints": [
+        "An uncaught error moves up through each calling function, one level at a time.",
+        "It keeps moving up until a catch block handles it, or until it reaches the top of the program.",
+        "If nothing catches it, the program crashes, or the error is logged as unhandled.",
+        "You do not need a try/catch in every function — catching errors in one place, higher up, is often cleaner."
+      ],
+      "examples": [
+        { "title": "An error propagating up three function calls", "language": "javascript", "code": "function level3() {\n  throw new Error(\"Something broke in level3\");\n}\nfunction level2() {\n  level3();\n}\nfunction level1() {\n  try {\n    level2();\n  } catch (error) {\n    console.log(\"Caught in level1:\", error.message);\n  }\n}\n\nlevel1(); // \"Caught in level1:\" \"Something broke in level3\"" }
+      ],
+      "assignment": null
+    }
+  ]
+}

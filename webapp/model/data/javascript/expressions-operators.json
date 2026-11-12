@@ -1,0 +1,239 @@
+{
+  "topicId": "expressions-operators",
+  "title": "Expressions & operators",
+  "questions": [
+    {
+      "id": "operands-and-operators",
+      "title": "What is an operand, and how many operands can an operator work with?",
+      "description": "An operand is a value or variable that an operator works on to produce a result. Operators are grouped by how many operands they need. A unary operator works with just one operand, like -x or !flag. A binary operator works with two operands, like a + b, which is the most common kind. A ternary operator works with three operands; JavaScript has exactly one of these, the conditional operator (condition ? valueIfTrue : valueIfFalse).",
+      "keyPoints": [
+        "An operand is a value that an operator uses to produce a result.",
+        "A unary operator works with one operand, for example -x or !flag.",
+        "A binary operator works with two operands, for example a + b.",
+        "A ternary operator works with three operands; JavaScript has exactly one, the conditional operator."
+      ],
+      "examples": [
+        { "title": "Unary, binary, and ternary operators", "language": "javascript", "code": "const x = 5;\nconsole.log(-x);                   // -5 (unary)\nconsole.log(2 + 3);                // 5 (binary)\nconsole.log(true ? \"yes\" : \"no\");  // \"yes\" (ternary)" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "arithmetic-operators",
+      "title": "What are the arithmetic operators in JavaScript?",
+      "description": "Arithmetic operators let you do math with numbers. Addition (+), subtraction (-), multiplication (*), and division (/) work the same way they do in normal math. The remainder operator (%) gives you what is left over after dividing one number by another; for example, 7 % 2 is 1, because 7 divided by 2 leaves a remainder of 1. Exponentiation (**) raises a number to a power, like 2 ** 3 for 2 cubed, which is 8. Increment (++) and decrement (--) add or subtract 1 from a variable. Finally, unary plus (+) and unary negation (-) are used in front of a single value: unary plus tries to turn the value into a number, and unary negation flips its sign.",
+      "keyPoints": [
+        "Addition (+), subtraction (-), multiplication (*), and division (/) work like normal math.",
+        "Remainder (%) gives you what is left over after a division.",
+        "Exponentiation (**) raises a number to a power.",
+        "Increment (++) and decrement (--) add or subtract 1 from a variable.",
+        "Unary plus (+) converts a value to a number; unary negation (-) flips its sign."
+      ],
+      "examples": [
+        { "title": "Common arithmetic operators", "language": "javascript", "code": "console.log(7 % 2);   // 1\nconsole.log(2 ** 3);  // 8\n\nlet count = 5;\ncount++;\nconsole.log(count);   // 6\n\nconsole.log(+\"42\");   // 42" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "shorthand-assignment-operators",
+      "title": "What are shorthand assignment operators?",
+      "description": "A shorthand assignment operator combines a normal operation with an assignment, in one step. For example, total += 5 means the same thing as total = total + 5, but it is shorter to write. This works for most arithmetic operators, like -=, *=, /=, %=, and **=. Newer versions of JavaScript also added logical shorthand assignments, like ||=, &&=, and ??=, which combine a logical check with an assignment. For example, name ||= \"Guest\" only assigns \"Guest\" to name if name was falsy (like an empty string, null, or undefined) before.",
+      "keyPoints": [
+        "A shorthand assignment combines an operation and an assignment in one step, like x += 5 (same as x = x + 5).",
+        "This works for most arithmetic operators: -=, *=, /=, %=, **=.",
+        "Newer shorthands like ||=, &&=, and ??= combine a logical check with an assignment."
+      ],
+      "examples": [
+        { "title": "Arithmetic and logical shorthand assignment", "language": "javascript", "code": "let total = 10;\ntotal += 5; // same as total = total + 5\nconsole.log(total); // 15\n\nlet name = \"\";\nname ||= \"Guest\"; // assign \"Guest\" only because name was falsy\nconsole.log(name); // \"Guest\"" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "eval-function",
+      "title": "What is eval, how does it work, and what are its risks?",
+      "description": "eval(code) is a built-in function that takes a string and runs it as if it were real JavaScript code, then gives back the result. A direct eval call, written literally as eval(...) in your code, can read and even change the variables in the surrounding scope, which can be confusing. An indirect eval call (for example, calling it through a stored reference instead of writing eval(...) directly) always runs in the global scope instead, with no access to local variables. eval has real risks: it is a security problem if the string comes from user input, because it could run harmful code, and it is also slow, because the JavaScript engine cannot prepare and optimize the code in advance. A safer and faster alternative, when you really need to build code from a string, is new Function(code), since the code it creates always runs in the global scope, with no access to your local variables.",
+      "keyPoints": [
+        "eval(code) takes a string and runs it as JavaScript code, returning the result.",
+        "A direct eval call (written literally as eval(...)) can read and change variables in the surrounding scope.",
+        "An indirect eval call always runs in the global scope instead.",
+        "eval is a security risk with untrusted input, and it also makes code slower to run.",
+        "new Function(code) is a safer and faster alternative, since it always runs in the global scope."
+      ],
+      "examples": [
+        { "title": "Running code from a string", "language": "javascript", "code": "const result = eval(\"2 + 3\");\nconsole.log(result); // 5" },
+        { "title": "A direct eval call can see local variables", "language": "javascript", "code": "function direct() {\n  const secret = 42;\n  return eval(\"secret\"); // direct eval can read the local variable\n}\n\nconsole.log(direct()); // 42" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "comparison-operators",
+      "title": "What are the comparison operators, and what is the difference between == and ===?",
+      "description": "Comparison operators check if two values are equal or not, and they return true or false. Equality (==) compares two values, but if they have different types, it first converts one of them, which can lead to surprising results. Identity, also called strict equality (===), compares both the value and the type, without converting anything, so it behaves more predictably. Inequality (!=) and non-identity (!==) are simply the opposite of == and ===. Because of the surprising conversions that == can do, most developers prefer to always use === and !==.",
+      "keyPoints": [
+        "Equality (==) compares values, but converts types first if they are different, which can cause surprising results.",
+        "Identity / strict equality (===) compares both the value and the type, with no conversion.",
+        "Inequality (!=) and non-identity (!==) are the opposite of == and ===.",
+        "Most developers prefer === and !== to avoid bugs caused by automatic type conversion."
+      ],
+      "examples": [
+        { "title": "== vs ===", "language": "javascript", "code": "console.log(1 == \"1\");   // true (the string is converted to a number)\nconsole.log(1 === \"1\");  // false (different types)\nconsole.log(0 == false); // true\nconsole.log(0 === false); // false" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "relational-operators",
+      "title": "What are the relational operators in JavaScript?",
+      "description": "Relational operators compare the order of two values, and they return true or false. Greater than (>) and greater than or equal (>=) check if the left value is bigger than, or at least equal to, the right value. Less than (<) and less than or equal (<=) check the opposite. These operators work with numbers, but they also work with strings, comparing them in alphabetical order, based on their character codes.",
+      "keyPoints": [
+        "> and >= check if the left value is greater than, or greater than or equal to, the right value.",
+        "< and <= check if the left value is smaller than, or smaller than or equal to, the right value.",
+        "These operators also work on strings, comparing them in alphabetical order."
+      ],
+      "examples": [
+        { "title": "Comparing numbers and strings", "language": "javascript", "code": "console.log(5 > 3);               // true\nconsole.log(5 <= 5);              // true\nconsole.log(\"apple\" < \"banana\");  // true" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "logical-operators",
+      "title": "What are the logical operators, and what is short-circuit evaluation?",
+      "description": "JavaScript has three main logical operators. && (AND) checks if both sides are true. || (OR) checks if at least one side is true. ! (NOT) flips a value to its opposite boolean meaning. These operators use something called short-circuit evaluation: && stops as soon as it finds a falsy value, and returns that value directly, without checking anything after it; || stops as soon as it finds a truthy value, and returns that value directly. This means && and || do not always return true or false — they return one of the actual values being checked. A useful trick, double NOT (!!), applies NOT twice in a row, which converts any value into a real true or false.",
+      "keyPoints": [
+        "&& (AND) returns the first falsy value, or the last value if all are truthy.",
+        "|| (OR) returns the first truthy value, or the last value if all are falsy.",
+        "! (NOT) flips a value to its opposite boolean.",
+        "Short-circuit evaluation means JavaScript stops checking as soon as the final result is already known.",
+        "Double NOT (!!) is a quick way to convert any value into a real true or false."
+      ],
+      "examples": [
+        { "title": "&&, ||, and short-circuit results", "language": "javascript", "code": "console.log(true && \"hello\");  // \"hello\"\nconsole.log(false && \"hello\"); // false\nconsole.log(null || \"default\"); // \"default\"" },
+        { "title": "Double NOT (!!) converts to a real boolean", "language": "javascript", "code": "console.log(!!\"text\"); // true\nconsole.log(!!0);       // false" }
+      ],
+      "assignment": {
+        "task": "Write a function displayName(user) that returns user.nickname if it exists, otherwise user.name. Use the || operator.",
+        "starterCode": "function displayName(user) {\n  // your code here\n}\n\nconsole.log(displayName({ name: \"Ana\", nickname: \"Ani\" })); // \"Ani\"\nconsole.log(displayName({ name: \"Leo\" }));                  // \"Leo\"",
+        "solution": "function displayName(user) {\n  return user.nickname || user.name;\n}\n\nconsole.log(displayName({ name: \"Ana\", nickname: \"Ani\" })); // \"Ani\"\nconsole.log(displayName({ name: \"Leo\" }));                  // \"Leo\""
+      }
+    },
+    {
+      "id": "ternary-operator",
+      "title": "What is the conditional (ternary) operator?",
+      "description": "The conditional operator, often called the ternary operator, is a short way to write a simple if/else as a single expression. It has the form condition ? valueIfTrue : valueIfFalse. If the condition is true, the whole expression gives you valueIfTrue; if it is false, it gives you valueIfFalse. It is useful when you want to use the result right away, for example to assign it to a variable or pass it directly into a function, instead of writing a full if/else block.",
+      "keyPoints": [
+        "The ternary operator has the form condition ? valueIfTrue : valueIfFalse.",
+        "It is the only operator in JavaScript that works with three operands.",
+        "It is useful for short decisions where you want a value immediately, like choosing between two strings."
+      ],
+      "examples": [
+        { "title": "A simple ternary expression", "language": "javascript", "code": "const age = 20;\nconst type = age >= 18 ? \"adult\" : \"minor\";\nconsole.log(type); // \"adult\"" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "ternary-chains",
+      "title": "How do you chain several conditions using the ternary operator?",
+      "description": "You can chain several ternary operators together to check more than one condition, one after another, similar to a chain of else if statements, but written as a single expression. Each time a condition is false, JavaScript moves on to check the next one. This can be handy for short chains, but chaining too many ternaries in a row quickly becomes hard to read. When you have more than two or three conditions, a normal if/else chain or a switch statement is usually clearer.",
+      "keyPoints": [
+        "You can chain ternary operators to check several conditions in a row, like a ? b : c ? d : e.",
+        "Each false result moves on to the next condition, similar to an else if chain.",
+        "Chaining more than two or three ternaries usually makes code harder to read; if/else or switch is often clearer at that point."
+      ],
+      "examples": [
+        { "title": "Chaining ternaries for a grade", "language": "javascript", "code": "function grade(score) {\n  return score >= 90 ? \"A\" : score >= 80 ? \"B\" : score >= 70 ? \"C\" : \"F\";\n}\n\nconsole.log(grade(95)); // \"A\"\nconsole.log(grade(82)); // \"B\"\nconsole.log(grade(50)); // \"F\"" }
+      ],
+      "assignment": {
+        "task": "Write a function fileSizeLabel(bytes) that uses chained ternary operators to return \"small\" for less than 1000 bytes, \"medium\" for less than 1000000 bytes, and \"large\" otherwise.",
+        "starterCode": "function fileSizeLabel(bytes) {\n  // your code here\n}\n\nconsole.log(fileSizeLabel(500));     // \"small\"\nconsole.log(fileSizeLabel(50000));   // \"medium\"\nconsole.log(fileSizeLabel(5000000)); // \"large\"",
+        "solution": "function fileSizeLabel(bytes) {\n  return bytes < 1000 ? \"small\" : bytes < 1000000 ? \"medium\" : \"large\";\n}\n\nconsole.log(fileSizeLabel(500));     // \"small\"\nconsole.log(fileSizeLabel(50000));   // \"medium\"\nconsole.log(fileSizeLabel(5000000)); // \"large\""
+      }
+    },
+    {
+      "id": "grouping-operator",
+      "title": "What is the grouping operator in JavaScript?",
+      "description": "The grouping operator is simply a pair of parentheses ( ), used to control the order in which parts of an expression are evaluated, just like in normal math. Without it, JavaScript follows its own default precedence rules, which might not give you the order you actually want. Wrapping part of an expression in parentheses forces JavaScript to evaluate that part first, before combining it with the rest.",
+      "keyPoints": [
+        "The grouping operator is simply a pair of parentheses ( ).",
+        "It forces JavaScript to evaluate the expression inside it first, before anything outside.",
+        "It is useful whenever the default operator precedence does not give you the result you expect."
+      ],
+      "examples": [
+        { "title": "Grouping changes the order of evaluation", "language": "javascript", "code": "console.log(2 + 3 * 4);   // 14 (multiplication happens first)\nconsole.log((2 + 3) * 4); // 20 (grouping forces addition first)" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "destructuring-assignment",
+      "title": "What is destructuring assignment, for arrays and for objects?",
+      "description": "Destructuring assignment lets you \"unpack\" values from an array, or properties from an object, directly into separate variables, in one line, instead of accessing them one by one. Array destructuring uses square brackets and matches values by their position, like const [a, b] = arr. Object destructuring uses curly braces and matches values by their property name instead, like const { name } = obj. Both forms let you give a default value for when something is missing, and object destructuring also lets you rename the variable you create.",
+      "keyPoints": [
+        "Destructuring lets you pull values out of an array or object, directly into variables, in one line.",
+        "Array destructuring uses square brackets and matches by position: const [a, b] = arr.",
+        "Object destructuring uses curly braces and matches by property name: const { name } = obj.",
+        "Both forms support default values, and object destructuring also supports renaming a variable."
+      ],
+      "examples": [
+        { "title": "Array and object destructuring", "language": "javascript", "code": "const [first, second] = [10, 20];\nconsole.log(first, second); // 10 20\n\nconst { name, age = 18 } = { name: \"Ana\" };\nconsole.log(name, age); // \"Ana\" 18" }
+      ],
+      "assignment": {
+        "task": "Write code that swaps the values of two variables, a and b, using array destructuring (without a temporary variable).",
+        "starterCode": "let a = 1;\nlet b = 2;\n\n// your code here\n\nconsole.log(a, b); // 2 1",
+        "solution": "let a = 1;\nlet b = 2;\n\n[a, b] = [b, a];\n\nconsole.log(a, b); // 2 1"
+      }
+    },
+    {
+      "id": "operator-precedence",
+      "title": "What is operator precedence in JavaScript?",
+      "description": "Operator precedence decides which operator is applied first, when an expression contains more than one operator, similar to the \"multiplication before addition\" rule from math class. For example, * and / have higher precedence than + and -, so multiplication and division always happen before addition and subtraction, even if addition is written first. When you are not sure about the order, or when the default order does not match what you want, you can always use parentheses (the grouping operator) to make the order clear and explicit.",
+      "keyPoints": [
+        "Operator precedence decides which operator is applied first, in an expression with more than one operator.",
+        "* and / have higher precedence than + and -, so they are evaluated first.",
+        "When precedence is unclear or unexpected, use parentheses to make the order explicit and easy to read."
+      ],
+      "examples": [
+        { "title": "Precedence in action", "language": "javascript", "code": "console.log(2 + 3 * 4);               // 14, * runs before +\nconsole.log(true || false && false);  // true, && runs before ||" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "operator-associativity",
+      "title": "What is operator associativity?",
+      "description": "Associativity decides the order in which operators of the same precedence level are evaluated: either from left to right, or from right to left. Most operators, like + and -, are left-to-right, which means a - b - c is evaluated as (a - b) - c. A few operators work the other way, right-to-left: assignment (=) and exponentiation (**) are the most common examples. For assignment, a = b = c first assigns c to b, and then assigns that same value to a.",
+      "keyPoints": [
+        "Associativity decides the order for operators that share the same precedence level.",
+        "Most operators, like + and -, are left-to-right: a - b - c is the same as (a - b) - c.",
+        "Assignment (=) and exponentiation (**) are right-to-left instead."
+      ],
+      "examples": [
+        { "title": "Right-to-left associativity", "language": "javascript", "code": "console.log(2 ** 3 ** 2); // 512, same as 2 ** (3 ** 2)\n\nlet a, b;\na = b = 5; // right-to-left: b = 5 first, then a = b\nconsole.log(a, b); // 5 5" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "in-operator",
+      "title": "What does the \"in\" operator do?",
+      "description": "The in operator checks if a property exists in an object, and it returns true or false. It also works with arrays, checking if a given index exists in that array. The in operator is a bit different from the hasOwnProperty method: in also finds properties that an object inherited from its prototype chain, not just the properties the object has directly on itself.",
+      "keyPoints": [
+        "The in operator checks if a property exists in an object, and returns true or false.",
+        "It also works with arrays, checking if an index exists.",
+        "Unlike hasOwnProperty, in also finds properties inherited through the prototype chain, not only the object's own properties."
+      ],
+      "examples": [
+        { "title": "Using the in operator", "language": "javascript", "code": "const user = { name: \"Ana\" };\nconsole.log(\"name\" in user); // true\nconsole.log(\"age\" in user);  // false\n\nconst arr = [\"a\", \"b\", \"c\"];\nconsole.log(1 in arr); // true (index 1 exists)\nconsole.log(5 in arr); // false" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "void-operator",
+      "title": "What does the void operator do?",
+      "description": "The void operator runs (evaluates) whatever expression you give it, but it always returns undefined, no matter what that expression actually produces. In the early days of the web, it was commonly used in links like javascript:void(0), to run some code without the browser navigating anywhere. In modern JavaScript, void is rarely needed, since undefined is already available directly as a reliable keyword.",
+      "keyPoints": [
+        "void runs an expression, but always returns undefined, no matter what the expression produces.",
+        "It was historically used in links like javascript:void(0), to run code without navigating the page.",
+        "In modern JavaScript it is rarely needed, since undefined is already reliably available as a keyword."
+      ],
+      "examples": [
+        { "title": "void always returns undefined", "language": "javascript", "code": "console.log(void 0);        // undefined\nconsole.log(void (1 + 2));  // undefined, even though 1 + 2 is 3" }
+      ],
+      "assignment": null
+    }
+  ]
+}

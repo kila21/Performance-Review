@@ -10,6 +10,7 @@ framework:
     - name: sap.ui.core
     - name: sap.ui.codeeditor
     - name: sap.tnt
+    - name: themelib_sap_horizon
 builder:
   customTasks:
     - name: ui5-tooling-transpile-task

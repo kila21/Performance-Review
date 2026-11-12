@@ -1,0 +1,43 @@
+<mvc:View
+  controllerName="performance.review.controller.Questions"
+  xmlns="sap.m"
+  xmlns:mvc="sap.ui.core.mvc"
+>
+  <VBox class="sapUiResponsiveMargin">
+    <MessageStrip
+      text="{i18n>topicContentMissing}"
+      type="Warning"
+      showIcon="true"
+      class="sapUiResponsiveMargin"
+      visible="{= !${topic>/questions}.length }"
+    />
+    <Panel
+      headerText="{i18n>questionsListTitle}"
+      class="sapUiResponsiveMargin"
+      width="auto"
+      visible="{= !!${topic>/questions}.length }"
+    >
+      <List items="{path: 'topic>/questions', templateShareable: false}" mode="None" showSeparators="Inner">
+        <items>
+          <StandardListItem
+            icon="sap-icon://question-mark"
+            title="{topic>title}"
+            type="Active"
+            press="onQuestionPress"
+          />
+        </items>
+      </List>
+    </Panel>
+
+    <Panel
+      headerText="{i18n>resourcesTitle}"
+      class="sapUiResponsiveMargin"
+      width="auto"
+      visible="{= ${topicMeta>/resources}.length > 0 }"
+    >
+      <VBox class="sapUiSmallMargin" items="{path: 'topicMeta>/resources', templateShareable: false}">
+        <Link text="{topicMeta>title}" href="{topicMeta>url}" target="_blank" class="sapUiTinyMarginBottom" />
+      </VBox>
+    </Panel>
+  </VBox>
+</mvc:View>

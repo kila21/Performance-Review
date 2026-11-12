@@ -1,0 +1,145 @@
+{
+  "topicId": "objects",
+  "title": "Objects",
+  "questions": [
+    {
+      "id": "object-initialization",
+      "title": "What are the different ways to create an object in JavaScript?",
+      "description": "There are several ways to create an object in JavaScript. The object literal, written with curly braces like { name: \"Ana\" }, is the simplest and most common way. new Object() creates an empty object too, but it is rarely used because the literal is shorter and clearer. Object.create(proto) creates a new object and lets you choose directly which object will be its prototype. ES2015 added a shorthand notation: if a variable has the same name as the property you want, you can just write the variable name once, instead of repeating it. You can also use computed property names, which let you use a variable or an expression inside square brackets as the property name. Finally, a regular function used together with the new keyword can also create objects, similar to a simple class.",
+      "keyPoints": [
+        "The object literal { } is the simplest and most common way to create an object.",
+        "new Object() also creates an empty object, but it is rarely used in practice.",
+        "Object.create(proto) creates a new object and lets you choose its prototype directly.",
+        "ES2015 shorthand notation lets you write { name } instead of { name: name } when the names match.",
+        "Computed property names let you use a variable or expression as a property name, written inside [ ].",
+        "A function used with new can also act as a constructor and create objects."
+      ],
+      "examples": [
+        { "title": "Object literal with shorthand notation", "language": "javascript", "code": "const name = \"Ana\";\nconst age = 28;\n\nconst user = { name, age }; // shorthand for { name: name, age: age }\nconsole.log(user); // { name: 'Ana', age: 28 }" },
+        { "title": "Computed property name", "language": "javascript", "code": "const key = \"color\";\nconst car = { [key]: \"red\" };\n\nconsole.log(car); // { color: 'red' }" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "accessing-object-properties",
+      "title": "What are the two ways to access an object's properties?",
+      "description": "You can read or set a property on an object in two ways. Dot notation, like user.age, is short and easy to read, but the property name must be a valid identifier, which means no spaces and it cannot start with a number. Bracket notation, like user[\"age\"], works with any string as a property name, including names with spaces or special characters. Bracket notation is also the only option when you need to access a property using a variable, because the value inside the brackets is evaluated, not treated as plain text.",
+      "keyPoints": [
+        "Dot notation (object.property) is short, but the property name must be a valid identifier.",
+        "Bracket notation (object[\"property\"]) works with any string, including names with spaces.",
+        "Bracket notation lets you use a variable to choose which property to access while the code runs."
+      ],
+      "examples": [
+        { "title": "Dot notation vs bracket notation", "language": "javascript", "code": "const user = { \"first name\": \"Ana\", age: 28 };\n\nconsole.log(user.age); // 28\nconsole.log(user[\"first name\"]); // \"Ana\"\n\nconst key = \"age\";\nconsole.log(user[key]); // 28" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "property-definition-variants",
+      "title": "What are the different ways to define a property on an object, and what is a property descriptor?",
+      "description": "The normal way to add a property to an object is a simple assignment, either inside the object literal or later, like user.id = 1. This gives the property default behavior: it can be changed, deleted, and it shows up in loops. Object.defineProperty(obj, \"name\", descriptor) is a more advanced way, which lets you control exactly how the property behaves, using an object called a property descriptor. A property descriptor can set the value, whether it is writable (can its value be changed), enumerable (does it appear in loops like for...in or in Object.keys), and configurable (can it be deleted or redefined later).",
+      "keyPoints": [
+        "Simple assignment (user.id = 1, or writing it directly in the literal) is the normal, most common way to add a property.",
+        "Object.defineProperty(obj, name, descriptor) gives full control over how a property behaves.",
+        "A property descriptor can set value, writable, enumerable, and configurable.",
+        "A property added with defineProperty can be made read-only, or hidden from loops, which a simple assignment cannot do."
+      ],
+      "examples": [
+        { "title": "Defining a read-only property", "language": "javascript", "code": "const user = {};\nObject.defineProperty(user, \"id\", {\n  value: 1,\n  writable: false,\n  enumerable: true\n});\n\nuser.id = 99; // ignored, because writable is false\nconsole.log(user.id); // 1" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "method-definitions",
+      "title": "What are the different ways to define a method on an object?",
+      "description": "A method is simply a function stored as a property on an object. The classic way to define one is to write it as a normal property with a function value, like greet: function() { ... }. Since ES2015, you can use a shorter method shorthand instead, writing greet() { ... } directly inside the object literal, without the function keyword. It is best to avoid arrow functions as methods, because an arrow function does not have its own this, so this inside it will not point to the object the way you expect.",
+      "keyPoints": [
+        "The classic way writes a function as a property value: greet: function() { ... }.",
+        "ES2015 method shorthand lets you write greet() { ... }, without the function keyword.",
+        "Arrow functions are usually a bad choice for methods, because they do not have their own this."
+      ],
+      "examples": [
+        { "title": "Method shorthand", "language": "javascript", "code": "const user = {\n  name: \"Ana\",\n  greet() {\n    return `Hi, I'm ${this.name}`;\n  }\n};\n\nconsole.log(user.greet()); // \"Hi, I'm Ana\"" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "delete-operator",
+      "title": "How does the delete operator work, and what effect does it have on memory?",
+      "description": "The delete operator removes a property from an object completely. This is different from setting the property to undefined, which keeps the property but empties its value. After using delete, the property no longer exists at all: checking \"prop\" in obj returns false, and the property disappears from Object.keys(obj). Removing a property also removes JavaScript's internal reference to whatever value it held, so if nothing else in your program uses that value, the memory it used can eventually be freed by the garbage collector. It is important to know that delete only works on properties of an object; it cannot remove a variable declared with let, const, or var.",
+      "keyPoints": [
+        "delete obj.prop removes the property completely, which is different from setting it to undefined.",
+        "After delete, \"prop\" in obj becomes false, and the property disappears from Object.keys(obj).",
+        "Removing the last reference to a value lets the garbage collector free that memory later.",
+        "delete cannot remove a variable, only a property of an object."
+      ],
+      "examples": [
+        { "title": "Deleting a property", "language": "javascript", "code": "const user = { name: \"Ana\", age: 28 };\ndelete user.age;\n\nconsole.log(user); // { name: 'Ana' }\nconsole.log(\"age\" in user); // false" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "spread-properties",
+      "title": "What is the spread properties technique, and how do you use it with objects?",
+      "description": "The spread syntax, written as three dots (...), lets you copy all the own properties of one object into another, usually inside a new object literal. It is commonly used to make a shallow copy of an object without changing the original, or to merge several objects together into one new object. You can also use it to create a changed version of an object, by spreading the original object and then overriding one or more properties, which is a simple way to keep your data immutable (unchanged).",
+      "keyPoints": [
+        "{ ...obj } copies all of obj's own properties into a new object.",
+        "Spread is often used to make a shallow copy of an object without changing the original.",
+        "You can combine several objects by spreading them one after another: { ...a, ...b }.",
+        "If two spread objects share a property name, the one written later wins."
+      ],
+      "examples": [
+        { "title": "Copying and updating with spread", "language": "javascript", "code": "const user = { name: \"Ana\", age: 28 };\nconst updated = { ...user, age: 29 };\n\nconsole.log(updated); // { name: 'Ana', age: 29 }\nconsole.log(user); // { name: 'Ana', age: 28 }" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "built-in-object-methods",
+      "title": "What do the common built-in Object methods (hasOwnProperty, assign, freeze, etc.) do?",
+      "description": "JavaScript's built-in Object methods help you work with objects without writing your own code for common tasks. hasOwnProperty checks if an object has a property directly on itself (not inherited from somewhere else). isPrototypeOf checks if an object exists in another object's prototype chain. Object.assign copies properties from one or more source objects into a target object, changing the target. Object.create builds a new object with a prototype that you choose. Object.defineProperty and defineProperties let you define one or many properties with full control, using descriptors. Object.entries returns an array of [key, value] pairs for the object, which is useful for looping. Object.freeze stops any further changes to an object: you cannot add, remove, or edit its properties afterward. Object.fromEntries does the opposite of entries: it builds a new object from an array of [key, value] pairs.",
+      "keyPoints": [
+        "hasOwnProperty(prop) — checks if a property belongs directly to the object, not inherited.",
+        "isPrototypeOf — checks if an object appears in another object's prototype chain.",
+        "Object.assign(target, ...sources) — copies properties from source objects into the target object.",
+        "Object.create(proto) — creates a new object with the given prototype.",
+        "Object.defineProperty / defineProperties — define one or more properties with full descriptor control.",
+        "Object.entries(obj) — returns an array of [key, value] pairs.",
+        "Object.freeze(obj) — prevents any further changes to the object.",
+        "Object.fromEntries(pairs) — builds an object from an array of [key, value] pairs."
+      ],
+      "examples": [
+        { "title": "hasOwnProperty and entries", "language": "javascript", "code": "const user = { name: \"Ana\", age: 28 };\nconsole.log(user.hasOwnProperty(\"name\")); // true\nconsole.log(Object.entries(user)); // [ [ 'name', 'Ana' ], [ 'age', 28 ] ]" },
+        { "title": "Object.freeze", "language": "javascript", "code": "const frozen = Object.freeze({ count: 1 });\nfrozen.count = 99; // silently ignored outside strict mode\n\nconsole.log(frozen.count); // 1" }
+      ],
+      "assignment": {
+        "task": "Write a function doubleValues(obj) that returns a new object with the same keys, but every value doubled. Use Object.entries, map, and Object.fromEntries.",
+        "starterCode": "function doubleValues(obj) {\n  // your code here\n}\n\nconsole.log(doubleValues({ a: 1, b: 2 })); // { a: 2, b: 4 }",
+        "solution": "function doubleValues(obj) {\n  return Object.fromEntries(\n    Object.entries(obj).map(([key, value]) => [key, value * 2])\n  );\n}\n\nconsole.log(doubleValues({ a: 1, b: 2 })); // { a: 2, b: 4 }"
+      }
+    },
+    {
+      "id": "class-structure",
+      "title": "What is the structure of a JavaScript class, and what do its main members (constructor, extends, static, etc.) do?",
+      "description": "A class is a template for creating objects, declared with the class keyword. The constructor is a special method that runs automatically when you create a new instance with new, and it is normally used to set up the object's initial properties. Getters and setters are special methods that let you read or write a property using normal property syntax, while still running your own code behind the scenes. Inside a class method, this refers to the current instance. extends makes one class inherit the properties and methods of another class, and super is used inside the child class to call the parent class's constructor or methods. instanceof checks if an object was created by a specific class (or one that extends it). A class field is a property written directly in the class body, without needing the constructor. static members belong to the class itself, not to individual instances, and are accessed through the class name. Private members, written with a # in front of their name, can only be accessed from inside the class itself. Finally, you can stop a class from being extended by checking the special value new.target inside the constructor, and throwing an error if it does not match the class itself.",
+      "keyPoints": [
+        "constructor runs automatically when a new instance is created with new, and sets up the initial state.",
+        "Getters and setters let you run custom code when a property is read or assigned, with normal property syntax.",
+        "this inside a class method refers to the current instance.",
+        "extends makes one class inherit from another; super calls the parent class's constructor or methods.",
+        "instanceof checks whether an object was created by a specific class (or a class that extends it).",
+        "A class field is a property written directly in the class body, outside of any method.",
+        "static members belong to the class itself, not to individual instances.",
+        "Private members (written with a # prefix) can only be accessed from inside the class.",
+        "Checking new.target inside the constructor lets you prevent a class from being extended."
+      ],
+      "examples": [
+        { "title": "A class with inheritance and a getter", "language": "javascript", "code": "class Animal {\n  constructor(name) {\n    this.name = name;\n  }\n  get label() {\n    return `Animal: ${this.name}`;\n  }\n}\n\nclass Dog extends Animal {\n  bark() {\n    return `${this.name} says woof`;\n  }\n}\n\nconst rex = new Dog(\"Rex\");\nconsole.log(rex.label); // \"Animal: Rex\"\nconsole.log(rex.bark()); // \"Rex says woof\"\nconsole.log(rex instanceof Animal); // true" }
+      ],
+      "assignment": {
+        "task": "Write a class Counter with a private field #count starting at 0, and a method increment() that increases it by 1 and returns the new value.",
+        "starterCode": "class Counter {\n  // your code here\n}\n\nconst c = new Counter();\nconsole.log(c.increment()); // 1\nconsole.log(c.increment()); // 2",
+        "solution": "class Counter {\n  #count = 0;\n  increment() {\n    this.#count++;\n    return this.#count;\n  }\n}\n\nconst c = new Counter();\nconsole.log(c.increment()); // 1\nconsole.log(c.increment()); // 2"
+      }
+    }
+  ]
+}

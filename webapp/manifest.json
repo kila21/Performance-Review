@@ -56,6 +56,54 @@
         }
       }
     },
+    "routing": {
+      "config": {
+        "viewType": "XML",
+        "viewPath": "performance.review.view",
+        "controlId": "appContent",
+        "controlAggregation": "items",
+        "clearControlAggregation": true,
+        "async": true,
+        "bypassed": {
+          "target": "notFound"
+        }
+      },
+      "routes": [
+        {
+          "name": "root",
+          "pattern": ""
+        },
+        {
+          "name": "subject",
+          "pattern": "{subjectId}",
+          "target": "topics"
+        },
+        {
+          "name": "topic",
+          "pattern": "{subjectId}/{topicId}",
+          "target": "questions"
+        },
+        {
+          "name": "question",
+          "pattern": "{subjectId}/{topicId}/{questionId}",
+          "target": "questionDetail"
+        }
+      ],
+      "targets": {
+        "topics": {
+          "viewName": "Topics"
+        },
+        "questions": {
+          "viewName": "Questions"
+        },
+        "questionDetail": {
+          "viewName": "QuestionDetail"
+        },
+        "notFound": {
+          "viewName": "NotFound"
+        }
+      }
+    },
     "resources": {
       "css": []
     }

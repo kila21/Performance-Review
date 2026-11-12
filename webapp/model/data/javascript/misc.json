@@ -1,0 +1,52 @@
+{
+  "topicId": "misc",
+  "title": "Misc",
+  "questions": [
+    {
+      "id": "regex-basics",
+      "title": "What are regular expressions, and what kinds of tasks can they solve?",
+      "description": "A regular expression, often shortened to regex, is a pattern used to match, search, or replace text based on rules, instead of matching an exact string. In JavaScript, you can write one between two slashes, like /pattern/, or create one with new RegExp(). Regular expressions are useful for a lot of common text tasks: checking if a string follows a certain format (like an email address), searching for a pattern somewhere inside a longer text, replacing matched parts of a string with something else, and splitting a string based on a pattern instead of a fixed character.",
+      "keyPoints": [
+        "A regular expression describes a pattern to match inside text, not one exact string.",
+        "Common uses: validating input format, searching text, replacing parts of a string, and splitting strings.",
+        "test() checks if a pattern matches somewhere in a string, and returns true or false.",
+        "String methods like replace() and split() can also take a regular expression as their pattern."
+      ],
+      "examples": [
+        { "title": "Testing and replacing with a regular expression", "language": "javascript", "code": "const emailPattern = /^\\S+@\\S+\\.\\S+$/;\nconsole.log(emailPattern.test(\"ana@example.com\")); // true\nconsole.log(emailPattern.test(\"not an email\")); // false\n\nconsole.log(\"2026-11-12\".replace(/-/g, \"/\")); // \"2026/11/12\"" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "js-modules-concept",
+      "title": "What is the JavaScript modules concept, and what techniques exist to organize modularization?",
+      "description": "A module is a separate piece of code, usually its own file, that has its own private scope. A module can choose to export certain values, like functions, variables, or classes, so that other files can import and use them. This helps split a large program into smaller, organized, reusable pieces, and keeps variables from accidentally leaking into the global scope. The modern, native way to do this in JavaScript is with ES modules, using the export and import keywords, supported directly by both browsers and Node.js. Before ES modules existed, developers used other techniques to fake the same idea, such as CommonJS (using require and module.exports, still common in Node.js projects), or wrapping code in an IIFE (an immediately invoked function expression) to keep variables private and only expose a few chosen values.",
+      "keyPoints": [
+        "A module is a file with its own private scope; its variables stay private unless explicitly exported.",
+        "export makes a value available to other files; import brings an exported value into another file.",
+        "ES modules are the native, modern way, supported directly by browsers and Node.js.",
+        "Older techniques, like CommonJS (require / module.exports) and the IIFE pattern, were used to organize code before ES modules existed."
+      ],
+      "examples": [
+        { "title": "The IIFE module pattern (predates ES modules)", "language": "javascript", "code": "const MathUtils = (function () {\n  function add(a, b) {\n    return a + b;\n  }\n  return { add }; // only \"add\" is exposed, everything else stays private\n})();\n\nconsole.log(MathUtils.add(2, 3)); // 5" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "strict-mode",
+      "title": "What does strict mode do in JavaScript, and what limitations and improvements does it bring?",
+      "description": "Strict mode is a way to opt into a more restricted, safer version of JavaScript. You turn it on by writing \"use strict\"; at the very top of a file or a function. In strict mode, several silent mistakes become real, visible errors instead of failing quietly. For example, assigning a value to a variable that was never declared throws an error in strict mode, instead of silently creating a new global variable, which is a common source of bugs. Strict mode also throws errors for things like assigning to a read-only property, or using duplicate parameter names in a function. Another change is that inside a plain function called without an object, this becomes undefined in strict mode, instead of pointing to the global object. Classes and ES modules are automatically treated as strict mode, even if you never write \"use strict\" yourself.",
+      "keyPoints": [
+        "You turn on strict mode by writing \"use strict\"; at the top of a file or a function.",
+        "Assigning to an undeclared variable throws an error in strict mode, instead of silently creating a global one.",
+        "Strict mode also catches other silent mistakes, like assigning to a read-only property.",
+        "Inside a plain function call (not a method), this is undefined in strict mode, instead of the global object.",
+        "Classes and ES modules are automatically in strict mode, even without writing \"use strict\" yourself."
+      ],
+      "examples": [
+        { "title": "Strict mode catching an undeclared assignment", "language": "javascript", "code": "\"use strict\";\n\nfunction example() {\n  try {\n    undeclaredVariable = 5; // throws in strict mode\n  } catch (error) {\n    console.log(error instanceof ReferenceError); // true\n  }\n}\n\nexample();" }
+      ],
+      "assignment": null
+    }
+  ]
+}

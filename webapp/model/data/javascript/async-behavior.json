@@ -1,0 +1,97 @@
+{
+  "topicId": "async-behavior",
+  "title": "Async behavior",
+  "questions": [
+    {
+      "id": "settimeout-setinterval",
+      "title": "How do setTimeout and setInterval work, and what are they used for?",
+      "description": "setTimeout and setInterval let you run code later, instead of right away. setTimeout(fn, delay) schedules fn to run once, after at least delay milliseconds have passed. setInterval(fn, delay) is similar, but it keeps running fn again and again, every delay milliseconds, until you stop it. Both functions give you back an id, which you can use with clearTimeout or clearInterval to cancel the timer before it runs (or stop it from repeating). An important thing to remember is that these functions do not pause your other code while waiting — JavaScript keeps running the rest of the program, and only comes back to run fn once the delay has passed and the current code has finished.",
+      "keyPoints": [
+        "setTimeout(fn, delay) runs fn once, after at least delay milliseconds.",
+        "setInterval(fn, delay) runs fn again and again, every delay milliseconds.",
+        "clearTimeout(id) and clearInterval(id) stop a timer, using the id that setTimeout/setInterval returned.",
+        "Both functions schedule fn for later; they do not pause the rest of your code while waiting."
+      ],
+      "examples": [
+        { "title": "A basic setTimeout", "language": "javascript", "code": "console.log(\"start\");\n\nsetTimeout(() => {\n  console.log(\"this runs later\");\n}, 0);\n\nconsole.log(\"end\");" },
+        { "title": "setInterval with clearInterval", "language": "javascript", "code": "let count = 0;\n\nconst id = setInterval(() => {\n  count++;\n  console.log(\"tick\", count);\n\n  if (count === 3) {\n    clearInterval(id);\n    console.log(\"stopped\");\n  }\n}, 10);" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "settimeout-zero",
+      "title": "What is the purpose of setTimeout(fn, 0), and what effect does it have?",
+      "description": "setTimeout(fn, 0) looks like it should run fn immediately, but it does not. A delay of 0 does not mean \"right now\" — it still means \"wait for the current code to finish first, then run fn as soon as possible\". JavaScript always finishes running the code that is currently executing (and anything already queued) before it looks at timers, even ones with a delay of 0. This trick is often used to push a piece of work to run right after the current task, for example to let the screen update, or to let other pending code run, before doing more work.",
+      "keyPoints": [
+        "setTimeout(fn, 0) does not run fn immediately; it still waits for the current code to finish first.",
+        "A delay of 0 really means \"run this as soon as possible after the current task\", not \"run this now\".",
+        "This is a common trick to split up work, so other pending code (or screen updates) can run in between."
+      ],
+      "examples": [
+        { "title": "Order with setTimeout(fn, 0)", "language": "javascript", "code": "console.log(\"1\");\n\nsetTimeout(() => console.log(\"3 (from setTimeout)\"), 0);\n\nconsole.log(\"2\");" }
+      ],
+      "assignment": {
+        "task": "Without running the code, predict the order the three messages will print in. Then run it (mentally or for real) and check: write a function logInOrder() that reproduces this exact behavior — log \"first\", schedule logging \"third\" with setTimeout(..., 0), then log \"second\".",
+        "starterCode": "function logInOrder() {\n  // your code here\n}\n\nlogInOrder(); // should log \"first\", then \"second\", then \"third\"",
+        "solution": "function logInOrder() {\n  console.log(\"first\");\n  setTimeout(() => console.log(\"third\"), 0);\n  console.log(\"second\");\n}\n\nlogInOrder();"
+      }
+    },
+    {
+      "id": "promise-concept",
+      "title": "What is a Promise, and what are its advantages compared to the callback pattern?",
+      "description": "A Promise is an object that represents a value you do not have yet, but that will be ready in the future — or that will fail. A Promise can be in one of three states: pending (still waiting), fulfilled (the value is ready), or rejected (something went wrong). Compared to plain callbacks, Promises have a few real advantages. You can chain several steps together with .then(), instead of nesting callbacks inside callbacks (which leads to the \"Callback Hell\" problem). You can also handle errors in one single place with .catch(), instead of checking for an error inside every callback. Promises also give you extra tools: Promise.all(list) waits for every promise in the list to finish, and fails if even one of them fails, while Promise.race(list) finishes as soon as the first promise in the list finishes, and ignores the rest.",
+      "keyPoints": [
+        "A Promise represents a value that is not ready yet, but will be — or that will fail.",
+        "A Promise is pending, then becomes either fulfilled (success) or rejected (failure).",
+        "Promise chaining lets you run several .then() steps one after another, instead of nesting callbacks.",
+        "Errors can be handled in one place with .catch(), instead of in every single callback.",
+        "Promise.all(list) waits for every promise to finish, and fails if any one of them fails.",
+        "Promise.race(list) finishes as soon as the first promise in the list finishes, ignoring the rest."
+      ],
+      "examples": [
+        { "title": "Creating and chaining a Promise", "language": "javascript", "code": "function double(n) {\n  return new Promise((resolve) => {\n    setTimeout(() => resolve(n * 2), 10);\n  });\n}\n\ndouble(5)\n  .then((result) => double(result))\n  .then((result) => console.log(result)); // 20" },
+        { "title": "Promise.all vs Promise.race", "language": "javascript", "code": "const fast = new Promise((resolve) => setTimeout(() => resolve(\"fast\"), 10));\nconst slow = new Promise((resolve) => setTimeout(() => resolve(\"slow\"), 50));\n\nPromise.race([fast, slow]).then((winner) => console.log(\"race winner:\", winner));\nPromise.all([fast, slow]).then((results) => console.log(\"all results:\", results));" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "async-await",
+      "title": "What is async/await, and what are its advantages compared to the Promise .then() pattern?",
+      "description": "async/await is a way to work with Promises that makes asynchronous code look much more like normal, synchronous code. Adding the word async in front of a function means that function will always return a Promise. Inside an async function, you can use await in front of a Promise — this pauses that function (and only that function, not the rest of your program) until the Promise finishes, and then gives you the result directly, instead of needing a .then() callback. The main advantage is readability: a series of steps written with await, one after another, is usually easier to read and follow than a long chain of .then() calls, especially once there are several steps involved.",
+      "keyPoints": [
+        "Adding async before a function makes it always return a Promise.",
+        "Inside an async function, await pauses that function until the Promise finishes.",
+        "await only pauses the current async function — the rest of the program keeps running.",
+        "async/await usually makes asynchronous code easier to read than a long .then() chain."
+      ],
+      "examples": [
+        { "title": "Using await instead of .then()", "language": "javascript", "code": "function delay(ms, value) {\n  return new Promise((resolve) => setTimeout(() => resolve(value), ms));\n}\n\nasync function run() {\n  const a = await delay(10, 2);\n  const b = await delay(10, 3);\n  console.log(a + b); // 5\n}\n\nrun();" }
+      ],
+      "assignment": {
+        "task": "Rewrite the Promise chain below using async/await inside a function named run(), so it logs the exact same result.",
+        "starterCode": "function delay(ms, value) {\n  return new Promise((resolve) => setTimeout(() => resolve(value), ms));\n}\n\ndelay(10, \"A\")\n  .then((a) => delay(10, \"B\").then((b) => a + b))\n  .then((result) => console.log(result)); // \"AB\"",
+        "solution": "function delay(ms, value) {\n  return new Promise((resolve) => setTimeout(() => resolve(value), ms));\n}\n\nasync function run() {\n  const a = await delay(10, \"A\");\n  const b = await delay(10, \"B\");\n  console.log(a + b); // \"AB\"\n}\n\nrun();"
+      }
+    },
+    {
+      "id": "async-error-handling",
+      "title": "How does error handling work in asynchronous code, with Promises and with async/await?",
+      "description": "Handling errors in asynchronous code works differently from normal, synchronous try/catch, but the goal is the same: catching something that went wrong. With Promises, a failure is handled using .catch(), usually placed at the end of a chain. If any step in the chain fails, every .then() after it is skipped, and the error jumps straight to the nearest .catch(). With async/await, you can go back to a more familiar style: you wrap your await calls in a normal try/catch block, and if the awaited Promise is rejected, the catch block runs, just like it would for a regular thrown error. One common and easy-to-make mistake is forgetting to handle a rejected Promise at all — with no .catch() and no try/catch, the error is silently lost, or shows up as an \"unhandled rejection\" warning.",
+      "keyPoints": [
+        "A rejected Promise's error can be handled with .catch(), usually placed at the end of a chain.",
+        "If one step in a Promise chain fails, every later .then() is skipped, straight to the nearest .catch().",
+        "With async/await, you wrap the await calls in a normal try/catch block.",
+        "Forgetting to add a .catch() (or a try/catch around await) is a common bug — the error can be silently lost."
+      ],
+      "examples": [
+        { "title": "Handling a rejected Promise with .catch()", "language": "javascript", "code": "function mayFail(shouldFail) {\n  return new Promise((resolve, reject) => {\n    if (shouldFail) {\n      reject(new Error(\"Something went wrong\"));\n    } else {\n      resolve(\"All good\");\n    }\n  });\n}\n\nmayFail(true)\n  .then((result) => console.log(result))\n  .catch((err) => console.log(\"Caught:\", err.message));" },
+        { "title": "Handling the same error with try/catch", "language": "javascript", "code": "function mayFail(shouldFail) {\n  return new Promise((resolve, reject) => {\n    if (shouldFail) {\n      reject(new Error(\"Something went wrong\"));\n    } else {\n      resolve(\"All good\");\n    }\n  });\n}\n\nasync function run() {\n  try {\n    const result = await mayFail(true);\n    console.log(result);\n  } catch (err) {\n    console.log(\"Caught:\", err.message);\n  }\n}\n\nrun();" }
+      ],
+      "assignment": {
+        "task": "Complete the async function run() so it calls mayFail(true) inside a try/catch, and logs \"Caught:\" followed by the error message if it fails.",
+        "starterCode": "function mayFail(shouldFail) {\n  return new Promise((resolve, reject) => {\n    if (shouldFail) {\n      reject(new Error(\"Something went wrong\"));\n    } else {\n      resolve(\"All good\");\n    }\n  });\n}\n\nasync function run() {\n  // your code here\n}\n\nrun();",
+        "solution": "function mayFail(shouldFail) {\n  return new Promise((resolve, reject) => {\n    if (shouldFail) {\n      reject(new Error(\"Something went wrong\"));\n    } else {\n      resolve(\"All good\");\n    }\n  });\n}\n\nasync function run() {\n  try {\n    const result = await mayFail(true);\n    console.log(result);\n  } catch (err) {\n    console.log(\"Caught:\", err.message);\n  }\n}\n\nrun();"
+      }
+    }
+  ]
+}

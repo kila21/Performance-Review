@@ -1,0 +1,44 @@
+{
+  "topicId": "browser-misc",
+  "title": "Misc",
+  "questions": [
+    {
+      "id": "connecting-js-to-html",
+      "title": "What are the ways to connect JavaScript to an HTML page?",
+      "description": "There are a few ways to add JavaScript to a web page. The most common way is the script tag, which can either contain JavaScript code directly, or point to an external file using the src attribute, like <script src=\"app.js\"></script>. Using an external file is usually better, because the code can be reused across multiple pages and cached by the browser. Where you place the script tag also matters: if it is placed in the head of the page, the browser will stop loading the rest of the page until the script finishes downloading and running, unless you add the defer or async attribute. Placing the script at the end of the body, just before the closing tag, is an older but still common way to make sure the page's HTML is already loaded before the script runs.",
+      "keyPoints": [
+        "The script tag connects JavaScript to a page, either with code written inline or with an external file via src.",
+        "External files (separate .js files) are usually better: they can be reused and cached by the browser.",
+        "A script placed in the head blocks page loading unless you add defer or async.",
+        "Placing a script at the end of the body is an older way to make sure the HTML is ready first."
+      ],
+      "examples": [
+        {
+          "title": "Three ways to add JavaScript to a page",
+          "language": "html",
+          "code": "<script>\n  console.log(\"Inline script\");\n</script>\n\n<script src=\"app.js\"></script>\n\n<script src=\"app.js\" defer></script>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "line-endings",
+      "title": "What are line endings (LF/CRLF), and what problems can they cause?",
+      "description": "A line ending is the invisible character (or pair of characters) at the end of each line of text in a file, telling the computer \"this line is finished, start a new one\". There are two common styles: LF (just one character, written as \\n, called Line Feed), used by default on Linux and macOS, and CRLF (two characters together, written as \\r\\n, Carriage Return plus Line Feed), used by default on Windows. The text usually looks exactly the same on screen either way, so this difference is easy to miss. Problems happen when files move between systems that use different styles without care: version control tools, like Git, can show every single line as \"changed\" just because the line ending style changed, even though the real content is the same. It can also break tools that read files line by line and don't expect the extra \\r character, or cause string comparisons in your code to fail unexpectedly, because \"line1\\n\" and \"line1\\r\\n\" are not equal as strings, even though they look the same when printed.",
+      "keyPoints": [
+        "A line ending marks where one line of text stops and the next one begins.",
+        "LF (\\n) is the default on Linux and macOS; CRLF (\\r\\n) is the default on Windows.",
+        "Mixing styles in the same project can make version control (like Git) show lines as changed when they are not.",
+        "A string like \"line1\\n\" is not equal to \"line1\\r\\n\" in code, even though both look like \"line1\" on screen."
+      ],
+      "examples": [
+        {
+          "title": "LF vs CRLF are different strings",
+          "language": "javascript",
+          "code": "const lf = \"line1\\n\";\nconst crlf = \"line1\\r\\n\";\n\nconsole.log(lf === crlf); // false\nconsole.log(lf.trim() === crlf.trim()); // true"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

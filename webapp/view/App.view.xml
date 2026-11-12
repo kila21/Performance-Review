@@ -11,15 +11,37 @@
       </tnt:ToolHeader>
     </tnt:header>
     <tnt:mainContents>
-      <Page title="{i18n>appTitle}" showHeader="false">
-        <content>
-          <MessageStrip
-            text="SAPUI5 TypeScript scaffold is running with sap.m, sap.ui.core, sap.tnt and sap.ui.codeeditor."
-            type="Success"
-            showIcon="true"
-            class="sapUiMediumMargin"
-          />
-        </content>
+      <Page id="shellBody" showHeader="false">
+        <IconTabBar
+          id="subjectTabBar"
+          select="onSubjectSelect"
+          selectedKey="{appView>/subjectId}"
+          items="{subjects>/}"
+        >
+          <items>
+            <IconTabFilter key="{subjects>id}" text="{subjects>title}" />
+          </items>
+        </IconTabBar>
+        <Panel class="sapUiResponsiveMargin" width="auto">
+          <Breadcrumbs
+            id="breadcrumbs"
+            currentLocationText="{appView>/title}"
+            links="{path: 'appView>/crumbs', templateShareable: false}"
+            class="sapUiTinyMarginBottom"
+          >
+            <links>
+              <Link text="{appView>text}" press="onCrumbPress" />
+            </links>
+          </Breadcrumbs>
+          <Title id="pageTitle" text="{appView>/title}" level="H2" />
+        </Panel>
+        <VBox id="appContent" />
+        <FlexBox
+          justifyContent="Center"
+          class="sapUiResponsiveMargin sapUiLargeMarginTop sapUiLargeMarginBottom"
+        >
+          <Text text="{i18n>footerText}" class="sapUiContentPadding" />
+        </FlexBox>
       </Page>
     </tnt:mainContents>
   </tnt:ToolPage>

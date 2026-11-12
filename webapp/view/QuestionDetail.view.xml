@@ -1,0 +1,86 @@
+<mvc:View
+  controllerName="performance.review.controller.QuestionDetail"
+  xmlns="sap.m"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:codeeditor="sap.ui.codeeditor"
+>
+  <VBox class="sapUiResponsiveMargin">
+    <Bar design="Footer" class="sapUiResponsiveMargin">
+      <contentLeft>
+        <Button text="{i18n>previous}" enabled="{nav>/hasPrevious}" press="onPrevious" />
+      </contentLeft>
+      <contentRight>
+        <Button text="{i18n>next}" enabled="{nav>/hasNext}" press="onNext" />
+      </contentRight>
+    </Bar>
+
+    <Panel id="questionPanel" headerText="{i18n>questionLabel}" class="sapUiResponsiveMargin" width="auto">
+      <Title text="{topic>title}" level="H2" />
+    </Panel>
+
+    <Panel headerText="{i18n>descriptionLabel}" class="sapUiResponsiveMargin" width="auto">
+      <Text text="{topic>description}" />
+    </Panel>
+
+    <Panel headerText="{i18n>keyPointsLabel}" class="sapUiResponsiveMargin" width="auto">
+      <List items="{path: 'topic>keyPoints', templateShareable: false}" mode="None">
+        <items>
+          <StandardListItem icon="sap-icon://accept" title="{topic>}" />
+        </items>
+      </List>
+    </Panel>
+
+    <Panel headerText="{i18n>examplesLabel}" class="sapUiResponsiveMargin" width="auto">
+      <VBox items="{path: 'topic>examples', templateShareable: false}">
+        <VBox class="sapUiSmallMarginBottom">
+          <Text text="{topic>title}" class="sapUiTinyMarginBottom" />
+          <codeeditor:CodeEditor
+            value="{topic>code}"
+            type="{topic>language}"
+            editable="false"
+            height="{path: 'topic>code', formatter: '.formatter.codeEditorHeight'}"
+          />
+        </VBox>
+      </VBox>
+    </Panel>
+
+    <Panel
+      headerText="{i18n>assignmentLabel}"
+      class="sapUiResponsiveMargin"
+      width="auto"
+      visible="{= ${topic>assignment} !== null }"
+    >
+      <VBox>
+        <Text text="{topic>assignment/task}" class="sapUiSmallMarginBottom" />
+        <codeeditor:CodeEditor
+          value="{topic>assignment/starterCode}"
+          type="javascript"
+          editable="false"
+          height="{path: 'topic>assignment/starterCode', formatter: '.formatter.codeEditorHeight'}"
+          class="sapUiSmallMarginBottom"
+        />
+        <Button
+          text="{= ${ui>/solutionVisible} ? ${i18n>hideSolution} : ${i18n>showSolution} }"
+          press="onToggleSolution"
+          class="sapUiSmallMarginBottom"
+        />
+        <codeeditor:CodeEditor
+          visible="{ui>/solutionVisible}"
+          value="{topic>assignment/solution}"
+          type="javascript"
+          editable="false"
+          height="{path: 'topic>assignment/solution', formatter: '.formatter.codeEditorHeight'}"
+        />
+      </VBox>
+    </Panel>
+
+    <Bar design="Footer" class="sapUiResponsiveMargin">
+      <contentLeft>
+        <Button text="{i18n>previous}" enabled="{nav>/hasPrevious}" press="onPrevious" />
+      </contentLeft>
+      <contentRight>
+        <Button text="{i18n>next}" enabled="{nav>/hasNext}" press="onNext" />
+      </contentRight>
+    </Bar>
+  </VBox>
+</mvc:View>

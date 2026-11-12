@@ -1,0 +1,82 @@
+{
+  "topicId": "networking",
+  "title": "Networking",
+  "questions": [
+    {
+      "id": "xhr-and-formdata",
+      "title": "How do XMLHttpRequest and FormData work?",
+      "description": "XMLHttpRequest (often called XHR) is the original browser API for sending HTTP requests from JavaScript, used before fetch existed. You create an XHR object, open a connection to a URL, listen for events (like \"load\", which fires when the response arrives), and then send the request. FormData is a separate, smaller helper object that you use to build form data (text fields and files) in the same format a real HTML form would send. You often use a FormData object as the body of an XHR or fetch request when you need to upload a file or submit a form with JavaScript.",
+      "keyPoints": [
+        "XMLHttpRequest is the original way to make HTTP requests in the browser, before fetch existed.",
+        "You open the request, set up event listeners (like load and error), and then send it.",
+        "FormData collects form fields and files into a request body shaped the same way as a real HTML form submission.",
+        "FormData is often used together with XHR or fetch to upload files."
+      ],
+      "examples": [
+        {
+          "title": "Basic XMLHttpRequest usage",
+          "language": "javascript",
+          "code": "const xhr = new XMLHttpRequest();\nxhr.open(\"GET\", \"/api/users\");\nxhr.onload = () => {\n  // xhr.responseText holds the response text here\n};\nxhr.send();"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fetch-basics",
+      "title": "How does the fetch function work?",
+      "description": "fetch(url) sends an HTTP request and returns a Promise that resolves with a Response object as soon as the response headers arrive. To get the actual body, you call another method on that response, like response.json() or response.text(), which also returns a Promise. One important detail: fetch does not reject when the server answers with an error status, like 404 or 500 — it only rejects on real network failures (like no internet connection). This means you need to check response.ok yourself if you want to treat error status codes as failures. fetch is usually combined with async/await, which makes the code read in a simple, top-to-bottom way.",
+      "keyPoints": [
+        "fetch(url) returns a Promise that resolves with a Response object.",
+        "You read the body separately, with response.json() or response.text(), which is also a Promise.",
+        "fetch only rejects on network errors; an HTTP error like 404 still resolves normally, so you must check response.ok.",
+        "fetch works well with async/await for more readable asynchronous code."
+      ],
+      "examples": [
+        {
+          "title": "Using fetch with async/await",
+          "language": "javascript",
+          "code": "async function loadUser(id) {\n  const response = await fetch(`/api/users/${id}`);\n  if (!response.ok) {\n    throw new Error(`Request failed: ${response.status}`);\n  }\n  return response.json();\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "websocket-basics",
+      "title": "How does WebSocket work?",
+      "description": "WebSocket is a different kind of connection than a normal HTTP request. Instead of sending one request and getting one response back, WebSocket opens a single connection that stays open, and both sides (the browser and the server) can send messages to each other at any time, in either direction. This makes WebSocket a good fit for things like chat apps, live notifications, or real-time games, where the server needs to push new data to the browser without the browser having to ask for it again and again. You create a WebSocket by giving it a URL that starts with ws:// or wss://, and then you listen for events like open (connection ready), message (data received), and close (connection ended).",
+      "keyPoints": [
+        "WebSocket keeps one connection open, instead of sending a new request for every message.",
+        "Both the browser and the server can send messages at any time, in either direction.",
+        "It fits real-time use cases well: chat apps, live notifications, multiplayer games.",
+        "You listen for events like open, message, and close to react to what happens on the connection."
+      ],
+      "examples": [
+        {
+          "title": "Opening a WebSocket connection",
+          "language": "javascript",
+          "code": "const socket = new WebSocket(\"wss://example.com/chat\");\n\nsocket.addEventListener(\"open\", () => {\n  socket.send(\"Hello!\");\n});\n\nsocket.addEventListener(\"message\", (event) => {\n  // event.data holds the message received from the server\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "choosing-networking-technique",
+      "title": "When should you choose fetch, XMLHttpRequest, or WebSocket?",
+      "description": "Each networking technique fits a different situation. Use fetch for most normal requests today — it is modern, simple, and works well with async/await, so it is the right default choice for things like loading data from an API or submitting a form. Use the older XMLHttpRequest mainly when you need a feature fetch doesn't support well, like tracking upload progress, or when you are working inside older code that already uses it. Use WebSocket when you need a real-time, two-way connection that stays open, like a chat app or a live dashboard — this is something fetch and XMLHttpRequest cannot do, because both of them are built around sending one request and getting one response back.",
+      "keyPoints": [
+        "fetch: the modern default choice for most one-off requests (loading data, sending data).",
+        "XMLHttpRequest: mostly used today for features fetch lacks, like upload progress tracking, or in older codebases.",
+        "WebSocket: the right choice for real-time, two-way communication that needs to stay open (chat, live updates, games).",
+        "The main difference is request/response (fetch, XHR) versus one long-lived, two-way connection (WebSocket)."
+      ],
+      "examples": [
+        {
+          "title": "The three techniques, side by side",
+          "language": "javascript",
+          "code": "// fetch: one request, one response, modern and simple\nfetch(\"/api/data\");\n\n// XMLHttpRequest: the older way, still used for upload progress\nconst xhr = new XMLHttpRequest();\n\n// WebSocket: one connection that stays open for two-way messages\nconst socket = new WebSocket(\"wss://example.com\");"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

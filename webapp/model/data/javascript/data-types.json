@@ -1,0 +1,208 @@
+{
+  "topicId": "data-types",
+  "title": "Data types",
+  "questions": [
+    {
+      "id": "dynamic-typing",
+      "title": "What is dynamic typing, and how is it different from static typing and strict static typing?",
+      "description": "Dynamic typing means that the type of a variable is decided while the program runs, not before. In a dynamically typed language, like JavaScript, you never declare a type for a variable, and the same variable can hold a number at one moment and a string a moment later. Static typing is the opposite: every variable has a fixed type, and that type is checked before the program even runs (languages like Java or TypeScript work this way). Strict static typing is an even stronger version of static typing, where almost no automatic conversion between types is allowed at all. Because JavaScript is dynamically typed, it is very flexible, but it also means that type-related bugs are usually only discovered while the program is running, not before.",
+      "keyPoints": [
+        "Dynamic typing means a variable's type is decided at runtime, and can change later in the program.",
+        "Static typing means every variable has a fixed type, checked before the program runs.",
+        "Strict static typing is a stricter version of static typing, with little to no automatic type conversion.",
+        "JavaScript is dynamically typed: a variable never has a fixed type."
+      ],
+      "examples": [
+        { "title": "The same variable holding different types", "language": "javascript", "code": "let value = 5;\nconsole.log(typeof value); // \"number\"\n\nvalue = \"now a string\";\nconsole.log(typeof value); // \"string\"" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "primitive-vs-reference-types",
+      "title": "What are primitive types and reference types, and what is the key difference between them?",
+      "description": "JavaScript values are either primitive types or reference types, and they behave very differently when you copy them. Primitive types — number, string, boolean, undefined, null, bigint, and symbol — store their actual value directly. When you copy a primitive value into another variable, you get a completely independent copy; changing the copy never affects the original. Reference types — objects, arrays, and functions — work differently: a variable does not store the object itself, but a reference (like an address) pointing to where the object lives in memory. When you copy a reference type into another variable, you are only copying that reference, not the actual data. This means both variables end up pointing to the exact same object, so changing one of them also changes what the other one sees.",
+      "keyPoints": [
+        "Primitive types (number, string, boolean, undefined, null, bigint, symbol) store the actual value directly.",
+        "Copying a primitive value creates an independent copy; changing the copy does not affect the original.",
+        "Reference types (objects, arrays, functions) are stored as a reference to a location in memory.",
+        "Copying a reference type copies the reference, not the data — both variables end up pointing to the same object."
+      ],
+      "examples": [
+        { "title": "Copying a primitive vs copying an object", "language": "javascript", "code": "let a = 5;\nlet b = a;\nb = 10;\nconsole.log(a, b); // 5 10\n\nconst obj1 = { value: 5 };\nconst obj2 = obj1;\nobj2.value = 10;\nconsole.log(obj1.value, obj2.value); // 10 10" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "all-data-types",
+      "title": "What are all the data types in JavaScript, and what is each one used for?",
+      "description": "JavaScript has a small, fixed set of data types. Number stores both whole numbers and decimals. String stores text. Boolean stores only true or false. Object stores a collection of key-value pairs, and is also the base type behind arrays and functions. Undefined is the automatic value JavaScript gives to a variable that has been declared, but has not yet been given a value. Null represents \"no value\", and unlike undefined, it is usually set on purpose by the developer. BigInt stores whole numbers that are too large for the regular Number type to handle safely. Symbol creates a unique, hidden value, often used as a special object key that will never accidentally clash with another key.",
+      "keyPoints": [
+        "Number stores both whole numbers and decimals; String stores text; Boolean stores true or false.",
+        "Object stores key-value pairs, and is also the base type for arrays and functions.",
+        "Undefined is the automatic value of a declared variable with no value yet; Null means \"no value\", set on purpose.",
+        "BigInt stores very large whole numbers; Symbol creates a unique, hidden value, often used as a special object key.",
+        "typeof null returns \"object\", which is a well-known historical quirk in JavaScript — null is still its own separate type."
+      ],
+      "examples": [
+        { "title": "Checking the type of each kind of value", "language": "javascript", "code": "console.log(typeof 42);        // \"number\"\nconsole.log(typeof \"hello\");   // \"string\"\nconsole.log(typeof true);      // \"boolean\"\nconsole.log(typeof {});        // \"object\"\nconsole.log(typeof undefined); // \"undefined\"\nconsole.log(typeof null);      // \"object\"\nconsole.log(typeof 10n);       // \"bigint\"\nconsole.log(typeof Symbol());  // \"symbol\"" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "date-object",
+      "title": "How do you work with the Date object in JavaScript?",
+      "description": "The Date object is used to work with dates and times. Writing new Date() with no arguments creates a date representing right now, at the exact moment the code runs. You can also create a specific date, for example new Date(2024, 0, 15) (year, month, day), or new Date(\"2024-01-15\") using a date string. Once you have a Date object, you can read parts of it using methods like getFullYear(), getMonth(), getDate(), getDay(), and getHours(). One detail that catches many developers by surprise is that getMonth() counts months starting from 0, so January is 0 and December is 11. If you just need the current time as a plain number, Date.now() gives you a timestamp: the number of milliseconds that have passed since January 1, 1970.",
+      "keyPoints": [
+        "new Date() creates an object representing the current date and time.",
+        "You can also create a specific date, like new Date(2024, 0, 15) or new Date(\"2024-01-15\").",
+        "getMonth() returns the month as a number from 0 (January) to 11 (December) — a common source of off-by-one bugs.",
+        "Date.now() returns the current time as a timestamp (milliseconds since January 1, 1970)."
+      ],
+      "examples": [
+        { "title": "Creating a date and reading its parts", "language": "javascript", "code": "const date = new Date(2024, 0, 15);\nconsole.log(date.getFullYear()); // 2024\nconsole.log(date.getMonth());    // 0\nconsole.log(date.getDate());     // 15" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "number-methods",
+      "title": "What do the common Number methods (parseInt, parseFloat, isNaN, toFixed) do?",
+      "description": "JavaScript gives you a few useful functions and methods for working with numbers, especially when converting text into numbers. parseInt(str) reads a string from the beginning, and converts as much of it as looks like a whole number, stopping as soon as it finds a character that isn't part of a number. parseFloat(str) works the same way, but it also understands a decimal point, so it can read numbers with decimals. isNaN(value) checks whether a value is NaN, the special \"Not a Number\" value, which often appears after a failed numeric conversion. toFixed(n) rounds a number to a fixed number of decimal places — but its result is always a string, not a number, which is easy to forget.",
+      "keyPoints": [
+        "parseInt(\"42px\") reads the string from the start, and stops at the first character that isn't part of a number, giving 42.",
+        "parseFloat(\"3.14kg\") works the same way, but also understands a decimal point.",
+        "isNaN(value) checks if a value is NaN (the special \"Not a Number\" value).",
+        "toFixed(n) rounds a number to n decimal places, but the result it gives back is a string, not a number."
+      ],
+      "examples": [
+        { "title": "Parsing and formatting numbers", "language": "javascript", "code": "console.log(parseInt(\"42px\"));     // 42\nconsole.log(parseFloat(\"3.14kg\")); // 3.14\nconsole.log(isNaN(\"hello\" * 2));   // true\nconsole.log((3.14159).toFixed(2)); // \"3.14\"" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "string-methods",
+      "title": "What do the common String methods (charAt, slice, split, replace, etc.) do?",
+      "description": "Strings in JavaScript come with many built-in methods for reading and changing text. charAt(i) gives you the single character at position i. slice(start, end) returns part of the string, and it also accepts negative numbers to count from the end of the string (substring(start, end) does something similar, but it does not support negative indexes). indexOf(sub) gives you the position of the first match of sub inside the string, or -1 if it is not found. split(separator) breaks a string into an array of smaller pieces, cutting it wherever separator appears. replace(search, replacement) replaces the first match of search with replacement (or every match, if search is written as a global regular expression). toUpperCase() returns the whole string in uppercase letters. search(regex) returns the index of the first match of a regular expression, similar to indexOf, but for patterns instead of plain text.",
+      "keyPoints": [
+        "charAt(i) returns the single character at position i.",
+        "slice(start, end) returns part of the string and accepts negative indexes; substring(start, end) is similar but does not.",
+        "indexOf(sub) returns the position of the first match of sub, or -1 if it is not found.",
+        "split(separator) breaks a string into an array of parts, cut at every occurrence of separator.",
+        "replace(search, replacement) replaces the first match (or every match, with a global regular expression).",
+        "toUpperCase() returns the string in uppercase letters; search(regex) finds the position of the first pattern match."
+      ],
+      "examples": [
+        { "title": "Common string methods in action", "language": "javascript", "code": "const text = \"Hello World\";\nconsole.log(text.charAt(0));              // \"H\"\nconsole.log(text.slice(-5));              // \"World\"\nconsole.log(text.indexOf(\"World\"));       // 6\nconsole.log(text.split(\" \"));             // [ 'Hello', 'World' ]\nconsole.log(text.replace(\"World\", \"JS\")); // \"Hello JS\"" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "variable-declarations",
+      "title": "What are the different ways to declare a variable (var, let, const), and what are their features and pitfalls?",
+      "description": "JavaScript has three keywords for declaring a variable, and each one behaves a little differently. var is the oldest keyword: it is scoped to the whole function (not to a block like if or for), it is hoisted with an initial value of undefined, and it can be declared again with the same name in the same scope without an error — all of this can easily cause confusing bugs. let is more modern: it is scoped to the exact block where it is declared, it can be reassigned to a new value, but it cannot be declared again with the same name in the same scope. const also belongs to its block, just like let, but once it is given a value, that value cannot be reassigned. An important detail about const is that it does not make the value itself unchangeable — if a const variable holds an object or an array, you can still change its properties or items, you just cannot make the variable point to a completely different object.",
+      "keyPoints": [
+        "var is function-scoped, hoisted with an initial value of undefined, and can be redeclared — this can easily cause bugs.",
+        "let is block-scoped, and can be reassigned, but not redeclared in the same scope.",
+        "const is block-scoped too, and cannot be reassigned after it gets its first value.",
+        "const does not make the value itself unchangeable — if it holds an object or array, its contents can still change."
+      ],
+      "examples": [
+        { "title": "const still allows changing an object's contents", "language": "javascript", "code": "const user = { name: \"Ana\" };\nuser.name = \"Leo\"; // allowed: changing a property, not reassigning the variable\nconsole.log(user.name); // \"Leo\"" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "type-coercion-implicit",
+      "title": "How and when does implicit (automatic) type coercion work in JavaScript?",
+      "description": "Implicit type coercion happens automatically, without you asking for it, usually when you use an operator with values of different types. With the + operator, if one side is a string, JavaScript converts the other side to a string too, and joins them together as text. But with - , *, and /, a string that looks like a number is converted into an actual number first, and then the math is done normally. In places where a boolean is expected, like inside an if, a while, or with && and ||, JavaScript automatically converts the value to true or false. When an object is used where a string is expected, like inside a template literal or string concatenation, JavaScript first tries the object's valueOf() method (if it returns a simple value), and otherwise falls back to its toString() method.",
+      "keyPoints": [
+        "String <-> Number: + with a string joins values as text, but - , *, and / convert a numeric-looking string into a number first.",
+        "Boolean <-> Number: in a condition (if, while, &&, ||), JavaScript automatically converts a value to true or false.",
+        "Object <-> String: when an object is used in a string context, JavaScript calls its valueOf() method first (if it returns a usable value), otherwise its toString() method."
+      ],
+      "examples": [
+        { "title": "Implicit coercion with + and -", "language": "javascript", "code": "console.log(\"5\" + 3);  // \"53\"\nconsole.log(\"5\" - 3);  // 2\nconsole.log(1 + true); // 2" },
+        { "title": "An object converted to a string", "language": "javascript", "code": "const point = { toString: () => \"(0,0)\" };\nconsole.log(`Point: ${point}`); // \"Point: (0,0)\"" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "explicit-coercion",
+      "title": "How do you do explicit type coercion in JavaScript?",
+      "description": "Explicit coercion means you convert a value from one type to another on purpose, instead of letting JavaScript do it automatically behind the scenes. Number(value) converts a value into a number (the unary + operator, like +\"10\", is a common shortcut for the same thing). String(value) converts a value into a string. Boolean(value) converts a value into true or false (the double-NOT trick, !!value, is a common shortcut for this). Writing explicit coercion makes your intention clear in the code, instead of relying on JavaScript's sometimes surprising automatic rules.",
+      "keyPoints": [
+        "Number(value) converts a value into a number explicitly (the unary + is a common shortcut for this).",
+        "String(value) converts a value into a string explicitly.",
+        "Boolean(value) converts a value into true or false explicitly (!!value is a common shortcut for this).",
+        "Explicit coercion is clearer than relying on implicit coercion, because the intention is visible in the code."
+      ],
+      "examples": [
+        { "title": "Converting values explicitly", "language": "javascript", "code": "console.log(Number(\"42\")); // 42\nconsole.log(String(42));   // \"42\"\nconsole.log(Boolean(0));   // false\nconsole.log(+\"10\");        // 10\nconsole.log(!!\"hello\");    // true" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "comparing-different-types",
+      "title": "How does comparing values of different types work in JavaScript?",
+      "description": "JavaScript gives you two ways to compare values for equality, and they behave quite differently. == (loose equality) first converts the two values to a common type, and only then compares them, which can lead to surprising results, like \"5\" == 5 being true. === (strict equality) compares both the value and the type together, without converting anything, so \"5\" === 5 is false, because a string is never equal to a number with ===. Because of this, most developers recommend always using === and !==, unless you have a clear, specific reason to use the loose version. Relational operators like < and > also convert both sides to numbers before comparing, unless both sides are already strings, in which case they are compared alphabetically instead.",
+      "keyPoints": [
+        "== (loose equality) converts the values to a common type before comparing, which can give surprising results.",
+        "=== (strict equality) compares the value and the type together, without converting anything.",
+        "It is a common best practice to always use === and !==, unless you have a clear reason to use ==.",
+        "Relational operators like < and > convert both sides to numbers, unless both sides are already strings (then they compare alphabetically)."
+      ],
+      "examples": [
+        { "title": "Loose vs strict equality", "language": "javascript", "code": "console.log(\"5\" == 5);            // true\nconsole.log(\"5\" === 5);           // false\nconsole.log(null == undefined);   // true\nconsole.log(null === undefined);  // false\nconsole.log(\"10\" < \"9\");          // true (compared alphabetically, as strings)" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "falsy-values",
+      "title": "What is the \"falsy values\" concept, and what are its applications and pitfalls?",
+      "description": "A falsy value is a value that behaves like false whenever it is used in a condition, such as in an if, a while, or with && and ||, even though it is not literally the boolean false. JavaScript only has a small, fixed list of falsy values: false, 0, -0, \"\" (an empty string), null, undefined, and NaN. Every other value is considered truthy, including some values that might surprise you, like \"0\" (a non-empty string), an empty array [], or an empty object {}. Falsy values are useful because they let you write short condition checks, like if (value) instead of a long comparison against null, undefined, and an empty string. The pitfall is that this shortcut can introduce bugs: if (count) will be treated as false when count is the number 0, even if 0 is a perfectly valid, meaningful value in your program.",
+      "keyPoints": [
+        "Falsy values behave like false in a condition, even though they are not the boolean false: false, 0, -0, \"\" (empty string), null, undefined, and NaN.",
+        "Every other value is truthy, including \"0\" (a string), [] (an empty array), and {} (an empty object).",
+        "Falsy values let you write short checks, like if (value), instead of a longer comparison.",
+        "This can also cause bugs: if (count) is false when count is 0, which might not be what you wanted."
+      ],
+      "examples": [
+        { "title": "Checking which values are falsy", "language": "javascript", "code": "console.log(0 ? \"truthy\" : \"falsy\");    // \"falsy\"\nconsole.log(\"\" ? \"truthy\" : \"falsy\");   // \"falsy\"\nconsole.log(\"0\" ? \"truthy\" : \"falsy\");  // \"truthy\"\nconsole.log([] ? \"truthy\" : \"falsy\");   // \"truthy\"" }
+      ],
+      "assignment": {
+        "task": "The function below should print the count even when it is 0, but right now it treats 0 as \"no count given\", because of the falsy-values pitfall. Fix the condition so it only treats null or undefined as \"no count given\".",
+        "starterCode": "function printCount(count) {\n  if (count) {\n    console.log(count);\n  } else {\n    console.log(\"no count given\");\n  }\n}\n\nprintCount(0); // should log 0, but currently logs \"no count given\"",
+        "solution": "function printCount(count) {\n  if (count !== null && count !== undefined) {\n    console.log(count);\n  } else {\n    console.log(\"no count given\");\n  }\n}\n\nprintCount(0); // 0"
+      }
+    },
+    {
+      "id": "mutable-immutable",
+      "title": "What is the difference between mutable and immutable values, and when is this useful?",
+      "description": "A value is immutable when it can never be changed after it is created — all primitive values in JavaScript (numbers, strings, booleans, and so on) work this way. For example, when you \"change\" a string to uppercase, you are not editing the original string at all; you are creating a brand new string and giving it to a variable. A value is mutable when it can be changed directly, without creating a new one — objects and arrays are mutable by default, so you can change their properties or items in place. Treating your data as if it were immutable, by creating a changed copy instead of editing the original directly, tends to make code more predictable and easier to reason about, since nothing unexpected changes behind your back. For objects, you can even enforce this with Object.freeze(), which stops (or silently ignores) further changes to an object's own properties.",
+      "keyPoints": [
+        "Primitive values (numbers, strings, booleans, etc.) are immutable — any operation that looks like it changes them actually creates a new value.",
+        "Objects and arrays are mutable by default — you can change their properties or items directly, without creating a new object.",
+        "Treating data as immutable (creating a changed copy instead of editing the original) makes code more predictable.",
+        "Object.freeze(obj) can make an object's own properties act immutable, so changes to them are silently ignored."
+      ],
+      "examples": [
+        { "title": "An immutable string vs a frozen object", "language": "javascript", "code": "let str = \"hello\";\nstr = str.toUpperCase(); // creates a brand new string\nconsole.log(str); // \"HELLO\"\n\nconst frozen = Object.freeze({ value: 1 });\nfrozen.value = 2; // silently ignored (no error outside strict mode)\nconsole.log(frozen.value); // 1" }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "math-object",
+      "title": "What are the basic features of the Math standard object?",
+      "description": "Math is a built-in JavaScript object that gives you math-related constants and functions — you never create your own Math object, you just use the one that is already there (there is no new Math()). Math.PI gives you the value of π. Math.round(), Math.floor(), and Math.ceil() round a number to the nearest, the next lower, or the next higher whole number. Math.max(...values) and Math.min(...values) give you the largest or smallest of a list of numbers. Math.random() gives you a random decimal number between 0 (included) and 1 (excluded), which is often combined with some math to get a random whole number in a chosen range.",
+      "keyPoints": [
+        "Math is a built-in object with math-related constants and functions — you never create an instance of it.",
+        "Math.round(), Math.floor(), and Math.ceil() round a number to the nearest, lower, or higher whole number.",
+        "Math.max(...values) and Math.min(...values) return the largest or smallest of the given numbers.",
+        "Math.random() returns a random decimal number, from 0 (included) up to 1 (excluded)."
+      ],
+      "examples": [
+        { "title": "Rounding and comparing numbers", "language": "javascript", "code": "console.log(Math.round(4.5));   // 5\nconsole.log(Math.floor(4.9));   // 4\nconsole.log(Math.ceil(4.1));    // 5\nconsole.log(Math.max(3, 7, 2)); // 7" }
+      ],
+      "assignment": null
+    }
+  ]
+}

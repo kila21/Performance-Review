@@ -10,5 +10,6 @@ export default class Component extends UIComponent {
 
   public init(): void {
     super.init();
+    this.getRouter().initialize();
   }
 }
