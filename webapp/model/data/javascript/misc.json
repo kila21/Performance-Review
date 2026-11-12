@@ -5,9 +5,9 @@
     {
       "id": "regex-basics",
       "title": "What are regular expressions, and what kinds of tasks can they solve?",
-      "description": "A regular expression, often shortened to regex, is a pattern used to match, search, or replace text based on rules, instead of matching an exact string. In JavaScript, you can write one between two slashes, like /pattern/, or create one with new RegExp(). Regular expressions are useful for a lot of common text tasks: checking if a string follows a certain format (like an email address), searching for a pattern somewhere inside a longer text, replacing matched parts of a string with something else, and splitting a string based on a pattern instead of a fixed character.",
+      "description": "A regular expression, often shortened to regex, is a pattern used to match, search, or replace text based on rules, instead of matching an exact string. In JavaScript, you can write one between two slashes, like /pattern/, or create one with new RegExp(). Flags written after the closing slash change how the pattern works: g finds every match instead of only the first, i ignores upper/lower case, and m makes ^ and $ match at the start and end of each line. Regular expressions are useful for a lot of common text tasks: checking if a string follows a certain format (like an email address), searching for a pattern somewhere inside a longer text, replacing matched parts of a string with something else, and splitting a string based on a pattern instead of a fixed character.",
       "keyPoints": [
-        "A regular expression describes a pattern to match inside text, not one exact string.",
+        "A regular expression describes a pattern to match inside text, not one exact string; flags like g (all matches) and i (ignore case) change how it matches.",
         "Common uses: validating input format, searching text, replacing parts of a string, and splitting strings.",
         "test() checks if a pattern matches somewhere in a string, and returns true or false.",
         "String methods like replace() and split() can also take a regular expression as their pattern."

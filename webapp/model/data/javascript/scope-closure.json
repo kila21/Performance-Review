@@ -35,12 +35,12 @@
     {
       "id": "global-vs-local-scope",
       "title": "What is the difference between global scope and local scope?",
-      "description": "Global scope is the outer-most scope in your code. A variable declared in the global scope, outside of any function or block, can be used anywhere in the file. Local scope is created inside a function or a block, and variables declared there can only be used inside that function or block, not outside it. Code that runs inside a local scope can still read variables from the global scope, as long as a local variable with the same name does not hide (shadow) it. If you need to access the global scope directly, you can use the special object called globalThis.",
+      "description": "Global scope is the outer-most scope in your code. A variable declared in the global scope, outside of any function or block, can be used anywhere in your program (in an ES module, top-level variables belong to that module instead, and are not global). Local scope is created inside a function or a block, and variables declared there can only be used inside that function or block, not outside it. Code that runs inside a local scope can still read variables from the global scope, as long as a local variable with the same name does not hide (shadow) it. If you need to access the global object directly (window in a browser), you can use globalThis. Note that top-level var and function declarations become properties of the global object, but top-level let and const variables do not.",
       "keyPoints": [
-        "Global scope is the outer-most scope; anything declared there can be used anywhere in the file.",
+        "Global scope is the outer-most scope; anything declared there can be used anywhere in the program.",
         "Local scope is created inside a function or a block, and its variables cannot be used outside it.",
         "Local code can read global variables, unless a local variable with the same name hides them.",
-        "globalThis gives you direct access to the global scope, in any JavaScript environment."
+        "globalThis gives you the global object in any JavaScript environment; top-level var becomes its property, but let and const do not."
       ],
       "examples": [
         { "title": "Reading a global variable from a local scope", "language": "javascript", "code": "const appName = \"MyApp\";\n\nfunction greet() {\n  console.log(`Welcome to ${appName}`);\n}\n\ngreet(); // \"Welcome to MyApp\"" }

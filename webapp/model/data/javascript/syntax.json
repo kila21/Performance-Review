@@ -61,10 +61,10 @@
     {
       "id": "block-statement",
       "title": "What is a block statement in JavaScript?",
-      "description": "A block statement is a group of statements written between curly braces { }. It lets you treat several lines of code as one single unit. You will usually see a block right after an if, else, for, while, or function, but you can also write a plain block on its own, just to group code together. One important thing about blocks is that they create their own scope for let and const. This means a let or const variable declared inside a block only exists inside that block, and it disappears once the block ends. The older keyword var does not follow this rule, and it ignores block boundaries completely.",
+      "description": "A block statement is a group of statements written between curly braces { }. It lets you treat several lines of code as one single unit. You will usually see a block right after an if, else, for, or while (a function body is written with { } in the same way), but you can also write a plain block on its own, just to group code together. One important thing about blocks is that they create their own scope for let and const. This means a let or const variable declared inside a block only exists inside that block, and it cannot be used from outside it. The older keyword var does not follow this rule, and it ignores block boundaries completely.",
       "keyPoints": [
         "A block statement groups several lines of code between { } into one unit.",
-        "Blocks are commonly used after if, else, for, while, and function.",
+        "Blocks are commonly used after if, else, for, and while; a function body uses the same { } syntax.",
         "A block creates its own scope for let and const, but not for var.",
         "A let or const variable declared inside a block cannot be used outside that block."
       ],
@@ -76,12 +76,12 @@
     {
       "id": "conditions-syntax",
       "title": "What is the syntax for conditional statements in JavaScript (if...else, switch)?",
-      "description": "Conditional statements let your code make decisions and run different code depending on a condition. The if statement runs a block of code only if a condition is true. You can add else if to check another condition, and a final else to run code when none of the earlier conditions matched. The switch statement is a different way to check one value against several possible options, using case. Each case needs a break at the end, or the code will continue running into the next case by accident (this is called \"falling through\"). The default case runs when none of the other cases match, similar to an else.",
+      "description": "Conditional statements let your code make decisions and run different code depending on a condition. The if statement runs a block of code only if a condition is true. You can add else if to check another condition, and a final else to run code when none of the earlier conditions matched. The switch statement is a different way to check one value against several possible options, using case. switch compares the value with each case using strict equality (===), so \"1\" does not match case 1. Each case needs a break (or a return) at the end, or the code will continue running into the next case (this is called \"falling through\"). Sometimes falling through is used on purpose, to let several cases share the same code. The default case runs when none of the other cases match, similar to an else.",
       "keyPoints": [
         "if runs code only when its condition is true.",
         "else if checks another condition, and else runs when nothing else matched.",
-        "switch compares one value against several case options.",
-        "Each case usually needs a break, or the code keeps running into the next case.",
+        "switch compares one value against several case options, using strict equality (===).",
+        "Each case needs a break (or a return), or the code keeps running into the next case (\"falling through\").",
         "default in a switch works like else: it runs when no case matched."
       ],
       "examples": [

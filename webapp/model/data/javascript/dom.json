@@ -5,11 +5,11 @@
     {
       "id": "dom-tree-concept",
       "title": "What is the DOM, and why is it described as a tree structure?",
-      "description": "The DOM (Document Object Model) is how the browser represents an HTML page in memory, as a tree of objects called nodes. The <html> element is the root of the tree, and every other element (like <body>, <div>, <p>) is a node inside it, nested the same way the HTML was written. Each node can have child nodes, and every node except the root has exactly one parent. JavaScript uses this tree to read, change, add, or remove any part of the page, because every piece of the page -- elements, text, attributes -- is represented somewhere in this tree.",
+      "description": "The DOM (Document Object Model) is how the browser represents an HTML page in memory, as a tree of objects called nodes. At the very top of the tree is the document node (the document object in JavaScript), and its main child is the <html> element, called the root element. Every other element (like <body>, <div>, <p>) is a node inside it, nested the same way the HTML was written. Each node can have child nodes, and every node except the document has exactly one parent. JavaScript uses this tree to read, change, add, or remove any part of the page, because every piece of the page is represented in it: elements and text are nodes in the tree, and attributes are stored on their element nodes.",
       "keyPoints": [
         "The DOM represents an HTML page as a tree of nodes, built by the browser from the HTML.",
-        "The <html> element is the root; every other element is nested inside it as a child or a deeper descendant.",
-        "Each node (except the root) has exactly one parent, and can have zero or more children.",
+        "The document node is at the top; the <html> element is the root element, and every other element is nested inside it.",
+        "Each node (except the document) has exactly one parent, and can have zero or more children.",
         "JavaScript reads and changes the page by working with this tree, not with the raw HTML text."
       ],
       "examples": [
@@ -34,7 +34,7 @@
         {
           "title": "childNodes vs children",
           "language": "javascript",
-          "code": "// <ul>\n//   <li>One</li>\n//   <li>Two</li>\n// </ul>\n\n// list.childNodes.length -> 4 (two <li> elements + whitespace text nodes around/between them)\n// list.children.length   -> 2 (only the two <li> elements)"
+          "code": "// <ul>\n//   <li>One</li>\n//   <li>Two</li>\n// </ul>\n\n// list.childNodes.length -> 5 (two <li> elements + three whitespace text nodes: before, between, and after them)\n// list.children.length   -> 2 (only the two <li> elements)"
         }
       ],
       "assignment": null
@@ -42,7 +42,7 @@
     {
       "id": "html-entities",
       "title": "What are HTML entities, and why do you need them?",
-      "description": "HTML entities are special codes used to display characters that would otherwise be confused with HTML syntax, or that are hard to type directly. For example, writing a literal < or > inside text would be read as the start of a tag, so you write &lt; and &gt; instead, and the browser displays < and >. Entities also let you write other special characters, like &amp; for a literal ampersand (&), &nbsp; for a non-breaking space, or named entities like &copy; for characters that are hard to type, like ©. When JavaScript reads text from the page with a property like textContent, entities are automatically turned back into their real characters.",
+      "description": "HTML entities are special codes used to display characters that would otherwise be confused with HTML syntax, or that are hard to type directly. For example, a literal < inside text could be read as the start of a tag, so you write &lt; instead (and &gt; for >, to keep things consistent), and the browser displays < and >. Entities also let you write other special characters, like &amp; for a literal ampersand (&), &nbsp; for a non-breaking space, or named entities like &copy; for characters that are hard to type, like ©. When JavaScript reads text from the page with a property like textContent, entities are automatically turned back into their real characters.",
       "keyPoints": [
         "Entities let you safely write characters with special meaning in HTML, like < and >, using &lt; and &gt;.",
         "&amp; writes a literal ampersand (&), and &nbsp; writes a non-breaking space.",
@@ -61,7 +61,7 @@
     {
       "id": "dom-node-types",
       "title": "What are the different node types in the DOM, like element nodes and text nodes?",
-      "description": "Every piece of an HTML page becomes a \"node\" in the DOM, but not all nodes are the same kind. The most common ones are element nodes (like <div> or <p>, which can have attributes and children) and text nodes (the actual text inside an element, with no tags of its own). There are a few other, rarer node types too, like comment nodes, for HTML comments. Each node has a nodeType property (a number) and a nodeName property (a short description) that tell you which kind of node it is, which is useful when you write code that walks through the DOM tree and needs to treat text differently from elements.",
+      "description": "Every piece of an HTML page becomes a \"node\" in the DOM, but not all nodes are the same kind. The most common ones are element nodes (like <div> or <p>, which can have attributes and children) and text nodes (the actual text inside an element, with no tags of its own). There are a few other node types too, like comment nodes, for HTML comments, and the document node itself, at the top of the tree. Each node has a nodeType property (a number: 1 for elements, 3 for text, 8 for comments, 9 for the document) and a nodeName property (the tag name in uppercase for elements, like \"DIV\", or \"#text\" and \"#comment\" for the others) that tell you which kind of node it is, which is useful when you write code that walks through the DOM tree and needs to treat text differently from elements.",
       "keyPoints": [
         "Element nodes represent HTML tags, like <div> or <p>; they can have attributes and child nodes.",
         "Text nodes hold the plain text inside an element, with no tags of their own.",
@@ -99,11 +99,11 @@
     {
       "id": "dom-selectors",
       "title": "What are the different ways to select (find) elements in the DOM?",
-      "description": "JavaScript gives you several methods to find elements on a page. getElementById(\"id\") finds one element by its unique id. getElementsByClassName(\"name\") and getElementsByTagName(\"tag\") return a live collection of all matching elements. The more modern and flexible methods are querySelector(\"css-selector\"), which returns the first matching element, and querySelectorAll(\"css-selector\"), which returns all matching elements, using the same selector syntax you would write in CSS, like \".item\", \"#main\", or \"div > p\". querySelector / querySelectorAll are usually preferred today, because CSS selectors can express much more complex conditions than the older methods.",
+      "description": "JavaScript gives you several methods to find elements on a page. getElementById(\"id\") finds one element by its unique id (or returns null if there is none). getElementsByClassName(\"name\") and getElementsByTagName(\"tag\") return a live collection of all matching elements, which updates automatically when the page changes. The more modern and flexible methods are querySelector(\"css-selector\"), which returns the first matching element (or null), and querySelectorAll(\"css-selector\"), which returns all matching elements as a static NodeList (a snapshot that does not update when the page changes), using the same selector syntax you would write in CSS, like \".item\", \"#main\", or \"div > p\". querySelector / querySelectorAll are usually preferred today, because CSS selectors can express much more complex conditions than the older methods.",
       "keyPoints": [
         "getElementById finds exactly one element, by its unique id attribute.",
         "getElementsByClassName / getElementsByTagName return a live collection of matching elements.",
-        "querySelector returns the first element matching a CSS selector; querySelectorAll returns all of them.",
+        "querySelector returns the first element matching a CSS selector (or null); querySelectorAll returns all of them, as a static (not live) NodeList.",
         "CSS selectors (used by querySelector / querySelectorAll) can express much more complex conditions than the older methods."
       ],
       "examples": [
@@ -118,7 +118,7 @@
     {
       "id": "dom-altering-elements",
       "title": "How do you change existing DOM elements, like their text or their position in the page?",
-      "description": "Once you have selected an element, you can change it in several ways. textContent lets you read or replace all the text inside an element. innerHTML lets you read or replace the element's content as an HTML string, which also lets you insert new tags, but can be risky with untrusted input, since it can introduce unwanted scripts. To move elements around, methods like appendChild, insertBefore, and the newer append / prepend / before / after let you add a node at a specific position, and removeChild (or the newer remove()) takes a node out of the page.",
+      "description": "Once you have selected an element, you can change it in several ways. textContent lets you read or replace all the text inside an element. innerHTML lets you read or replace the element's content as an HTML string, which also lets you insert new tags, but it is dangerous with untrusted input: <script> tags inserted this way do not run, but markup like <img src=x onerror=\"...\"> does, which allows cross-site scripting (XSS) attacks. For plain text, always use textContent. To move elements around, methods like appendChild, insertBefore, and the newer append / prepend / before / after let you add a node at a specific position, and removeChild (or the newer remove()) takes a node out of the page.",
       "keyPoints": [
         "textContent reads or replaces only the text inside an element (tags inside are treated as plain text).",
         "innerHTML reads or replaces the content as HTML, so it can add real new tags, but can be unsafe with untrusted input.",
@@ -155,7 +155,7 @@
     {
       "id": "dom-attributes-styles-css",
       "title": "How do you read and change an element's attributes, inline styles, and CSS classes?",
-      "description": "getAttribute(\"name\") and setAttribute(\"name\", \"value\") let you read or change any HTML attribute, like src or href. For styling, element.style.propertyName lets you set one inline CSS style directly, for example element.style.color = \"red\". For working with CSS classes, classList gives you methods like add, remove, toggle, and contains, which are the recommended way to change which CSS classes are applied to an element, instead of rewriting className as one whole string.",
+      "description": "getAttribute(\"name\") and setAttribute(\"name\", \"value\") let you read or change any HTML attribute, like src or href. For styling, element.style.propertyName lets you set one inline CSS style directly, for example element.style.color = \"red\". CSS names with dashes are written in camelCase, so background-color becomes element.style.backgroundColor. For working with CSS classes, classList gives you methods like add, remove, toggle, and contains, which are the recommended way to change which CSS classes are applied to an element, instead of rewriting className as one whole string.",
       "keyPoints": [
         "getAttribute / setAttribute read or write any HTML attribute by name.",
         "element.style.propertyName sets one inline CSS style directly, like element.style.color = \"red\".",
@@ -174,7 +174,7 @@
     {
       "id": "dom-positioning-animation",
       "title": "How can you control an element's position on the page and animate it with JavaScript?",
-      "description": "An element's size and position can be read with methods like getBoundingClientRect(), which returns its width, height, and distance from the edges of the browser window. To move an element, you usually combine CSS positioning (like position: absolute, with top/left) with JavaScript that changes those style values. For smooth animation, modern code normally relies on CSS transitions or CSS animations, triggered by changing a class or style from JavaScript, or on the Web Animations API, rather than manually updating styles in a loop, because the browser can run CSS-based animations more smoothly.",
+      "description": "An element's size and position can be read with methods like getBoundingClientRect(), which returns its width, height, and distance from the edges of the browser window. To move an element, you can combine CSS positioning (like position: absolute, with top/left) with JavaScript that changes those style values; changing transform (like translate(...)) instead is usually smoother, because the browser does not need to recalculate the page layout. For smooth animation, modern code normally relies on CSS transitions or CSS animations, triggered by changing a class or style from JavaScript, or on the Web Animations API, rather than manually updating styles in a loop, because the browser can run CSS-based animations more smoothly. When you do need to animate from JavaScript, use requestAnimationFrame(), which runs your update right before the browser paints the next frame, instead of setInterval or setTimeout.",
       "keyPoints": [
         "getBoundingClientRect() tells you an element's current size and position on the screen.",
         "Moving an element usually means changing its CSS position properties (like top/left) from JavaScript.",
@@ -211,7 +211,7 @@
     {
       "id": "form-elements",
       "title": "What are the main HTML form elements, and what is each one used for?",
-      "description": "Forms are built from several specialized elements. <input> is the most common one, and its type attribute decides its behavior: \"text\" for plain text, \"checkbox\" for a yes/no choice, \"radio\" for choosing one option from a group, \"password\" for hidden text, and more. <textarea> is for longer, multi-line text. <select>, together with <option> children, creates a dropdown list to choose from. <button> (or an <input type=\"submit\">) triggers an action, usually submitting the form. JavaScript can read and set the current value of any of these using their value property, or checked for checkboxes and radio buttons.",
+      "description": "Forms are built from several specialized elements. <input> is the most common one, and its type attribute decides its behavior: \"text\" for plain text, \"checkbox\" for a yes/no choice, \"radio\" for choosing one option from a group, \"password\" for hidden text, and more. <textarea> is for longer, multi-line text. <select>, together with <option> children, creates a dropdown list to choose from. <button> (or an <input type=\"submit\">) triggers an action, usually submitting the form. JavaScript can read and set the current value of any of these using their value property, or checked for checkboxes and radio buttons. Note that value is always a string, even for <input type=\"number\">, so convert it with Number() (or use valueAsNumber) before doing math.",
       "keyPoints": [
         "<input> covers many behaviors through its type attribute: text, checkbox, radio, password, and more.",
         "<textarea> is for longer, multi-line text input.",

@@ -37,11 +37,11 @@
     {
       "id": "property-definition-variants",
       "title": "What are the different ways to define a property on an object, and what is a property descriptor?",
-      "description": "The normal way to add a property to an object is a simple assignment, either inside the object literal or later, like user.id = 1. This gives the property default behavior: it can be changed, deleted, and it shows up in loops. Object.defineProperty(obj, \"name\", descriptor) is a more advanced way, which lets you control exactly how the property behaves, using an object called a property descriptor. A property descriptor can set the value, whether it is writable (can its value be changed), enumerable (does it appear in loops like for...in or in Object.keys), and configurable (can it be deleted or redefined later).",
+      "description": "The normal way to add a property to an object is a simple assignment, either inside the object literal or later, like user.id = 1. This gives the property default behavior: it can be changed, deleted, and it shows up in loops. Object.defineProperty(obj, \"name\", descriptor) is a more advanced way, which lets you control exactly how the property behaves, using an object called a property descriptor. A property descriptor can set the value, whether it is writable (can its value be changed), enumerable (does it appear in loops like for...in or in Object.keys), and configurable (can it be deleted or redefined later). Be careful: with defineProperty, every flag you leave out defaults to false, so a property defined with only a value is read-only, hidden from loops, and cannot be deleted. Instead of a value, a descriptor can also have get and set functions, which turns the property into an accessor. Writing to a read-only property is silently ignored, or throws a TypeError in strict mode.",
       "keyPoints": [
         "Simple assignment (user.id = 1, or writing it directly in the literal) is the normal, most common way to add a property.",
         "Object.defineProperty(obj, name, descriptor) gives full control over how a property behaves.",
-        "A property descriptor can set value, writable, enumerable, and configurable.",
+        "A property descriptor can set value, writable, enumerable, and configurable; with defineProperty, any flag you leave out defaults to false.",
         "A property added with defineProperty can be made read-only, or hidden from loops, which a simple assignment cannot do."
       ],
       "examples": [
@@ -66,7 +66,7 @@
     {
       "id": "delete-operator",
       "title": "How does the delete operator work, and what effect does it have on memory?",
-      "description": "The delete operator removes a property from an object completely. This is different from setting the property to undefined, which keeps the property but empties its value. After using delete, the property no longer exists at all: checking \"prop\" in obj returns false, and the property disappears from Object.keys(obj). Removing a property also removes JavaScript's internal reference to whatever value it held, so if nothing else in your program uses that value, the memory it used can eventually be freed by the garbage collector. It is important to know that delete only works on properties of an object; it cannot remove a variable declared with let, const, or var.",
+      "description": "The delete operator removes a property from an object completely. This is different from setting the property to undefined, which keeps the property but empties its value. After using delete, the property no longer exists at all: checking \"prop\" in obj returns false, and the property disappears from Object.keys(obj). Removing a property also removes JavaScript's internal reference to whatever value it held, so if nothing else in your program uses that value, the memory it used can eventually be freed by the garbage collector. It is important to know that delete only works on properties of an object; it cannot remove a variable declared with let, const, or var. It also cannot remove a non-configurable property (for example, a property of a frozen object): delete returns false, or throws a TypeError in strict mode.",
       "keyPoints": [
         "delete obj.prop removes the property completely, which is different from setting it to undefined.",
         "After delete, \"prop\" in obj becomes false, and the property disappears from Object.keys(obj).",
@@ -81,9 +81,9 @@
     {
       "id": "spread-properties",
       "title": "What is the spread properties technique, and how do you use it with objects?",
-      "description": "The spread syntax, written as three dots (...), lets you copy all the own properties of one object into another, usually inside a new object literal. It is commonly used to make a shallow copy of an object without changing the original, or to merge several objects together into one new object. You can also use it to create a changed version of an object, by spreading the original object and then overriding one or more properties, which is a simple way to keep your data immutable (unchanged).",
+      "description": "The spread syntax, written as three dots (...), lets you copy all the own enumerable properties of one object into another, usually inside a new object literal. Inherited properties (from the prototype) are not copied. It is commonly used to make a shallow copy of an object without changing the original, or to merge several objects together into one new object. You can also use it to create a changed version of an object, by spreading the original object and then overriding one or more properties, which is a simple way to keep your data immutable (unchanged).",
       "keyPoints": [
-        "{ ...obj } copies all of obj's own properties into a new object.",
+        "{ ...obj } copies all of obj's own enumerable properties into a new object (not inherited ones).",
         "Spread is often used to make a shallow copy of an object without changing the original.",
         "You can combine several objects by spreading them one after another: { ...a, ...b }.",
         "If two spread objects share a property name, the one written later wins."
@@ -96,7 +96,7 @@
     {
       "id": "built-in-object-methods",
       "title": "What do the common built-in Object methods (hasOwnProperty, assign, freeze, etc.) do?",
-      "description": "JavaScript's built-in Object methods help you work with objects without writing your own code for common tasks. hasOwnProperty checks if an object has a property directly on itself (not inherited from somewhere else). isPrototypeOf checks if an object exists in another object's prototype chain. Object.assign copies properties from one or more source objects into a target object, changing the target. Object.create builds a new object with a prototype that you choose. Object.defineProperty and defineProperties let you define one or many properties with full control, using descriptors. Object.entries returns an array of [key, value] pairs for the object, which is useful for looping. Object.freeze stops any further changes to an object: you cannot add, remove, or edit its properties afterward. Object.fromEntries does the opposite of entries: it builds a new object from an array of [key, value] pairs.",
+      "description": "JavaScript's built-in Object methods help you work with objects without writing your own code for common tasks. hasOwnProperty checks if an object has a property directly on itself (not inherited from somewhere else). isPrototypeOf checks if an object exists in another object's prototype chain. Object.assign copies properties from one or more source objects into a target object, changing the target. Object.create builds a new object with a prototype that you choose. Object.defineProperty and defineProperties let you define one or many properties with full control, using descriptors. Object.entries returns an array of [key, value] pairs for the object, which is useful for looping. Object.freeze stops any further changes to an object: you cannot add, remove, or edit its properties afterward. The freeze is shallow, so objects nested inside it can still be changed. Object.fromEntries does the opposite of entries: it builds a new object from an array of [key, value] pairs.",
       "keyPoints": [
         "hasOwnProperty(prop) — checks if a property belongs directly to the object, not inherited.",
         "isPrototypeOf — checks if an object appears in another object's prototype chain.",
@@ -104,7 +104,7 @@
         "Object.create(proto) — creates a new object with the given prototype.",
         "Object.defineProperty / defineProperties — define one or more properties with full descriptor control.",
         "Object.entries(obj) — returns an array of [key, value] pairs.",
-        "Object.freeze(obj) — prevents any further changes to the object.",
+        "Object.freeze(obj) — prevents any further changes to the object's own properties (shallow: nested objects can still change).",
         "Object.fromEntries(pairs) — builds an object from an array of [key, value] pairs."
       ],
       "examples": [
@@ -120,7 +120,7 @@
     {
       "id": "class-structure",
       "title": "What is the structure of a JavaScript class, and what do its main members (constructor, extends, static, etc.) do?",
-      "description": "A class is a template for creating objects, declared with the class keyword. The constructor is a special method that runs automatically when you create a new instance with new, and it is normally used to set up the object's initial properties. Getters and setters are special methods that let you read or write a property using normal property syntax, while still running your own code behind the scenes. Inside a class method, this refers to the current instance. extends makes one class inherit the properties and methods of another class, and super is used inside the child class to call the parent class's constructor or methods. instanceof checks if an object was created by a specific class (or one that extends it). A class field is a property written directly in the class body, without needing the constructor. static members belong to the class itself, not to individual instances, and are accessed through the class name. Private members, written with a # in front of their name, can only be accessed from inside the class itself. Finally, you can stop a class from being extended by checking the special value new.target inside the constructor, and throwing an error if it does not match the class itself.",
+      "description": "A class is a template for creating objects, declared with the class keyword. The constructor is a special method that runs automatically when you create a new instance with new, and it is normally used to set up the object's initial properties. Getters and setters are special methods that let you read or write a property using normal property syntax, while still running your own code behind the scenes. Inside a class method, this refers to the current instance. extends makes one class inherit the properties and methods of another class, and super is used inside the child class to call the parent class's constructor or methods. instanceof checks if an object was created by a specific class (or one that extends it). A class field is a property written directly in the class body, without needing the constructor. static members belong to the class itself, not to individual instances, and are accessed through the class name. Private members, written with a # in front of their name, can only be accessed from inside the class itself. Finally, inside a constructor, the special value new.target tells you which class was actually called with new. By throwing an error when new.target is not the class itself, you can stop subclasses from being instantiated (JavaScript has no built-in final keyword to forbid extends). Also note that classes are not hoisted like function declarations: you cannot use a class before the line where it is declared.",
       "keyPoints": [
         "constructor runs automatically when a new instance is created with new, and sets up the initial state.",
         "Getters and setters let you run custom code when a property is read or assigned, with normal property syntax.",
@@ -130,7 +130,7 @@
         "A class field is a property written directly in the class body, outside of any method.",
         "static members belong to the class itself, not to individual instances.",
         "Private members (written with a # prefix) can only be accessed from inside the class.",
-        "Checking new.target inside the constructor lets you prevent a class from being extended."
+        "Checking new.target inside the constructor lets you prevent subclasses from being instantiated (there is no built-in final keyword)."
       ],
       "examples": [
         { "title": "A class with inheritance and a getter", "language": "javascript", "code": "class Animal {\n  constructor(name) {\n    this.name = name;\n  }\n  get label() {\n    return `Animal: ${this.name}`;\n  }\n}\n\nclass Dog extends Animal {\n  bark() {\n    return `${this.name} says woof`;\n  }\n}\n\nconst rex = new Dog(\"Rex\");\nconsole.log(rex.label); // \"Animal: Rex\"\nconsole.log(rex.bark()); // \"Rex says woof\"\nconsole.log(rex instanceof Animal); // true" }

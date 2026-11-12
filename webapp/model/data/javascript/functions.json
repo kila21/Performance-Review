@@ -20,7 +20,7 @@
     {
       "id": "function-declaration-vs-expression",
       "title": "What is the difference between a function declaration and a function expression?",
-      "description": "A function declaration is written using the function keyword as its own statement, like function greet() { ... }. JavaScript hoists function declarations completely, which means it moves them to the top of their scope before running the code. Because of this, you can call a function declaration even before the line where it is written. A function expression is different: it is a function that is assigned to a variable, like const greet = function () { ... }. A function expression is only available after the line where it is assigned runs, even though the variable itself might be hoisted. If you try to call it earlier, your code will fail.",
+      "description": "A function declaration is written using the function keyword as its own statement, like function greet() { ... }. JavaScript hoists function declarations completely, which means it moves them to the top of their scope before running the code. Because of this, you can call a function declaration even before the line where it is written. A function expression is different: it is a function that is assigned to a variable, like const greet = function () { ... }. A function expression is only available after the line where it is assigned runs, even though the variable itself might be hoisted. If you try to call it earlier, your code will fail: with const or let you get a ReferenceError (the variable is in its temporal dead zone), and with var you get a TypeError, because the variable exists but still holds undefined, which is not a function.",
       "keyPoints": [
         "A function declaration uses the function keyword on its own, like function greet() {}.",
         "Function declarations are hoisted completely, so you can call them before their line in the code.",
@@ -28,18 +28,18 @@
         "A function expression only works after the line where it is assigned has already run."
       ],
       "examples": [
-        { "title": "Calling a declaration early works, an expression does not", "language": "javascript", "code": "console.log(greetDeclared()); // \"Hi!\" — works, because function declarations are hoisted\n\nfunction greetDeclared() {\n  return \"Hi!\";\n}\n\nconst greetExpression = function () {\n  return \"Hello!\";\n};\n\nconsole.log(greetExpression()); // \"Hello!\" — works, but only after this line has run" }
+        { "title": "A declaration works before its line; an expression only after it", "language": "javascript", "code": "console.log(greetDeclared()); // \"Hi!\" — works, because function declarations are hoisted\n\nfunction greetDeclared() {\n  return \"Hi!\";\n}\n\nconst greetExpression = function () {\n  return \"Hello!\";\n};\n\nconsole.log(greetExpression()); // \"Hello!\" — works, but only after this line has run" }
       ],
       "assignment": null
     },
     {
       "id": "function-context",
       "title": "What is the context (this) of a function, and how do you know its value in a given situation?",
-      "description": "The context of a function is the value of the special keyword this inside it. this usually refers to the object that the function is working for, at the moment it is called. The value of this is decided mainly by how a function is called, not by where the function was written. If you call a function as a method, like user.greet(), then this points to user. If you call a plain function on its own, this does not point to any specific object you created, and can even be undefined in modern strict code. Arrow functions are special: they do not have their own this at all, and they simply use the this value from the code around them, at the place where the arrow function is written.",
+      "description": "The context of a function is the value of the special keyword this inside it. this usually refers to the object that the function is working for, at the moment it is called. The value of this is decided mainly by how a function is called, not by where the function was written. If you call a function as a method, like user.greet(), then this points to user. If you call a plain function on its own, like greet(), this does not point to any object you created: in strict mode (which classes and modules always use) it is undefined, and in older non-strict code it is the global object (window in a browser). If you call a function with new, this is the brand new object being created. You can also set this yourself with call, apply, or bind. Arrow functions are special: they do not have their own this at all, and they simply use the this value from the code around them, at the place where the arrow function is written.",
       "keyPoints": [
         "this refers to the object that \"owns\" the current function call.",
         "The value of this depends on how a function is called, not where it was defined.",
-        "Calling obj.method() sets this to obj.",
+        "Calling obj.method() sets this to obj; a plain call like fn() gives undefined in strict mode (the global object otherwise); new Fn() sets this to the new object.",
         "Arrow functions do not have their own this; they use the this from the surrounding code."
       ],
       "examples": [
@@ -51,7 +51,7 @@
     {
       "id": "setting-function-context",
       "title": "What are the different ways to set the context (this) of a function: call, apply, and bind?",
-      "description": "JavaScript gives you three built-in ways to control what this will be inside a function, instead of relying only on how it is called. call(thisValue, arg1, arg2, ...) runs the function immediately, and sets this to the value you give it, with the rest of the arguments listed one by one. apply(thisValue, argsArray) does exactly the same thing as call, but you pass the arguments as a single array, instead of listing them one by one. bind(thisValue) is different from the other two: it does not run the function right away. Instead, it returns a brand new function, with this permanently locked to the value you gave it, so you can call that new function later, as many times as you like, and this will always stay the same.",
+      "description": "JavaScript gives you three built-in ways to control what this will be inside a function, instead of relying only on how it is called. call(thisValue, arg1, arg2, ...) runs the function immediately, and sets this to the value you give it, with the rest of the arguments listed one by one. apply(thisValue, argsArray) does exactly the same thing as call, but you pass the arguments as a single array, instead of listing them one by one. bind(thisValue) is different from the other two: it does not run the function right away. Instead, it returns a brand new function, with this permanently locked to the value you gave it, so you can call that new function later, as many times as you like, and this will always stay the same. bind can also lock in some of the arguments in advance, like add.bind(null, 10), which returns a function that always gets 10 as its first argument.",
       "keyPoints": [
         "call(obj, a, b) runs the function right away, with this set to obj.",
         "apply(obj, [a, b]) does the same as call, but the arguments are given as one array.",
@@ -115,9 +115,9 @@
     {
       "id": "arrow-functions",
       "title": "What are arrow functions, and how are they different from normal functions?",
-      "description": "Arrow functions are a shorter way to write a function, using the => symbol instead of the function keyword, like (a, b) => a + b. Besides being shorter to write, arrow functions behave differently from normal functions in a few important ways. They do not have their own this value; instead, they always use the this from the surrounding code, at the place where they are written. They also do not have their own arguments object. Finally, you cannot use the new keyword with an arrow function to create an object from it, the way you can with a normal function. Because of this, arrow functions are a great fit for short callbacks, and for cases where you want to keep the this value from the outer code, but they are not a good fit for object methods or constructors.",
+      "description": "Arrow functions are a shorter way to write a function, using the => symbol instead of the function keyword, like (a, b) => a + b. When the body is a single expression without curly braces, its value is returned automatically (an implicit return); with curly braces you need to write return yourself. To return an object literal directly, wrap it in parentheses, like () => ({ id: 1 }). Besides being shorter to write, arrow functions behave differently from normal functions in a few important ways. They do not have their own this value; instead, they always use the this from the surrounding code, at the place where they are written. They also do not have their own arguments object. Finally, you cannot use the new keyword with an arrow function to create an object from it, the way you can with a normal function. Because of this, arrow functions are a great fit for short callbacks, and for cases where you want to keep the this value from the outer code, but they are not a good fit for object methods or constructors.",
       "keyPoints": [
-        "Arrow functions use a shorter syntax: (a, b) => a + b.",
+        "Arrow functions use a shorter syntax: (a, b) => a + b, and a single expression without braces is returned automatically.",
         "They do not have their own this; they always use the this from the surrounding code.",
         "They do not have their own arguments object.",
         "You cannot use new with an arrow function."
@@ -164,9 +164,9 @@
     {
       "id": "function-as-constructor",
       "title": "How does a function behave when it is used as a constructor, with new?",
-      "description": "When you put the keyword new in front of a function call, JavaScript does a few things automatically, before and after running the function's code. First, it creates a brand new, empty object. Then, it sets this inside the function to point to that new object. The function's code then usually runs normally, setting properties on this, to prepare the new object. Finally, JavaScript automatically returns that new object for you, unless the function explicitly returns a different object by itself. This pattern is how you create many similar objects from one function, which is often called a constructor function.",
+      "description": "When you put the keyword new in front of a function call, JavaScript does a few things automatically, before and after running the function's code. First, it creates a brand new, empty object, and links it to the function's prototype object (so the new object can use the methods stored there). Then, it sets this inside the function to point to that new object. The function's code then usually runs normally, setting properties on this, to prepare the new object. Finally, JavaScript automatically returns that new object for you, unless the function explicitly returns a different object by itself. This pattern is how you create many similar objects from one function, which is often called a constructor function.",
       "keyPoints": [
-        "new creates a brand new, empty object before running the function.",
+        "new creates a brand new, empty object, linked to the function's prototype, before running the function.",
         "this inside the function points to that new object.",
         "The function usually sets properties on this to prepare the new object.",
         "The new object is returned automatically, unless the function explicitly returns a different object."
@@ -239,7 +239,7 @@
     {
       "id": "recursion",
       "title": "What is recursion, and how do you use it?",
-      "description": "Recursion is when a function calls itself, in order to solve a smaller version of the same problem. A recursive function always needs what is called a base case: a simple situation where the function can give a direct answer, without calling itself again. Without a base case, the function would keep calling itself forever, and your program would eventually crash with a \"stack overflow\" error. Recursion is especially useful for problems that naturally repeat on smaller pieces of themselves, like calculating a factorial, or working with data that contains other data inside it, such as nested arrays or nested folders.",
+      "description": "Recursion is when a function calls itself, in order to solve a smaller version of the same problem. A recursive function always needs what is called a base case: a simple situation where the function can give a direct answer, without calling itself again. Without a base case, the function would keep calling itself forever, and your program would eventually crash with a \"stack overflow\" error (in JavaScript: RangeError: Maximum call stack size exceeded). Recursion is especially useful for problems that naturally repeat on smaller pieces of themselves, like calculating a factorial, or working with data that contains other data inside it, such as nested arrays or nested folders.",
       "keyPoints": [
         "Recursion is when a function calls itself, to work on a smaller version of the same problem.",
         "A recursive function needs a base case: a simple condition where it stops and returns a direct answer.",
@@ -258,7 +258,7 @@
     {
       "id": "function-hoisting",
       "title": "How does hoisting work for function declarations?",
-      "description": "A function declaration, written with the function keyword as its own statement, is hoisted completely, body included, to the top of its scope. This means you can call such a function before the line where it is actually written in your code, and it will still work correctly, because JavaScript already knows about the whole function before running anything. This is different from a function expression, where a function is assigned to a variable. In that case, only the variable declaration might be hoisted, not the function itself, so calling it before the assignment line will fail.",
+      "description": "A function declaration, written with the function keyword as its own statement, is hoisted completely, body included, to the top of its scope. This means you can call such a function before the line where it is actually written in your code, and it will still work correctly, because JavaScript already knows about the whole function before running anything. This is different from a function expression, where a function is assigned to a variable. In that case, only the variable declaration might be hoisted, not the function itself, so calling it before the assignment line will fail: a const or let variable throws a ReferenceError (temporal dead zone), and a var variable throws a TypeError, because it still holds undefined.",
       "keyPoints": [
         "Function declarations are hoisted completely, body included, to the top of their scope.",
         "You can call a function declaration before the line where it is written in the file.",

@@ -5,7 +5,7 @@
     {
       "id": "what-is-an-array",
       "title": "What is an array in JavaScript, and what is it used for?",
-      "description": "An array is a special kind of variable that can hold many values together, in one place. Each value inside the array is called an item or an element. Every item has a position number, called an index. The first item has index 0, the second item has index 1, and so on. We use arrays when we need to keep a list of related things, for example a list of names, a list of numbers, or a list of tasks. Instead of creating many separate variables, we put all the values inside one array, and then we can read, add, or remove items in an easy way.",
+      "description": "An array is a special kind of object that can hold many values together, in one ordered list, and you usually store it in a variable. Each value inside the array is called an item or an element. Every item has a position number, called an index. The first item has index 0, the second item has index 1, and so on. We use arrays when we need to keep a list of related things, for example a list of names, a list of numbers, or a list of tasks. Instead of creating many separate variables, we put all the values inside one array, and then we can read, add, or remove items in an easy way.",
       "keyPoints": [
         "An array stores an ordered list of values in one variable.",
         "Items are accessed by a numeric index, starting at 0.",
@@ -84,7 +84,7 @@
     {
       "id": "array-length",
       "title": "What does the length property of an array do?",
-      "description": "The length property tells you how many items are currently stored in an array. It is a number, and it is always equal to the highest index used in the array, plus one. For example, if an array has 5 items, length will be 5, and the last item will be at index 4 (5 minus 1). You can use length in many situations: to check if an array is empty (length === 0), to control a loop that goes through all the items, or even to make the array shorter. If you set arr.length to a smaller number, JavaScript will remove the extra items at the end of the array.",
+      "description": "The length property tells you how many items are currently stored in an array. It is a number, and it is always equal to the highest index used in the array, plus one. For example, if an array has 5 items, length will be 5, and the last item will be at index 4 (5 minus 1). You can use length in many situations: to check if an array is empty (length === 0), to control a loop that goes through all the items, or even to make the array shorter. If you set arr.length to a smaller number, JavaScript will remove the extra items at the end of the array. If you set it to a bigger number, the array gets longer, but the new positions are empty holes, not real values.",
       "keyPoints": [
         "arr.length returns the number of items in the array.",
         "arr.length === 0 means the array is empty.",
@@ -192,10 +192,10 @@
     {
       "id": "array-like-objects",
       "title": "What is an array-like object, and how do you turn it into a real array?",
-      "description": "An array-like object looks similar to a real array, because it has a length property and items you can access by index. However, it is not a true array, so it does not have array methods like map, filter, or push. Some common examples of array-like objects are: a string (which has indexed characters and a length), the old arguments object inside a regular function, and a NodeList, which you get when you select many elements from the DOM. If you want to use real array methods on these values, you need to convert them first. You can do this with Array.from(arrayLike), which creates a true array from an array-like value. The spread operator, like [...arrayLike], can also do the same thing, as long as the value can be looped over (is iterable).",
+      "description": "An array-like object looks similar to a real array, because it has a length property and items you can access by index. However, it is not a true array, so it does not have most array methods, like map, filter, or push. Some common examples of array-like values are: a string (a primitive value, but it also has indexed characters and a length), the old arguments object inside a regular function, and a NodeList, which you get when you select many elements from the DOM (a NodeList does have forEach, but not map or filter). If you want to use real array methods on these values, you need to convert them first. You can do this with Array.from(arrayLike), which creates a true array from an array-like value. The spread operator, like [...arrayLike], can also do the same thing, as long as the value can be looped over (is iterable).",
       "keyPoints": [
         "Array-like objects have length and indexed values, but no array methods.",
-        "Common examples: strings, the arguments object, NodeList from the DOM.",
+        "Common examples: strings, the arguments object, NodeList from the DOM (which has forEach, but not map or filter).",
         "Array.from(arrayLike) converts it into a true array.",
         "The spread operator [...arrayLike] does the same for iterable array-likes."
       ],
@@ -236,9 +236,9 @@
     {
       "id": "chaining-array-methods",
       "title": "What does it mean to chain array methods, and how do you do it?",
-      "description": "Chaining array methods means calling several array methods one after another, in a single expression. This works because many array methods, like filter, map, and sort, give back a new array as their result. Since the result is still an array, you can immediately call another array method on it, without saving it in a separate variable first. For example, you can filter an array to remove items you do not need, then map it to change each remaining item, then use reduce to combine everything into one final value. Chaining usually makes code shorter and easier to read than writing many separate loops. It is also a good idea to filter out items you do not need as early as possible, because this can make the rest of the chain faster, especially for big arrays.",
+      "description": "Chaining array methods means calling several array methods one after another, in a single expression. This works because many array methods give back an array as their result: filter and map return a new array, and sort sorts the original array in place and returns that same array (use toSorted() or [...arr].sort() if you need to keep the original unchanged). Since the result is still an array, you can immediately call another array method on it, without saving it in a separate variable first. For example, you can filter an array to remove items you do not need, then map it to change each remaining item, then use reduce to combine everything into one final value. Chaining usually makes code shorter and easier to read than writing many separate loops. It is also a good idea to filter out items you do not need as early as possible, because this can make the rest of the chain faster, especially for big arrays.",
       "keyPoints": [
-        "filter, map, and sort return arrays, so another array method can be called right after them.",
+        "filter and map return a new array, and sort returns the same (sorted) array, so another array method can be called right after them.",
         "Chaining reads like a pipeline: start with the data, then transform it step by step.",
         "Filtering out unneeded items before mapping can make the chain faster on large arrays."
       ],

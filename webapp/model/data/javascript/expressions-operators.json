@@ -20,12 +20,12 @@
     {
       "id": "arithmetic-operators",
       "title": "What are the arithmetic operators in JavaScript?",
-      "description": "Arithmetic operators let you do math with numbers. Addition (+), subtraction (-), multiplication (*), and division (/) work the same way they do in normal math. The remainder operator (%) gives you what is left over after dividing one number by another; for example, 7 % 2 is 1, because 7 divided by 2 leaves a remainder of 1. Exponentiation (**) raises a number to a power, like 2 ** 3 for 2 cubed, which is 8. Increment (++) and decrement (--) add or subtract 1 from a variable. Finally, unary plus (+) and unary negation (-) are used in front of a single value: unary plus tries to turn the value into a number, and unary negation flips its sign.",
+      "description": "Arithmetic operators let you do math with numbers. Addition (+), subtraction (-), multiplication (*), and division (/) work the same way they do in normal math. The remainder operator (%) gives you what is left over after dividing one number by another; for example, 7 % 2 is 1, because 7 divided by 2 leaves a remainder of 1. Exponentiation (**) raises a number to a power, like 2 ** 3 for 2 cubed, which is 8. Increment (++) and decrement (--) add or subtract 1 from a variable. Where you put them matters when you use the result: x++ (postfix) changes x but gives back the old value, while ++x (prefix) changes x and gives back the new value. Also remember that + joins strings: if one side is a string, \"5\" + 1 gives \"51\", not 6. Finally, unary plus (+) and unary negation (-) are used in front of a single value: unary plus tries to turn the value into a number, and unary negation flips its sign.",
       "keyPoints": [
         "Addition (+), subtraction (-), multiplication (*), and division (/) work like normal math.",
         "Remainder (%) gives you what is left over after a division.",
         "Exponentiation (**) raises a number to a power.",
-        "Increment (++) and decrement (--) add or subtract 1 from a variable.",
+        "Increment (++) and decrement (--) add or subtract 1 from a variable; x++ returns the old value, ++x returns the new value.",
         "Unary plus (+) converts a value to a number; unary negation (-) flips its sign."
       ],
       "examples": [
@@ -36,11 +36,11 @@
     {
       "id": "shorthand-assignment-operators",
       "title": "What are shorthand assignment operators?",
-      "description": "A shorthand assignment operator combines a normal operation with an assignment, in one step. For example, total += 5 means the same thing as total = total + 5, but it is shorter to write. This works for most arithmetic operators, like -=, *=, /=, %=, and **=. Newer versions of JavaScript also added logical shorthand assignments, like ||=, &&=, and ??=, which combine a logical check with an assignment. For example, name ||= \"Guest\" only assigns \"Guest\" to name if name was falsy (like an empty string, null, or undefined) before.",
+      "description": "A shorthand assignment operator combines a normal operation with an assignment, in one step. For example, total += 5 means the same thing as total = total + 5, but it is shorter to write. This works for most arithmetic operators, like -=, *=, /=, %=, and **=. Newer versions of JavaScript also added logical shorthand assignments, like ||=, &&=, and ??=, which combine a logical check with an assignment. For example, name ||= \"Guest\" only assigns \"Guest\" to name if name was falsy (like an empty string, 0, null, or undefined) before. x &&= y only assigns when x is truthy, and x ??= y only assigns when x is null or undefined (so 0 and \"\" are kept).",
       "keyPoints": [
         "A shorthand assignment combines an operation and an assignment in one step, like x += 5 (same as x = x + 5).",
         "This works for most arithmetic operators: -=, *=, /=, %=, **=.",
-        "Newer shorthands like ||=, &&=, and ??= combine a logical check with an assignment."
+        "Newer shorthands combine a logical check with an assignment: ||= assigns if the value is falsy, &&= if it is truthy, and ??= only if it is null or undefined."
       ],
       "examples": [
         { "title": "Arithmetic and logical shorthand assignment", "language": "javascript", "code": "let total = 10;\ntotal += 5; // same as total = total + 5\nconsole.log(total); // 15\n\nlet name = \"\";\nname ||= \"Guest\"; // assign \"Guest\" only because name was falsy\nconsole.log(name); // \"Guest\"" }
@@ -50,13 +50,13 @@
     {
       "id": "eval-function",
       "title": "What is eval, how does it work, and what are its risks?",
-      "description": "eval(code) is a built-in function that takes a string and runs it as if it were real JavaScript code, then gives back the result. A direct eval call, written literally as eval(...) in your code, can read and even change the variables in the surrounding scope, which can be confusing. An indirect eval call (for example, calling it through a stored reference instead of writing eval(...) directly) always runs in the global scope instead, with no access to local variables. eval has real risks: it is a security problem if the string comes from user input, because it could run harmful code, and it is also slow, because the JavaScript engine cannot prepare and optimize the code in advance. A safer and faster alternative, when you really need to build code from a string, is new Function(code), since the code it creates always runs in the global scope, with no access to your local variables.",
+      "description": "eval(code) is a built-in function that takes a string and runs it as if it were real JavaScript code, then gives back the result. A direct eval call, written literally as eval(...) in your code, can read and even change the variables in the surrounding scope, which can be confusing. An indirect eval call (for example, calling it through a stored reference instead of writing eval(...) directly) always runs in the global scope instead, with no access to local variables. eval has real risks: it is a security problem if the string comes from user input, because it could run harmful code, and it is also slow, because the JavaScript engine cannot prepare and optimize the code in advance. If you really need to build code from a string, new Function(code) is usually preferred, because the code it creates always runs in the global scope, with no access to your local variables, which makes it more predictable and easier for the engine to optimize. But it still runs any code it is given, so it is exactly as dangerous as eval with untrusted input — never pass user input to either of them.",
       "keyPoints": [
         "eval(code) takes a string and runs it as JavaScript code, returning the result.",
         "A direct eval call (written literally as eval(...)) can read and change variables in the surrounding scope.",
         "An indirect eval call always runs in the global scope instead.",
         "eval is a security risk with untrusted input, and it also makes code slower to run.",
-        "new Function(code) is a safer and faster alternative, since it always runs in the global scope."
+        "new Function(code) is more predictable than eval (it runs in the global scope, without access to local variables), but it is just as dangerous with untrusted input."
       ],
       "examples": [
         { "title": "Running code from a string", "language": "javascript", "code": "const result = eval(\"2 + 3\");\nconsole.log(result); // 5" },
@@ -67,11 +67,11 @@
     {
       "id": "comparison-operators",
       "title": "What are the comparison operators, and what is the difference between == and ===?",
-      "description": "Comparison operators check if two values are equal or not, and they return true or false. Equality (==) compares two values, but if they have different types, it first converts one of them, which can lead to surprising results. Identity, also called strict equality (===), compares both the value and the type, without converting anything, so it behaves more predictably. Inequality (!=) and non-identity (!==) are simply the opposite of == and ===. Because of the surprising conversions that == can do, most developers prefer to always use === and !==.",
+      "description": "Comparison operators check if two values are equal or not, and they return true or false. Equality (==) compares two values, but if they have different types, it first converts one of them, which can lead to surprising results. Identity, also called strict equality (===), compares both the value and the type, without converting anything, so it behaves more predictably. Inequality (!=) and non-identity (!==) are simply the opposite of == and ===. When you compare objects or arrays, both == and === check whether they are the same object in memory, not whether they have the same contents, so {} === {} and [1] === [1] are both false. Because of the surprising conversions that == can do, most developers prefer to always use === and !==.",
       "keyPoints": [
         "Equality (==) compares values, but converts types first if they are different, which can cause surprising results.",
         "Identity / strict equality (===) compares both the value and the type, with no conversion.",
-        "Inequality (!=) and non-identity (!==) are the opposite of == and ===.",
+        "Inequality (!=) and non-identity (!==) are the opposite of == and ===. Objects and arrays are compared by reference, not by contents.",
         "Most developers prefer === and !== to avoid bugs caused by automatic type conversion."
       ],
       "examples": [
@@ -82,11 +82,11 @@
     {
       "id": "relational-operators",
       "title": "What are the relational operators in JavaScript?",
-      "description": "Relational operators compare the order of two values, and they return true or false. Greater than (>) and greater than or equal (>=) check if the left value is bigger than, or at least equal to, the right value. Less than (<) and less than or equal (<=) check the opposite. These operators work with numbers, but they also work with strings, comparing them in alphabetical order, based on their character codes.",
+      "description": "Relational operators compare the order of two values, and they return true or false. Greater than (>) and greater than or equal (>=) check if the left value is bigger than, or at least equal to, the right value. Less than (<) and less than or equal (<=) check the opposite. These operators work with numbers, but they also work with strings, comparing them character by character, based on their Unicode character codes. This is close to alphabetical order, but not exactly: all uppercase letters come before lowercase ones, so \"Zebra\" < \"apple\" is true. If only one side is a string, it is converted to a number first, so \"10\" > 9 is true.",
       "keyPoints": [
         "> and >= check if the left value is greater than, or greater than or equal to, the right value.",
         "< and <= check if the left value is smaller than, or smaller than or equal to, the right value.",
-        "These operators also work on strings, comparing them in alphabetical order."
+        "These operators also work on strings, comparing them by character code (uppercase letters come before lowercase ones)."
       ],
       "examples": [
         { "title": "Comparing numbers and strings", "language": "javascript", "code": "console.log(5 > 3);               // true\nconsole.log(5 <= 5);              // true\nconsole.log(\"apple\" < \"banana\");  // true" }
@@ -224,11 +224,11 @@
     {
       "id": "void-operator",
       "title": "What does the void operator do?",
-      "description": "The void operator runs (evaluates) whatever expression you give it, but it always returns undefined, no matter what that expression actually produces. In the early days of the web, it was commonly used in links like javascript:void(0), to run some code without the browser navigating anywhere. In modern JavaScript, void is rarely needed, since undefined is already available directly as a reliable keyword.",
+      "description": "The void operator runs (evaluates) whatever expression you give it, but it always returns undefined, no matter what that expression actually produces. In the early days of the web, it was commonly used in links like javascript:void(0), to run some code without the browser navigating anywhere. In modern JavaScript, void is rarely needed, since undefined is now a reliable, read-only global value (it is not a keyword, though, so a local variable could still be named undefined — one reason old code used void 0).",
       "keyPoints": [
         "void runs an expression, but always returns undefined, no matter what the expression produces.",
         "It was historically used in links like javascript:void(0), to run code without navigating the page.",
-        "In modern JavaScript it is rarely needed, since undefined is already reliably available as a keyword."
+        "In modern JavaScript it is rarely needed, since the global undefined value is read-only and reliable."
       ],
       "examples": [
         { "title": "void always returns undefined", "language": "javascript", "code": "console.log(void 0);        // undefined\nconsole.log(void (1 + 2));  // undefined, even though 1 + 2 is 3" }
