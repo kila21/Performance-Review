@@ -2,27 +2,69 @@
   controllerName="performance.review.controller.Topics"
   xmlns="sap.m"
   xmlns:mvc="sap.ui.core.mvc"
+  xmlns:pr="performance.review.control"
 >
-  <VBox
-    items="{path: 'index>/groups', templateShareable: false}"
-    class="sapUiResponsiveMargin"
-  >
-    <Panel
-      headerText="{index>title}"
-      class="sapUiResponsiveMargin"
-      width="auto"
-    >
-      <List items="{path: 'index>topics', templateShareable: false}" mode="None" showSeparators="Inner">
+  <VBox class="sapUiResponsiveMargin">
+    <Panel class="sapUiResponsiveMargin" width="auto">
+      <SearchField
+        id="questionSearch"
+        placeholder="{i18n>searchPlaceholder}"
+        enableSuggestions="true"
+        suggest=".onSuggest"
+        search=".onSearch"
+        liveChange=".onSearchLiveChange"
+        suggestionItems="{path: 'search>/suggestions', templateShareable: false}"
+      >
+        <suggestionItems>
+          <pr:QuestionSuggestionItem
+            key="{search>key}"
+            text="{search>title}"
+            description="{search>topicTitle}"
+            icon="{search>icon}"
+          />
+        </suggestionItems>
+      </SearchField>
+      <List
+        visible="{search>/resultsVisible}"
+        headerText="{search>/resultsHeader}"
+        noDataText="{i18n>searchNoResults}"
+        items="{path: 'search>/results', templateShareable: false}"
+        mode="None"
+        showSeparators="Inner"
+        class="sapUiSmallMarginTop"
+      >
         <items>
           <StandardListItem
-            icon="sap-icon://course-book"
-            title="{index>title}"
-            info="{parts: [{path: 'index>questionCount'}, {path: 'i18n>questionsCountPattern'}], formatter: '.formatter.questionCountText'}"
+            icon="{search>icon}"
+            title="{search>title}"
+            description="{search>snippet}"
+            info="{search>topicTitle}"
+            wrapping="true"
             type="Active"
-            press=".onTopicPress"
+            press=".onSearchResultPress"
           />
         </items>
       </List>
     </Panel>
+
+    <VBox items="{path: 'index>/groups', templateShareable: false}">
+      <Panel
+        headerText="{index>title}"
+        class="sapUiResponsiveMargin"
+        width="auto"
+      >
+        <List items="{path: 'index>topics', templateShareable: false}" mode="None" showSeparators="Inner">
+          <items>
+            <StandardListItem
+              icon="sap-icon://course-book"
+              title="{index>title}"
+              info="{parts: [{path: 'index>questionCount'}, {path: 'i18n>questionsCountPattern'}], formatter: '.formatter.questionCountText'}"
+              type="Active"
+              press=".onTopicPress"
+            />
+          </items>
+        </List>
+      </Panel>
+    </VBox>
   </VBox>
 </mvc:View>

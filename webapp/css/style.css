@@ -77,3 +77,32 @@
   font-size: 1rem;
   font-weight: bold;
 }
+
+/* Search suggestions: title on the left, topic name on the right */
+.sapMSuL.sapMSelectList .sapMSelectListItem.prSuggestion {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.prSuggestionIcon {
+  flex-shrink: 0;
+}
+
+.prSuggestionTitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prSuggestionTopic {
+  flex-shrink: 0;
+  max-width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--sapFontSmallSize);
+  color: var(--sapContent_LabelColor);
+}
