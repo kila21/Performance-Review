@@ -8,6 +8,6 @@
     <core:Icon src="sap-icon://documents" size="3rem" class="sapUiMediumMarginBottom" color="Critical" />
     <Title text="{i18n>notFoundTitle}" level="H2" class="sapUiTinyMarginBottom" />
     <Text text="{i18n>notFoundText}" class="sapUiMediumMarginBottom" />
-    <Button text="{i18n>backToOverview}" press="onBackToOverview" type="Emphasized" />
+    <Button text="{i18n>backToOverview}" press=".onBackToOverview" type="Emphasized" />
   </VBox>
 </mvc:View>

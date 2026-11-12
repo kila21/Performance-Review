@@ -1,0 +1,79 @@
+/* Previous / Next bar: sized and shaped like the content panels around it. */
+.prNavBar.sapMBar {
+  width: auto;
+  background: var(--sapGroup_ContentBackground);
+  border-radius: var(--sapTile_BorderCornerRadius, 0.75rem);
+  box-shadow: none;
+  padding: 0 0.5rem;
+}
+
+/* Readable body text */
+.prProse {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--sapTextColor);
+  max-width: 60rem;
+}
+
+.prProse p {
+  margin: 0 0 0.875rem;
+}
+
+.prProse p:last-child {
+  margin-bottom: 0;
+}
+
+.prProse .prLead {
+  font-size: 1.0625rem;
+  margin-bottom: 1rem;
+}
+
+/* Inline code inside prose */
+.prProse code.prCode,
+.prExampleTitle code.prCode {
+  font-family: var(--sapContent_MonospaceFontFamily, "Consolas", "Courier New", monospace);
+  font-size: 0.9em;
+  padding: 0.0625rem 0.3125rem;
+  border-radius: 0.25rem;
+  background: var(--sapNeutralBackgroundColor, #eff1f2);
+  color: var(--sapNeutralTextColor, #32363a);
+  white-space: nowrap;
+}
+
+/* Key points: icon + wrapped text, with breathing room between items */
+.prKeyPoint.sapMLIB {
+  padding: 0.5rem 0;
+  border-bottom: none;
+}
+
+.prKeyPointIcon {
+  color: var(--sapPositiveElementColor);
+  margin: 0.375rem 0.75rem 0 0.25rem;
+  flex-shrink: 0;
+}
+
+/* Examples: bold caption, clear separation between examples */
+.prExample {
+  margin-bottom: 1.5rem;
+}
+
+.prExample:last-child {
+  margin-bottom: 0;
+}
+
+.prExampleTitle {
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--sapTextColor);
+}
+
+/* "3 / 6" question counter in the header */
+.prPosition {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.prPosition .sapMObjStatusText {
+  font-size: 1rem;
+  font-weight: bold;
+}

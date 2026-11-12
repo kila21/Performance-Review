@@ -11,9 +11,6 @@ export interface Crumb {
   topicId?: string;
 }
 
-export const SCROLL_TOP_CHANNEL = "app";
-export const SCROLL_TOP_EVENT = "scrollToTop";
-
 /**
  * @namespace performance.review.controller
  */
@@ -25,7 +22,6 @@ export default abstract class BaseController extends Controller {
   protected navTo(routeName: string, parameters?: Record<string, string>, replace = false): void {
     const router = this.getRouter();
     if (!router.getRoute(routeName)) {
-      // eslint-disable-next-line no-console
       console.warn(`Route "${routeName}" is not defined yet.`);
       return;
     }
@@ -36,10 +32,12 @@ export default abstract class BaseController extends Controller {
     return this.getOwnerComponent()?.getModel("appView") as JSONModel;
   }
 
-  protected setHeader(crumbs: Crumb[], title: string): void {
+  /** `position` is an optional counter shown at the right of the header, e.g. "3 / 6". */
+  protected setHeader(crumbs: Crumb[], title: string, position = ""): void {
     const model = this.getAppViewModel();
     model.setProperty("/crumbs", crumbs);
     model.setProperty("/title", title);
+    model.setProperty("/position", position);
   }
 
   protected getText(key: string): string {
@@ -51,10 +49,5 @@ export default abstract class BaseController extends Controller {
   protected showNotFound(): void {
     this.setHeader([], this.getText("notFoundTitle"));
     this.getRouter().getTargets()?.display("notFound");
-  }
-
-  /** Asks the shell to scroll its content back to the top. */
-  protected scrollToTop(): void {
-    this.getOwnerComponent()?.getEventBus().publish(SCROLL_TOP_CHANNEL, SCROLL_TOP_EVENT);
   }
 }

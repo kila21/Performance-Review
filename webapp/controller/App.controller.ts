@@ -12,7 +12,8 @@ export default class App extends BaseController {
     const appViewModel = new JSONModel({
       subjectId: "",
       crumbs: [],
-      title: ""
+      title: "",
+      position: ""
     });
     this.getOwnerComponent()?.setModel(appViewModel, "appView");
 

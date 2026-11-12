@@ -1,5 +1,5 @@
 {
-  "_version": "1.68.0",
+  "_version": "2.0.0",
   "sap.app": {
     "id": "performance.review",
     "type": "application",
@@ -58,12 +58,12 @@
     },
     "routing": {
       "config": {
+        "type": "View",
         "viewType": "XML",
-        "viewPath": "performance.review.view",
+        "path": "performance.review.view",
         "controlId": "appContent",
         "controlAggregation": "items",
         "clearControlAggregation": true,
-        "async": true,
         "bypassed": {
           "target": "notFound"
         }
@@ -91,21 +91,21 @@
       ],
       "targets": {
         "topics": {
-          "viewName": "Topics"
+          "name": "Topics"
         },
         "questions": {
-          "viewName": "Questions"
+          "name": "Questions"
         },
         "questionDetail": {
-          "viewName": "QuestionDetail"
+          "name": "QuestionDetail"
         },
         "notFound": {
-          "viewName": "NotFound"
+          "name": "NotFound"
         }
       }
     },
     "resources": {
-      "css": []
+      "css": [{ "uri": "css/style.css" }]
     }
   }
 }

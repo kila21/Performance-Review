@@ -19,7 +19,7 @@
             title="{index>title}"
             info="{parts: [{path: 'index>questionCount'}, {path: 'i18n>questionsCountPattern'}], formatter: '.formatter.questionCountText'}"
             type="Active"
-            press="onTopicPress"
+            press=".onTopicPress"
           />
         </items>
       </List>

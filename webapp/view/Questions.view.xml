@@ -23,7 +23,7 @@
             icon="sap-icon://question-mark"
             title="{topic>title}"
             type="Active"
-            press="onQuestionPress"
+            press=".onQuestionPress"
           />
         </items>
       </List>

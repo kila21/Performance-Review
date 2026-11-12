@@ -106,7 +106,8 @@ export default class QuestionDetail extends BaseController {
                   { text: subject.title, subjectId },
                   { text: topicRef.title, subjectId, topicId }
                 ],
-                questions[questionIndex].title
+                questions[questionIndex].title,
+                `${questionIndex + 1} / ${questions.length}`
               );
             })
             // A single question has no meaningful partial state without its data,

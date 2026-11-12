@@ -2,15 +2,29 @@
   controllerName="performance.review.controller.QuestionDetail"
   xmlns="sap.m"
   xmlns:mvc="sap.ui.core.mvc"
+  xmlns:core="sap.ui.core"
   xmlns:codeeditor="sap.ui.codeeditor"
 >
   <VBox class="sapUiResponsiveMargin">
-    <Bar design="Footer" class="sapUiResponsiveMargin">
+    <Bar class="sapUiResponsiveMargin prNavBar">
       <contentLeft>
-        <Button text="{i18n>previous}" enabled="{nav>/hasPrevious}" press="onPrevious" />
+        <Button
+          text="{i18n>previous}"
+          icon="sap-icon://navigation-left-arrow"
+          type="Transparent"
+          enabled="{nav>/hasPrevious}"
+          press=".onPrevious"
+        />
       </contentLeft>
       <contentRight>
-        <Button text="{i18n>next}" enabled="{nav>/hasNext}" press="onNext" />
+        <Button
+          text="{i18n>next}"
+          icon="sap-icon://navigation-right-arrow"
+          iconFirst="false"
+          type="Transparent"
+          enabled="{nav>/hasNext}"
+          press=".onNext"
+        />
       </contentRight>
     </Bar>
 
@@ -19,21 +33,29 @@
     </Panel>
 
     <Panel headerText="{i18n>descriptionLabel}" class="sapUiResponsiveMargin" width="auto">
-      <Text text="{topic>description}" />
+      <FormattedText htmlText="{path: 'topic>description', formatter: '.formatter.proseHtml'}" class="prProse" />
     </Panel>
 
     <Panel headerText="{i18n>keyPointsLabel}" class="sapUiResponsiveMargin" width="auto">
-      <List items="{path: 'topic>keyPoints', templateShareable: false}" mode="None">
+      <List items="{path: 'topic>keyPoints', templateShareable: false}" mode="None" showSeparators="None">
         <items>
-          <StandardListItem icon="sap-icon://accept" title="{topic>}" />
+          <CustomListItem class="prKeyPoint">
+            <HBox alignItems="Start">
+              <core:Icon src="sap-icon://accept" class="prKeyPointIcon" />
+              <FormattedText htmlText="{path: 'topic>', formatter: '.formatter.inlineTextHtml'}" class="prProse" />
+            </HBox>
+          </CustomListItem>
         </items>
       </List>
     </Panel>
 
     <Panel headerText="{i18n>examplesLabel}" class="sapUiResponsiveMargin" width="auto">
       <VBox items="{path: 'topic>examples', templateShareable: false}">
-        <VBox class="sapUiSmallMarginBottom">
-          <Text text="{topic>title}" class="sapUiTinyMarginBottom" />
+        <VBox class="prExample">
+          <FormattedText
+            htmlText="{path: 'topic>title', formatter: '.formatter.inlineTextHtml'}"
+            class="prExampleTitle sapUiSmallMarginBottom"
+          />
           <codeeditor:CodeEditor
             value="{topic>code}"
             type="{topic>language}"
@@ -51,7 +73,10 @@
       visible="{= ${topic>assignment} !== null }"
     >
       <VBox>
-        <Text text="{topic>assignment/task}" class="sapUiSmallMarginBottom" />
+        <FormattedText
+          htmlText="{path: 'topic>assignment/task', formatter: '.formatter.inlineTextHtml'}"
+          class="prProse sapUiSmallMarginBottom"
+        />
         <codeeditor:CodeEditor
           value="{topic>assignment/starterCode}"
           type="javascript"
@@ -61,7 +86,7 @@
         />
         <Button
           text="{= ${ui>/solutionVisible} ? ${i18n>hideSolution} : ${i18n>showSolution} }"
-          press="onToggleSolution"
+          press=".onToggleSolution"
           class="sapUiSmallMarginBottom"
         />
         <codeeditor:CodeEditor
@@ -74,12 +99,25 @@
       </VBox>
     </Panel>
 
-    <Bar design="Footer" class="sapUiResponsiveMargin">
+    <Bar class="sapUiResponsiveMargin prNavBar">
       <contentLeft>
-        <Button text="{i18n>previous}" enabled="{nav>/hasPrevious}" press="onPrevious" />
+        <Button
+          text="{i18n>previous}"
+          icon="sap-icon://navigation-left-arrow"
+          type="Transparent"
+          enabled="{nav>/hasPrevious}"
+          press=".onPrevious"
+        />
       </contentLeft>
       <contentRight>
-        <Button text="{i18n>next}" enabled="{nav>/hasNext}" press="onNext" />
+        <Button
+          text="{i18n>next}"
+          icon="sap-icon://navigation-right-arrow"
+          iconFirst="false"
+          type="Transparent"
+          enabled="{nav>/hasNext}"
+          press=".onNext"
+        />
       </contentRight>
     </Bar>
   </VBox>
