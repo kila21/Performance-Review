@@ -1,6 +1,6 @@
 import { Route$PatternMatchedEvent } from "sap/ui/core/routing/Route";
 import JSONModel from "sap/ui/model/json/JSONModel";
-import BaseController from "./BaseController";
+import BaseController, { QuestionNav, QuestionRouteArgs } from "./BaseController";
 import {
   loadSubjects,
   loadSubjectIndex,
@@ -10,12 +10,6 @@ import {
   SubjectIndex
 } from "../model/DataRepository";
 import * as Formatter from "../model/Formatter";
-
-interface QuestionRouteArgs {
-  subjectId: string;
-  topicId: string;
-  questionId: string;
-}
 
 interface Question {
   id: string;
@@ -30,11 +24,9 @@ export default class QuestionDetail extends BaseController {
 
   private subjectId = "";
   private topicId = "";
-  private questions: Question[] = [];
-  private questionIndex = -1;
 
   public onInit(): void {
-    this.getView()?.setModel(new JSONModel({ solutionVisible: false }), "ui");
+    this.getView()?.setModel(new JSONModel({ solutionVisible: false, answerVisible: false }), "ui");
     this.getRouter().getRoute("question")?.attachPatternMatched(this.onRouteMatched, this);
   }
 
@@ -46,7 +38,7 @@ export default class QuestionDetail extends BaseController {
     // (e.g. the Previous/Next button just clicked) shortly after rendering; this runs
     // after that, so it wins and moves focus (and the scroll position) back to the top.
     setTimeout(() => {
-      const domRef = this.getView()?.byId("questionPanel")?.getDomRef() as HTMLElement | null;
+      const domRef = this.getView()?.byId("detailContent")?.getDomRef() as HTMLElement | null;
       if (domRef) {
         if (!domRef.hasAttribute("tabindex")) {
           domRef.setAttribute("tabindex", "-1");
@@ -87,19 +79,11 @@ export default class QuestionDetail extends BaseController {
                 return;
               }
 
-              this.questions = questions;
-              this.questionIndex = questionIndex;
-
               this.getView()?.setModel(topicModel, "topic");
               this.getView()?.bindElement({ path: `/questions/${questionIndex}`, model: "topic" });
-              this.getView()?.setModel(
-                new JSONModel({
-                  hasPrevious: questionIndex > 0,
-                  hasNext: questionIndex < questions.length - 1
-                }),
-                "nav"
-              );
-              (this.getView()?.getModel("ui") as JSONModel).setProperty("/solutionVisible", false);
+              const uiModel = this.getView()?.getModel("ui") as JSONModel;
+              uiModel.setProperty("/solutionVisible", false);
+              uiModel.setProperty("/answerVisible", false);
 
               this.setHeader(
                 [
@@ -109,6 +93,9 @@ export default class QuestionDetail extends BaseController {
                 questions[questionIndex].title,
                 `${questionIndex + 1} / ${questions.length}`
               );
+              // After setHeader (which clears it): the shell footer and the
+              // arrow-key shortcuts use this to go to the previous / next question.
+              this.setQuestionNav(this.neighbourNav(questions, questionIndex));
             })
             // A single question has no meaningful partial state without its data,
             // unlike the Questions list, which can show an empty-state message instead.
@@ -123,23 +110,14 @@ export default class QuestionDetail extends BaseController {
     uiModel.setProperty("/solutionVisible", !uiModel.getProperty("/solutionVisible"));
   }
 
-  public onPrevious(): void {
-    this.navToQuestion(this.questionIndex - 1);
+  public onToggleAnswer(): void {
+    const uiModel = this.getView()?.getModel("ui") as JSONModel;
+    uiModel.setProperty("/answerVisible", !uiModel.getProperty("/answerVisible"));
   }
 
-  public onNext(): void {
-    this.navToQuestion(this.questionIndex + 1);
-  }
-
-  private navToQuestion(index: number): void {
-    const question = this.questions[index];
-    if (!question) {
-      return;
-    }
-    this.navTo("question", {
-      subjectId: this.subjectId,
-      topicId: this.topicId,
-      questionId: question.id
-    });
+  private neighbourNav(questions: Question[], index: number): QuestionNav {
+    const toArgs = (question?: Question) =>
+      question ? { subjectId: this.subjectId, topicId: this.topicId, questionId: question.id } : null;
+    return { previous: toArgs(questions[index - 1]), next: toArgs(questions[index + 1]) };
   }
 }

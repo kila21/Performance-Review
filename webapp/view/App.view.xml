@@ -8,10 +8,26 @@
     <tnt:header>
       <tnt:ToolHeader>
         <Title text="{i18n>appTitle}" level="H1" />
+        <ToolbarSpacer />
+        <Button
+          text="{i18n>randomQuestion}"
+          icon="sap-icon://learning-assistant"
+          type="Transparent"
+          press=".onRandomQuestion"
+        />
+        <Label text="{i18n>selfTestLabel}" labelFor="selfTestSwitch" class="sapUiSmallMarginBegin" />
+        <Switch
+          id="selfTestSwitch"
+          state="{appView>/selfTest}"
+          customTextOn=" "
+          customTextOff=" "
+          tooltip="{i18n>selfTestTooltip}"
+          change=".onSelfTestChange"
+        />
       </tnt:ToolHeader>
     </tnt:header>
     <tnt:mainContents>
-      <Page id="shellBody" showHeader="false">
+      <Page id="shellBody" showHeader="false" showFooter="{= !!${appView>/nav} }">
         <IconTabBar
           id="subjectTabBar"
           select=".onSubjectSelect"
@@ -22,14 +38,16 @@
             <IconTabFilter key="{subjects>id}" text="{subjects>title}" />
           </items>
         </IconTabBar>
-        <VBox class="sapUiResponsiveMargin">
-          <Panel class="sapUiResponsiveMargin" width="auto">
+        <VBox class="prPage prHeaderSection">
+          <Panel class="prCard" width="auto">
             <HBox justifyContent="SpaceBetween" alignItems="Center">
               <VBox>
+                <!-- Hidden on the topics page, where there is nothing above the current page. -->
                 <Breadcrumbs
                   id="breadcrumbs"
                   currentLocationText="{appView>/title}"
                   links="{path: 'appView>/crumbs', templateShareable: false}"
+                  visible="{= ${appView>/crumbs}.length > 0 }"
                   class="sapUiTinyMarginBottom"
                 >
                   <links>
@@ -49,12 +67,36 @@
           </Panel>
         </VBox>
         <VBox id="appContent" />
-        <FlexBox
-          justifyContent="Center"
-          class="sapUiResponsiveMargin sapUiLargeMarginTop sapUiLargeMarginBottom"
-        >
+        <FlexBox justifyContent="Center" class="sapUiMediumMarginTop sapUiSmallMarginBottom">
           <Text text="{i18n>footerText}" class="sapUiContentPadding" />
         </FlexBox>
+        <footer>
+          <Bar>
+            <contentLeft>
+              <Button
+                text="{i18n>previous}"
+                icon="sap-icon://navigation-left-arrow"
+                tooltip="{i18n>previousTooltip}"
+                enabled="{= !!${appView>/nav/previous} }"
+                press=".onPrevious"
+              />
+            </contentLeft>
+            <contentMiddle>
+              <Text text="{i18n>arrowKeysHint}" class="prMuted" />
+            </contentMiddle>
+            <contentRight>
+              <Button
+                text="{i18n>next}"
+                icon="sap-icon://navigation-right-arrow"
+                iconFirst="false"
+                type="Emphasized"
+                tooltip="{i18n>nextTooltip}"
+                enabled="{= !!${appView>/nav/next} }"
+                press=".onNext"
+              />
+            </contentRight>
+          </Bar>
+        </footer>
       </Page>
     </tnt:mainContents>
   </tnt:ToolPage>

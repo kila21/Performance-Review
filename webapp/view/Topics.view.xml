@@ -4,8 +4,8 @@
   xmlns:mvc="sap.ui.core.mvc"
   xmlns:pr="performance.review.control"
 >
-  <VBox class="sapUiResponsiveMargin">
-    <Panel class="sapUiResponsiveMargin" width="auto">
+  <VBox class="prPage">
+    <Panel class="prCard" width="auto">
       <SearchField
         id="questionSearch"
         placeholder="{i18n>searchPlaceholder}"
@@ -50,7 +50,7 @@
     <VBox items="{path: 'index>/groups', templateShareable: false}">
       <Panel
         headerText="{index>title}"
-        class="sapUiResponsiveMargin"
+        class="prCard"
         width="auto"
       >
         <List items="{path: 'index>topics', templateShareable: false}" mode="None" showSeparators="Inner">

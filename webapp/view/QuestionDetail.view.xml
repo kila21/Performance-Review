@@ -5,70 +5,77 @@
   xmlns:core="sap.ui.core"
   xmlns:codeeditor="sap.ui.codeeditor"
 >
-  <VBox class="sapUiResponsiveMargin">
-    <Bar class="sapUiResponsiveMargin prNavBar">
-      <contentLeft>
+  <!-- The question itself is the page title in the shell header; Previous / Next live in the shell footer. -->
+  <VBox id="detailContent" class="prPage">
+    <!-- Self-test mode: the answer stays hidden until the user asks for it. -->
+    <Panel
+      class="prCard"
+      width="auto"
+      visible="{= ${appView>/selfTest} &amp;&amp; !${ui>/answerVisible} }"
+    >
+      <VBox alignItems="Center" class="sapUiSmallMarginTopBottom">
+        <Text text="{i18n>selfTestHint}" textAlign="Center" class="sapUiSmallMarginBottom" />
         <Button
-          text="{i18n>previous}"
-          icon="sap-icon://navigation-left-arrow"
-          type="Transparent"
-          enabled="{nav>/hasPrevious}"
-          press=".onPrevious"
+          text="{i18n>showAnswer}"
+          icon="sap-icon://show"
+          type="Emphasized"
+          press=".onToggleAnswer"
         />
-      </contentLeft>
-      <contentRight>
-        <Button
-          text="{i18n>next}"
-          icon="sap-icon://navigation-right-arrow"
-          iconFirst="false"
-          type="Transparent"
-          enabled="{nav>/hasNext}"
-          press=".onNext"
-        />
-      </contentRight>
-    </Bar>
-
-    <Panel id="questionPanel" headerText="{i18n>questionLabel}" class="sapUiResponsiveMargin" width="auto">
-      <Title text="{topic>title}" level="H2" />
-    </Panel>
-
-    <Panel headerText="{i18n>descriptionLabel}" class="sapUiResponsiveMargin" width="auto">
-      <FormattedText htmlText="{path: 'topic>description', formatter: '.formatter.proseHtml'}" class="prProse" />
-    </Panel>
-
-    <Panel headerText="{i18n>keyPointsLabel}" class="sapUiResponsiveMargin" width="auto">
-      <List items="{path: 'topic>keyPoints', templateShareable: false}" mode="None" showSeparators="None">
-        <items>
-          <CustomListItem class="prKeyPoint">
-            <HBox alignItems="Start">
-              <core:Icon src="sap-icon://accept" class="prKeyPointIcon" />
-              <FormattedText htmlText="{path: 'topic>', formatter: '.formatter.inlineTextHtml'}" class="prProse" />
-            </HBox>
-          </CustomListItem>
-        </items>
-      </List>
-    </Panel>
-
-    <Panel headerText="{i18n>examplesLabel}" class="sapUiResponsiveMargin" width="auto">
-      <VBox items="{path: 'topic>examples', templateShareable: false}">
-        <VBox class="prExample">
-          <FormattedText
-            htmlText="{path: 'topic>title', formatter: '.formatter.inlineTextHtml'}"
-            class="prExampleTitle sapUiSmallMarginBottom"
-          />
-          <codeeditor:CodeEditor
-            value="{topic>code}"
-            type="{topic>language}"
-            editable="false"
-            height="{path: 'topic>code', formatter: '.formatter.codeEditorHeight'}"
-          />
-        </VBox>
       </VBox>
     </Panel>
 
+    <VBox visible="{= !${appView>/selfTest} || ${ui>/answerVisible} }">
+      <Panel headerText="{i18n>descriptionLabel}" class="prCard" width="auto">
+        <FormattedText htmlText="{path: 'topic>description', formatter: '.formatter.proseHtml'}" class="prProse" />
+      </Panel>
+
+      <Panel headerText="{i18n>keyPointsLabel}" class="prCard" width="auto">
+        <List items="{path: 'topic>keyPoints', templateShareable: false}" mode="None" showSeparators="None">
+          <items>
+            <CustomListItem class="prKeyPoint">
+              <HBox alignItems="Start">
+                <core:Icon src="sap-icon://accept" class="prKeyPointIcon" />
+                <FormattedText htmlText="{path: 'topic>', formatter: '.formatter.inlineTextHtml'}" class="prProse" />
+              </HBox>
+            </CustomListItem>
+          </items>
+        </List>
+      </Panel>
+
+      <Panel headerText="{i18n>examplesLabel}" class="prCard" width="auto">
+        <VBox items="{path: 'topic>examples', templateShareable: false}">
+          <VBox class="prExample">
+            <FormattedText
+              htmlText="{path: 'topic>title', formatter: '.formatter.inlineTextHtml'}"
+              class="prExampleTitle sapUiSmallMarginBottom"
+            />
+            <codeeditor:CodeEditor
+              value="{topic>code}"
+              type="{topic>language}"
+              editable="false"
+              height="{path: 'topic>code', formatter: '.formatter.codeEditorHeight'}"
+            />
+          </VBox>
+        </VBox>
+      </Panel>
+
+      <FlexBox
+        justifyContent="Center"
+        visible="{appView>/selfTest}"
+        class="prCard"
+      >
+        <Button
+          text="{i18n>hideAnswer}"
+          icon="sap-icon://hide"
+          type="Transparent"
+          press=".onToggleAnswer"
+        />
+      </FlexBox>
+    </VBox>
+
     <Panel
       headerText="{i18n>assignmentLabel}"
-      class="sapUiResponsiveMargin"
+      class="prCard"
       width="auto"
       visible="{= ${topic>assignment} !== null }"
     >
@@ -98,27 +105,5 @@
         />
       </VBox>
     </Panel>
-
-    <Bar class="sapUiResponsiveMargin prNavBar">
-      <contentLeft>
-        <Button
-          text="{i18n>previous}"
-          icon="sap-icon://navigation-left-arrow"
-          type="Transparent"
-          enabled="{nav>/hasPrevious}"
-          press=".onPrevious"
-        />
-      </contentLeft>
-      <contentRight>
-        <Button
-          text="{i18n>next}"
-          icon="sap-icon://navigation-right-arrow"
-          iconFirst="false"
-          type="Transparent"
-          enabled="{nav>/hasNext}"
-          press=".onNext"
-        />
-      </contentRight>
-    </Bar>
   </VBox>
 </mvc:View>

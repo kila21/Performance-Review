@@ -1,10 +1,40 @@
-/* Previous / Next bar: sized and shaped like the content panels around it. */
-.prNavBar.sapMBar {
-  width: auto;
-  background: var(--sapGroup_ContentBackground);
-  border-radius: var(--sapTile_BorderCornerRadius, 0.75rem);
-  box-shadow: none;
-  padding: 0 0.5rem;
+/* Page layout: one horizontal gutter for every page, one gap between cards. */
+.prPage {
+  padding: 0 2rem;
+}
+
+@media (max-width: 599px) {
+  .prPage {
+    padding: 0 1rem;
+  }
+}
+
+.prHeaderSection {
+  padding-top: 1rem;
+}
+
+.prCard {
+  margin-bottom: 1rem;
+}
+
+.prMuted {
+  color: var(--sapContent_LabelColor);
+  font-size: var(--sapFontSmallSize);
+}
+
+/* Questions list: title on the left, "Assignment" tag on the right */
+.prQuestionRow {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  box-sizing: border-box;
+}
+
+.prQuestionTitle {
+  min-width: 0;
+}
+
+.prNoShrink {
+  flex-shrink: 0;
 }
 
 /* Readable body text */

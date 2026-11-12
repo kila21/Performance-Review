@@ -11,6 +11,18 @@ export interface Crumb {
   topicId?: string;
 }
 
+export interface QuestionRouteArgs {
+  subjectId: string;
+  topicId: string;
+  questionId: string;
+}
+
+/** Previous / next question of the current one; null at either end of the topic. */
+export interface QuestionNav {
+  previous: QuestionRouteArgs | null;
+  next: QuestionRouteArgs | null;
+}
+
 /**
  * @namespace performance.review.controller
  */
@@ -38,6 +50,13 @@ export default abstract class BaseController extends Controller {
     model.setProperty("/crumbs", crumbs);
     model.setProperty("/title", title);
     model.setProperty("/position", position);
+    // Only the question page has previous/next; every other page clears it.
+    model.setProperty("/nav", null);
+  }
+
+  /** Enables the shell footer's Previous / Next buttons and the arrow-key shortcuts. */
+  protected setQuestionNav(nav: QuestionNav): void {
+    this.getAppViewModel().setProperty("/nav", nav);
   }
 
   protected getText(key: string): string {

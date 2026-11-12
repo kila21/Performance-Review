@@ -2,36 +2,47 @@
   controllerName="performance.review.controller.Questions"
   xmlns="sap.m"
   xmlns:mvc="sap.ui.core.mvc"
+  xmlns:core="sap.ui.core"
 >
-  <VBox class="sapUiResponsiveMargin">
+  <VBox class="prPage">
     <MessageStrip
       text="{i18n>topicContentMissing}"
       type="Warning"
       showIcon="true"
-      class="sapUiResponsiveMargin"
+      class="prCard"
       visible="{= !${topic>/questions}.length }"
     />
     <Panel
       headerText="{i18n>questionsListTitle}"
-      class="sapUiResponsiveMargin"
+      class="prCard"
       width="auto"
       visible="{= !!${topic>/questions}.length }"
     >
       <List items="{path: 'topic>/questions', templateShareable: false}" mode="None" showSeparators="Inner">
         <items>
-          <StandardListItem
-            icon="sap-icon://question-mark"
-            title="{topic>title}"
-            type="Active"
-            press=".onQuestionPress"
-          />
+          <CustomListItem type="Active" press=".onQuestionPress">
+            <HBox alignItems="Center" justifyContent="SpaceBetween" class="prQuestionRow">
+              <HBox alignItems="Center" class="prQuestionTitle">
+                <core:Icon src="sap-icon://question-mark" class="sapUiSmallMarginEnd" />
+                <Text text="{topic>title}" />
+              </HBox>
+              <ObjectStatus
+                text="{i18n>assignmentLabel}"
+                icon="sap-icon://edit"
+                state="Information"
+                inverted="true"
+                visible="{= !!${topic>assignment} }"
+                class="sapUiSmallMarginBegin prNoShrink"
+              />
+            </HBox>
+          </CustomListItem>
         </items>
       </List>
     </Panel>
 
     <Panel
       headerText="{i18n>resourcesTitle}"
-      class="sapUiResponsiveMargin"
+      class="prCard"
       width="auto"
       visible="{= ${topicMeta>/resources}.length > 0 }"
     >
