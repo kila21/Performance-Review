@@ -1,0 +1,111 @@
+{
+  "topicId": "accessibility",
+  "title": "Accessibility",
+  "questions": [
+    {
+      "id": "why-accessibility",
+      "level": "elementary",
+      "title": "Why is accessibility important for UI/UX in enterprise software? Give real use cases where it matters.",
+      "description": "Accessibility means that everyone can use the app, including people with disabilities: users who are blind or have low vision, color blindness, motor impairments that make a mouse hard to use, hearing impairments, or cognitive limitations, and also people with temporary limitations, like a broken arm. In enterprise software this matters for several reasons. Employees must be able to do their job with the company's tools; an inaccessible app can exclude someone from their work. Many countries have laws and regulations that require accessible software, especially for the public sector (for example the European Accessibility Act, EN 301 549, and Section 508 in the US, based on the WCAG guidelines), and SAP's products follow these standards, so apps built on them are expected to as well. And accessible design improves usability for everyone: clear labels, good contrast, keyboard shortcuts and predictable focus help power users and people in difficult conditions too. Real use cases: a blind accountant uses a screen reader to post invoices, so every field needs a label and every icon button a text; a warehouse worker with gloves, or an expert who enters hundreds of records, works with the keyboard only; a user with low vision uses zoom and a high-contrast theme; a color-blind manager must see overdue items not only as red, but also with an icon or a text.",
+      "keyPoints": [
+        "Accessibility lets everyone use the app, including people with visual, motor, hearing or cognitive impairments.",
+        "Employees must be able to do their job with company tools.",
+        "Laws and standards require it (WCAG, EN 301 549, European Accessibility Act, Section 508).",
+        "It improves usability for all: labels, contrast, keyboard use, predictable focus."
+      ],
+      "examples": [
+        {
+          "title": "Accessibility in everyday app details",
+          "language": "xml",
+          "code": "<!-- an icon-only button needs a text for screen readers -->\n<Button icon=\"sap-icon://delete\" tooltip=\"{i18n>delete}\" press=\".onDelete\" />\n\n<!-- status is shown with text and icon, not only with color -->\n<ObjectStatus text=\"{i18n>overdue}\" state=\"Error\" icon=\"sap-icon://alert\" />\n\n<!-- every input has a label -->\n<Label text=\"{i18n>invoiceAmount}\" labelFor=\"amountInput\" />\n<Input id=\"amountInput\" value=\"{Amount}\" />"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "aria",
+      "level": "basic",
+      "title": "What is ARIA?",
+      "description": "ARIA (Accessible Rich Internet Applications), a W3C standard often called WAI-ARIA, defines extra HTML attributes that describe the meaning and state of UI elements to assistive technologies like screen readers. Plain HTML has built-in meaning for a few elements (a button, a link, a checkbox), but modern apps build complex widgets, like trees, tabs, comboboxes, or tables, out of div and span elements, which say nothing to a screen reader. ARIA fills this gap with three kinds of attributes: roles say what an element is (role=\"button\", \"tab\", \"dialog\", \"grid\", \"navigation\"), states say its current condition (aria-expanded, aria-selected, aria-checked, aria-disabled, aria-invalid), and properties give extra information and relations (aria-label, aria-labelledby, aria-describedby, aria-required, aria-haspopup). The screen reader reads this information, like \"Shipping address, edit, required, invalid entry\". In SAPUI5, the standard controls write the correct ARIA roles, states and properties automatically in their renderers, so app developers mostly need to provide the content: labels and relations through properties and associations like labelFor, ariaLabelledBy and ariaDescribedBy. Custom controls must write ARIA themselves, for example with RenderManager.accessibilityState(). The first rule of ARIA is: use a native element or a standard control with the right meaning, and add ARIA only where needed; wrong ARIA is worse than none.",
+      "keyPoints": [
+        "ARIA (WAI-ARIA) adds attributes that describe UI elements to assistive technologies.",
+        "Roles (what it is), states (its condition, like aria-expanded), properties (labels, relations, like aria-labelledby).",
+        "UI5 standard controls render ARIA automatically; apps provide labels via labelFor, ariaLabelledBy, ariaDescribedBy.",
+        "Custom controls write ARIA themselves (rm.accessibilityState); wrong ARIA is worse than none."
+      ],
+      "examples": [
+        {
+          "title": "ARIA as rendered for a custom toggle",
+          "language": "javascript",
+          "code": "// in a custom control's renderer\nrender: function (rm, control) {\n  rm.openStart(\"div\", control);\n  rm.attr(\"tabindex\", \"0\");\n  rm.accessibilityState(control, {\n    role: \"switch\",\n    checked: control.getOn(),\n    label: control.getLabel()\n  });\n  rm.openEnd();\n  rm.close(\"div\");\n}\n// renders: <div id=\"...\" tabindex=\"0\" role=\"switch\" aria-checked=\"true\" aria-label=\"Notifications\">"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "labeling-tooltips",
+      "level": "basic",
+      "title": "What is the purpose of labeling and tooltips for accessibility?",
+      "description": "Every interactive element must have an accessible name, the text a screen reader announces for it, otherwise a blind user hears only \"edit text\" or \"button\" and does not know what it is for. For input fields, the standard way is a visible sap.m.Label connected with labelFor=\"inputId\" (or placing them together in a Form, which connects them automatically); the label is then announced when the field gets focus, and clicking the label focuses the field. When there is no visible label, for example a search field in a toolbar or an icon-only button, the name must come from elsewhere: ariaLabelledBy can point to another text, and sap.ui.core.InvisibleText provides a text that is not shown but can be referenced for screen readers. ariaDescribedBy adds extra, less important information, like a hint or a format. Tooltips (the tooltip property) show a short text when the mouse hovers over an element. For icon-only buttons, a tooltip is required, and UI5 also uses it as the accessible name. But tooltips must not be the only place for important information: they are not shown on touch devices, keyboard and screen reader users may not get them reliably, and they disappear quickly. So: visible labels for fields, tooltips for icon-only controls, and never hide essential information in a tooltip only.",
+      "keyPoints": [
+        "Every interactive element needs an accessible name, announced by screen readers.",
+        "Inputs: a visible Label with labelFor (or a Form that connects them).",
+        "No visible label: ariaLabelledBy with a text or an InvisibleText; ariaDescribedBy for extra hints.",
+        "Tooltips are required for icon-only buttons, but must never be the only source of important information."
+      ],
+      "examples": [
+        {
+          "title": "Labels, invisible texts, and tooltips",
+          "language": "xml",
+          "code": "<Label text=\"{i18n>customerName}\" labelFor=\"customerInput\" required=\"true\" />\n<Input id=\"customerInput\" value=\"{CustomerName}\" ariaDescribedBy=\"customerHint\" />\n<Text id=\"customerHint\" text=\"{i18n>customerNameHint}\" />\n\n<core:InvisibleText id=\"searchLabel\" text=\"{i18n>searchOrders}\" />\n<SearchField ariaLabelledBy=\"searchLabel\" />\n\n<Button icon=\"sap-icon://edit\" tooltip=\"{i18n>edit}\" press=\".onEdit\" />"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "keyboard-handling",
+      "level": "basic",
+      "title": "How is keyboard handling implemented in SAPUI5, and how can you customize it for keyboard-only use?",
+      "description": "Users must be able to do everything with the keyboard alone. SAPUI5's standard controls already support this: Tab and Shift+Tab move between focusable controls in a logical order, Enter or Space activate buttons and links, arrow keys move inside composite controls like lists, tables, tab bars, and menus (using item navigation, so the whole list is one Tab stop and the arrow keys move inside it), Escape closes dialogs and popovers, F4 or Alt+Down opens value helps and dropdowns, and F6 / Shift+F6 jumps between main areas of the page. Dialogs keep the focus inside them while open, and return it to the opener when closed. For your own needs, there are several ways to customize. The tab order follows the order in the view, so arrange controls logically instead of forcing focus with tabindex. Use pseudo events, which UI5 maps from keyboard events, like onsapenter, onsapspace, onsapescape, onsapup or onsapdown, either in a custom control, or on any control from the outside with control.addEventDelegate({ onsapenter: handler }). Set the focus deliberately where it helps, for example the first field of a form with initialFocus on a Dialog, or focus() after an action. For app-wide shortcuts, like Ctrl+S for Save, use commands (sap.ui.core.CommandExecution), declared in the manifest. Always test the app with the keyboard only.",
+      "keyPoints": [
+        "Standard controls support Tab, Enter/Space, arrow keys inside composites, Escape, F4, and F6 groups.",
+        "Dialogs keep focus inside and return it to the opener; the tab order follows the view order.",
+        "Customize with pseudo events (onsapenter, onsapescape...) via addEventDelegate, and deliberate focus (initialFocus, focus()).",
+        "App-wide shortcuts with commands (CommandExecution, declared in the manifest); test keyboard-only."
+      ],
+      "examples": [
+        {
+          "title": "Reacting to Enter on a control without its own event",
+          "language": "javascript",
+          "code": "onInit: function () {\n  this.byId(\"quantityInput\").addEventDelegate({\n    onsapenter: function () {\n      this.onAddToCart();\n    }\n  }, this);\n}"
+        },
+        {
+          "title": "A keyboard shortcut as a command",
+          "language": "json",
+          "code": "{\n  \"sap.ui5\": {\n    \"commands\": {\n      \"Save\": { \"shortcut\": \"Ctrl+S\" }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "accessibility-recommendations",
+      "level": "basic",
+      "title": "What are the general accessibility recommendations from the SAPUI5 documentation?",
+      "description": "The SAPUI5 documentation gives a set of practical rules for app developers. Use standard controls wherever possible, because they already have keyboard support, ARIA, focus handling, and high-contrast theme support; custom controls must provide all of this themselves. Give every input a label (with labelFor, or inside a Form), and every icon-only control a tooltip; use InvisibleText and ariaLabelledBy where there is no visible label. Do not use color as the only way to show information: add a text or an icon, like a status text with its state. Structure the page with titles in a correct hierarchy (Title with level H1, H2...) and landmarks, so screen reader users can understand and jump through the layout. Keep all texts in i18n, use clear wording, and do not write texts into images. Support all themes, including the high-contrast black and white themes, by using theme parameters instead of fixed colors. Handle focus deliberately: set initial focus in dialogs, and move focus to the new content after navigation or important actions. Show validation errors with value states and messages that are announced. Support zoom and text resizing, without fixed pixel sizes. Finally, test: navigate with the keyboard only, use a screen reader, switch to a high-contrast theme, and run the accessibility rules of the UI5 Support Assistant.",
+      "keyPoints": [
+        "Use standard controls; they bring keyboard, ARIA, focus, and theme support.",
+        "Labels for inputs, tooltips for icon-only controls; never color alone to convey information.",
+        "Correct title hierarchy and landmarks; all texts in i18n; theme parameters so high-contrast themes work.",
+        "Deliberate focus handling, announced validation, zoom support; test with keyboard, screen reader, high contrast, Support Assistant."
+      ],
+      "examples": [
+        {
+          "title": "Title hierarchy and non-color status",
+          "language": "xml",
+          "code": "<Page title=\"{i18n>orders}\">\n  <Title text=\"{i18n>openOrders}\" level=\"H2\" />\n  <List items=\"{/Orders}\">\n    <ObjectListItem title=\"{OrderID}\">\n      <firstStatus>\n        <ObjectStatus text=\"{StatusText}\" state=\"{StatusState}\" icon=\"{StatusIcon}\" />\n      </firstStatus>\n    </ObjectListItem>\n  </List>\n</Page>"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

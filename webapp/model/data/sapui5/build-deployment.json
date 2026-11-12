@@ -1,0 +1,176 @@
+{
+  "topicId": "build-deployment",
+  "title": "Build & deployment",
+  "questions": [
+    {
+      "id": "local-vs-deployed-app",
+      "level": "elementary",
+      "title": "How is an app in the local environment different from a deployed one, and what must an app have to work when deployed?",
+      "description": "Locally, the app runs on your machine with a development server (like ui5 serve or SAP Fiori tools): the files are served one by one and not minified, the UI5 framework comes from the tooling or a CDN, the OData service is reached through a proxy or replaced by a mock server, you start it with index.html, and you are the only user. Deployed, it runs on a server (an ABAP system, SAP BTP, or the SAP Fiori launchpad): it is built and minified, with preload bundles, UI5 is provided by the platform in a specific version, the real back end with real authentication and authorizations is used, it usually starts inside the launchpad as a tile (not from index.html), and many users work with it at the same time. To work in both worlds, an app must: be a Component configured through manifest.json, because the launchpad starts components, not HTML pages; use relative service URLs in the manifest's dataSources (like /sap/opu/odata/...) and no hard-coded hosts, so the platform's routing or destinations can resolve them; load all its own files relative to its namespace (sap.ui.require.toUrl), never with absolute paths; keep all texts in i18n; not depend on code in index.html; use stable IDs; handle missing authorizations and errors from the real back end; and support the launchpad features it needs, like intents for navigation and the shell's back button.",
+      "keyPoints": [
+        "Local: dev server, unminified files, proxy or mock server, index.html, one user.",
+        "Deployed: built and minified, platform-provided UI5, real back end and auth, started in the launchpad.",
+        "Needed: a manifest-configured Component, relative dataSource URLs, no hard-coded hosts or absolute paths.",
+        "Also: i18n texts, no logic in index.html, stable IDs, real error handling, launchpad intents."
+      ],
+      "examples": [
+        {
+          "title": "Relative vs hard-coded service URLs",
+          "language": "json",
+          "code": "{\n  \"sap.app\": {\n    \"dataSources\": {\n      \"mainService\": {\n        \"uri\": \"/sap/opu/odata/sap/ZSHOP_SRV/\",\n        \"type\": \"OData\",\n        \"settings\": { \"odataVersion\": \"2.0\", \"localUri\": \"localService/metadata.xml\" }\n      }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "build-approaches",
+      "level": "elementary",
+      "title": "Which approaches exist for building web apps: Grunt, Gulp, SAP's internal tools, and the UI5 tooling?",
+      "description": "Building means turning the source code into an optimized version for deployment: minifying JavaScript (and keeping -dbg.js copies), creating preload bundles, compiling themes, converting TypeScript, and copying everything into a dist folder. Several generations of tools have been used for UI5 apps. Grunt and Gulp are general JavaScript task runners: Grunt works with configured tasks, Gulp with code-based streams; for UI5 there were plugins (like grunt-openui5) to create preloads and themes. They were common in older UI5 projects, but are no longer the recommended way. Inside SAP, teams also used internal build and tooling solutions (like the SAP IBSO SAPUI5 Tools mentioned in some internal guidelines); these are company-internal, documented in internal wikis, and not available publicly. The current standard is the UI5 tooling (UI5 CLI, @ui5/cli), an open-source, UI5-specific tool from SAP: configured with a ui5.yaml file, it serves the app locally (ui5 serve) and builds it (ui5 build) with all UI5-specific steps built in, understands the dependencies to UI5 libraries, and can be extended with custom tasks and middleware. SAP Fiori tools build on top of it. Other general tools, like npm scripts, are used to call it.",
+      "keyPoints": [
+        "Building: minify, create preload bundles, compile themes, transpile TypeScript, write dist/.",
+        "Grunt and Gulp: general task runners with UI5 plugins; used in older projects.",
+        "SAP-internal build tools (like IBSO SAPUI5 Tools) exist inside SAP, documented internally only.",
+        "Current standard: the open-source UI5 tooling (ui5.yaml, ui5 serve, ui5 build), used by SAP Fiori tools."
+      ],
+      "examples": [
+        {
+          "title": "Building with the UI5 tooling",
+          "language": "text",
+          "code": "npm install --save-dev @ui5/cli\n\nnpx ui5 serve              # local development server\nnpx ui5 build --clean-dest # optimized build into ./dist\nnpx ui5 build --all        # also build the dependencies (libraries)"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "component-preload",
+      "level": "basic",
+      "title": "What is a Component-preload file?",
+      "description": "Without bundling, an app would load each of its files separately: Component.js, manifest.json, every controller, every view, every fragment, every formatter. That can easily be dozens of HTTP requests before the first screen appears. Component-preload.js is a single file, created during the build, that contains all of the app's modules and resources (JavaScript modules, XML views, fragments, and other resources) in one bundle, already minified. When UI5 creates the component (asynchronously), it first loads Component-preload.js and registers all the modules in it, so later, when the app needs a controller or a view, it is already available without a request. This makes startup much faster, especially on slow networks or with high latency. It is created automatically by the UI5 tooling (task generateComponentPreload); libraries get a similar library-preload.js. Because the deployed app uses the preload, changes to single source files on the server are not visible until the preload is rebuilt; for debugging, the URL parameter sap-ui-xx-componentPreload=off makes UI5 load the individual files instead.",
+      "keyPoints": [
+        "Component-preload.js bundles all of the app's modules and resources into one minified file.",
+        "UI5 loads it first when creating the component, so later module requests are avoided.",
+        "It makes startup much faster; created by the build (generateComponentPreload); libraries have library-preload.js.",
+        "sap-ui-xx-componentPreload=off loads single files instead, for debugging."
+      ],
+      "examples": [
+        {
+          "title": "What a preload file looks like (simplified)",
+          "language": "javascript",
+          "code": "sap.ui.require.preload({\n  \"my/app/Component.js\": function () { /* minified module code */ },\n  \"my/app/controller/Main.controller.js\": function () { /* ... */ },\n  \"my/app/view/Main.view.xml\": \"<mvc:View ...>...</mvc:View>\",\n  \"my/app/manifest.json\": \"{ ... }\"\n}, \"my/app/Component-preload\");"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "ui5-tooling-tasks-build-types",
+      "level": "basic",
+      "title": "What are the main features of the UI5 tooling: its main tasks and build types?",
+      "description": "The UI5 tooling is configured per project with ui5.yaml: the specVersion, the project's metadata.name, its type (application, library, theme-library, or module), the framework (OpenUI5 or SAPUI5, with a version and the libraries to use), and optional builder and server settings. ui5 serve starts a development server with live module serving, and ui5 build creates the optimized result in dist. The build runs a standard list of tasks, in a fixed order, for example: replaceCopyright and replaceVersion (fill placeholders), minify (minifies JavaScript, creates the -dbg.js files and source maps), generateFlexChangesBundle (bundles UI flexibility changes), generateComponentPreload for applications (or generateLibraryPreload for libraries), buildThemes for libraries (compiles LESS into CSS), and generateVersionInfo. Some tasks are optional, like generateCachebusterInfo, and can be included or excluded with --include-task and --exclude-task. Build types: the default build creates the preload bundles; ui5 build self-contained creates a standalone app with one custom bundle that also contains the needed parts of UI5 itself (no external UI5 needed); ui5 build jsdoc generates API documentation. Options like --all (also build dependencies) and --clean-dest are common.",
+      "keyPoints": [
+        "ui5.yaml: specVersion, metadata.name, type (application, library...), framework + libraries, builder, server.",
+        "ui5 serve for development; ui5 build writes dist.",
+        "Standard tasks: replaceCopyright/Version, minify, generateFlexChangesBundle, generateComponentPreload, buildThemes...",
+        "Build types: default (preload), self-contained (bundles UI5 too), jsdoc; --include-task / --exclude-task / --all."
+      ],
+      "examples": [
+        {
+          "title": "ui5.yaml of an application",
+          "language": "yaml",
+          "code": "specVersion: \"4.0\"\nmetadata:\n  name: my.app\ntype: application\nframework:\n  name: SAPUI5\n  version: \"1.120.15\"\n  libraries:\n    - name: sap.m\n    - name: sap.ui.core\n    - name: themelib_sap_horizon\nbuilder:\n  resources:\n    excludes:\n      - \"/test/**\""
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "ui5-tooling-custom-middleware",
+      "level": "basic",
+      "title": "How do you implement a custom middleware (and custom task) for the UI5 tooling?",
+      "description": "The UI5 tooling can be extended with your own code. A custom middleware runs inside the development server (ui5 serve), on every request: it can answer requests itself, change them, or pass them on. Typical uses are a proxy to a back end, live reload, serving mock data, or adding headers. A custom task runs during ui5 build, and can create, change or remove files, for example transpiling, generating a file, or replacing placeholders. Both follow the same pattern. First, the extension is declared with kind: extension and type: server-middleware (or task), a metadata.name, and the path to its implementation, either in the project's ui5.yaml (separated by ---) or in an npm package. Second, the implementation is a module that exports a function. For a middleware, this function receives an object with log, options (including options.configuration from ui5.yaml), middlewareUtil and resources, and returns an Express-style handler (req, res, next). For a task, the function receives the workspace (the project's files), dependencies, options, taskUtil and log. Third, the project uses it: under server.customMiddleware with name, afterMiddleware or beforeMiddleware (where to place it), and configuration; or under builder.customTasks with afterTask or beforeTask. Many ready-made ones exist as npm packages, like ui5-middleware-livereload or ui5-tooling-transpile (used by this app).",
+      "keyPoints": [
+        "A custom middleware runs in ui5 serve on each request; a custom task runs in ui5 build.",
+        "Declare it: kind: extension, type: server-middleware (or task), metadata.name, path to the implementation.",
+        "Middleware module: function({ log, options, middlewareUtil, resources }) returning (req, res, next) => {...}.",
+        "Use it in ui5.yaml: server.customMiddleware (afterMiddleware/beforeMiddleware, configuration) or builder.customTasks."
+      ],
+      "examples": [
+        {
+          "title": "A custom middleware in ui5.yaml",
+          "language": "yaml",
+          "code": "specVersion: \"4.0\"\nmetadata:\n  name: my.app\ntype: application\nserver:\n  customMiddleware:\n    - name: add-version-header\n      afterMiddleware: compression\n      configuration:\n        headerValue: \"local\"\n---\nspecVersion: \"4.0\"\nkind: extension\ntype: server-middleware\nmetadata:\n  name: add-version-header\nmiddleware:\n  path: lib/addVersionHeader.js"
+        },
+        {
+          "title": "lib/addVersionHeader.js",
+          "language": "javascript",
+          "code": "module.exports = function ({ log, options }) {\n  const value = options.configuration && options.configuration.headerValue;\n  return function addVersionHeader(req, res, next) {\n    res.setHeader(\"X-App-Version\", value || \"unknown\");\n    log.verbose(\"Header added for \" + req.path);\n    next();\n  };\n};"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "deploy-scp-neo",
+      "level": "basic",
+      "title": "What was the deployment procedure to the SAP Cloud Platform (SAP BTP) Neo environment?",
+      "description": "Neo was SAP's original environment of the SAP Cloud Platform (today SAP Business Technology Platform, SAP BTP). It is a proprietary environment that SAP has announced to retire; new projects should use the Cloud Foundry (or ABAP) environment instead, and existing Neo apps are being migrated. You should still know how it worked, because older projects and documentation refer to it. A UI5 app on Neo was deployed as an HTML5 application. Its routing configuration was the neo-app.json file in the project root: it listed routes that map URL paths to destinations (named connections to back-end systems, maintained in the cockpit, often through the SAP Cloud Connector to an on-premise system) or to the UI5 runtime (like /resources served by the platform's SAPUI5 service). Deployment was typically done directly from the SAP Web IDE (Deploy to SAP Cloud Platform), or with an MTA archive and the Neo console client; each deployment created a new version, which then had to be activated in the cockpit. Apps were registered in the SAP Fiori launchpad of the Neo portal service. Many of these concepts (destinations, HTML5 apps, launchpad) continue in Cloud Foundry, with different tools.",
+      "keyPoints": [
+        "Neo was SAP Cloud Platform's original, proprietary environment; SAP is retiring it in favor of Cloud Foundry.",
+        "UI5 apps were HTML5 applications with routes in neo-app.json (paths to destinations or the UI5 service).",
+        "Destinations (often via the Cloud Connector) connected the app to back-end systems.",
+        "Deployed from SAP Web IDE or as an MTA; each deployment was a version to activate in the cockpit."
+      ],
+      "examples": [
+        {
+          "title": "neo-app.json (Neo environment)",
+          "language": "json",
+          "code": "{\n  \"welcomeFile\": \"/webapp/index.html\",\n  \"routes\": [\n    {\n      \"path\": \"/resources\",\n      \"target\": { \"type\": \"service\", \"name\": \"sapui5\", \"entryPath\": \"/resources\" }\n    },\n    {\n      \"path\": \"/sap/opu/odata\",\n      \"target\": { \"type\": \"destination\", \"name\": \"ERP_BACKEND\", \"entryPath\": \"/sap/opu/odata\" }\n    }\n  ]\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "deploy-scp-cf",
+      "level": "basic",
+      "title": "What is the deployment procedure to SAP BTP, Cloud Foundry environment?",
+      "description": "On SAP BTP's Cloud Foundry environment, a UI5 app is usually deployed as part of a multi-target application (MTA). The project gets an mta.yaml file that describes its modules and the services they need. The UI5 app is built and zipped (an html5 module), and a deployer module uploads it into the HTML5 Application Repository, a BTP service that stores and serves the static files of UI apps. The app is reached through an application router: either the managed app router (provided by SAP Build Work Zone or the SAP Launchpad service) or your own standalone app router. The xs-app.json file in the app defines its routes: which paths go to destinations (named connections to back-end systems, defined in the destination service, possibly through the Cloud Connector), which go to the HTML5 repository, and which authentication is required. Authentication and authorization use the XSUAA service (with roles defined in xs-security.json). The steps are: build the MTA archive with the Cloud MTA Build Tool (mbt build creates an .mtar file), then deploy it with the Cloud Foundry CLI (cf deploy app.mtar), or let SAP Fiori tools do both (npm run build:mta and npm run deploy, set up with npx fiori add deploy-config cf). Finally, the app is added to the launchpad (SAP Build Work Zone) as a tile.",
+      "keyPoints": [
+        "The app is part of an MTA (mta.yaml); its zipped content is deployed to the HTML5 Application Repository.",
+        "An app router (managed via SAP Build Work Zone, or standalone) serves it; xs-app.json defines routes to destinations.",
+        "Destinations (destination service, Cloud Connector) reach the back end; XSUAA handles authentication and roles.",
+        "Build with mbt build (.mtar) and deploy with cf deploy, or use SAP Fiori tools' deploy configuration."
+      ],
+      "examples": [
+        {
+          "title": "xs-app.json and the deploy commands",
+          "language": "json",
+          "code": "{\n  \"welcomeFile\": \"/index.html\",\n  \"authenticationMethod\": \"route\",\n  \"routes\": [\n    {\n      \"source\": \"^/sap/opu/odata/(.*)$\",\n      \"target\": \"/sap/opu/odata/$1\",\n      \"destination\": \"ERP_BACKEND\",\n      \"authenticationType\": \"xsuaa\",\n      \"csrfProtection\": false\n    },\n    {\n      \"source\": \"^(.*)$\",\n      \"target\": \"$1\",\n      \"service\": \"html5-apps-repo-rt\",\n      \"authenticationType\": \"xsuaa\"\n    }\n  ]\n}"
+        },
+        {
+          "title": "Build and deploy",
+          "language": "text",
+          "code": "npm install -g mbt\nmbt build                         # creates mta_archives/my-app_1.0.0.mtar\ncf login -a https://api.cf.eu10.hana.ondemand.com\ncf deploy mta_archives/my-app_1.0.0.mtar"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "project-portal-gerrit",
+      "level": "basic",
+      "title": "How do you work with SAP Project Portal and Gerrit?",
+      "description": "Both are tools used inside SAP's development process; the exact procedures are company-internal and documented in internal wikis, so here is the general idea. SAP Project Portal is an internal tool where development projects are registered and their infrastructure is set up: for example the source code repositories, the build and CI configuration, and the people with access. Gerrit is an open-source, web-based code review tool for Git, which SAP has used widely. The key difference from pushing directly to a branch is that every commit is reviewed first. You clone the repository and install Gerrit's commit-msg hook, which adds a Change-Id line to each commit message; this ID links all versions of the same change. Instead of pushing to the branch, you push to a special ref: git push origin HEAD:refs/for/master. Gerrit creates a change for review. Reviewers comment and vote (for example Code-Review from -2 to +2), and the CI system builds and tests the change and votes on Verified. If you need to fix something, you amend the commit (keeping the same Change-Id) and push again, which creates a new patch set of the same change. When the change has the required votes (like +2 Code-Review and +1 Verified), it is submitted, which merges it into the branch. Many teams have moved to GitHub with pull requests, which follows the same review idea.",
+      "keyPoints": [
+        "SAP Project Portal (internal) registers projects and sets up repositories, CI and access.",
+        "Gerrit: code review for Git; every commit is reviewed before it is merged.",
+        "The commit-msg hook adds a Change-Id; push to refs/for/<branch> to create a change; amend + push = new patch set.",
+        "Reviewers vote Code-Review (-2 to +2), CI votes Verified; with the required votes the change is submitted."
+      ],
+      "examples": [
+        {
+          "title": "The Gerrit workflow",
+          "language": "text",
+          "code": "git clone ssh://user@gerrit.example.com:29418/my-app\n# install the commit-msg hook so every commit gets a Change-Id\ngit commit -m \"Add discount field\"          # message ends with: Change-Id: I8f3c...\ngit push origin HEAD:refs/for/master         # creates a change for review\n\n# review feedback: fix and update the same change\ngit commit --amend\ngit push origin HEAD:refs/for/master         # new patch set, same Change-Id"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

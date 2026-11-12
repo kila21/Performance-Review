@@ -1,0 +1,296 @@
+{
+  "topicId": "layouting",
+  "title": "Layouting & Responsiveness",
+  "questions": [
+    {
+      "id": "layout-page-navcontainer-splitapp",
+      "level": "elementary",
+      "title": "How do the app-level containers work: Page, NavContainer (App), and SplitApp?",
+      "description": "These controls form the outer frame of an app and decide how screens are shown. sap.m.Page is one full screen: it has a header bar with a title (and optionally a back button, showNavButton, which fires navButtonPress), a scrollable content area (its default aggregation), optional subHeader, and a footer (with floatingFooter=\"true\", the footer floats above the content). sap.m.NavContainer holds several pages in its pages aggregation but shows only one at a time; to(pageId, transition) moves to another page with an animation, and back() returns. sap.m.App is a NavContainer meant to be the root control of a full-screen app (it also sets up things like the page background and the viewport); with routing, the router places the target views into the App's pages aggregation. sap.m.SplitApp shows two areas side by side on large screens: masterPages (a list) and detailPages (the selected item's details), each working like a NavContainer. Its mode property controls how the master area behaves, for example ShowHideMode (the master is hidden in portrait orientation and can be opened with a button) or StretchCompressMode (both always visible); on phones, it automatically becomes a single NavContainer. For newer master-detail apps, the FlexibleColumnLayout is usually preferred.",
+      "keyPoints": [
+        "Page: one screen with header (title, back button), scrollable content, subHeader and footer.",
+        "NavContainer: several pages, one visible at a time; to(id) and back() switch with animations.",
+        "App: a NavContainer used as the root control; the router fills its pages aggregation.",
+        "SplitApp: masterPages and detailPages side by side; mode controls the master area; one column on phones."
+      ],
+      "examples": [
+        {
+          "title": "App with a Page",
+          "language": "xml",
+          "code": "<App id=\"app\">\n  <pages>\n    <Page id=\"listPage\" title=\"Products\">\n      <List items=\"{/Products}\">\n        <StandardListItem title=\"{Name}\" type=\"Navigation\" press=\".onPress\" />\n      </List>\n      <footer>\n        <OverflowToolbar>\n          <ToolbarSpacer />\n          <Button text=\"Add\" type=\"Emphasized\" />\n        </OverflowToolbar>\n      </footer>\n    </Page>\n  </pages>\n</App>"
+        },
+        {
+          "title": "A SplitApp",
+          "language": "xml",
+          "code": "<SplitApp id=\"splitApp\" mode=\"ShowHideMode\">\n  <masterPages>\n    <Page title=\"Orders\" />\n  </masterPages>\n  <detailPages>\n    <Page title=\"Order details\" />\n  </detailPages>\n</SplitApp>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "layout-dynamicpage-objectpage",
+      "level": "elementary",
+      "title": "How do DynamicPage and ObjectPageLayout work?",
+      "description": "sap.f.DynamicPage is the standard SAP Fiori page layout for list and overview screens. It has a title (sap.f.DynamicPageTitle, with heading, actions, and content for the expanded and the snapped state), an optional header (sap.f.DynamicPageHeader, for example with filters or key information), the content, and an optional footer, which floats above the content. The special behavior is that the header collapses (snaps) when the user scrolls the content, so more space is left for the data, and expands again when scrolling back or clicking the title; the user can also pin the header to keep it open. sap.uxap.ObjectPageLayout is the standard layout for showing one business object, like a sales order, with many details. It has a header title (usually ObjectPageDynamicHeaderTitle), headerContent (key facts like status and amounts), and the object's information split into sections (ObjectPageSection), which contain subsections (ObjectPageSubSection) with the actual content (blocks). An anchor bar under the header shows one link per section, so the user can jump to it, and it highlights the section that is currently visible while scrolling; with useIconTabBar=\"true\", the sections are shown as tabs instead. Subsections can be loaded lazily (enableLazyLoading), so only visible parts are rendered.",
+      "keyPoints": [
+        "DynamicPage: title, collapsible header, content, floating footer.",
+        "The header snaps (collapses) while scrolling and can be expanded or pinned.",
+        "ObjectPageLayout: header title + headerContent, then sections > subsections with the content.",
+        "The anchor bar jumps between sections (or useIconTabBar for tabs); enableLazyLoading renders visible parts only."
+      ],
+      "examples": [
+        {
+          "title": "A DynamicPage",
+          "language": "xml",
+          "code": "<f:DynamicPage id=\"page\" xmlns:f=\"sap.f\">\n  <f:title>\n    <f:DynamicPageTitle>\n      <f:heading>\n        <Title text=\"Products\" />\n      </f:heading>\n      <f:actions>\n        <Button text=\"Create\" type=\"Emphasized\" />\n      </f:actions>\n    </f:DynamicPageTitle>\n  </f:title>\n  <f:header>\n    <f:DynamicPageHeader pinnable=\"true\">\n      <SearchField width=\"20rem\" />\n    </f:DynamicPageHeader>\n  </f:header>\n  <f:content>\n    <Table items=\"{/Products}\" />\n  </f:content>\n</f:DynamicPage>"
+        },
+        {
+          "title": "An ObjectPageLayout",
+          "language": "xml",
+          "code": "<uxap:ObjectPageLayout id=\"objectPage\">\n  <uxap:headerTitle>\n    <uxap:ObjectPageDynamicHeaderTitle>\n      <uxap:heading>\n        <Title text=\"{Name}\" />\n      </uxap:heading>\n    </uxap:ObjectPageDynamicHeaderTitle>\n  </uxap:headerTitle>\n  <uxap:headerContent>\n    <ObjectStatus title=\"Status\" text=\"{Status}\" />\n  </uxap:headerContent>\n  <uxap:sections>\n    <uxap:ObjectPageSection title=\"General\">\n      <uxap:subSections>\n        <uxap:ObjectPageSubSection title=\"Details\">\n          <Text text=\"{Description}\" />\n        </uxap:ObjectPageSubSection>\n      </uxap:subSections>\n    </uxap:ObjectPageSection>\n  </uxap:sections>\n</uxap:ObjectPageLayout>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "layout-tabbar-form",
+      "level": "elementary",
+      "title": "How do the tab bar (IconTabBar) and the Form controls work?",
+      "description": "sap.m.IconTabBar shows several tabs (IconTabFilter items), each with a text, an optional icon and count, and switches the content below when the user selects a tab. Each filter can hold its own content, or the app can listen to the select event and change the shown data itself, for example to filter a table by status; selectedKey sets or reads the active tab. With many tabs, the extra ones move into an overflow menu. (sap.m.IconTabHeader shows only the tab strip, without a content area.) Forms show fields as label and value pairs. sap.ui.layout.form.SimpleForm is the easy version: you put Label and field controls (and Title or Toolbar for groups) directly into its content, in order, and it arranges them; editable=\"true\" marks it as an input form. sap.ui.layout.form.Form is the structured version: it contains FormContainers (groups), which contain FormElements (one label with one or more fields). In both, the layout property decides how the form is arranged: ColumnLayout is the recommended responsive layout (it moves groups into one to four columns based on the available width), and ResponsiveGridLayout uses the 12-column grid. The older ResponsiveLayout and GridLayout are deprecated.",
+      "keyPoints": [
+        "IconTabBar: tabs (IconTabFilter) with text, icon, count; select event and selectedKey; overflow for many tabs.",
+        "SimpleForm: labels and fields placed directly in its content, arranged automatically.",
+        "Form: FormContainer (groups) > FormElement (label + fields) for more control.",
+        "Layouts: ColumnLayout (recommended) or ResponsiveGridLayout; ResponsiveLayout and GridLayout are deprecated."
+      ],
+      "examples": [
+        {
+          "title": "IconTabBar",
+          "language": "xml",
+          "code": "<IconTabBar id=\"tabs\" selectedKey=\"all\" select=\".onTabSelect\">\n  <items>\n    <IconTabFilter key=\"all\" text=\"All\" count=\"{/count/all}\" />\n    <IconTabFilter key=\"open\" icon=\"sap-icon://pending\" text=\"Open\" count=\"{/count/open}\" />\n    <IconTabFilter key=\"done\" icon=\"sap-icon://accept\" text=\"Done\" count=\"{/count/done}\" />\n  </items>\n  <content>\n    <Table id=\"ordersTable\" items=\"{/Orders}\" />\n  </content>\n</IconTabBar>"
+        },
+        {
+          "title": "SimpleForm with ColumnLayout",
+          "language": "xml",
+          "code": "<f:SimpleForm editable=\"true\" layout=\"ColumnLayout\" xmlns:f=\"sap.ui.layout.form\" xmlns:core=\"sap.ui.core\">\n  <f:content>\n    <core:Title text=\"Address\" />\n    <Label text=\"Street\" />\n    <Input value=\"{Street}\" />\n    <Label text=\"ZIP / City\" />\n    <Input value=\"{Zip}\" />\n    <Input value=\"{City}\" />\n  </f:content>\n</f:SimpleForm>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "layout-flexbox-hbox-vbox",
+      "level": "elementary",
+      "title": "How do FlexBox, HBox, VBox, and the Horizontal / Vertical layouts work?",
+      "description": "These controls arrange other controls in a row or a column. sap.m.FlexBox is based on the CSS flexible box model: its direction property (Row, Column, RowReverse, ColumnReverse) sets the main axis, justifyContent (Start, Center, End, SpaceBetween, SpaceAround) places the items along the main axis, alignItems (Start, Center, End, Stretch, Baseline) places them on the cross axis, and wrap=\"Wrap\" lets items move to a new line when there is not enough room. sap.m.HBox is simply a FlexBox with the direction Row, and sap.m.VBox is a FlexBox with the direction Column, so they are the most common way to place a few controls next to or below each other. Individual items can get sap.m.FlexItemData as layoutData, for example growFactor to take the remaining space, or a baseSize. sap.ui.layout.HorizontalLayout and VerticalLayout are older, simpler containers from the sap.ui.layout library: they just place controls next to each other (with allowWrapping for the horizontal one) or below each other, without the flexbox options. For new code, HBox, VBox and FlexBox are usually the better choice, because they are more flexible and responsive.",
+      "keyPoints": [
+        "FlexBox uses CSS flexbox: direction, justifyContent, alignItems, wrap.",
+        "HBox = FlexBox in a row; VBox = FlexBox in a column.",
+        "FlexItemData (layoutData) controls single items, like growFactor.",
+        "HorizontalLayout / VerticalLayout are simpler, older containers; prefer HBox/VBox/FlexBox."
+      ],
+      "examples": [
+        {
+          "title": "Common flex arrangements",
+          "language": "xml",
+          "code": "<!-- title left, button right -->\n<HBox justifyContent=\"SpaceBetween\" alignItems=\"Center\">\n  <Title text=\"Orders\" />\n  <Button text=\"Add\" />\n</HBox>\n\n<!-- a field that takes the remaining space -->\n<HBox alignItems=\"Center\">\n  <Label text=\"Search\" class=\"sapUiSmallMarginEnd\" />\n  <SearchField>\n    <layoutData>\n      <FlexItemData growFactor=\"1\" />\n    </layoutData>\n  </SearchField>\n</HBox>\n\n<!-- tiles that wrap to the next line -->\n<FlexBox wrap=\"Wrap\">\n  <GenericTile header=\"Sales\" class=\"sapUiTinyMargin\" />\n  <GenericTile header=\"Stock\" class=\"sapUiTinyMargin\" />\n</FlexBox>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "layout-grid-system",
+      "level": "elementary",
+      "title": "How does the grid system work, and which controls use it?",
+      "description": "The SAPUI5 grid system divides the available width into 12 equal columns, and lets each item say how many of those columns it spans, separately for each screen size. This is how one layout adapts to phones, tablets and desktops. The screen sizes (breakpoints) are: S (phones, under 600 pixels), M (tablets, 600 to 1023 px), L (desktops, 1024 to 1439 px), and XL (large desktops, from 1440 px). The span is written like \"XL3 L4 M6 S12\": three columns on XL (four items per row), four columns on L (three per row), six on M (two per row), and twelve on S (one per row, full width). The main control is sap.ui.layout.Grid: its defaultSpan (default \"XL3 L3 M6 S12\") applies to all its content, and each item can override it with sap.ui.layout.GridData as layoutData, which also supports indent (empty columns before the item) and visibility per size (visibleS, visibleM, ...). The same idea is used by the ResponsiveGridLayout of forms and SimpleForm (with labelSpan and columns per size) and by sap.ui.layout.BlockLayout. For layouts based on the native CSS grid, there are newer controls, like sap.ui.layout.cssgrid.CSSGrid and sap.f.GridContainer.",
+      "keyPoints": [
+        "The grid divides the width into 12 columns; items span a number of columns per screen size.",
+        "Breakpoints: S < 600px, M 600 to 1023px, L 1024 to 1439px, XL >= 1440px.",
+        "sap.ui.layout.Grid: defaultSpan (\"XL3 L3 M6 S12\") and GridData (span, indent) per item.",
+        "Also used by ResponsiveGridLayout (forms) and BlockLayout; CSSGrid and GridContainer use native CSS grid."
+      ],
+      "examples": [
+        {
+          "title": "A responsive Grid",
+          "language": "xml",
+          "code": "<l:Grid defaultSpan=\"XL3 L4 M6 S12\" class=\"sapUiSmallMarginTop\" xmlns:l=\"sap.ui.layout\">\n  <ObjectStatus title=\"Revenue\" text=\"1.2M\" />\n  <ObjectStatus title=\"Orders\" text=\"845\" />\n  <ObjectStatus title=\"Returns\" text=\"12\" />\n  <Text text=\"A wide item\">\n    <layoutData>\n      <l:GridData span=\"XL6 L8 M12 S12\" />\n    </layoutData>\n  </Text>\n</l:Grid>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "layout-responsive-table-popin",
+      "level": "elementary",
+      "title": "How does the responsive table (sap.m.Table) adapt to small screens with pop-in?",
+      "description": "sap.m.Table is the responsive table of SAPUI5. On a wide screen, all columns are shown side by side; on a narrow screen, there is not enough room, so the table can hide columns or move them into the pop-in area. Each sap.m.Column has a minScreenWidth: below that width, the column is no longer shown as a column. It can be a named size (Phone, Tablet, Desktop, ...) or a CSS size like 40em. If the column also has demandPopin=\"true\", its values are not lost, but shown inside each row, under the visible cells, as \"Header: value\" pairs; this is the pop-in. Without demandPopin, the column is simply hidden on small screens. The table's popinLayout decides how pop-in values are arranged (Block, GridSmall, GridLarge). Newer versions also offer autoPopinMode, where the table decides itself which columns go into the pop-in, based on their importance (importance of each column) and the available width. Good practice: keep the most important one or two columns always visible, and let the others pop in. For very large data sets with many columns, where every column must stay visible, use the grid table (sap.ui.table.Table) instead, which scrolls horizontally.",
+      "keyPoints": [
+        "sap.m.Table adapts to the screen width per column.",
+        "Column minScreenWidth: below it the column is not shown as a column (Phone, Tablet, Desktop, or a CSS size).",
+        "demandPopin=\"true\" moves the values into the row as \"Header: value\" instead of hiding them.",
+        "popinLayout and autoPopinMode (with column importance) control the pop-in; sap.ui.table.Table is for huge data."
+      ],
+      "examples": [
+        {
+          "title": "Columns with pop-in",
+          "language": "xml",
+          "code": "<Table items=\"{/Products}\" popinLayout=\"GridSmall\">\n  <columns>\n    <Column>\n      <Text text=\"Product\" />\n    </Column>\n    <Column minScreenWidth=\"Tablet\" demandPopin=\"true\">\n      <Text text=\"Supplier\" />\n    </Column>\n    <Column minScreenWidth=\"Desktop\" demandPopin=\"true\" hAlign=\"End\">\n      <Text text=\"Price\" />\n    </Column>\n  </columns>\n  <items>\n    <ColumnListItem>\n      <cells>\n        <ObjectIdentifier title=\"{Name}\" text=\"{ProductID}\" />\n        <Text text=\"{SupplierName}\" />\n        <ObjectNumber number=\"{Price}\" unit=\"{Currency}\" />\n      </cells>\n    </ColumnListItem>\n  </items>\n</Table>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "layout-responsive-css-wrapping-footer",
+      "level": "elementary",
+      "title": "Which responsive techniques help besides tables: responsive CSS classes, text wrapping, and the floating footer?",
+      "description": "Several smaller features make an app work on every screen size. Responsive CSS classes adapt spacing and visibility automatically: sapUiResponsiveMargin and sapUiResponsiveContentPadding use smaller spacing on phones and larger spacing on desktops, and the visibility classes, like sapUiHideOnPhone or sapUiVisibleOnlyOnDesktop, hide less important content on some devices (for real logic, the device model, bound to sap/ui/Device, can be used instead, like visible=\"{= !${device>/system/phone} }\"). Text wrapping decides what happens when a text is too long for its space: sap.m.Text wraps to new lines by default (wrapping=\"true\"), and maxLines limits the number of lines, cutting the rest with an ellipsis; Label and Title do not wrap by default, but have a wrapping property. Letting important texts wrap avoids cutting off information on small screens. The floating footer keeps actions reachable: on an sap.m.Page with floatingFooter=\"true\" (and in sap.f.DynamicPage, where it is the default), the footer bar floats above the content instead of taking a fixed area, so the main actions, like Save and Cancel, are always visible without reducing the space of the content. Together with the content density classes (compact for mouse, cozy for touch), these make the same app comfortable on every device.",
+      "keyPoints": [
+        "sapUiResponsiveMargin / sapUiResponsiveContentPadding adapt spacing to the screen size.",
+        "Visibility classes (sapUiHideOnPhone...) or the device model hide less important content.",
+        "Text wraps by default (maxLines limits it); Label and Title need wrapping=\"true\".",
+        "floatingFooter on Page (default in DynamicPage) keeps actions visible above the content."
+      ],
+      "examples": [
+        {
+          "title": "Responsive spacing, wrapping, and a floating footer",
+          "language": "xml",
+          "code": "<Page title=\"Edit order\" floatingFooter=\"true\">\n  <VBox class=\"sapUiResponsiveMargin\">\n    <Title text=\"{Name}\" wrapping=\"true\" />\n    <Text text=\"{LongDescription}\" maxLines=\"3\" />\n    <Text text=\"{InternalNotes}\" class=\"sapUiHideOnPhone\" />\n  </VBox>\n  <footer>\n    <OverflowToolbar>\n      <ToolbarSpacer />\n      <Button text=\"Save\" type=\"Emphasized\" />\n      <Button text=\"Cancel\" />\n    </OverflowToolbar>\n  </footer>\n</Page>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "layout-form-grid",
+      "level": "elementary",
+      "title": "How is a form made responsive with its layout (form grid)?",
+      "description": "The layout of a Form or SimpleForm decides how labels and fields are arranged on different screen sizes. With ResponsiveGridLayout, the form uses the 12-column grid: labelSpanXL, labelSpanL, labelSpanM and labelSpanS set how many of the 12 columns the label takes on each screen size (for example labelSpanL=\"3\" puts the label next to the field, and labelSpanS=\"12\" puts it above the field on phones), and columnsXL, columnsL and columnsM set how many groups (form containers) are placed side by side. With ColumnLayout, the recommended layout in current SAP Fiori guidelines, the form is split into up to four columns depending on the available width (columnsXL, columnsL, columnsM), and labelCellsLarge sets the label width in large columns; on small sizes, labels automatically move above their fields. In both cases, a field can get layoutData (like ColumnElementData or GridData) to change its width. A form should be given the Title or Toolbar of each group so that the layout knows where groups begin, and the same form then works from phones to large desktops without extra code.",
+      "keyPoints": [
+        "The form's layout controls how labels and fields are arranged per screen size.",
+        "ResponsiveGridLayout: labelSpanXL/L/M/S and columnsXL/L/M on the 12-column grid.",
+        "ColumnLayout (recommended): up to 4 columns by width; labels move above fields on small screens.",
+        "Groups (core:Title or Toolbar) tell the layout where containers start; layoutData adjusts single fields."
+      ],
+      "examples": [
+        {
+          "title": "SimpleForm with ResponsiveGridLayout",
+          "language": "xml",
+          "code": "<f:SimpleForm\n  xmlns:f=\"sap.ui.layout.form\"\n  xmlns:core=\"sap.ui.core\"\n  editable=\"true\"\n  layout=\"ResponsiveGridLayout\"\n  labelSpanXL=\"4\" labelSpanL=\"3\" labelSpanM=\"4\" labelSpanS=\"12\"\n  columnsXL=\"2\" columnsL=\"2\" columnsM=\"1\">\n  <f:content>\n    <core:Title text=\"Customer\" />\n    <Label text=\"Name\" />\n    <Input value=\"{Name}\" />\n    <core:Title text=\"Contact\" />\n    <Label text=\"E-mail\" />\n    <Input value=\"{Email}\" type=\"Email\" />\n  </f:content>\n</f:SimpleForm>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "layout-flexible-column-layout",
+      "level": "basic",
+      "title": "How does the FlexibleColumnLayout work, and how is it set up?",
+      "description": "sap.f.FlexibleColumnLayout (FCL) shows up to three pages side by side in columns: begin (for example a list), mid (the selected item's details) and end (a sub-item's details). Its pages are placed in the aggregations beginColumnPages, midColumnPages and endColumnPages, each working like a NavContainer. The layout property (sap.f.LayoutType) decides which columns are visible and which one is wider, for example OneColumn, TwoColumnsBeginExpanded, TwoColumnsMidExpanded, ThreeColumnsMidExpanded, ThreeColumnsEndExpanded, MidColumnFullScreen or EndColumnFullScreen. On smaller screens, the FCL shows fewer columns automatically (at most two on tablets, one on phones). To change the layout correctly for the device, the app usually uses sap.f.FlexibleColumnLayoutSemanticHelper: getNextUIState(level) returns the recommended layout for showing one, two or three columns, and it also provides the actions for full screen and closing a column. With routing, the router class sap.f.routing.Router is used, and each target names its controlAggregation (beginColumnPages, midColumnPages, endColumnPages); the route's pattern usually also carries the layout, like detail/{productId}/{layout}, so the current layout can be bookmarked. The FCL is the recommended pattern for list-detail apps in SAP Fiori.",
+      "keyPoints": [
+        "FCL shows up to three columns: beginColumnPages, midColumnPages, endColumnPages.",
+        "The layout property (sap.f.LayoutType) sets which columns are visible and expanded.",
+        "It shows fewer columns automatically on smaller screens.",
+        "FlexibleColumnLayoutSemanticHelper.getNextUIState(level) gives the right layout; routing uses sap.f.routing.Router."
+      ],
+      "examples": [
+        {
+          "title": "FCL in the root view",
+          "language": "xml",
+          "code": "<f:FlexibleColumnLayout id=\"fcl\" layout=\"{appView>/layout}\" xmlns:f=\"sap.f\" />"
+        },
+        {
+          "title": "Routing targets for the columns",
+          "language": "json",
+          "code": "{\n  \"routing\": {\n    \"config\": {\n      \"routerClass\": \"sap.f.routing.Router\",\n      \"type\": \"View\",\n      \"viewType\": \"XML\",\n      \"path\": \"my.app.view\",\n      \"controlId\": \"fcl\"\n    },\n    \"routes\": [\n      { \"name\": \"list\", \"pattern\": \":layout:\", \"target\": [\"list\"] },\n      { \"name\": \"detail\", \"pattern\": \"detail/{productId}/{layout}\", \"target\": [\"list\", \"detail\"] }\n    ],\n    \"targets\": {\n      \"list\": { \"name\": \"List\", \"controlAggregation\": \"beginColumnPages\" },\n      \"detail\": { \"name\": \"Detail\", \"controlAggregation\": \"midColumnPages\" }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "layout-semantic-page",
+      "level": "basic",
+      "title": "What is a semantic page (sap.f.semantic and sap.m.semantic)?",
+      "description": "A semantic page is a page where you do not place and style action buttons yourself, but add them as semantic actions, objects that say what the action means: EditAction, DeleteAction, AddAction, TitleMainAction, FooterMainAction, PositiveAction (like Accept), NegativeAction (like Reject), FavoriteAction, FlagAction, MessagesIndicator, share menu actions, and more. The page then puts each action in the position, order, and style that the SAP Fiori design guidelines define for it (for example the main action as an emphasized button in the footer, or Edit and Delete in the title area), so all apps look and behave consistently, and developers do not need to remember the rules. There are two versions: sap.f.semantic.SemanticPage is the current one, built on sap.f.DynamicPage, so it also has a collapsible header (titleHeading, titleContent, headerContent, content, and the action aggregations); sap.m.semantic (with variants like FullscreenPage, MasterPage and DetailPage) is the older version, built on sap.m.Page, still found in older apps. Each action still has its own press event, which the controller handles as usual.",
+      "keyPoints": [
+        "Semantic actions (Edit, Delete, Add, MainAction, Positive/Negative, Favorite...) describe what an action means.",
+        "The semantic page places and styles them according to SAP Fiori guidelines automatically.",
+        "sap.f.semantic.SemanticPage is the current version, based on DynamicPage.",
+        "sap.m.semantic (FullscreenPage, MasterPage, DetailPage) is the older, sap.m.Page-based version."
+      ],
+      "examples": [
+        {
+          "title": "A sap.f semantic page",
+          "language": "xml",
+          "code": "<semantic:SemanticPage\n  xmlns:semantic=\"sap.f.semantic\"\n  headerPinnable=\"true\"\n  showFooter=\"true\">\n  <semantic:titleHeading>\n    <Title text=\"{Name}\" />\n  </semantic:titleHeading>\n  <semantic:content>\n    <Text text=\"{Description}\" />\n  </semantic:content>\n  <semantic:editAction>\n    <semantic:EditAction press=\".onEdit\" />\n  </semantic:editAction>\n  <semantic:deleteAction>\n    <semantic:DeleteAction press=\".onDelete\" />\n  </semantic:deleteAction>\n  <semantic:footerMainAction>\n    <semantic:FooterMainAction text=\"Save\" press=\".onSave\" />\n  </semantic:footerMainAction>\n</semantic:SemanticPage>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "layout-cssgrid-tnt",
+      "level": "basic",
+      "title": "What are the grid-based layouts (CSSGrid, GridContainer) and the sap.tnt controls used for?",
+      "description": "Besides the 12-column sap.ui.layout.Grid, newer grid controls use the browser's native CSS grid. sap.ui.layout.cssgrid.CSSGrid exposes CSS grid properties directly, like gridTemplateColumns (\"repeat(auto-fill, minmax(12rem, 1fr))\"), gridGap and gridAutoFlow, and its items can be placed with GridItemLayoutData; sap.f.GridList combines a list (with selection and growing) with a CSS grid layout of its items. sap.f.GridContainer arranges cards and tiles in a responsive grid of equal cells, with built-in keyboard navigation and drag and drop, which makes it a good base for dashboards and overview pages. The sap.tnt library (tools and admin) provides controls for apps with a side navigation, like admin consoles and tools: sap.tnt.ToolPage is the page frame with a header (sap.tnt.ToolHeader), a side area (sideContent, usually sap.tnt.SideNavigation with a NavigationList of items and sub-items, which can be collapsed with sideExpanded), and mainContents for the actual screen. sap.tnt also has InfoLabel, a small colored label for statuses. This app uses a ToolPage with a ToolHeader as its frame.",
+      "keyPoints": [
+        "CSSGrid uses native CSS grid properties (gridTemplateColumns, gridGap...); GridList adds list features.",
+        "GridContainer arranges cards and tiles in responsive cells, with keyboard and drag and drop support.",
+        "sap.tnt.ToolPage: ToolHeader + sideContent (SideNavigation) + mainContents, for tools and admin apps.",
+        "SideNavigation with NavigationList items, collapsible via sideExpanded; InfoLabel for statuses."
+      ],
+      "examples": [
+        {
+          "title": "A CSSGrid",
+          "language": "xml",
+          "code": "<grid:CSSGrid xmlns:grid=\"sap.ui.layout.cssgrid\"\n  gridTemplateColumns=\"repeat(auto-fill, minmax(12rem, 1fr))\"\n  gridGap=\"1rem\">\n  <GenericTile header=\"Sales\" />\n  <GenericTile header=\"Stock\" />\n  <GenericTile header=\"Returns\" />\n</grid:CSSGrid>"
+        },
+        {
+          "title": "A ToolPage with side navigation",
+          "language": "xml",
+          "code": "<tnt:ToolPage id=\"toolPage\" xmlns:tnt=\"sap.tnt\">\n  <tnt:header>\n    <tnt:ToolHeader>\n      <Button icon=\"sap-icon://menu2\" press=\".onToggleSide\" />\n      <Title text=\"Admin\" />\n    </tnt:ToolHeader>\n  </tnt:header>\n  <tnt:sideContent>\n    <tnt:SideNavigation itemSelect=\".onNavSelect\">\n      <tnt:NavigationList>\n        <tnt:NavigationListItem text=\"Users\" icon=\"sap-icon://employee\" key=\"users\" />\n        <tnt:NavigationListItem text=\"Settings\" icon=\"sap-icon://action-settings\" key=\"settings\" />\n      </tnt:NavigationList>\n    </tnt:SideNavigation>\n  </tnt:sideContent>\n  <tnt:mainContents>\n    <NavContainer id=\"pages\" />\n  </tnt:mainContents>\n</tnt:ToolPage>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "layout-flex-toolbar-responsive",
+      "level": "basic",
+      "title": "How do you set up FlexBox / HBox / VBox and toolbars to be responsive (toolbar elements collapsing)?",
+      "description": "A FlexBox (and HBox / VBox) adapts to the available width with a few settings. wrap=\"Wrap\" lets items move to the next line instead of overflowing; FlexItemData on the items controls how they grow and shrink (growFactor, shrinkFactor, baseSize, minWidth); and the direction can be changed for small screens, for example by binding it to the device model, like direction=\"{= ${device>/system/phone} ? 'Column' : 'Row' }\", so items stand below each other on phones and next to each other on desktops. fitContainer makes the box fill its parent's height. For toolbars, sap.m.OverflowToolbar is the responsive version of Toolbar: when there is not enough space, buttons and other items that do not fit move into an overflow menu, opened with a \"...\" button, instead of being cut off. Each item can get sap.m.OverflowToolbarLayoutData with a priority: NeverOverflow (always stays visible, for the most important actions), High, Low (moves to the overflow first), AlwaysOverflow (always in the menu), or Disappear (is hidden when space runs out). Items with the same group number overflow together. Page footers and table toolbars should use OverflowToolbar.",
+      "keyPoints": [
+        "FlexBox wrap=\"Wrap\" moves items to a new line; FlexItemData controls grow/shrink/baseSize.",
+        "direction can switch from Row to Column on phones, for example via the device model.",
+        "OverflowToolbar moves items that do not fit into a \"...\" overflow menu.",
+        "OverflowToolbarLayoutData priority: NeverOverflow, High, Low, AlwaysOverflow, Disappear; group keeps items together."
+      ],
+      "examples": [
+        {
+          "title": "A responsive toolbar",
+          "language": "xml",
+          "code": "<OverflowToolbar>\n  <Title text=\"Orders\" />\n  <ToolbarSpacer />\n  <Button text=\"Create\" type=\"Emphasized\">\n    <layoutData>\n      <OverflowToolbarLayoutData priority=\"NeverOverflow\" />\n    </layoutData>\n  </Button>\n  <Button text=\"Export\">\n    <layoutData>\n      <OverflowToolbarLayoutData priority=\"Low\" />\n    </layoutData>\n  </Button>\n  <Button text=\"Print\">\n    <layoutData>\n      <OverflowToolbarLayoutData priority=\"AlwaysOverflow\" />\n    </layoutData>\n  </Button>\n</OverflowToolbar>"
+        },
+        {
+          "title": "A box that stacks on phones",
+          "language": "xml",
+          "code": "<FlexBox direction=\"{= ${device>/system/phone} ? 'Column' : 'Row' }\" wrap=\"Wrap\">\n  <Panel headerText=\"Customer\" width=\"auto\" />\n  <Panel headerText=\"Delivery\" width=\"auto\" />\n</FlexBox>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "layout-dynamicpage-sticky-header",
+      "level": "basic",
+      "title": "How does the DynamicPage sticky header behavior work, and how is it configured?",
+      "description": "By default, the header of an sap.f.DynamicPage snaps (collapses) when the user scrolls down, and only the title stays at the top, so the content gets more room; scrolling back to the top, or clicking the title, expands the header again. Several settings control this. headerExpanded sets or reads whether the header is currently expanded. pinnable on the DynamicPageHeader (true by default) shows a pin button in the header; when the user pins the header, it stays expanded and does not snap while scrolling; headerPinned reflects that state. toggleHeaderOnTitleClick decides whether clicking the title expands or collapses the header. preserveHeaderStateOnScroll keeps the header in its current state while scrolling (often used on small screens, where scrolling the header away is not wanted); then the header does not scroll with the content. To keep a part of the content visible at the top as well, for example the tabs of an IconTabBar, the page's stickySubheaderProvider association points to a control that implements sap.f.IDynamicPageStickyContent (like the IconTabBar); its header part then sticks under the title while the rest scrolls. fitContent makes the content fill the remaining height, which is useful for tables that should scroll by themselves.",
+      "keyPoints": [
+        "The header snaps on scroll; the title stays; scrolling up or clicking the title expands it.",
+        "headerExpanded, the header's pinnable (on DynamicPageHeader) and the page's headerPinned (the pin keeps it expanded), toggleHeaderOnTitleClick.",
+        "preserveHeaderStateOnScroll keeps the header state while scrolling.",
+        "stickySubheaderProvider keeps part of the content (like IconTabBar tabs) stuck under the title; fitContent fills the height."
+      ],
+      "examples": [
+        {
+          "title": "A DynamicPage with sticky tabs",
+          "language": "xml",
+          "code": "<f:DynamicPage\n  xmlns:f=\"sap.f\"\n  id=\"page\"\n  headerExpanded=\"true\"\n  toggleHeaderOnTitleClick=\"true\"\n  stickySubheaderProvider=\"tabs\">\n  <f:title>\n    <f:DynamicPageTitle>\n      <f:heading>\n        <Title text=\"Orders\" />\n      </f:heading>\n    </f:DynamicPageTitle>\n  </f:title>\n  <f:header>\n    <f:DynamicPageHeader pinnable=\"true\">\n      <SearchField width=\"20rem\" />\n    </f:DynamicPageHeader>\n  </f:header>\n  <f:content>\n    <IconTabBar id=\"tabs\">\n      <items>\n        <IconTabFilter text=\"Open\" key=\"open\" />\n        <IconTabFilter text=\"Done\" key=\"done\" />\n      </items>\n    </IconTabBar>\n  </f:content>\n</f:DynamicPage>"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

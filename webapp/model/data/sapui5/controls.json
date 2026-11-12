@@ -1,0 +1,291 @@
+{
+  "topicId": "controls",
+  "title": "Controls",
+  "questions": [
+    {
+      "id": "xml-namespaces",
+      "level": "elementary",
+      "title": "What is a namespace in an XML view, and how do you use default and named namespaces?",
+      "description": "UI5 controls are organized in libraries, like sap.m (the main controls), sap.ui.core, sap.ui.layout or sap.f. In an XML view, a namespace declaration (an xmlns attribute) tells UI5 which library an XML element comes from, so it knows which control class to create. The value of the namespace is the library (or package) name. One namespace can be the default namespace, declared without a prefix: xmlns=\"sap.m\". All elements without a prefix, like <Button> or <Input>, then come from sap.m. Every other library is declared as a named namespace with a prefix of your choice: xmlns:core=\"sap.ui.core\" or xmlns:l=\"sap.ui.layout\", and its controls must be written with that prefix, like <core:Icon> or <l:Grid>. The view itself needs the MVC namespace, usually xmlns:mvc=\"sap.ui.core.mvc\", because the root element is <mvc:View>. The usual convention is to make the most used library (normally sap.m) the default namespace, and to use short, common prefixes for the rest (core, l, f, form, table). The libraries must also be listed in the manifest's dependencies (sap.ui5/dependencies/libs), so they are loaded.",
+      "keyPoints": [
+        "A namespace declaration (xmlns) maps XML elements to a UI5 library, like sap.m or sap.ui.core.",
+        "Default namespace: xmlns=\"sap.m\"; its controls are written without a prefix, like <Button>.",
+        "Named namespace: xmlns:core=\"sap.ui.core\"; its controls need the prefix, like <core:Icon>.",
+        "The root <mvc:View> needs xmlns:mvc=\"sap.ui.core.mvc\"; libraries must also be listed in the manifest."
+      ],
+      "examples": [
+        {
+          "title": "Default and named namespaces",
+          "language": "xml",
+          "code": "<mvc:View\n  xmlns=\"sap.m\"\n  xmlns:mvc=\"sap.ui.core.mvc\"\n  xmlns:core=\"sap.ui.core\"\n  xmlns:l=\"sap.ui.layout\">\n\n  <Page title=\"Namespaces\">                         <!-- sap.m.Page -->\n    <l:VerticalLayout>                                <!-- sap.ui.layout.VerticalLayout -->\n      <core:Icon src=\"sap-icon://home\" />             <!-- sap.ui.core.Icon -->\n      <Button text=\"OK\" />                            <!-- sap.m.Button -->\n    </l:VerticalLayout>\n  </Page>\n</mvc:View>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "xml-nodes-attributes-events",
+      "level": "elementary",
+      "title": "What is an XML node in a view, and how are attributes (properties) and events written?",
+      "description": "In an XML view, every XML element (node) whose name starts with an uppercase letter, like <Button> or <core:Icon>, creates a control instance; the name is the control's class name inside the namespace's library. The element can be self-closing (<Button />) or have child elements. Its attributes set the control's settings. A property attribute sets a property value, like text=\"Save\", enabled=\"false\" or width=\"10rem\"; the value can be a fixed string or a binding, like text=\"{i18n>save}\". The special id attribute sets the control's local ID, and class adds CSS classes. An event attribute attaches an event handler: its value is the handler's name, usually a controller method with a leading dot, like press=\".onSave\". You can also pass arguments, like press=\".onDelete($event, ${ID})\", where $event is the event object and ${...} reads a bound value; $controller refers to the controller. Which properties and events a control has is listed in its API reference. Elements that start with a lowercase letter are not controls, but aggregations.",
+      "keyPoints": [
+        "Every element starting with an uppercase letter creates a control (its class in that namespace).",
+        "Property attributes set values, fixed or bound: text=\"Save\" or text=\"{i18n>save}\".",
+        "Event attributes attach handlers: press=\".onSave\" (leading dot means a controller method).",
+        "Handlers can receive arguments: press=\".onDelete($event, ${ID})\"; lowercase elements are aggregations."
+      ],
+      "examples": [
+        {
+          "title": "Properties and events in XML",
+          "language": "xml",
+          "code": "<Button\n  id=\"saveButton\"\n  text=\"{i18n>save}\"\n  type=\"Emphasized\"\n  enabled=\"{= !${view>/busy} }\"\n  press=\".onSave\" />\n\n<Button text=\"Delete\" press=\".onDelete($event, ${ID})\" />"
+        },
+        {
+          "title": "The handlers in the controller",
+          "language": "javascript",
+          "code": "onSave: function (event) {\n  // event.getSource() is the button that was pressed\n},\n\nonDelete: function (event, id) {\n  // id is the bound ${ID} value of this button's context\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "xml-aggregations",
+      "level": "elementary",
+      "title": "What is an aggregation, how is it written in XML, and what is a default aggregation?",
+      "description": "An aggregation is a relationship in which a control contains other controls as its children, and owns them: when the parent is destroyed, its aggregated children are destroyed too, and they are rendered as part of the parent. For example, a Page has the aggregations content, headerContent and footer, and a List has items. Each aggregation has a cardinality: 0..n for many children (like items) or 0..1 for one child (like footer). In XML, an aggregation is written as a child element with a lowercase name, in the same namespace as the parent control, and the child controls go inside it: <Page><content><Button/></content></Page>. Many controls also define a default aggregation, which can be filled without writing the aggregation element at all: the default aggregation of Page is content, so <Page><Button/></Page> puts the Button into content. The same goes for VBox (items) and Dialog (content). Aggregations can also be filled with an aggregation binding, like items=\"{/Products}\" with a template inside. In code, aggregations are changed with generated methods like addItem, insertItem, removeItem and destroyItems.",
+      "keyPoints": [
+        "An aggregation means a parent contains and owns child controls (they are rendered and destroyed with it).",
+        "In XML: a lowercase child element in the parent's namespace, like <content> or <items>.",
+        "Cardinality 0..1 (one child, like footer) or 0..n (many, like items).",
+        "A default aggregation (like Page's content) can be filled without writing the aggregation element."
+      ],
+      "examples": [
+        {
+          "title": "Explicit and default aggregations",
+          "language": "xml",
+          "code": "<Page title=\"Orders\">\n  <headerContent>                 <!-- aggregation, written explicitly -->\n    <Button icon=\"sap-icon://refresh\" />\n  </headerContent>\n\n  <Text text=\"Content goes here\" /> <!-- default aggregation: content -->\n\n  <footer>\n    <OverflowToolbar>\n      <ToolbarSpacer />\n      <Button text=\"Save\" type=\"Emphasized\" />\n    </OverflowToolbar>\n  </footer>\n</Page>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "xml-associations",
+      "level": "elementary",
+      "title": "What is an association, and how is it written in XML?",
+      "description": "An association is a loose relationship between two controls: one control only keeps a reference (the ID) to another control, without containing or owning it. The associated control lives somewhere else in the control tree, is rendered by its own parent, and is not destroyed with the control that points to it. This is the difference from an aggregation, where the parent owns and renders its children. Associations are mostly used to describe connections between controls, especially for accessibility: the labelFor association of a Label points to the input it describes, and ariaLabelledBy / ariaDescribedBy point to texts that a screen reader should announce for a control. Other examples are the selectedItem of some controls, or initialFocus of a Dialog. In XML, an association is written like a property, with the local ID of the target control as its value: labelFor=\"emailInput\". Inside a view, UI5 adds the view prefix to the ID automatically. For associations with several targets (0..n), list the IDs separated by spaces or commas: ariaLabelledBy=\"titleText hintText\".",
+      "keyPoints": [
+        "An association is a reference to another control by ID, without owning it.",
+        "The associated control is rendered and destroyed independently.",
+        "Typical uses: Label labelFor, ariaLabelledBy, ariaDescribedBy, Dialog initialFocus.",
+        "In XML: labelFor=\"emailInput\" (local ID); several IDs are separated by spaces or commas."
+      ],
+      "examples": [
+        {
+          "title": "Associations in XML",
+          "language": "xml",
+          "code": "<Label text=\"E-mail\" labelFor=\"emailInput\" />\n<Input id=\"emailInput\" value=\"{/email}\" ariaDescribedBy=\"emailHint\" />\n<Text id=\"emailHint\" text=\"We never share your e-mail address.\" />\n\n<Dialog id=\"editDialog\" title=\"Edit\" initialFocus=\"nameInput\">\n  <Input id=\"nameInput\" />\n</Dialog>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "xml-dependents",
+      "level": "elementary",
+      "title": "What is the dependents aggregation, and how is it written in an XML view?",
+      "description": "dependents is a special aggregation that every control and view has. Controls placed in it belong to the parent (they are part of its control tree, inherit its models and binding context, and are destroyed with it), but they are not rendered inside the parent's area. It is meant for controls that appear in their own layer, outside the normal page layout: dialogs, popovers, message popovers, action sheets, or invisible helper elements. In XML, you write it like any other aggregation: a <dependents> element inside the view or control, containing the controls. A dialog declared this way is created with the view, already has all the view's models (so bindings like {i18n>title} work), and you only need to open it from the controller with this.byId(\"dialogId\").open(). The disadvantage is that it is created even if the user never opens it, which costs time at startup; for big or rarely used dialogs, load a fragment on demand instead (and add it to the dependents in code with addDependent, or let this.loadFragment() do that for you).",
+      "keyPoints": [
+        "dependents: an aggregation for controls that belong to a parent but are not rendered inside it.",
+        "Dependents inherit the parent's models and binding context, and are destroyed with it.",
+        "Typical content: dialogs, popovers, action sheets.",
+        "In XML: <dependents> inside the view or control; for rarely used dialogs, prefer a fragment loaded on demand."
+      ],
+      "examples": [
+        {
+          "title": "A dialog declared in the view's dependents",
+          "language": "xml",
+          "code": "<mvc:View controllerName=\"my.app.controller.Main\" xmlns=\"sap.m\" xmlns:mvc=\"sap.ui.core.mvc\">\n  <Page title=\"Main\">\n    <Button text=\"Show info\" press=\".onShowInfo\" />\n  </Page>\n  <dependents>\n    <Dialog id=\"infoDialog\" title=\"{i18n>infoTitle}\">\n      <Text text=\"{i18n>infoText}\" />\n      <endButton>\n        <Button text=\"Close\" press=\".onCloseInfo\" />\n      </endButton>\n    </Dialog>\n  </dependents>\n</mvc:View>"
+        },
+        {
+          "title": "Opening it",
+          "language": "javascript",
+          "code": "onShowInfo: function () {\n  this.byId(\"infoDialog\").open();\n},\nonCloseInfo: function () {\n  this.byId(\"infoDialog\").close();\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "icons-syntax",
+      "level": "elementary",
+      "title": "How are icons defined and used in SAPUI5?",
+      "description": "SAPUI5 comes with an icon font, the SAP icons, with hundreds of icons for common actions and objects. An icon is referenced by a URI with the sap-icon:// protocol followed by the icon's name: sap-icon://add, sap-icon://delete, sap-icon://edit, sap-icon://employee. Many controls have an icon property that accepts such a URI, for example Button, StandardListItem, Tab filters or ObjectStatus: <Button icon=\"sap-icon://add\" />. To show an icon on its own, use the sap.ui.core.Icon control (core:Icon in XML), with src for the icon URI and optional settings like size, color, and press (which makes it clickable); a decorative icon that carries no meaning should be marked with decorative=\"true\". You can browse all available icons and their names in the Icon Explorer in the SAPUI5 SDK (Demo Kit). Besides the default collection, more icon fonts can be registered with sap/ui/core/IconPool (for example the SAP TNT or Business Suite icons), and are then used with their collection name: sap-icon://collectionName/iconName. Icons scale perfectly and follow the theme's colors, because they are a font.",
+      "keyPoints": [
+        "Icons are referenced as sap-icon://name, like sap-icon://add.",
+        "Many controls have an icon property (Button, list items, ObjectStatus...).",
+        "core:Icon shows a standalone icon: src, size, color, press, decorative.",
+        "Find names in the Icon Explorer; extra fonts are registered with IconPool and used as sap-icon://collection/name."
+      ],
+      "examples": [
+        {
+          "title": "Icons in controls and on their own",
+          "language": "xml",
+          "code": "<Button icon=\"sap-icon://add\" tooltip=\"{i18n>add}\" press=\".onAdd\" />\n<StandardListItem title=\"{Name}\" icon=\"sap-icon://product\" />\n\n<core:Icon\n  src=\"sap-icon://message-warning\"\n  size=\"2rem\"\n  color=\"Critical\"\n  tooltip=\"{i18n>warning}\" />"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "class-attribute",
+      "level": "elementary",
+      "title": "What is special about the class attribute in an XML view?",
+      "description": "In an XML view, class is not a normal control property: it adds CSS classes to the control's root HTML element, the same as calling control.addStyleClass(\"className\") in code. Several classes are separated by spaces: class=\"sapUiSmallMargin myHighlight\". The important specific is that it is a one-time setup: the classes are applied once, when the control is created from the XML. The class attribute does not support data binding, so you cannot write class=\"{/cssClass}\" to switch classes dynamically. To change classes at runtime, use the methods in the controller: addStyleClass, removeStyleClass, toggleStyleClass, and hasStyleClass. For styling that depends on data, other options are a control property (like type or state), or custom data written to the DOM (data-* attributes) and matched in your CSS. The class attribute is the place for the predefined UI5 CSS classes (margins, padding) and your own app classes, which should use a unique prefix to avoid conflicts.",
+      "keyPoints": [
+        "class adds CSS classes to the control's root element, like addStyleClass(); several are separated by spaces.",
+        "It is applied once, when the control is created: a one-time setup.",
+        "class does not support data binding.",
+        "Change classes at runtime with addStyleClass / removeStyleClass / toggleStyleClass."
+      ],
+      "examples": [
+        {
+          "title": "Static classes in XML, dynamic classes in code",
+          "language": "xml",
+          "code": "<Panel id=\"infoPanel\" class=\"sapUiSmallMargin myAppHighlight\" headerText=\"Info\" />\n<!-- class=\"{/cssClass}\" would NOT work: class cannot be bound -->"
+        },
+        {
+          "title": "Toggling a class from the controller",
+          "language": "javascript",
+          "code": "onToggleHighlight: function () {\n  this.byId(\"infoPanel\").toggleStyleClass(\"myAppHighlight\");\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "predefined-css-classes",
+      "level": "elementary",
+      "title": "What are the predefined CSS classes in SAPUI5?",
+      "description": "SAPUI5 provides a set of CSS classes for common layout needs, so you rarely need to write your own CSS for spacing. They are added with the class attribute or addStyleClass. Margin classes add space around a control, in four sizes: sapUiTinyMargin (0.5rem), sapUiSmallMargin (1rem), sapUiMediumMargin (2rem) and sapUiLargeMargin (3rem). Each size also exists for one side or one direction: ...Top, ...Bottom, ...Begin (left in left-to-right languages, right in RTL), ...End, ...TopBottom and ...BeginEnd, for example sapUiSmallMarginBottom. sapUiNoMargin (and its directional variants) removes margins. sapUiResponsiveMargin adapts the margin to the screen size. Container padding classes control the space inside containers like Panel or Page: sapUiContentPadding, sapUiNoContentPadding, and sapUiResponsiveContentPadding. Other useful classes are sapUiForceWidthAuto (overrides a fixed width, for example to keep margins inside 100% width), visibility classes like sapUiHideOnPhone or sapUiVisibleOnlyOnDesktop, and sapUiSizeCompact / sapUiSizeCozy, which set the content density. Using these classes instead of custom CSS keeps spacing consistent with the SAP Fiori design and works with every theme and RTL automatically.",
+      "keyPoints": [
+        "Margins in four sizes: sapUiTinyMargin (0.5rem), Small (1rem), Medium (2rem), Large (3rem).",
+        "Directional variants: ...Top, ...Bottom, ...Begin, ...End, ...TopBottom, ...BeginEnd; sapUiNoMargin removes them.",
+        "Container padding: sapUiContentPadding, sapUiNoContentPadding, sapUiResponsiveContentPadding.",
+        "Also: sapUiResponsiveMargin, sapUiForceWidthAuto, sapUiHideOnPhone, sapUiSizeCompact / sapUiSizeCozy."
+      ],
+      "examples": [
+        {
+          "title": "Common predefined classes",
+          "language": "xml",
+          "code": "<VBox class=\"sapUiSmallMargin\">\n  <Title text=\"Profile\" class=\"sapUiTinyMarginBottom\" />\n  <Panel class=\"sapUiResponsiveMargin sapUiNoContentPadding\" width=\"auto\">\n    <Text text=\"Edge-to-edge content\" />\n  </Panel>\n  <Text text=\"Only on desktops\" class=\"sapUiVisibleOnlyOnDesktop\" />\n</VBox>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "instantiate-control-js",
+      "level": "elementary",
+      "title": "How do you create (instantiate) a control in JavaScript?",
+      "description": "Besides declaring controls in XML views, you can create them in JavaScript. First, the control's module must be loaded as a dependency, like \"sap/m/Button\". Then you create an instance with new and pass a settings object, which can contain properties, events, aggregations, associations and bindings: new Button({ text: \"Save\", type: \"Emphasized\", press: this.onSave.bind(this) }). An optional first argument is the ID, like new Button(\"saveButton\", {...}); inside a view or controller, use this.createId(\"saveButton\") so the ID gets the view prefix. Values in curly braces in the settings are bindings, like text: \"{i18n>save}\". After creating it, the control must be placed into the UI, usually by adding it to an aggregation of an existing control (for example page.addContent(button)), or as a dependent for dialogs; a control that is not in the control tree is not rendered and does not get any models. After creation, properties are changed with the generated setters and getters, like setText(\"New\") and getText(). Controls you create yourself and that are not part of the tree must be destroyed with destroy() when no longer needed.",
+      "keyPoints": [
+        "Load the control's module (like \"sap/m/Button\") and create it with new and a settings object.",
+        "Settings contain properties, events, aggregations, associations and bindings (\"{i18n>save}\").",
+        "The optional first argument is the ID; use this.createId(...) inside a view/controller.",
+        "Add it to an aggregation (or as a dependent) so it is rendered and gets models; use setX()/getX() afterwards."
+      ],
+      "examples": [
+        {
+          "title": "Creating and placing controls",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/ui/core/mvc/Controller\",\n  \"sap/m/Button\",\n  \"sap/m/Text\"\n], function (Controller, Button, Text) {\n  \"use strict\";\n\n  return Controller.extend(\"my.app.controller.Main\", {\n    onInit: function () {\n      const button = new Button(this.createId(\"saveButton\"), {\n        text: \"{i18n>save}\",\n        type: \"Emphasized\",\n        press: this.onSave.bind(this)\n      });\n      this.byId(\"page\").addContent(new Text({ text: \"Created in code\" }));\n      this.byId(\"page\").addContent(button);\n    },\n\n    onSave: function () {\n      this.byId(\"saveButton\").setText(\"Saved\");\n    }\n  });\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "control-dev-theming-guidelines",
+      "level": "elementary",
+      "title": "What do the guidelines from the documentation say about control development and theming / CSS?",
+      "description": "The SAPUI5 documentation gives a few clear rules for building controls and styling apps. For controls: first check if an existing control, a composition of existing controls, or an extension can do the job, before writing a new control; give controls a clear API (properties, aggregations, events) with sensible defaults; render with the RenderManager's semantic API (apiVersion 2), write no inline styles, and support accessibility (keyboard handling, ARIA attributes), right-to-left languages, and all themes. For theming and CSS: do not override the standard CSS classes of UI5 controls (the sapM... and sapUi... classes and their DOM structure are internal and can change in any version, which would break your app after an update); instead, add your own classes with a unique, app-specific prefix and keep your CSS small. Do not use hard-coded colors, fonts or sizes: use the theme parameters (CSS variables like var(--sapTextColor) or var(--sapBrandColor)), so your styles adapt to every theme, including dark and high-contrast themes. Use rem units and the predefined margin classes instead of fixed pixel spacing, and avoid !important and inline styles. Custom CSS files are declared in the manifest (sap.ui5/resources/css).",
+      "keyPoints": [
+        "Prefer existing controls, composition, or extension before building a new control.",
+        "Controls: clear API, semantic rendering (apiVersion 2), no inline styles, accessibility, RTL, and theme support.",
+        "Never override UI5's internal sapM/sapUi classes or rely on their DOM; use your own prefixed classes.",
+        "Use theme parameters (CSS variables) instead of hard-coded colors; declare CSS in the manifest."
+      ],
+      "examples": [
+        {
+          "title": "Theme-aware custom CSS",
+          "language": "text",
+          "code": "/* css/style.css, declared in manifest.json under sap.ui5/resources/css */\n\n/* Good: own prefixed class, theme parameters, rem units */\n.myAppWarningBox {\n  border-left: 0.25rem solid var(--sapCriticalColor);\n  background: var(--sapGroup_ContentBackground);\n  padding: 1rem;\n}\n\n/* Bad: overrides an internal UI5 class and hard-codes a color */\n.sapMBtnInner { background: #ff0000 !important; }"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "custom-data-binding",
+      "level": "basic",
+      "title": "What is custom data, when do you use it, and how is it written and bound in XML?",
+      "description": "Custom data lets you attach your own key-value pairs to any control, for information that the control itself does not have a property for. Typical uses are to remember which record, action, or setting belongs to a control, for example several buttons sharing one press handler, where each button carries an action key, or a list item carrying an extra ID. Internally, custom data entries are sap.ui.core.CustomData elements in the customData aggregation, each with a key and a value. In an XML view, there are two ways to write them. The short way uses the custom data namespace: declare xmlns:app=\"http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1\" (the prefix name is up to you) and add attributes like app:action=\"delete\". The long way writes the aggregation explicitly: <customData><core:CustomData key=\"action\" value=\"delete\" /></customData>. In both forms, the value can be bound, like app:productId=\"{ID}\", so every item of a list carries its own value.",
+      "keyPoints": [
+        "Custom data attaches your own key-value pairs to any control (sap.ui.core.CustomData).",
+        "Use it to carry extra info, like an action key or a record ID, for a shared event handler.",
+        "Short XML syntax: a namespace for .../sap.ui.core.CustomData/1, then app:key=\"value\".",
+        "Long syntax: <customData><core:CustomData key value /></customData>; values can be bound, like app:id=\"{ID}\"."
+      ],
+      "examples": [
+        {
+          "title": "Both XML forms",
+          "language": "xml",
+          "code": "<mvc:View\n  xmlns=\"sap.m\"\n  xmlns:mvc=\"sap.ui.core.mvc\"\n  xmlns:core=\"sap.ui.core\"\n  xmlns:app=\"http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1\">\n\n  <!-- short form -->\n  <Button text=\"Approve\" app:action=\"approve\" press=\".onAction\" />\n  <Button text=\"Reject\" app:action=\"reject\" press=\".onAction\" />\n\n  <!-- long form, with a bound value -->\n  <Button text=\"Details\" press=\".onDetails\">\n    <customData>\n      <core:CustomData key=\"productId\" value=\"{ID}\" />\n    </customData>\n  </Button>\n</mvc:View>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "custom-data-controller-dom",
+      "level": "basic",
+      "title": "How do you read custom data in the controller, and how (and why) can it be written to the DOM?",
+      "description": "In a controller, custom data is read with the control's data() method: control.data(\"action\") returns the value for the key action, and control.data() without arguments returns all entries as an object. The same method can also set a value: control.data(\"action\", \"archive\"). The usual pattern is a shared event handler that reads the custom data of the control that fired the event, through event.getSource().data(\"key\"). Custom data can also be written to the HTML of the control: set writeToDom=\"true\" on the CustomData element, and the control's root element gets an attribute data-key=\"value\", like data-status=\"Error\". This is useful for styling based on data: your CSS can then match the attribute, like .myList [data-status=\"Error\"], without changing internal UI5 classes. It can also help automated tests find elements. Only use it with keys that are valid HTML attribute names, and only for string values; never put sensitive data into the DOM, because it is visible to anyone who inspects the page.",
+      "keyPoints": [
+        "control.data(\"key\") reads one entry, control.data() reads all, control.data(\"key\", value) sets one.",
+        "Common pattern: a shared handler reads event.getSource().data(\"action\").",
+        "writeToDom=\"true\" renders the entry as a data-key=\"value\" attribute on the control's HTML.",
+        "Use DOM custom data for data-dependent styling or test selectors; never for sensitive data."
+      ],
+      "examples": [
+        {
+          "title": "Reading custom data in a shared handler",
+          "language": "javascript",
+          "code": "onAction: function (event) {\n  const action = event.getSource().data(\"action\"); // \"approve\" or \"reject\"\n  if (action === \"approve\") {\n    // ...\n  }\n}"
+        },
+        {
+          "title": "Writing custom data to the DOM for styling",
+          "language": "xml",
+          "code": "<ObjectListItem title=\"{Name}\">\n  <customData>\n    <core:CustomData key=\"status\" value=\"{Status}\" writeToDom=\"true\" />\n  </customData>\n</ObjectListItem>\n<!-- renders data-status=\"Error\" (for example) on the item's HTML,\n     so CSS can match: .myOrders [data-status=\"Error\"] { ... } -->"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "field-groups",
+      "level": "basic",
+      "title": "What are field groups, what are they for, and what are common use cases?",
+      "description": "A field group is a set of input controls that logically belong together, like the street, ZIP code and city of an address, or the start and end date of a period. You put controls into a group by giving them the same ID in the fieldGroupIds property: fieldGroupIds=\"address\". A control can belong to several groups. The framework then watches the focus: when the user leaves the group, meaning focus moves from a control of the group to a control outside it (or the user presses Enter inside the group), UI5 fires the validateFieldGroup event on the control, and the event bubbles up the control tree. In the handler, the fieldGroupIds parameter tells you which group was left, and you can get all its controls with getControlsByFieldGroupId(\"address\"), for example on the view. The main use case is validating several fields together, once the user has finished the whole block, instead of after every single field: checking that a ZIP code fits the city, that the end date is after the start date, or that a group of required fields is complete. It avoids showing errors too early, while the user is still typing in the group.",
+      "keyPoints": [
+        "A field group is a set of controls that belong together, marked with the same fieldGroupIds.",
+        "When focus leaves the group (or Enter is pressed), the validateFieldGroup event is fired and bubbles up.",
+        "The handler gets the fieldGroupIds; getControlsByFieldGroupId(\"id\") returns the group's controls.",
+        "Use case: validate related fields together (address, date range) once the user has finished the block."
+      ],
+      "examples": [
+        {
+          "title": "Validating a date range as a group",
+          "language": "xml",
+          "code": "<VBox validateFieldGroup=\".onValidateRange\">\n  <DatePicker id=\"startDate\" fieldGroupIds=\"range\" value=\"{/start}\" />\n  <DatePicker id=\"endDate\" fieldGroupIds=\"range\" value=\"{/end}\" />\n</VBox>"
+        },
+        {
+          "title": "The handler",
+          "language": "javascript",
+          "code": "onValidateRange: function (event) {\n  if (!event.getParameter(\"fieldGroupIds\").includes(\"range\")) {\n    return;\n  }\n  const start = this.byId(\"startDate\").getDateValue();\n  const end = this.byId(\"endDate\").getDateValue();\n  const invalid = start && end && end < start;\n  this.byId(\"endDate\").setValueState(invalid ? \"Error\" : \"None\");\n  this.byId(\"endDate\").setValueStateText(invalid ? \"End date must be after the start date\" : \"\");\n}"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

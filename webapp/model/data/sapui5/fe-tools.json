@@ -1,0 +1,66 @@
+{
+  "topicId": "fe-tools",
+  "title": "FE: Tools",
+  "questions": [
+    {
+      "id": "fe-build-web-ide",
+      "level": "elementary",
+      "title": "How do you build a Fiori elements app using SAP Web IDE (and what replaces it today)?",
+      "description": "In SAP Web IDE, a Fiori elements app was created with the template wizard: File, New, Project from Template, then choosing a floorplan template, like List Report Application or Overview Page. The wizard asked for the basic information (project name, title, namespace), the data connection (an OData service from an SAP system, usually through a destination, or a local metadata file), the annotation files to use (the back-end annotations and a local annotation file for the app's own annotations), and the template customization, such as the main entity set (OData collection) and the navigation entity for the object page. It then generated the project: manifest.json with the sap.ui.generic.app pages, the Component, the localService folder with the metadata, an annotation file, and test pages, and the app could be run right away. Important: SAP Web IDE has been retired; its successor is SAP Business Application Studio, together with SAP Fiori tools (also available for Visual Studio Code). There, the same steps are done with the Application Generator (Fiori: Open Application Generator), and the generated app is configured further with the Page Map and Page Editor.",
+      "keyPoints": [
+        "SAP Web IDE: File > New > Project from Template, then a Fiori elements floorplan template.",
+        "Wizard steps: basic information, data connection (service or metadata), annotation files, main entity set and navigation.",
+        "It generated manifest.json (sap.ui.generic.app), Component, localService, annotations, and test pages.",
+        "Web IDE is retired: today use SAP Business Application Studio / VS Code with SAP Fiori tools (Application Generator)."
+      ],
+      "examples": [
+        {
+          "title": "Generated project (simplified)",
+          "language": "text",
+          "code": "webapp/\n  Component.js\n  manifest.json          <- sap.ui.generic.app with ListReport and ObjectPage pages\n  annotations/\n    annotation.xml       <- the app's local annotations\n  localService/\n    metadata.xml         <- copy of the service metadata\n  i18n/\n    i18n.properties\n  test/\n    flpSandbox.html"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-sync-metadata",
+      "level": "elementary",
+      "title": "How do you synchronize the service metadata in SAP Web IDE?",
+      "description": "A Fiori elements app keeps a local copy of the OData service metadata in localService/metadata.xml. It is used for running the app with mock data and by the annotation tools, which need to know the entity types and properties. When the back-end service changes, for example a new property or entity set is added, the local copy becomes outdated, and the new fields cannot be used in local annotations or with the mock server. In SAP Web IDE, you updated it with the Sync Metadata option: right-click the metadata.xml file (or the localService folder), choose Sync Metadata, and select the service in the system again; Web IDE then downloaded the current metadata and replaced the file. In SAP Fiori tools (SAP Business Application Studio or Visual Studio Code), the same is done with the Service Manager or the Refresh Service Metadata command, which also updates the back-end annotation files. After a sync, check the local annotations and mock data, because renamed or removed properties can break them.",
+      "keyPoints": [
+        "The app keeps a local copy of the metadata in localService/metadata.xml (for mock data and annotation tools).",
+        "When the service changes, the copy becomes outdated.",
+        "SAP Web IDE: right-click metadata.xml (or localService) > Sync Metadata, and select the service.",
+        "SAP Fiori tools: Service Manager / Refresh Service Metadata; then check annotations and mock data."
+      ],
+      "examples": [
+        {
+          "title": "What is synchronized",
+          "language": "text",
+          "code": "Back-end service ZSALES_SRV  ->  $metadata (new property: DeliveryPriority)\n                                |\n                 Sync Metadata  v\nwebapp/localService/metadata.xml   (now contains DeliveryPriority)\nwebapp/annotations/annotation.xml  (can now reference DeliveryPriority)"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-edit-annotations-web-ide",
+      "level": "elementary",
+      "title": "How do you edit UI annotations in SAP Web IDE?",
+      "description": "The UI of a Fiori elements app is mostly defined by UI annotations, which can come from the back end (CDS views, or annotations in the service) and from a local annotation file in the app (annotations/annotation.xml). In SAP Web IDE, local annotations were edited with the Annotation Modeler: you opened the annotation file with it, saw the entity types of the service, and added or changed annotations through a form-based editor, for example adding a UI.LineItem with DataFields, UI.SelectionFields, a UI.HeaderInfo, or UI.Facets for the object page sections, with value help for property paths and annotation terms; the back-end annotations were shown read-only, and local annotations override them. Alternatively, the file could be edited directly in the code editor as XML. The annotation file is referenced in the manifest as a data source of type ODataAnnotation, and the order of the annotation sources decides which one wins. In SAP Fiori tools, annotations are edited with the XML annotation language server (code completion and checks in the editor), the Page Editor (forms for common annotations), or in CDS when the service is built with CAP or RAP.",
+      "keyPoints": [
+        "UI annotations come from the back end and from a local annotations/annotation.xml file.",
+        "SAP Web IDE: the Annotation Modeler edited local annotations with forms and value help; back-end ones were read-only.",
+        "Local annotations override back-end ones; the file is a dataSource of type ODataAnnotation in the manifest.",
+        "SAP Fiori tools: XML annotation language server, Page Editor, or CDS annotations."
+      ],
+      "examples": [
+        {
+          "title": "The local annotation file in the manifest",
+          "language": "json",
+          "code": "{\n  \"sap.app\": {\n    \"dataSources\": {\n      \"mainService\": {\n        \"uri\": \"/sap/opu/odata/sap/ZSALES_SRV/\",\n        \"type\": \"OData\",\n        \"settings\": {\n          \"annotations\": [\"ZSALES_ANNO_MDL\", \"annotation\"],\n          \"localUri\": \"localService/metadata.xml\"\n        }\n      },\n      \"annotation\": {\n        \"type\": \"ODataAnnotation\",\n        \"uri\": \"annotations/annotation.xml\",\n        \"settings\": { \"localUri\": \"annotations/annotation.xml\" }\n      }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

@@ -10,6 +10,7 @@ import {
   Subject,
   SubjectIndex
 } from "../model/DataRepository";
+import * as Formatter from "../model/Formatter";
 
 interface TopicRouteArgs {
   subjectId: string;
@@ -24,6 +25,8 @@ interface Question {
  * @namespace performance.review.controller
  */
 export default class Questions extends BaseController {
+  public formatter = Formatter;
+
   private subjectId = "";
   private topicId = "";
 

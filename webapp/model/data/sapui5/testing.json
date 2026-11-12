@@ -1,0 +1,195 @@
+{
+  "topicId": "testing",
+  "title": "Testing",
+  "questions": [
+    {
+      "id": "why-testing",
+      "level": "elementary",
+      "title": "Why is testing so important?",
+      "description": "Automated tests check that the app does what it should, every time the code changes, without someone clicking through every screen by hand. This matters a lot for business apps, which live for many years, are changed by many developers, and run on new UI5 versions regularly. Tests catch bugs early, when they are cheap to fix, instead of in production, where a wrong total or a broken Save button costs real money and trust. They make refactoring and upgrades safe: if all tests still pass after a change, you can be confident nothing else broke (protection against regressions). They document the expected behavior in an executable form, so a new developer can read the tests to understand what a formatter or a screen must do. They also lead to better design, because code that is easy to test is usually small, focused, and loosely coupled. In SAP projects, automated tests are also part of the quality requirements and run in CI pipelines on every change, so broken code does not reach the main branch. The usual strategy is the test pyramid: many fast unit tests, fewer integration tests, and only a few slow end-to-end tests.",
+      "keyPoints": [
+        "Tests check behavior automatically on every change, without manual clicking.",
+        "They catch bugs early and protect against regressions during refactoring and upgrades.",
+        "They document expected behavior and push code toward a cleaner, testable design.",
+        "In SAP projects they run in CI; the test pyramid: many unit tests, fewer integration, few end-to-end tests."
+      ],
+      "examples": [
+        {
+          "title": "The test pyramid for a UI5 app",
+          "language": "text",
+          "code": "    /\\        end-to-end (few, slow): full system, real back end\n   /  \\\n  /----\\      integration / OPA5 (some): app + mock server, user journeys\n /      \\\n/--------\\    unit / QUnit (many, fast): formatters, models, helpers"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "ui5-testing-options",
+      "level": "elementary",
+      "title": "What testing options does SAPUI5 offer: unit tests (QUnit) and integration tests (OPA5)?",
+      "description": "SAPUI5 comes with two main testing tools. Unit tests are written with QUnit, a JavaScript testing framework that UI5 supports out of the box. A unit test checks one small piece of code in isolation, like a formatter function, a custom data type, a model helper, or a single controller method, with dependencies replaced by stubs or mocks (often with Sinon.JS, which UI5 also ships). Unit tests are fast (milliseconds each), so you can have hundreds of them. Integration tests are written with OPA5 (One Page Acceptance tests), which is also part of UI5. OPA5 starts the real app (usually with a mock server instead of the real back end), and then acts like a user: it waits for controls to appear, presses buttons, enters text, and checks what the screen shows, for example \"when I press a product in the list, the detail page shows its name\". OPA5 knows UI5 controls, so tests find controls by ID, type, and properties, and wait automatically until the app is ready, which makes them stable. Both kinds of tests run in the browser, from the test pages in the webapp/test folder, and can run automatically in CI (for example with the UI5 test runner or Karma). For end-to-end tests across real systems, wdi5 or similar WebDriver-based tools are used.",
+      "keyPoints": [
+        "QUnit unit tests: small pieces (formatters, types, helpers) in isolation, fast, with Sinon stubs.",
+        "OPA5 integration tests: start the real app (usually with a mock server) and act like a user.",
+        "OPA5 finds UI5 controls by ID, type and properties, and waits until the app is ready.",
+        "Both run in the browser from webapp/test and in CI; wdi5 and similar tools are for end-to-end tests."
+      ],
+      "examples": [
+        {
+          "title": "A unit test and an OPA journey side by side",
+          "language": "javascript",
+          "code": "// unit test (QUnit)\nQUnit.test(\"statusState returns Success for A\", function (assert) {\n  assert.strictEqual(formatter.statusState(\"A\"), \"Success\");\n});\n\n// integration test (OPA5)\nopaTest(\"Should open the details of a product\", function (Given, When, Then) {\n  Given.iStartMyUIComponent({ componentConfig: { name: \"my.app\" } });\n  When.onTheListPage.iPressOnTheFirstProduct();\n  Then.onTheDetailPage.iShouldSeeTheProductName();\n  Then.iTeardownMyUIComponent();\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "tdd-bdd",
+      "level": "elementary",
+      "title": "What are the TDD and BDD approaches?",
+      "description": "TDD (test-driven development) means writing the test before the code. You work in short cycles called red, green, refactor: first write a small test for the next piece of behavior and run it, and it fails (red), because the code does not exist yet; then write just enough code to make it pass (green); then improve the code's structure while keeping all tests green (refactor). This leads to small, well-tested, focused code, and every piece of logic has a test from the start. BDD (behavior-driven development) builds on TDD, but focuses on the behavior a user or the business expects, described in plain, structured language that developers, testers and business experts all understand. Scenarios are written as Given (the starting situation), When (the action), and Then (the expected result), for example \"Given I am on the product list, When I press a product, Then I see its details\". The Gherkin language formalizes this. In UI5, OPA5 tests follow the same Given / When / Then structure, which makes them read like BDD scenarios, and there is also built-in support for running Gherkin feature files with OPA5. TDD fits unit tests especially well, and BDD fits integration tests of user journeys.",
+      "keyPoints": [
+        "TDD: write a failing test first, then the code to pass it, then refactor (red, green, refactor).",
+        "BDD: describe expected behavior in shared, plain language as Given / When / Then scenarios.",
+        "Gherkin is the formal language for BDD scenarios.",
+        "OPA5 uses Given / When / Then; UI5 can also run Gherkin feature files with OPA5."
+      ],
+      "examples": [
+        {
+          "title": "A BDD scenario in Gherkin",
+          "language": "text",
+          "code": "Feature: Product details\n\n  Scenario: Open a product from the list\n    Given I start the app\n    When I press the product \"Notebook Basic 15\"\n    Then I see the product name \"Notebook Basic 15\" on the detail page"
+        },
+        {
+          "title": "A TDD cycle for a formatter",
+          "language": "javascript",
+          "code": "// 1. RED: the test is written first and fails (formatter.discountText does not exist yet)\nQUnit.test(\"discountText shows the percentage\", function (assert) {\n  assert.strictEqual(formatter.discountText(0.15), \"15% off\");\n});\n\n// 2. GREEN: the simplest code that passes\ndiscountText: function (rate) {\n  return Math.round(rate * 100) + \"% off\";\n}\n\n// 3. REFACTOR: improve the code while the test stays green"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "qunit-unit-testing",
+      "level": "basic",
+      "title": "How do you organize unit testing with QUnit: environment, guidelines, syntax, and assertions?",
+      "description": "Environment: unit tests live in webapp/test/unit, with one test file per module, like test/unit/model/formatter.js. In current UI5 versions, the Test Starter sets everything up: a testsuite file (test/testsuite.qunit.html and testsuite.qunit.js, using sap/ui/test/starter/createSuite) lists the test pages and their configuration (QUnit and Sinon versions, coverage, UI5 settings), and each test runs in a generated page. Older projects use a unitTests.qunit.html page that loads QUnit and the tests. For CI, the tests run headless, for example with the UI5 test runner or Karma (karma-ui5), with code coverage. Syntax: group tests with QUnit.module(\"name\", { beforeEach, afterEach }) for shared setup and cleanup, and write each test with QUnit.test(\"what it checks\", function (assert) { ... }). The main assertions are assert.strictEqual(actual, expected) (strict ===), assert.deepEqual for objects and arrays, assert.ok(value) and assert.notOk for truthy checks, assert.throws for expected errors, and assert.expect(n) to require a number of assertions. For async code, return a promise from the test, or use const done = assert.async() and call done(). Guidelines: test one behavior per test, keep tests independent of each other and of their order, give them descriptive names, replace dependencies with Sinon stubs and restore them, and test logic modules (formatters, types, helpers, controller logic) rather than UI rendering.",
+      "keyPoints": [
+        "Tests live in webapp/test/unit; the Test Starter (testsuite.qunit.js + createSuite) sets up pages; CI uses a test runner or Karma.",
+        "QUnit.module(name, { beforeEach, afterEach }) groups tests; QUnit.test(name, assert => ...) defines one.",
+        "Assertions: strictEqual, deepEqual, ok / notOk, throws, expect; async via returned promise or assert.async().",
+        "Guidelines: one behavior per test, independent tests, clear names, Sinon stubs restored, test logic not rendering."
+      ],
+      "examples": [
+        {
+          "title": "A unit test module",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"my/app/model/formatter\"\n], function (formatter) {\n  \"use strict\";\n\n  QUnit.module(\"formatter.statusState\");\n\n  QUnit.test(\"returns Success for approved orders\", function (assert) {\n    assert.strictEqual(formatter.statusState(\"A\"), \"Success\");\n  });\n\n  QUnit.test(\"returns None for unknown codes\", function (assert) {\n    assert.strictEqual(formatter.statusState(\"X\"), \"None\");\n  });\n\n  QUnit.test(\"async example\", function (assert) {\n    return Promise.resolve(42).then(function (value) {\n      assert.strictEqual(value, 42);\n    });\n  });\n});"
+        }
+      ],
+      "assignment": {
+        "task": "Write QUnit tests for a formatter priceClass(price) that returns \"cheap\" for prices below 100, \"normal\" for 100 to 999, and \"expensive\" for 1000 and more. Cover the boundaries 99, 100, 999 and 1000.",
+        "starterCode": "QUnit.module(\"formatter.priceClass\");\n\n// your tests here",
+        "solution": "QUnit.module(\"formatter.priceClass\");\n\nQUnit.test(\"below 100 is cheap\", function (assert) {\n  assert.strictEqual(formatter.priceClass(99), \"cheap\");\n});\n\nQUnit.test(\"100 to 999 is normal\", function (assert) {\n  assert.strictEqual(formatter.priceClass(100), \"normal\");\n  assert.strictEqual(formatter.priceClass(999), \"normal\");\n});\n\nQUnit.test(\"1000 and more is expensive\", function (assert) {\n  assert.strictEqual(formatter.priceClass(1000), \"expensive\");\n});"
+      }
+    },
+    {
+      "id": "opa5-setup-finding-controls",
+      "level": "basic",
+      "title": "How do you set up OPA5 integration tests and find the controls you want to work with?",
+      "description": "OPA5 tests live in webapp/test/integration. The structure has three parts. Journeys are the test cases, written with opaTest(\"description\", function (Given, When, Then) {...}): Given starts the app, When performs actions, and Then checks results. Page objects, created with Opa5.createPageObjects({ onTheListPage: { actions: {...}, assertions: {...} } }), contain the reusable steps for each screen, so journeys stay readable, like When.onTheListPage.iPressOnTheFirstProduct(). The app is started with Given.iStartMyUIComponent({ componentConfig: { name: \"my.app\" }, hash: \"\" }) and stopped with Then.iTeardownMyUIComponent(); usually the mock server is started too, so tests do not depend on a real back end. Every step uses this.waitFor({...}), which looks for controls and retries until they are found or a timeout is reached (so you never need sleeps). Controls are found by id (with viewName, so the view prefix is handled), or by controlType (like \"sap.m.Button\") within a view, narrowed down with matchers from sap/ui/test/matchers: PropertyStrictEquals (a property has a value), AggregationLengthEquals and AggregationFilled, BindingPath, I18NText (a text from the i18n model), Ancestor, Descendant, LabelFor, and others. When found, success receives the control(s), and errorMessage describes what failed.",
+      "keyPoints": [
+        "Journeys: opaTest(name, (Given, When, Then) => ...); page objects (Opa5.createPageObjects) hold reusable steps.",
+        "Start with Given.iStartMyUIComponent({ componentConfig, hash }); stop with Then.iTeardownMyUIComponent().",
+        "this.waitFor({...}) retries until controls are found; no manual waiting needed.",
+        "Find by id + viewName, or controlType + matchers (PropertyStrictEquals, AggregationLengthEquals, BindingPath, I18NText...)."
+      ],
+      "examples": [
+        {
+          "title": "A page object with waitFor and matchers",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/ui/test/Opa5\",\n  \"sap/ui/test/matchers/AggregationLengthEquals\",\n  \"sap/ui/test/matchers/PropertyStrictEquals\"\n], function (Opa5, AggregationLengthEquals, PropertyStrictEquals) {\n  \"use strict\";\n\n  Opa5.createPageObjects({\n    onTheListPage: {\n      assertions: {\n        iShouldSeeProducts: function (count) {\n          return this.waitFor({\n            id: \"productList\",\n            viewName: \"List\",\n            matchers: new AggregationLengthEquals({ name: \"items\", length: count }),\n            success: function () {\n              Opa5.assert.ok(true, \"The list shows \" + count + \" products\");\n            },\n            errorMessage: \"The product list does not have \" + count + \" items\"\n          });\n        },\n        iShouldSeeTheCreateButton: function () {\n          return this.waitFor({\n            viewName: \"List\",\n            controlType: \"sap.m.Button\",\n            matchers: new PropertyStrictEquals({ name: \"text\", value: \"Create\" }),\n            success: function () {\n              Opa5.assert.ok(true, \"The Create button is visible\");\n            }\n          });\n        }\n      }\n    }\n  });\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "opa5-input-interaction-navigation",
+      "level": "basic",
+      "title": "How do you test user input, user interaction, and navigation with OPA5?",
+      "description": "User actions are performed with the actions setting of waitFor, using the classes in sap/ui/test/actions. Press simulates a click or tap on a control, like a button, a list item, or a link (on the right DOM element, with the right events). EnterText types into an input field: new EnterText({ text: \"Notebook\" }), with options like clearTextFirst and pressEnterKey (to trigger a search or a submit). There are also Scroll, Drag and Drop. Because actions are executed only after the control is found and ready (visible, enabled, not busy), tests stay stable without manual waits. User input is tested by entering text, then asserting the result, such as the filtered number of items or the value state of a field. User interaction is tested by pressing controls and checking what changes: a dialog opens, a message toast appears, a value is saved. Navigation is tested by acting (for example pressing a list item) and then asserting that the target view is displayed, typically with a waitFor on a control of the new view, like its title, or by checking the hash with Opa5.getHashChanger().getHash(). Starting the app with a hash (iStartMyUIComponent({ hash: \"products/HT-1000\" })) tests deep links and bookmarks, and Back navigation can be tested by pressing the page's back button.",
+      "keyPoints": [
+        "Actions from sap/ui/test/actions: Press, EnterText (clearTextFirst, pressEnterKey), Scroll, Drag, Drop.",
+        "Actions run only when the control is ready (visible, enabled, not busy), so tests are stable.",
+        "Input and interaction: act, then assert the effect (filtered items, value state, dialog, toast).",
+        "Navigation: act, then assert a control of the target view or the hash; start with a hash to test deep links."
+      ],
+      "examples": [
+        {
+          "title": "Entering text, pressing, and checking navigation",
+          "language": "javascript",
+          "code": "// actions in the list page object\niSearchFor: function (text) {\n  return this.waitFor({\n    id: \"searchField\",\n    viewName: \"List\",\n    actions: new EnterText({ text: text, pressEnterKey: true }),\n    errorMessage: \"The search field was not found\"\n  });\n},\n\niPressOnTheFirstProduct: function () {\n  return this.waitFor({\n    id: \"productList\",\n    viewName: \"List\",\n    actions: function (list) {\n      new Press().executeOn(list.getItems()[0]);\n    }\n  });\n},\n\n// assertion in the detail page object\niShouldBeOnTheDetailPage: function () {\n  return this.waitFor({\n    id: \"productTitle\",\n    viewName: \"Detail\",\n    success: function () {\n      Opa5.assert.ok(Opa5.getHashChanger().getHash().startsWith(\"products/\"), \"Navigated to the detail page\");\n    }\n  });\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "mockserver-configuration-data",
+      "level": "basic",
+      "title": "How do you configure the MockServer: metadata, annotations, and mock data (JSON files or generated data)?",
+      "description": "The MockServer (sap/ui/core/util/MockServer) intercepts the app's OData V2 requests in the browser and answers them itself, so the app (and OPA tests) can run without a back end. It is usually set up in localService/mockserver.js and started before the app's component is created. You create it with the rootUri of the service, exactly as in the manifest's dataSource (like /sap/opu/odata/sap/ZSHOP_SRV/), and call simulate(metadataUrl, settings): the metadata (a local copy, localService/metadata.xml) tells it which entity sets, keys and navigation properties exist. The mock data comes from JSON files, one per entity set (like Products.json with an array of products), in the folder given by sMockdataBaseUrl. With bGenerateMissingMockData: true, the MockServer invents random data for entity sets that have no JSON file, based on the property types; aEntitySetsNames limits which sets are loaded. MockServer.config({ autoRespond: true, autoRespondAfter: 500 }) makes it answer automatically, with a delay that simulates network latency. Then start() activates it, and stop() deactivates it. Annotation files are not served by the MockServer automatically: point the annotation data source's localUri to a local file, or add a request handler for its URL. Projects created with SAP Fiori tools often use the ui5-middleware-fe-mockserver instead, which runs on the development server rather than in the browser.",
+      "keyPoints": [
+        "new MockServer({ rootUri }) with the same URL as the manifest's dataSource; start it before the component.",
+        "simulate(metadataUrl, { sMockdataBaseUrl, bGenerateMissingMockData, aEntitySetsNames }).",
+        "Data: one JSON file per entity set, or generated random data for missing files.",
+        "MockServer.config({ autoRespond, autoRespondAfter }), then start() / stop(); annotations need a localUri or a handler."
+      ],
+      "examples": [
+        {
+          "title": "localService/mockserver.js",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/ui/core/util/MockServer\"\n], function (MockServer) {\n  \"use strict\";\n\n  return {\n    init: function () {\n      const mockServer = new MockServer({\n        rootUri: \"/sap/opu/odata/sap/ZSHOP_SRV/\"\n      });\n\n      MockServer.config({ autoRespond: true, autoRespondAfter: 300 });\n\n      mockServer.simulate(sap.ui.require.toUrl(\"my/app/localService/metadata.xml\"), {\n        sMockdataBaseUrl: sap.ui.require.toUrl(\"my/app/localService/mockdata\"),\n        bGenerateMissingMockData: true\n      });\n\n      mockServer.start();\n    }\n  };\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "mockserver-custom-requests",
+      "level": "basic",
+      "title": "How do you add custom behavior to the MockServer: CRUD hooks, function imports, URL parameters, and multiple mock servers?",
+      "description": "The MockServer handles the standard CRUD requests by itself, but real services have special logic. Hooks let you change requests and responses: attachBefore(HTTPMETHOD, fnCallback, entitySet) runs before the MockServer handles a request, and attachAfter(...) runs after it, with access to the request and the result, for example to fill a server-generated field (like a creation date) after a POST, or to change data after a GET. For requests the MockServer does not know at all, especially function imports (which it cannot simulate automatically), you add your own handlers: read the list with getRequests(), push an object with method (like \"POST\"), path (a regular expression matching the URL, like /ApproveOrder.*/) and response (a function that answers with oXhr.respondJSON(status, headers, body) and returns true), then set it back with setRequests(list). URL parameters make the mock configurable without code changes, for example ?serverDelay=2000 to test slow responses, or a parameter that switches on error simulation; mockserver.js reads them from the page URL (like new URLSearchParams(window.location.search)). Multiple mock servers: an app that uses several services creates one MockServer per service, each with its own rootUri, metadata, and mock data, and starts all of them.",
+      "keyPoints": [
+        "attachBefore / attachAfter(HTTPMETHOD, callback, entitySet) change requests and responses.",
+        "Function imports need custom handlers: getRequests(), add { method, path: RegExp, response }, setRequests().",
+        "Read URL parameters (like ?serverDelay=2000) in mockserver.js to configure the mock without code changes.",
+        "Several services: one MockServer per service, each with its own rootUri, metadata and data."
+      ],
+      "examples": [
+        {
+          "title": "A function import handler and an after-hook",
+          "language": "javascript",
+          "code": "// simulate the function import POST /ApproveOrder?OrderID='...'\nconst requests = mockServer.getRequests();\nrequests.push({\n  method: \"POST\",\n  path: /ApproveOrder\\?(.*)/,\n  response: function (xhr) {\n    xhr.respondJSON(200, {}, JSON.stringify({ d: { OrderID: \"4711\", Status: \"A\" } }));\n    return true;\n  }\n});\nmockServer.setRequests(requests);\n\n// fill a server-side field after a create\nmockServer.attachAfter(MockServer.HTTPMETHOD.POST, function (event) {\n  const entry = event.getParameter(\"oEntity\");\n  entry.CreatedAt = new Date().toISOString();\n}, \"Products\");\n\n// configurable delay from the URL: ...?serverDelay=2000\nconst delay = Number(new URLSearchParams(window.location.search).get(\"serverDelay\")) || 300;\nMockServer.config({ autoRespond: true, autoRespondAfter: delay });"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "test-coverage-requirements",
+      "level": "basic",
+      "title": "What are SAP's standard requirements regarding test coverage?",
+      "description": "Test coverage measures how much of the code is executed by the automated tests, most often as the percentage of lines (or statements, branches, functions) that at least one test runs. SAP's product standards require that delivered software is covered by automated tests that run in the CI pipeline on every change, and that the results, including coverage, are tracked; a change that breaks tests or lowers coverage below the agreed threshold should not be merged. The exact numbers are defined in SAP's internal quality guidelines and by each team or project, so they are not public; check your project's own definition. A common target in the industry, and in many teams, is around 80% line coverage for app logic, with a higher focus on important code paths. For UI5 apps, coverage is measured while running the QUnit and OPA5 tests, for example with the Test Starter's coverage support, the UI5 middleware for code coverage, or Karma with Istanbul, and is reported in CI tools. Keep in mind that coverage shows what code was executed, not that the results were checked correctly: meaningful assertions and well-chosen test cases (like boundaries and error paths) matter more than reaching a number.",
+      "keyPoints": [
+        "Coverage = how much code the tests execute (lines, statements, branches, functions).",
+        "SAP standards require automated tests in CI on every change, with coverage tracked; exact thresholds are internal.",
+        "A common target is around 80% line coverage for app logic; check your project's own rules.",
+        "Measured with the Test Starter / coverage middleware / Karma + Istanbul; good assertions matter more than the number."
+      ],
+      "examples": [
+        {
+          "title": "A coverage threshold in a Karma configuration (example)",
+          "language": "javascript",
+          "code": "// karma.conf.js (excerpt)\nmodule.exports = function (config) {\n  config.set({\n    frameworks: [\"ui5\"],\n    reporters: [\"progress\", \"coverage\"],\n    coverageReporter: {\n      type: \"html\",\n      dir: \"coverage\",\n      check: {\n        global: { statements: 80, branches: 70, functions: 80, lines: 80 }\n      }\n    }\n  });\n};"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

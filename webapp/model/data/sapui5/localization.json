@@ -1,0 +1,101 @@
+{
+  "topicId": "localization",
+  "title": "Localization",
+  "questions": [
+    {
+      "id": "resource-model-aspects",
+      "level": "elementary",
+      "title": "How does the ResourceModel work: its binding type, where its texts come from, and how multiple languages are supported?",
+      "description": "The ResourceModel (sap.ui.model.resource.ResourceModel) makes translatable texts available for data binding. Its texts come from .properties files, plain text files with one key=value pair per line, usually in the i18n folder: i18n.properties (the raw file, often in English), plus one file per language with the language code in the name, like i18n_de.properties, i18n_fr.properties or i18n_de_CH.properties. The model is normally declared in manifest.json, with the bundleName (the file's module path without .properties, like my.app.i18n.i18n). Its texts are read-only: the default binding mode is OneWay (OneTime is also possible), never TwoWay. Which language is loaded is decided by the UI5 configuration (for example the sap-ui-language URL parameter, the launchpad user setting, or the browser language). For a user with de_CH, UI5 looks for the text in i18n_de_CH, then i18n_de, then the fallback locale (en by default), and finally the raw i18n.properties; if no file contains the key, the key itself is shown, which makes missing texts easy to spot. In manifest.json, sap.app/i18n can list supportedLocales and the fallbackLocale, so UI5 only requests files that really exist (avoiding failed requests). In views, texts are bound with {i18n>key}, and in code read with getResourceBundle().getText(key).",
+      "keyPoints": [
+        "Texts come from .properties files: i18n.properties plus one per language (i18n_de.properties...).",
+        "Declared in the manifest with a bundleName; texts are read-only (OneWay or OneTime).",
+        "Fallback chain: de_CH, then de, then the fallback locale (en), then the raw file; if all fail, the key is shown.",
+        "supportedLocales and fallbackLocale in sap.app/i18n avoid requests for files that do not exist."
+      ],
+      "examples": [
+        {
+          "title": "Declaring the i18n model with supported languages",
+          "language": "json",
+          "code": "{\n  \"sap.app\": {\n    \"i18n\": {\n      \"bundleName\": \"my.app.i18n.i18n\",\n      \"supportedLocales\": [\"\", \"en\", \"de\"],\n      \"fallbackLocale\": \"en\"\n    }\n  },\n  \"sap.ui5\": {\n    \"models\": {\n      \"i18n\": {\n        \"type\": \"sap.ui.model.resource.ResourceModel\",\n        \"settings\": {\n          \"bundleName\": \"my.app.i18n.i18n\",\n          \"supportedLocales\": [\"\", \"en\", \"de\"],\n          \"fallbackLocale\": \"en\"\n        }\n      }\n    }\n  }\n}"
+        },
+        {
+          "title": "i18n.properties and i18n_de.properties",
+          "language": "properties",
+          "code": "# i18n.properties\nappTitle=Products\nsaveButton=Save\n\n# i18n_de.properties\nappTitle=Produkte\nsaveButton=Sichern"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "i18n-placeholders",
+      "level": "elementary",
+      "title": "How do you use i18n texts with placeholders?",
+      "description": "Many texts contain values that are only known at runtime, like a count or a name. Instead of building them by joining strings in code (which breaks in languages with a different word order), you write the complete sentence in the properties file with numbered placeholders: deleteConfirm=Do you really want to delete {0} items from {1}?. Translators can then move the placeholders wherever their language needs them. In a controller, you pass the values as an array: bundle.getText(\"deleteConfirm\", [3, \"Inbox\"]), where the bundle comes from this.getOwnerComponent().getModel(\"i18n\").getResourceBundle(). In an XML view, you fill the placeholders from bound values by using formatMessage (from sap/base/strings/formatMessage) as the formatter of a composite binding: the first part is the i18n text, and the following parts are the values, in order. The placeholder syntax follows the MessageFormat rules: a single quote is a special character, so a literal apostrophe must be written as two single quotes, like Don''t delete {0}.; otherwise the text between quotes is shown without replacing placeholders. Never build user-facing sentences from separate i18n fragments.",
+      "keyPoints": [
+        "Write the full sentence with numbered placeholders: Delete {0} items from {1}?",
+        "In code: bundle.getText(\"key\", [value0, value1]).",
+        "In views: a composite binding with formatMessage as formatter (declared with core:require).",
+        "A literal apostrophe in a text with placeholders is written as two single quotes ('')."
+      ],
+      "examples": [
+        {
+          "title": "Properties file",
+          "language": "properties",
+          "code": "deleteConfirm=Do you really want to delete {0} items from {1}?\ncannotDelete=Don''t delete {0}: it is still in use."
+        },
+        {
+          "title": "Filling placeholders in code and in a view",
+          "language": "javascript",
+          "code": "// controller\nconst bundle = this.getOwnerComponent().getModel(\"i18n\").getResourceBundle();\nMessageBox.confirm(bundle.getText(\"deleteConfirm\", [3, \"Inbox\"]));\n// \"Do you really want to delete 3 items from Inbox?\"\n\n// XML view (with core:require=\"{ formatMessage: 'sap/base/strings/formatMessage' }\"):\n// <Text text=\"{parts: ['i18n>deleteConfirm', 'view>/count', 'view>/folder'], formatter: 'formatMessage'}\" />"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "i18n-bundle-enhancing",
+      "level": "basic",
+      "title": "What is the i18n bundle enhancing mechanism?",
+      "description": "Enhancing a resource bundle means adding a second (or third) properties file on top of the original one, so that its texts override texts with the same key and can add new keys, without changing the original file. This is used mainly in extensibility scenarios: an app variant, a customer extension, or an adaptation project can change some labels (for example \"Customer\" to \"Client\") or add texts for its own new controls, while the original app stays untouched and can still be updated. In the manifest, it is declared with enhanceWith in the settings of the i18n model: an array of extra bundles, each given by bundleName or bundleUrl. When a text is requested, UI5 checks the enhancing bundles first, the last one in the list first, and only then the original bundle, so an enhancing bundle wins over the original. Language fallback works for each bundle as usual. The same can be done in code at runtime with resourceModel.enhance({ bundleName: ... }) or with an already loaded ResourceBundle.",
+      "keyPoints": [
+        "Enhancing adds extra properties files that override existing keys and add new ones.",
+        "Used for app variants, extensions and adaptation projects, without touching the original texts.",
+        "Manifest: \"enhanceWith\": [{ \"bundleName\": \"...\" }] in the i18n model's settings.",
+        "Enhancing bundles are checked first (the last one first); in code: resourceModel.enhance(...)."
+      ],
+      "examples": [
+        {
+          "title": "Enhancing the i18n model in a manifest",
+          "language": "json",
+          "code": "{\n  \"sap.ui5\": {\n    \"models\": {\n      \"i18n\": {\n        \"type\": \"sap.ui.model.resource.ResourceModel\",\n        \"settings\": {\n          \"bundleName\": \"my.app.i18n.i18n\",\n          \"enhanceWith\": [\n            { \"bundleName\": \"customer.ext.i18n.i18n\" }\n          ]\n        }\n      }\n    }\n  }\n}"
+        },
+        {
+          "title": "Override texts in the enhancing file",
+          "language": "properties",
+          "code": "# customer/ext/i18n/i18n.properties\n# overrides the original \"customerLabel\" and adds a new key\ncustomerLabel=Client\nloyaltyLevel=Loyalty level"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "i18n-text-types",
+      "level": "basic",
+      "title": "What is the purpose of text classification (text types) in i18n files?",
+      "description": "In SAP projects, the properties files are translated into many languages by translators who never see the app. To translate a text correctly, they need to know what kind of text it is and how much space it has: \"Open\" on a button (an action) is translated differently than \"Open\" as a status. That is why every text is classified with a comment line directly above it, in the format #<text type>[,<maximum length>]: <optional explanation>. The text type is a short code: the first letter tells whether it is a short text (X, for labels, buttons, titles; under 120 characters) or a long text (Y, for longer messages and instructions), and the rest names the UI element, for example XTIT (title), XFLD (field label), XBUT (button), XCOL (column header), XTOL (tooltip), XMSG (short message), YMSG (long message), XLNK (link), XSEL (selection or status value) and XTXT (general text). The optional length, like #XBUT,20, tells the translator the maximum number of characters that fit. The comment after the colon gives extra context, like what a placeholder stands for. The translation tools read these annotations, and SAP's checks require them, so missing classifications are reported.",
+      "keyPoints": [
+        "Every text gets a comment line above it: #<type>[,<max length>]: <explanation>.",
+        "X = short text, Y = long text; then the UI element: XTIT, XFLD, XBUT, XCOL, XTOL, XMSG, YMSG, XSEL, XTXT...",
+        "The optional maximum length (like #XBUT,20) tells translators how much space there is.",
+        "Translators see only the file, so type, length and context are needed for correct translations."
+      ],
+      "examples": [
+        {
+          "title": "Classified texts",
+          "language": "properties",
+          "code": "#XTIT: Title of the product list page\nproductListTitle=Products\n\n#XBUT,20: Button that saves the current product\nsaveButton=Save\n\n#XFLD: Label of the product name field\nproductNameLabel=Product name\n\n#YMSG: Confirmation before deleting; {0} is the number of selected products\ndeleteConfirm=Do you really want to delete {0} products?"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

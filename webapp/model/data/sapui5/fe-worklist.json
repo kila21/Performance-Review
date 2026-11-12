@@ -1,0 +1,66 @@
+{
+  "topicId": "fe-worklist",
+  "title": "FE: Worklist features",
+  "questions": [
+    {
+      "id": "worklist-purpose",
+      "level": "elementary",
+      "title": "What is the purpose of the worklist floorplan?",
+      "description": "The worklist floorplan shows a collection of items that the user has to process, like approvals waiting for a decision, tasks assigned to them, or items with errors to fix. Working through the list usually means looking at the details of an item and taking an action, typically completing or delegating it. The focus is on processing items, not on searching for them: the list is already pre-filtered for the user (for example \"my open items\"), so there is no extensive filter bar; instead, there is a search field in the table toolbar and, often, tabs or a segmented button to switch between item categories (like Open, In Process, Done), with counts. This differs from the list report, whose focus is on finding objects with flexible filters in a potentially large data set. A worklist is the right choice when the number of items is manageable and the user's job is to work through them, possibly with actions directly in the rows; when users need to search and filter a large set, the list report is the better floorplan.",
+      "keyPoints": [
+        "A worklist shows items the user must process (approve, complete, delegate).",
+        "The list is pre-filtered for the user; no large filter bar, just a search field in the table toolbar.",
+        "Categories (Open, Done...) are often shown as tabs or a segmented button with counts.",
+        "List report = finding objects with filters; worklist = working through a manageable list."
+      ],
+      "examples": [
+        {
+          "title": "Typical worklist layout",
+          "language": "text",
+          "code": "[ App title ]\n[ Open (12) | In Process (3) | Done (40) ]            <- multiple views\n[ My Approvals (12)          [Search...] [Approve] ] <- table toolbar with search\n| Request | Requester | Amount | Due date | Status |  <- table rows, navigation to details"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "worklist-generate",
+      "level": "elementary",
+      "title": "How do you generate a worklist app?",
+      "description": "A worklist app is created with the application generator, like any Fiori elements app: in SAP Fiori tools (the SAP Fiori application generator in SAP Business Application Studio or Visual Studio Code), or formerly in SAP Web IDE's template wizard. In the template selection step, you choose Worklist Page (in Web IDE, the worklist was an option of the list report template), then the data source (the OData service), and the main entity set, plus optional navigation to an object page. Technically, a Fiori elements V2 worklist is a list report in a special mode: in manifest.json, the list report component's settings contain isWorklist: true. This switches off the smart filter bar and shows the search field in the table toolbar, and uses the other worklist defaults. The app can then be configured with the usual list report options, for example multiple views (quickVariantSelection or quickVariantSelectionX) to create a categorized worklist with tabs, actions, and navigation to an object page.",
+      "keyPoints": [
+        "Generate it with the SAP Fiori application generator (or formerly SAP Web IDE) choosing Worklist Page.",
+        "Select the service, the main entity set, and optional object page navigation.",
+        "In V2 it is a list report with isWorklist: true in the component settings.",
+        "Then configure it like a list report: multiple views (tabs), actions, navigation."
+      ],
+      "examples": [
+        {
+          "title": "A worklist in the manifest",
+          "language": "json",
+          "code": "{\n  \"sap.ui.generic.app\": {\n    \"pages\": [\n      {\n        \"entitySet\": \"C_PurchaseRequisition\",\n        \"component\": {\n          \"name\": \"sap.suite.ui.generic.template.ListReport\",\n          \"list\": true,\n          \"settings\": {\n            \"isWorklist\": true,\n            \"quickVariantSelectionX\": {\n              \"showCounts\": true,\n              \"variants\": {\n                \"0\": { \"key\": \"_open\", \"annotationPath\": \"com.sap.vocabularies.UI.v1.SelectionVariant#Open\" },\n                \"1\": { \"key\": \"_done\", \"annotationPath\": \"com.sap.vocabularies.UI.v1.SelectionVariant#Done\" }\n              }\n            }\n          }\n        }\n      }\n    ]\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "worklist-vs-list-report",
+      "level": "elementary",
+      "title": "What are the main differences and limitations of the worklist compared with the list report?",
+      "description": "Technically, a worklist page is a simplified list report, so most list report features are available, but there are clear differences. There is no smart filter bar: instead, a search field is available in the table toolbar, so complex filtering is not possible (the list should already be focused on the user's items). Variant management is hidden by default; it can be provided at table level by setting variantManagementHidden: false, or at page level. The Execute on Select action (loading data immediately when a variant is selected) is not available, because there is no filter bar. In the smart table, multi-select is enabled for all tables (if there are only line item actions, a table without selection is used), the Export to Microsoft Excel feature is not available, and the default table type is the responsive table, with the row count in the table title, a fixed layout, and scroll-to-load. Categories can be added with multiple views. As a result, the worklist suits a manageable set of work items, while the list report remains the floorplan for searching large data sets with many filters and exporting results.",
+      "keyPoints": [
+        "No smart filter bar: only a search field in the table toolbar.",
+        "Variant management hidden by default (can be enabled at table or page level); no Execute on Select.",
+        "Multi-select for all tables; no Export to Excel; responsive table with row count by default.",
+        "Use it for manageable work items; use the list report for filtering large data sets."
+      ],
+      "examples": [
+        {
+          "title": "Worklist vs list report",
+          "language": "text",
+          "code": "                   List report                      Worklist\nFilter bar         smart filter bar                 none (search in table toolbar)\nVariant management on by default                    hidden by default\nExport to Excel    yes                              no\nFocus              find objects in large data       process my items"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

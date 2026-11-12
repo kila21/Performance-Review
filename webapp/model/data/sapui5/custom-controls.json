@@ -1,0 +1,191 @@
+{
+  "topicId": "custom-controls",
+  "title": "Custom controls",
+  "questions": [
+    {
+      "id": "custom-controls-why",
+      "level": "elementary",
+      "title": "What are custom controls, and why might you need one?",
+      "description": "A custom control is a control you write yourself, usually by extending sap.ui.core.Control (or an existing control), with its own properties, events and rendering. SAPUI5 already has hundreds of controls, so a custom control is only needed when the standard ones cannot do what the app needs: for example, a special visual element that does not exist (like a rating with custom symbols, a seat map, or a progress ring with a special design), a standard control that needs one extra property or behavior, or a group of controls that is repeated across many views and should become one reusable building block with a simple API. Custom controls bring real benefits: the logic and rendering live in one place, views stay short and declarative (you write <my:RatingBar value=\"{rating}\"/> instead of ten controls), and the control can be data-bound and reused like any standard control. But they also cost something: you must handle rendering, accessibility, keyboard support, theming, and right-to-left languages yourself, and keep the control working with new UI5 versions. So first check whether a standard control, a fragment, or a composition of existing controls is enough.",
+      "keyPoints": [
+        "A custom control is your own control class, usually extending sap.ui.core.Control or an existing control.",
+        "Needed when standard controls cannot provide the required UI or behavior, or to package a repeated group of controls.",
+        "Benefits: one reusable place, short declarative views, data binding like any standard control.",
+        "Costs: you own rendering, accessibility, theming and RTL; check standard controls and fragments first."
+      ],
+      "examples": [
+        {
+          "title": "Using a custom control in a view",
+          "language": "xml",
+          "code": "<mvc:View xmlns=\"sap.m\" xmlns:mvc=\"sap.ui.core.mvc\" xmlns:my=\"my.app.control\">\n  <my:StatusBadge text=\"{StatusText}\" status=\"{Status}\" press=\".onBadgePress\" />\n</mvc:View>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "custom-control-types",
+      "level": "basic",
+      "title": "What types of custom controls exist, and when should you use each type?",
+      "description": "There are three main approaches. (1) Extending an existing control: you inherit from a standard control, like sap.m.Input or sap.m.Button, and add a property, an event, or change a small part of its behavior or rendering. Use this when a standard control is almost right. It is the least work, but you depend on the parent's internal behavior. (2) A composite control: a new control that is built from other existing controls (stored in hidden, internal aggregations) and offers its own simple API to the outside. Use this when you repeat the same combination of controls in many places, like a label, an input and a help button that always go together. It reuses the existing controls' rendering, accessibility and theming. (3) A completely new control (sometimes called a notepad control): you extend sap.ui.core.Control, define all metadata yourself, and write the renderer that produces the HTML. Use this only when there is no standard control to build on, like a fully custom visualization. It gives full freedom, but you must handle rendering, accessibility, keyboard, theming and RTL yourself. For composites, there used to be an XML-based variant (sap.ui.core.XMLComposite), but it is deprecated since UI5 1.88; standard composite controls are the recommended way.",
+      "keyPoints": [
+        "Extension: inherit from a standard control to add or change a little. Least work.",
+        "Composite: combine existing controls behind one simple API. Good for repeated control groups.",
+        "New control from sap.ui.core.Control with its own renderer: full freedom, but most work.",
+        "XMLComposite is deprecated since 1.88; use standard composite controls."
+      ],
+      "examples": [
+        {
+          "title": "The three starting points",
+          "language": "javascript",
+          "code": "// 1. Extension of a standard control\nInput.extend(\"my.app.control.UpperCaseInput\", { /* ... */ });\n\n// 2. Composite control: built from other controls\nControl.extend(\"my.app.control.LabeledInput\", {\n  metadata: {\n    aggregations: { _label: { type: \"sap.m.Label\", multiple: false, visibility: \"hidden\" } }\n  }\n  /* ... */\n});\n\n// 3. Completely new control with its own HTML\nControl.extend(\"my.app.control.StatusBadge\", { /* metadata + renderer */ });"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "standard-composite-control",
+      "level": "basic",
+      "title": "What is a standard composite control, and what is its syntax?",
+      "description": "A standard composite control is a control (extending sap.ui.core.Control) that is built from other controls inside it, and shows them as one unit. The inner controls are stored in hidden aggregations: in the metadata, you declare them with visibility: \"hidden\", and by convention their names start with an underscore, like _label and _input. Hidden aggregations are not part of the public API, so users of the composite cannot add or remove the inner controls directly; they only use the composite's own properties and events. The inner controls are created in init(), and stored with this.setAggregation(\"_input\", new Input(...)). The composite passes its public property values to the inner controls, for example in a property setter or in onBeforeRendering, and forwards inner events as its own events, for example by attaching to the inner input's change event and calling this.fireChange(...). In the renderer, the composite writes a wrapping element and then calls rm.renderControl(control.getAggregation(\"_input\")) for each inner control, so the standard controls render themselves. This way, the composite reuses their rendering, accessibility and theming, and only adds its own structure.",
+      "keyPoints": [
+        "A composite control combines existing controls and presents them as one control with its own API.",
+        "Inner controls live in hidden aggregations (visibility: \"hidden\", names like _input).",
+        "Create the inner controls in init(); pass property values down and forward inner events with fireX().",
+        "The renderer calls rm.renderControl(innerControl) for each inner control."
+      ],
+      "examples": [
+        {
+          "title": "A labeled input as a composite control",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/ui/core/Control\",\n  \"sap/m/Label\",\n  \"sap/m/Input\"\n], function (Control, Label, Input) {\n  \"use strict\";\n\n  return Control.extend(\"my.app.control.LabeledInput\", {\n    metadata: {\n      properties: {\n        label: { type: \"string\", defaultValue: \"\" },\n        value: { type: \"string\", defaultValue: \"\" }\n      },\n      aggregations: {\n        _label: { type: \"sap.m.Label\", multiple: false, visibility: \"hidden\" },\n        _input: { type: \"sap.m.Input\", multiple: false, visibility: \"hidden\" }\n      },\n      events: {\n        change: { parameters: { value: { type: \"string\" } } }\n      }\n    },\n\n    init: function () {\n      const input = new Input({\n        change: function (event) {\n          const value = event.getParameter(\"value\");\n          this.setProperty(\"value\", value, true);\n          this.fireChange({ value: value });\n        }.bind(this)\n      });\n      this.setAggregation(\"_input\", input);\n      this.setAggregation(\"_label\", new Label({ labelFor: input }));\n    },\n\n    onBeforeRendering: function () {\n      this.getAggregation(\"_label\").setText(this.getLabel());\n      this.getAggregation(\"_input\").setValue(this.getValue());\n    },\n\n    renderer: {\n      apiVersion: 2,\n      render: function (rm, control) {\n        rm.openStart(\"div\", control);\n        rm.class(\"myAppLabeledInput\");\n        rm.openEnd();\n        rm.renderControl(control.getAggregation(\"_label\"));\n        rm.renderControl(control.getAggregation(\"_input\"));\n        rm.close(\"div\");\n      }\n    }\n  });\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "xml-composite-control",
+      "level": "basic",
+      "title": "What is an XML composite control, what was its purpose, and what should you use today?",
+      "description": "An XML composite control (sap.ui.core.XMLComposite) was a variant of a composite control where the inner structure was not created in JavaScript, but described declaratively in an XML fragment, with the same file name as the control (for example MyField.js plus MyField.control.xml). The control's own properties were available in that fragment through a special model, so the inner controls could be bound to them, like value=\"{$this>value}\", which made composites quicker to write and easier to read. The purpose was to give composite controls the same advantages as XML views: declarative structure, less JavaScript, and an easy way to see how the inner controls are arranged. However, XMLComposite is deprecated since UI5 version 1.88, because of performance and maintenance problems, and it should not be used in new code. The recommended replacement is a standard composite control (inner controls in hidden aggregations, created in JavaScript), or, when you only need reusable UI without its own API, an XML fragment. You should still recognize XMLComposite in older projects, and know that migrating it means rebuilding it as a standard composite.",
+      "keyPoints": [
+        "XMLComposite described a composite control's inner structure in an XML fragment (Name.control.xml).",
+        "Its properties were bound inside the fragment through a special model, like {$this>value}.",
+        "Purpose: declarative composites with less JavaScript.",
+        "Deprecated since 1.88: use standard composite controls, or plain XML fragments for reusable UI."
+      ],
+      "examples": [
+        {
+          "title": "How an old XML composite looked (do not use in new code)",
+          "language": "xml",
+          "code": "<!-- my/app/control/LabeledField.control.xml -->\n<core:FragmentDefinition xmlns=\"sap.m\" xmlns:core=\"sap.ui.core\">\n  <VBox>\n    <Label text=\"{$this>label}\" />\n    <Input value=\"{$this>value}\" />\n  </VBox>\n</core:FragmentDefinition>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "control-extension-inheritance",
+      "level": "basic",
+      "title": "How do you extend an existing control through inheritance?",
+      "description": "To extend a control, you call extend on the standard control's class, for example Input.extend( \"my.app.control.UpperCaseInput\", { ... }), after loading sap/m/Input as a dependency. The new control inherits everything: properties, aggregations, events, behavior and rendering. In its metadata, you add only what is new, such as an extra property or event; everything else stays as it is. To change behavior, you override a method and usually call the parent's version too, through the prototype: Input.prototype. onAfterRendering.apply(this, arguments), so the standard behavior is not lost. Init methods must also call the parent: Input.prototype.init.apply(this, arguments). If you do not set a renderer, the parent's renderer is inherited unchanged; if you give a renderer object that only contains some methods, it extends the parent's renderer and replaces just those methods. Extending is the quickest way to adapt a control, but it has a risk: if you rely on the parent's private methods or internal DOM, an update of UI5 can break your control. So only override public or documented hooks, and keep the extension small.",
+      "keyPoints": [
+        "Call ParentControl.extend(\"my.app.control.Name\", { ... }); everything is inherited.",
+        "Add only the new properties or events in the metadata.",
+        "Overridden methods (including init) should call the parent: Parent.prototype.method.apply(this, arguments).",
+        "No renderer: the parent's is used; avoid relying on private methods or internal DOM."
+      ],
+      "examples": [
+        {
+          "title": "An Input that converts input to uppercase",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/m/Input\",\n  \"sap/m/InputRenderer\"\n], function (Input, InputRenderer) {\n  \"use strict\";\n\n  return Input.extend(\"my.app.control.UpperCaseInput\", {\n    metadata: {\n      properties: {\n        upperCase: { type: \"boolean\", defaultValue: true }\n      }\n    },\n\n    setValue: function (value) {\n      const newValue = this.getUpperCase() && value ? value.toUpperCase() : value;\n      return Input.prototype.setValue.call(this, newValue);\n    },\n\n    renderer: InputRenderer // reuse the standard renderer unchanged\n  });\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "control-metadata",
+      "level": "basic",
+      "title": "What is a control's metadata: properties, aggregations, associations, and events with their settings?",
+      "description": "A control's metadata describes its public API, and UI5 generates the code for it automatically. It is defined in the metadata object of the control class. Properties are simple values, declared with a type (like string, int, float, boolean, sap.ui.core.CSSSize, or an enum like sap.ui.core.ValueState) and a defaultValue; optional settings are bindable and group. For every property, UI5 creates getX() and setX(). Aggregations are child controls the control owns and renders; their settings are type (the allowed control class), multiple (true for 0..n, false for 0..1), singularName (used for method names like addItem), visibility (\"hidden\" for internal ones) and bindable. A control can also name its defaultAggregation. Associations are references to other controls by ID, without ownership, with type and multiple; they get methods like setLabelFor or addAriaLabelledBy. Events are declared by name, optionally with parameters (and allowPreventDefault); UI5 generates attachX, detachX and fireX methods. Because all of this is generated, the API is consistent with standard controls: it can be used in XML views, supports data binding, and shows up in tools.",
+      "keyPoints": [
+        "Properties: type + defaultValue (+ bindable, group); getters and setters are generated.",
+        "Aggregations: type, multiple, singularName, visibility (\"hidden\"), bindable; plus defaultAggregation.",
+        "Associations: references by ID with type and multiple; no ownership.",
+        "Events: name + parameters (+ allowPreventDefault); attach/detach/fire methods are generated."
+      ],
+      "examples": [
+        {
+          "title": "Metadata of a custom control",
+          "language": "javascript",
+          "code": "Control.extend(\"my.app.control.TagList\", {\n  metadata: {\n    properties: {\n      title:   { type: \"string\", defaultValue: \"\" },\n      maxTags: { type: \"int\", defaultValue: 10 },\n      state:   { type: \"sap.ui.core.ValueState\", defaultValue: \"None\" }\n    },\n    defaultAggregation: \"tags\",\n    aggregations: {\n      tags: { type: \"sap.m.Token\", multiple: true, singularName: \"tag\" }\n    },\n    associations: {\n      ariaLabelledBy: { type: \"sap.ui.core.Control\", multiple: true, singularName: \"ariaLabelledBy\" }\n    },\n    events: {\n      tagPress: { parameters: { tag: { type: \"sap.m.Token\" } } }\n    }\n  }\n  // generated: getTitle/setTitle, addTag/removeTag/getTags,\n  //            addAriaLabelledBy, attachTagPress/fireTagPress, ...\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "custom-renderer-render-manager",
+      "level": "basic",
+      "title": "How do you implement a custom renderer, and how does the RenderManager work?",
+      "description": "Every control has a renderer, an object with a render(rm, control) method that writes the control's HTML. UI5 calls it whenever the control needs to be rendered or re-rendered (for example after a property change), and passes the RenderManager (rm), which collects the output and writes it efficiently into the page. Modern renderers declare apiVersion: 2, which means they use the RenderManager's semantic API instead of writing HTML strings: rm.openStart(\"div\", control) starts an element (passing the control writes its ID and the data needed by UI5), then rm.class(...), rm.attr(...), rm.style(...) add classes, attributes and styles, rm.openEnd() closes the start tag, rm.text(...) writes escaped text, rm.renderControl(child) renders a child control, and rm.close(\"div\") closes the element. For elements without content, there are rm.voidStart and rm.voidEnd. With apiVersion 2, UI5 can update only the changed parts of the DOM instead of replacing everything, which is faster and keeps the focus. Important rules: the root element must get the control (so its ID is set), texts must go through rm.text (which escapes them, protecting against cross-site scripting), the renderer must not change the control's state, and accessibility attributes can be written with rm.accessibilityState(control, {...}).",
+      "keyPoints": [
+        "A renderer has render(rm, control), called whenever the control is (re-)rendered.",
+        "apiVersion: 2 uses the semantic API: openStart, class, attr, style, openEnd, text, renderControl, close.",
+        "rm.openStart(tag, control) on the root writes the control's ID; rm.text escapes text (XSS protection).",
+        "apiVersion 2 allows efficient DOM patching; renderers must not change control state."
+      ],
+      "examples": [
+        {
+          "title": "A renderer with the semantic API",
+          "language": "javascript",
+          "code": "renderer: {\n  apiVersion: 2,\n  render: function (rm, control) {\n    rm.openStart(\"div\", control);                 // root element with the control's ID\n    rm.class(\"myAppStatusBadge\");\n    rm.class(\"myAppStatusBadge\" + control.getStatus());\n    rm.attr(\"tabindex\", \"0\");\n    rm.accessibilityState(control, { role: \"button\" });\n    rm.openEnd();\n\n    rm.openStart(\"span\");\n    rm.class(\"myAppStatusBadgeText\");\n    rm.openEnd();\n    rm.text(control.getText());                    // escaped text\n    rm.close(\"span\");\n\n    rm.close(\"div\");\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "reuse-extend-renderer",
+      "level": "basic",
+      "title": "How do you reuse or extend the renderer of an existing control?",
+      "description": "When you extend a standard control, you often want to keep its rendering, or change only a small part. There are three options, and UI5 decides based on what you put into the renderer setting of the new control. (1) Reuse unchanged: do not set a renderer at all (the parent's renderer is inherited), or set it explicitly to the parent's renderer class or name, like renderer: InputRenderer or renderer: \"sap.m.InputRenderer\". (2) Extend: give an object that does not have its own render method, but only some of the renderer's hook methods; UI5 then creates a new renderer that extends the parent's renderer, and replaces only the methods you provided. Some standard renderers offer such hooks on purpose, for example the protected prependInnerContent and writeInnerContent methods of sap.m.InputBaseRenderer, so you can change one part; if your version should keep the parent's output, call it inside, like ParentRenderer.methodName.apply(this, arguments). The same can be done explicitly with sap/ui/core/Renderer.extend(ParentRenderer). (3) Replace: give an object with a full render method, which ignores the parent's rendering completely. Option 2 is powerful, but the hook methods of standard renderers are often not part of the public API, so check the documentation, and retest after UI5 upgrades.",
+      "keyPoints": [
+        "No renderer set: the parent's renderer is inherited unchanged.",
+        "renderer: ParentRenderer (or its name as a string) reuses it explicitly.",
+        "An object with only some hook methods extends the parent renderer and overrides just those methods.",
+        "An object with its own render() replaces the rendering completely; hooks may be internal, so retest on upgrades."
+      ],
+      "examples": [
+        {
+          "title": "Extending a renderer by overriding one hook",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/m/Input\"\n], function (Input) {\n  \"use strict\";\n\n  return Input.extend(\"my.app.control.PrefixInput\", {\n    metadata: {\n      properties: { prefix: { type: \"string\", defaultValue: \"\" } }\n    },\n    renderer: {\n      // no render(): UI5 extends the Input renderer and replaces only this hook.\n      // prependInnerContent is a protected, empty hook of sap.m.InputBaseRenderer\n      // that writes content before the inner <input> element.\n      prependInnerContent: function (rm, control) {\n        rm.openStart(\"span\");\n        rm.class(\"myAppInputPrefix\");\n        rm.openEnd();\n        rm.text(control.getPrefix());\n        rm.close(\"span\");\n      }\n    }\n  });\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "custom-control-css-i18n",
+      "level": "basic",
+      "title": "How do you add custom CSS and i18n texts to a custom control (guidelines, naming, placement)?",
+      "description": "A custom control usually needs some CSS and some translatable texts. For CSS, the guidelines are: give every CSS class a unique prefix that belongs to your app or library (like myAppStatusBadge), never reuse or override the internal sapM/sapUi classes of standard controls, use theme parameters (CSS variables like var(--sapButton_Background)) instead of fixed colors, use rem units, and support right-to-left layouts (for example with margin-inline-start rather than margin-left). Where the file goes depends on where the control lives: a control inside an app adds its styles to the app's CSS file (declared in the manifest under sap.ui5/resources/css). A control in a UI5 library puts its styles into the library's theme folder (like themes/base/StatusBadge.less, imported by library.source.less), so the theming infrastructure compiles them for every theme. For texts, a control must not hard-code user-facing strings like tooltips or ARIA labels. An app control can read them from the app's resource bundle, while a library control uses the library's own messagebundle.properties, loaded with Lib.getResourceBundleFor(\"my.lib\") (older code: Core.getLibraryResourceBundle). Texts that the user of the control provides, like a label, should be properties, so they can be bound to i18n in the view.",
+      "keyPoints": [
+        "Use a unique prefix for CSS classes; never override internal sapM/sapUi classes.",
+        "Use theme parameters (CSS variables), rem units, and RTL-safe properties.",
+        "App control: CSS in the app's stylesheet (manifest resources/css); library control: themes/base/*.less.",
+        "No hard-coded texts: app bundle, or the library's messagebundle via Lib.getResourceBundleFor()."
+      ],
+      "examples": [
+        {
+          "title": "CSS for a control inside an app",
+          "language": "text",
+          "code": "/* webapp/css/style.css */\n.myAppStatusBadge {\n  display: inline-flex;\n  padding: 0.25rem 0.5rem;\n  border-radius: 0.75rem;\n  background: var(--sapNeutralBackgroundColor);\n  color: var(--sapTextColor);\n  margin-inline-start: 0.5rem;\n}\n.myAppStatusBadgeError {\n  background: var(--sapErrorBackground);\n  color: var(--sapNegativeTextColor);\n}"
+        },
+        {
+          "title": "A translated tooltip in a library control",
+          "language": "javascript",
+          "code": "sap.ui.define([\"sap/ui/core/Control\", \"sap/ui/core/Lib\"], function (Control, Lib) {\n  \"use strict\";\n  const bundle = Lib.getResourceBundleFor(\"my.lib\");\n\n  return Control.extend(\"my.lib.StatusBadge\", {\n    renderer: {\n      apiVersion: 2,\n      render: function (rm, control) {\n        rm.openStart(\"div\", control);\n        rm.attr(\"title\", bundle.getText(\"STATUS_BADGE_TOOLTIP\"));\n        rm.openEnd();\n        rm.close(\"div\");\n      }\n    }\n  });\n});"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

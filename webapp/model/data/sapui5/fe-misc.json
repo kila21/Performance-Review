@@ -1,0 +1,111 @@
+{
+  "topicId": "fe-misc",
+  "title": "FE: Misc",
+  "questions": [
+    {
+      "id": "fe-extension-api",
+      "level": "elementary",
+      "title": "What are the general extension capabilities of Fiori elements, and what is the extensionAPI?",
+      "description": "Fiori elements apps are first configured with annotations and manifest settings; when that is not enough, they can be extended with app extensions: view extensions (fragments placed at defined extension points, like custom columns, sections, filter fields, or header facets) and controller extensions (registered in the manifest under sap.ui.controllerExtensions for the list report or object page view), which add logic through documented extension methods like onBeforeRebindTableExtension, onListNavigationExtension, beforeDeleteExtension, or getCustomAppStateDataExtension. Inside a controller extension, this.extensionAPI is the official, stable way to work with the Fiori elements page, instead of accessing its internal controls. Its methods include getSelectedContexts (the selected items of a table), securedExecution (runs a function safely: it handles busy indication and messages, and makes sure no other action runs at the same time), getNavigationController (with navigateInternal and navigateExternal), attachPageDataLoaded (react when the object page data has been loaded), rebind and refresh (reload data), invokeActions (call back-end actions), setCustomMessage, and registerCustomFieldForSideEffect. Using the extensionAPI keeps extensions working across UI5 upgrades, while relying on internal IDs or controls does not.",
+      "keyPoints": [
+        "App extensions: view extensions (fragments at extension points) and controller extensions (documented methods).",
+        "this.extensionAPI is the stable API for working with the page inside controller extensions.",
+        "Methods: getSelectedContexts, securedExecution, getNavigationController, attachPageDataLoaded, rebind, invokeActions...",
+        "Use the extensionAPI instead of internal controls, so extensions survive upgrades."
+      ],
+      "examples": [
+        {
+          "title": "Using the extensionAPI in an action handler",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/m/MessageToast\"\n], function (MessageToast) {\n  \"use strict\";\n  return {\n    // list report controller extension, press handler of a custom action\n    onRemind: function () {\n      const contexts = this.extensionAPI.getSelectedContexts();\n      const send = function () {\n        return this.extensionAPI.invokeActions(\"/SendReminder\", contexts);\n      }.bind(this);\n      this.extensionAPI.securedExecution(send).then(function () {\n        MessageToast.show(\"Reminders sent\");\n      });\n    }\n  };\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-adaptation-extension-canvas",
+      "level": "basic",
+      "title": "What are adaptation extensions (for list report, analytical list page, object page, overview page) and the canvas page extension?",
+      "description": "Adaptation extensions are extensions of delivered (standard) Fiori elements apps that are created without changing the original app, for example by a customer or partner: in an adaptation project (SAP Fiori tools) or through key user adaptation. They are stored as changes on top of the original app and survive its upgrades. The possible changes depend on the floorplan. For the list report and the analytical list page, typical capabilities are adding or hiding filter fields and table columns, adding custom columns and actions (with fragments and controller extensions), changing table settings, and adding custom filters. For the object page, they include adding, moving or hiding sections, fields, and header facets, adding custom sections, subsections, and form fields, adding actions, and changing table settings in sections. For the overview page, they include adding, removing, or rearranging cards, changing card settings, and adding custom cards or filters. A canvas page extension adds a completely custom page to a Fiori elements V2 app: in the manifest, a page uses the component sap.suite.ui.generic.template.Canvas with your own view, so you can build a freestyle page inside the app's navigation (with routing, the app's models, and the shell's back navigation) when no floorplan fits.",
+      "keyPoints": [
+        "Adaptation extensions change delivered apps without modifying them (adaptation projects, key user adaptation).",
+        "List report / ALP: filter fields, columns, custom columns and actions, table settings.",
+        "Object page: sections, fields, header facets, custom sections/subsections/fields, actions; OVP: cards and filters.",
+        "Canvas page: sap.suite.ui.generic.template.Canvas adds a fully custom page inside the app's navigation."
+      ],
+      "examples": [
+        {
+          "title": "A canvas page in a Fiori elements V2 app (simplified)",
+          "language": "json",
+          "code": "{\n  \"sap.ui.generic.app\": {\n    \"pages\": {\n      \"ListReport|C_SalesOrder\": {\n        \"entitySet\": \"C_SalesOrder\",\n        \"component\": { \"name\": \"sap.suite.ui.generic.template.ListReport\", \"list\": true },\n        \"pages\": {\n          \"Canvas|DeliveryPlanning\": {\n            \"entitySet\": \"C_SalesOrder\",\n            \"component\": {\n              \"name\": \"sap.suite.ui.generic.template.Canvas\",\n              \"settings\": {}\n            },\n            \"implementingComponent\": {\n              \"componentName\": \"my.app.ext.deliveryplanning\"\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-navigation-config",
+      "level": "basic",
+      "title": "How do you configure navigation in Fiori elements: internal, external, and inbound / outbound?",
+      "description": "Internal navigation is navigation between the pages of the same app: from the list report to the object page, and from an object page to a subobject page. It is configured by the page hierarchy in manifest.json (sap.ui.generic.app pages, with entitySet and navigationProperty), and Fiori elements builds the routes and handles the back navigation. Extensions can navigate internally with the navigation controller's navigateInternal. External navigation is navigation to another app through the SAP Fiori launchpad, using intents (a semantic object and an action). In annotations, it is defined with Common.SemanticObject (smart links), UI.DataFieldForIntentBasedNavigation (buttons) and UI.DataFieldWithIntentBasedNavigation (links); the current object's properties are passed as parameters. Inbound and outbound navigation are declared in manifest.json under sap.app/crossNavigation. Inbounds describe how this app can be started: the semantic object and action of its intent, and the parameters it accepts (which can prefill filters or open a specific object). Outbounds describe targets this app navigates to: an outbound has a semantic object, action, and parameters, and code (or settings, like a list report's navigation target) refers to it by name, for example in navigateExternal(\"OutboundName\"). Changing the default row navigation to an external app is also configured with outbounds.",
+      "keyPoints": [
+        "Internal: between the app's own pages, from the sap.ui.generic.app page hierarchy (navigateInternal in code).",
+        "External: intents via Common.SemanticObject, DataFieldForIntentBasedNavigation, DataFieldWithIntentBasedNavigation.",
+        "Inbounds (sap.app/crossNavigation/inbounds): how the app is started and which parameters it accepts.",
+        "Outbounds: named navigation targets used by settings and navigateExternal(\"OutboundName\")."
+      ],
+      "examples": [
+        {
+          "title": "Inbound and outbound in manifest.json",
+          "language": "json",
+          "code": "{\n  \"sap.app\": {\n    \"crossNavigation\": {\n      \"inbounds\": {\n        \"salesOrderManage\": {\n          \"semanticObject\": \"SalesOrder\",\n          \"action\": \"manage\",\n          \"signature\": { \"parameters\": {}, \"additionalParameters\": \"allowed\" }\n        }\n      },\n      \"outbounds\": {\n        \"CustomerDisplay\": {\n          \"semanticObject\": \"Customer\",\n          \"action\": \"display\",\n          \"parameters\": {}\n        }\n      }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-common-actions-config",
+      "level": "basic",
+      "title": "How do you configure action control for context-dependent actions, action-specific confirmation messages, and confirmation popovers?",
+      "description": "Action control for context-dependent actions: many actions only make sense for some objects, like Release for orders that are not yet released. For bound actions (function imports bound to an entity), the service can name a Boolean property that tells, per object, whether the action is currently allowed: sap:applicable-path in the V2 metadata (or Core.OperationAvailable in vocabulary-based annotations). Fiori elements enables the action button only when the property is true for the selected object (or, in tables, for the selected rows), so users see immediately what is possible. Confirmation popovers: when an action is critical (it cannot be undone, or has big consequences), annotate it with Common.IsActionCritical = true; Fiori elements then asks the user for confirmation before executing it. Action-specific messages: the default confirmation text is generic, but the app can provide a specific text per action in its i18n file, with the key ACTION_CONFIRM|<EntitySetName><ActionName>, for example ACTION_CONFIRM|STTA_C_MP_ProductActivation=Confirm activation?; there is also a generic ACTION_CONFIRM key. This way, the user knows exactly what they are confirming.",
+      "keyPoints": [
+        "Context-dependent actions: sap:applicable-path (V2) or Core.OperationAvailable names a Boolean property per object.",
+        "Fiori elements enables the action only when that property is true for the selection.",
+        "Common.IsActionCritical = true asks for confirmation before running the action.",
+        "Action-specific confirmation texts: i18n key ACTION_CONFIRM|<EntitySetName><ActionName>."
+      ],
+      "examples": [
+        {
+          "title": "A critical, context-dependent action",
+          "language": "xml",
+          "code": "<FunctionImport Name=\"Release\" ReturnType=\"SALES_SRV.C_SalesOrderType\" EntitySet=\"C_SalesOrder\"\n  m:HttpMethod=\"POST\" sap:action-for=\"SALES_SRV.C_SalesOrderType\" sap:applicable-path=\"Release_ac\"\n  xmlns=\"http://schemas.microsoft.com/ado/2008/09/edm\"\n  xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\"\n  xmlns:sap=\"http://www.sap.com/Protocols/SAPData\">\n  <Parameter Name=\"SalesOrderID\" Type=\"Edm.String\" Mode=\"In\" />\n</FunctionImport>"
+        },
+        {
+          "title": "Critical action annotation and its confirmation text",
+          "language": "properties",
+          "code": "# annotation file (XML):\n# <Annotations Target=\"SALES_SRV.SALES_SRV_Entities/Release\">\n#   <Annotation Term=\"com.sap.vocabularies.Common.v1.IsActionCritical\" Bool=\"true\" />\n# </Annotations>\n\n# i18n.properties\nACTION_CONFIRM|C_SalesOrderRelease=Release this sales order? Released orders can no longer be changed."
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-status-colors-before-delete",
+      "level": "basic",
+      "title": "How do you configure status colors and icons, and how is beforeDeleteExtension used?",
+      "description": "Status colors and icons: values that represent a status, like an order status or a delivery status, are shown with semantic colors (and icons) by adding a Criticality to their UI.DataField (or UI.DataPoint): either a fixed value or, usually, a Path to a property that the back end fills per object, with the values 0 (neutral), 1 (negative, red), 2 (critical, orange), and 3 (positive, green). Fiori elements then renders the value as an ObjectStatus with the right color, and by default with a matching icon; CriticalityRepresentation controls the icon: UI.CriticalityRepresentationType/WithIcon or WithoutIcon. Because the color is never the only information (the text is still there, and the icon helps), this is also accessible. beforeDeleteExtension: when users delete objects, Fiori elements shows a confirmation dialog. The beforeDeleteExtension method, implemented in the list report's or object page's controller extension, is called before that dialog appears; it receives information about the items to be deleted and returns an object with custom texts for the dialog (title, text, unsavedChanges, undeletableText), or a promise for them. Use it when the default i18n texts are not enough, for example to warn about consequences that depend on the selected objects. It can be combined with extensionAPI.securedExecution.",
+      "keyPoints": [
+        "Status colors: Criticality on a DataField or DataPoint (fixed or Path): 0 neutral, 1 negative, 2 critical, 3 positive.",
+        "Rendered as an ObjectStatus with color and icon; CriticalityRepresentation WithIcon / WithoutIcon controls the icon.",
+        "beforeDeleteExtension (list report or object page controller extension) runs before the delete dialog.",
+        "It returns custom dialog texts: title, text, unsavedChanges, undeletableText (or a promise)."
+      ],
+      "examples": [
+        {
+          "title": "A status with criticality, without icon",
+          "language": "xml",
+          "code": "<Record Type=\"UI.DataField\">\n  <PropertyValue Property=\"Value\" Path=\"StatusText\" />\n  <PropertyValue Property=\"Criticality\" Path=\"StatusCriticality\" />\n  <PropertyValue Property=\"CriticalityRepresentation\"\n    EnumMember=\"UI.CriticalityRepresentationType/WithoutIcon\" />\n</Record>"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

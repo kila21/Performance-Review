@@ -1,0 +1,474 @@
+{
+  "topicId": "data-binding",
+  "title": "Data Binding",
+  "questions": [
+    {
+      "id": "what-is-data-binding",
+      "level": "elementary",
+      "title": "What is data binding, what is its purpose, and why is it so important?",
+      "description": "Data binding is the mechanism that connects the data in a model with the controls in the UI, so the two stay in sync automatically. Instead of writing code that reads a value from the data and puts it into a control (and again every time the data changes), you only declare which part of the model a control property shows, for example text=\"{/customer/name}\". UI5 then fills the control, and updates it whenever the model changes. With two-way binding, it also works in the other direction: when the user types into a bound Input, the new value is written back into the model. This matters a lot in real apps: it removes a huge amount of repetitive glue code, keeps views declarative (the XML says what is shown, not how), avoids bugs where the UI and the data get out of sync, and lets the same view work with any data that has the same shape. Lists and tables are built from data the same way, with one template that is repeated for every item. There are a few kinds of binding: property binding (one property), aggregation (list) binding (a list of child controls), and element (context) binding (sets the object that relative paths refer to).",
+      "keyPoints": [
+        "Data binding keeps model data and UI controls in sync automatically.",
+        "You declare what a control shows, like text=\"{/customer/name}\", instead of writing glue code.",
+        "Two-way binding also writes user input back into the model.",
+        "Kinds: property binding, aggregation (list) binding, and element (context) binding."
+      ],
+      "examples": [
+        {
+          "title": "Without and with data binding",
+          "language": "javascript",
+          "code": "// Without binding: manual glue code, repeated on every change\nthis.byId(\"nameText\").setText(data.customer.name);\n\n// With binding: declared once in the XML view, updated automatically\n// <Text id=\"nameText\" text=\"{/customer/name}\" />"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "property-binding",
+      "level": "elementary",
+      "title": "How does property binding work?",
+      "description": "Property binding connects one property of a control, such as text, value, enabled or visible, to one value in a model. In XML, you write the binding path in curly braces as the property's value, like text=\"{/company/name}\" (absolute path) or text=\"{name}\" (relative to the current binding context). For more options, the binding can be written as an object: {path: '/price', type: 'sap.ui.model.type.Float', formatOptions: {...}} for a data type, {path: 'status', formatter: '.formatStatus'} for a formatter, or {path: '/name', mode: 'OneWay'} to change the binding mode for just this binding. In JavaScript, you can bind a property with control.bindProperty(\"text\", \"/company/name\"), or pass the binding string in the constructor settings, like new Text({ text: \"{/company/name}\" }). Whenever the value at that path changes (for example after model.setProperty(\"/company/name\", \"New\")), the control updates by itself.",
+      "keyPoints": [
+        "Property binding connects one control property to one value in a model.",
+        "XML: text=\"{/company/name}\" (absolute) or text=\"{name}\" (relative to the binding context).",
+        "The object syntax adds options: type, formatOptions, constraints, formatter, mode.",
+        "In code: control.bindProperty(\"text\", \"/path\"), or a binding string in the constructor settings."
+      ],
+      "examples": [
+        {
+          "title": "Property bindings in XML",
+          "language": "xml",
+          "code": "<Text text=\"{/company/name}\" />\n<Input value=\"{/company/city}\" enabled=\"{/editMode}\" />\n<Text text=\"{path: '/company/revenue', type: 'sap.ui.model.type.Float', formatOptions: {maxFractionDigits: 2}}\" />"
+        },
+        {
+          "title": "The same in JavaScript",
+          "language": "javascript",
+          "code": "const model = new JSONModel({ company: { name: \"ACME\", city: \"Berlin\" }, editMode: true });\nview.setModel(model);\n\nconst text = new Text();\ntext.bindProperty(\"text\", \"/company/name\");\n\nmodel.setProperty(\"/company/name\", \"ACME Corp\"); // the Text updates automatically"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "aggregation-binding",
+      "level": "elementary",
+      "title": "How does aggregation (list) binding work?",
+      "description": "Aggregation binding (also called list binding) creates child controls from a list of data: one child for every entry of an array (JSONModel) or entity set (ODataModel). You bind an aggregation of a control, like the items of a List or Table, to a collection path, like items=\"{/Products}\", and provide one template control inside it. UI5 clones the template once for every entry, and gives each clone a binding context that points to its entry (/Products/0, /Products/1, ...), so the relative paths inside the template, like {Name}, show that entry's data. When entries are added or removed in the model, the list updates by itself. Instead of a single path, you can pass an object with extra settings: path, template (or a factory function), sorter, filters, and for OData parameters such as $expand or $select, and length (how many entries to load). In JavaScript, the same is done with control.bindAggregation(\"items\", { path: \"/Products\", template: itemTemplate }) or bindItems for lists.",
+      "keyPoints": [
+        "Aggregation binding creates one child control per entry of a collection.",
+        "XML: items=\"{/Products}\" with one template control inside; relative paths in it refer to each entry.",
+        "Each clone gets a binding context like /Products/0, /Products/1, ...",
+        "Extra settings: sorter, filters, parameters, length, factory; in code bindAggregation()/bindItems()."
+      ],
+      "examples": [
+        {
+          "title": "Binding a list to an array",
+          "language": "xml",
+          "code": "<List items=\"{/Products}\">\n  <StandardListItem title=\"{Name}\" description=\"{Category}\" />\n</List>\n\n<!-- with settings: sorted by name -->\n<List items=\"{path: '/Products', sorter: {path: 'Name'}}\">\n  <StandardListItem title=\"{Name}\" />\n</List>"
+        },
+        {
+          "title": "The same in JavaScript",
+          "language": "javascript",
+          "code": "list.bindItems({\n  path: \"/Products\",\n  template: new StandardListItem({ title: \"{Name}\", description: \"{Category}\" }),\n  sorter: new Sorter(\"Name\")\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "filters",
+      "level": "elementary",
+      "title": "How do you create, configure, and combine filters (including nested filters)?",
+      "description": "A filter (sap.ui.model.Filter) limits which entries of a list binding are shown. A simple filter has a path (the property), an operator from sap.ui.model.FilterOperator, and one or two values: new Filter(\"Price\", FilterOperator.LT, 100), or the same as an object, new Filter({ path: \"Price\", operator: FilterOperator.LT, value1: 100 }). Operators include EQ, NE, LT, LE, GT, GE, BT (between, with value1 and value2), Contains, StartsWith, EndsWith, and their Not variants, plus Any and All for collections (OData V4). For string comparisons you can set caseSensitive. Filters are applied with binding.filter(filters) on the list binding (for example list.getBinding(\"items\")), or declared in XML with the filters setting of the aggregation binding. When you pass an array of filters, the default rule is: filters on the same path are combined with OR, and filters on different paths with AND. To control this yourself, create a multi-filter: new Filter({ filters: [...], and: true }) combines its children with AND, and with and: false they are combined with OR. Multi-filters can contain other multi-filters, so any nested condition can be built, like (Category = A OR Category = B) AND Price < 100. Calling binding.filter([]) removes the filters.",
+      "keyPoints": [
+        "new Filter(path, operator, value1[, value2]) or new Filter({ path, operator, value1, value2, caseSensitive }).",
+        "Operators: EQ, NE, LT, LE, GT, GE, BT, Contains, StartsWith, EndsWith (and Not... variants), Any/All.",
+        "binding.filter([...]): filters on the same path are ORed, different paths ANDed.",
+        "new Filter({ filters: [...], and: true|false }) builds AND/OR groups, which can be nested."
+      ],
+      "examples": [
+        {
+          "title": "Simple, combined and nested filters",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/ui/model/Filter\",\n  \"sap/ui/model/FilterOperator\"\n], function (Filter, FilterOperator) {\n  \"use strict\";\n\n  // (Category = \"Laptops\" OR Category = \"Tablets\") AND Price < 1000\n  const byCategory = new Filter({\n    filters: [\n      new Filter(\"Category\", FilterOperator.EQ, \"Laptops\"),\n      new Filter(\"Category\", FilterOperator.EQ, \"Tablets\")\n    ],\n    and: false\n  });\n  const cheap = new Filter(\"Price\", FilterOperator.LT, 1000);\n\n  const finalFilter = new Filter({ filters: [byCategory, cheap], and: true });\n\n  // in a controller:\n  // this.byId(\"productList\").getBinding(\"items\").filter(finalFilter);\n});"
+        },
+        {
+          "title": "A filter declared in XML",
+          "language": "xml",
+          "code": "<List items=\"{\n  path: '/Products',\n  filters: [{ path: 'Price', operator: 'LT', value1: 1000 }]\n}\">\n  <StandardListItem title=\"{Name}\" />\n</List>"
+        }
+      ],
+      "assignment": {
+        "task": "The list \"productList\" is bound to /Products. Write onSearch(event) so that it filters the list to products whose Name contains the search text, case-insensitively, and shows all products again when the search text is empty.",
+        "starterCode": "onSearch: function (event) {\n  const query = event.getParameter(\"query\");\n  // your code here\n}",
+        "solution": "onSearch: function (event) {\n  const query = event.getParameter(\"query\");\n  const filters = [];\n  if (query) {\n    filters.push(new Filter({\n      path: \"Name\",\n      operator: FilterOperator.Contains,\n      value1: query,\n      caseSensitive: false\n    }));\n  }\n  this.byId(\"productList\").getBinding(\"items\").filter(filters);\n}"
+      }
+    },
+    {
+      "id": "sorting-grouping",
+      "level": "elementary",
+      "title": "How do sorting and grouping work in aggregation binding?",
+      "description": "Sorting is done with sap.ui.model.Sorter. new Sorter(\"Price\") sorts ascending by Price, and new Sorter(\"Price\", true) sorts descending. You can apply sorters in XML with the sorter setting of the aggregation binding, or in code with binding.sort(sorterOrArray); with an array, the first sorter decides first, and the next one is used only when values are equal. Grouping is built on top of sorting: the third parameter of the Sorter, group, set to true, makes the list show a group header every time the value of the sorted property changes, for example new Sorter(\"Category\", false, true) shows a header per category. The entries must be sorted by the grouping property first, which is why the group option belongs to a sorter. Lists and tables in sap.m display the group headers automatically (you can design your own with the groupHeaderFactory). Instead of true, group can also be a function (a grouper) that decides the group of each entry, for example for price ranges.",
+      "keyPoints": [
+        "new Sorter(path, descending) sorts a list binding; apply it in XML (sorter) or with binding.sort().",
+        "Several sorters: the first decides, the next ones break ties.",
+        "Grouping: new Sorter(path, descending, true) shows a group header whenever the value changes.",
+        "group can also be a grouper function; groupHeaderFactory customizes the header control."
+      ],
+      "examples": [
+        {
+          "title": "Sorting and grouping in XML",
+          "language": "xml",
+          "code": "<List items=\"{\n  path: '/Products',\n  sorter: [\n    { path: 'Category', group: true },\n    { path: 'Price', descending: true }\n  ]\n}\">\n  <StandardListItem title=\"{Name}\" info=\"{Price}\" />\n</List>"
+        },
+        {
+          "title": "Sorting in code",
+          "language": "javascript",
+          "code": "const binding = this.byId(\"productList\").getBinding(\"items\");\nbinding.sort([\n  new Sorter(\"Category\", false, true), // grouped by category\n  new Sorter(\"Price\", true)            // most expensive first inside each group\n]);"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "element-binding",
+      "level": "elementary",
+      "title": "How does element (object) binding work?",
+      "description": "Element binding (also called context binding or object binding) binds a whole control, usually a view, page or panel, to one object in the model, such as one product. It does not show a value by itself; it sets the binding context for the control and all its children, so the relative paths inside, like {Name} and {Price}, refer to that object. This is the usual way to build a detail page: the view stays the same, and only the bound object changes. You set it in code with control.bindElement(\"/Products/3\") (or view.bindElement({ path: \"/Products('HT-1000')\", parameters: { expand: \"Supplier\" } }) for OData V2), or in XML with the special binding attribute, like <Panel binding=\"{/Products/3}\">. With an ODataModel, the element binding also loads the entity from the server if it is not loaded yet, and it fires events (dataRequested, dataReceived, change) that you can use, for example, to show a busy indicator. Calling bindElement with a different path switches the whole area to another object.",
+      "keyPoints": [
+        "Element binding sets the binding context of a control and all its children to one object.",
+        "Relative paths inside, like {Name}, then refer to that object.",
+        "In code: control.bindElement(\"/Products/3\"); in XML: binding=\"{/Products/3}\".",
+        "With OData it loads the entity if needed and fires dataRequested / dataReceived / change events."
+      ],
+      "examples": [
+        {
+          "title": "A detail panel bound to one object",
+          "language": "xml",
+          "code": "<Panel id=\"productPanel\" binding=\"{/Products/0}\" headerText=\"{Name}\">\n  <Text text=\"{Description}\" />\n  <ObjectNumber number=\"{Price}\" unit=\"{Currency}\" />\n</Panel>"
+        },
+        {
+          "title": "Switching the object from the controller",
+          "language": "javascript",
+          "code": "_onRouteMatched: function (event) {\n  const productId = event.getParameter(\"arguments\").productId;\n  this.getView().bindElement({\n    path: \"/Products('\" + productId + \"')\",\n    events: {\n      dataRequested: () => this.getView().setBusy(true),\n      dataReceived: () => this.getView().setBusy(false)\n    }\n  });\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "binding-context",
+      "level": "elementary",
+      "title": "What is a binding context?",
+      "description": "A binding context (sap.ui.model.Context) is a pointer to a specific place in a model: it is the combination of a model and a path, like /Products/2. Relative binding paths, those without a leading /, are always resolved against a context: {Name} with the context /Products/2 means /Products/2/Name. Contexts are created in two ways: by element binding (bindElement sets one context for a control and its children), and by aggregation binding (every item created from the template gets its own context, pointing to its own entry). In event handlers, the context is how you find out which data belongs to the control the user clicked: event.getSource().getBindingContext() returns it, and from it you can call getPath() (the path string), getProperty(\"Name\") (one value relative to the context), or getObject() (the whole object). For a named model, pass the model name: getBindingContext(\"product\"). This is the standard way to handle a click on a list item.",
+      "keyPoints": [
+        "A binding context is a model plus a path, like /Products/2.",
+        "Relative paths ({Name}) are resolved against the current context: /Products/2/Name.",
+        "Contexts come from element binding and from each item of an aggregation binding.",
+        "In handlers: getBindingContext() then getPath(), getProperty(\"Name\"), or getObject()."
+      ],
+      "examples": [
+        {
+          "title": "Finding the data of a pressed list item",
+          "language": "javascript",
+          "code": "// <List items=\"{/Products}\">\n//   <StandardListItem title=\"{Name}\" type=\"Navigation\" press=\".onItemPress\" />\n// </List>\n\nonItemPress: function (event) {\n  const context = event.getSource().getBindingContext();\n  console.log(context.getPath());           // for example \"/Products/2\"\n  console.log(context.getProperty(\"Name\")); // the name of that product\n  const product = context.getObject();       // the whole product object\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "formatter-function",
+      "level": "elementary",
+      "title": "What is a formatter function, and when should you use it?",
+      "description": "A formatter is a JavaScript function that transforms a bound value before it is shown in a control. UI5 calls it with the value(s) from the model, and the function's return value becomes the property value. You add it to a binding with the formatter setting, like text=\"{path: 'status', formatter: '.formatter.statusText'}\". The leading dot means the function is looked up on the view's controller (here, in a formatter object the controller exposes). With parts, a formatter can receive several values at once, like a first and last name. Use a formatter when the conversion is app-specific logic: turning a status code into a readable text or an icon, choosing a state (Success/Error) from a value, or combining values in a special way. For standard formatting, like dates, numbers and currencies with the user's locale, use a data type instead, because types also parse user input back. For a very small condition, an expression binding may be enough. Formatters are one-way: they only change what is displayed, never what is written back. Inside a formatter called with a dot path, this is the controller; keep formatters free of side effects, and put them in a separate model/formatter.js module so they can be unit-tested.",
+      "keyPoints": [
+        "A formatter transforms bound value(s) into what the control displays.",
+        "Syntax: {path: 'status', formatter: '.formatter.statusText'}; parts passes several values.",
+        "Use it for app-specific conversions (status text, icon, state); use data types for dates, numbers, currencies.",
+        "Formatters work one-way only; keep them in model/formatter.js without side effects, so they are testable."
+      ],
+      "examples": [
+        {
+          "title": "formatter.js",
+          "language": "javascript",
+          "code": "sap.ui.define([], function () {\n  \"use strict\";\n  return {\n    statusState: function (status) {\n      switch (status) {\n        case \"A\": return \"Success\";\n        case \"R\": return \"Error\";\n        default: return \"None\";\n      }\n    }\n  };\n});"
+        },
+        {
+          "title": "Using it in the view",
+          "language": "xml",
+          "code": "<ObjectStatus\n  text=\"{StatusText}\"\n  state=\"{path: 'Status', formatter: '.formatter.statusState'}\" />"
+        }
+      ],
+      "assignment": {
+        "task": "Write a formatter fullName(firstName, lastName) that returns \"Last, First\" (for example \"Doe, Jane\"), and returns only the available part if one of them is empty. Then show how to call it from XML with parts.",
+        "starterCode": "// model/formatter.js\nfullName: function (firstName, lastName) {\n  // your code here\n}",
+        "solution": "// model/formatter.js\nfullName: function (firstName, lastName) {\n  return [lastName, firstName].filter(Boolean).join(\", \");\n}\n\n// In the XML view:\n// <Text text=\"{parts: ['FirstName', 'LastName'], formatter: '.formatter.fullName'}\" />"
+      }
+    },
+    {
+      "id": "simple-data-types",
+      "level": "elementary",
+      "title": "What are data types in data binding, which simple types exist, and what is the binding syntax?",
+      "description": "A data type tells a binding how to convert a value between the model and the UI, in both directions. When showing a value, the type formats it for the user's locale (for example, 1234.5 becomes 1,234.50 in English or 1.234,50 in German). When the user types a value, the type parses it back into the model's format, and validates it against constraints, like a minimum value or a maximum length; if the input is invalid, the model is not changed and the control shows an error state. This is why types are better than formatters for standard values: formatters only work one way. The simple types are in sap.ui.model.type: String, Integer, Float, Boolean, Date, Time, DateTime, Currency, Unit, FileSize, and interval types like DateInterval. For OData services there are matching types in sap.ui.model.odata.type (like Decimal, Int32, DateTime), which know the OData formats and are often chosen automatically. In a binding, you set type with the full class name, and optionally formatOptions (how to display) and constraints (what is allowed): {path: 'Price', type: 'sap.ui.model.type.Float', formatOptions: {maxFractionDigits: 2}, constraints: {minimum: 0}}. Declaring the type module with core:require in the view lets UI5 load it in advance.",
+      "keyPoints": [
+        "A type formats values for display and parses + validates user input back into the model.",
+        "Simple types (sap.ui.model.type): String, Integer, Float, Boolean, Date, Time, DateTime, Currency, Unit, FileSize...",
+        "OData-specific types live in sap.ui.model.odata.type.",
+        "Syntax: {path, type: 'sap.ui.model.type.X', formatOptions: {...}, constraints: {...}}."
+      ],
+      "examples": [
+        {
+          "title": "Types in bindings",
+          "language": "xml",
+          "code": "<mvc:View\n  xmlns=\"sap.m\"\n  xmlns:mvc=\"sap.ui.core.mvc\"\n  xmlns:core=\"sap.ui.core\"\n  core:require=\"{ FloatType: 'sap/ui/model/type/Float', DateType: 'sap/ui/model/type/Date' }\">\n\n  <Input value=\"{\n    path: '/price',\n    type: 'FloatType',\n    formatOptions: { minFractionDigits: 2, maxFractionDigits: 2 },\n    constraints: { minimum: 0 }\n  }\" />\n\n  <Text text=\"{\n    path: '/deliveryDate',\n    type: 'DateType',\n    formatOptions: { style: 'medium' }\n  }\" />\n</mvc:View>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "formatter-classes",
+      "level": "elementary",
+      "title": "What are the formatter classes (DateFormat, NumberFormat, FileSizeFormat, unit and currency formatting), and when do you use them?",
+      "description": "The formatter classes in sap/ui/core/format convert values to locale-aware text (and parse text back) in JavaScript code. They are the engine behind the data types: a binding type uses them internally, so in views you normally use a type, and you use the formatter classes directly when you need formatted text in code, for example in a message, in a formatter function, or for an export. You get an instance from a factory method with options, then call format(value) or parse(text). DateFormat.getDateInstance(options), getTimeInstance and getDateTimeInstance format dates and times, with a style (short, medium, long) or an exact pattern like \"dd.MM.yyyy\". NumberFormat has getIntegerInstance, getFloatInstance (with options like maxFractionDigits), getPercentInstance, getCurrencyInstance (format(amount, currencyCode) shows the amount with the right number of decimals and the currency symbol or code), and getUnitInstance (format(value, unitCode) for units of measure, like kg or km). FileSizeFormat.getInstance() turns a number of bytes into a readable size, like 1.5 MB. All of them use the user's locale automatically, unless you pass a different one.",
+      "keyPoints": [
+        "sap/ui/core/format classes format (and parse) values in code, using the user's locale.",
+        "DateFormat: getDateInstance / getTimeInstance / getDateTimeInstance with a style or a pattern.",
+        "NumberFormat: getIntegerInstance, getFloatInstance, getPercentInstance, getCurrencyInstance, getUnitInstance.",
+        "FileSizeFormat.getInstance() turns bytes into sizes like 1.5 MB; in views, prefer data types, which use these classes."
+      ],
+      "examples": [
+        {
+          "title": "Formatting values in code",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/ui/core/format/DateFormat\",\n  \"sap/ui/core/format/NumberFormat\",\n  \"sap/ui/core/format/FileSizeFormat\"\n], function (DateFormat, NumberFormat, FileSizeFormat) {\n  \"use strict\";\n\n  const date = DateFormat.getDateInstance({ pattern: \"dd.MM.yyyy\" });\n  date.format(new Date(2024, 0, 15));        // \"15.01.2024\"\n\n  const price = NumberFormat.getCurrencyInstance();\n  price.format(1234.5, \"EUR\");                // for example \"EUR 1,234.50\" (depends on the locale)\n\n  const weight = NumberFormat.getUnitInstance();\n  weight.format(12, \"mass-kilogram\");         // for example \"12 kg\"\n\n  const size = FileSizeFormat.getInstance();\n  size.format(1500000);                       // for example \"1.5 MB\"\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "binding-modes",
+      "level": "elementary",
+      "title": "What are the binding modes (OneWay, TwoWay, OneTime), and when do you use each one?",
+      "description": "The binding mode decides in which direction data flows between the model and the control. OneWay: data flows only from the model to the UI. When the model changes, the control updates, but user input is not written back. Use it for data that is only displayed, or when changes must go through your own code first. TwoWay: data flows in both directions. The control updates when the model changes, and the model is updated when the user changes the control's value (for example typing into an Input). Use it for forms and editable fields. OneTime: the value is read from the model only once, when the binding is created, and never updated again. It is the cheapest mode, good for values that never change, such as static texts. Each model type has a default mode: JSONModel uses TwoWay, ResourceModel and the OData V2 model use OneWay, and the OData V4 model uses TwoWay. You can change the default for a whole model with model.setDefaultBindingMode(BindingMode.OneWay), or for a single binding with the mode setting, like {path: '/name', mode: 'OneWay'}. Not every model supports every mode, for example a ResourceModel's texts cannot be changed through the UI.",
+      "keyPoints": [
+        "OneWay: model to UI only; for display-only data.",
+        "TwoWay: both directions; user input updates the model. For forms and editable fields.",
+        "OneTime: read once, never updated; cheapest, for values that never change.",
+        "Defaults: JSONModel TwoWay, ResourceModel and OData V2 OneWay, OData V4 TwoWay. Change with setDefaultBindingMode() or mode: '...'."
+      ],
+      "examples": [
+        {
+          "title": "Changing the binding mode",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/ui/model/json/JSONModel\",\n  \"sap/ui/model/BindingMode\"\n], function (JSONModel, BindingMode) {\n  \"use strict\";\n\n  const model = new JSONModel({ name: \"Ana\" });\n  model.setDefaultBindingMode(BindingMode.OneWay); // all bindings of this model\n\n  // or for one binding only, in XML:\n  // <Input value=\"{path: '/name', mode: 'TwoWay'}\" />\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "binding-path-syntax",
+      "level": "elementary",
+      "title": "What is the binding path syntax?",
+      "description": "A binding path tells a binding where in a model a value is. Paths look like file paths: each segment goes one level deeper, separated by /. An absolute path starts with /, beginning at the root of the model: {/company/address/city}. A relative path has no leading /, and is resolved against the current binding context: inside a list row with the context /Products/3, {Name} means /Products/3/Name. Array entries are addressed by their index: {/Products/0/Name}. To bind to a named model, put the model name and a > before the path: {i18n>appTitle}, {view>/busy}, or {product>Name} (relative). With an ODataModel, paths use the OData entity set and key: /Products('HT-1000') is one product, /Products('HT-1000')/Name its name, and /Products('HT-1000')/ToSupplier follows a navigation property to the related supplier. Bindings can be written in short form ({/path}) or as an object with a path property ({path: '/path', ...}), which also allows extra settings like type, formatter, mode or parameters.",
+      "keyPoints": [
+        "Absolute paths start with / (from the model root); relative paths are resolved against the binding context.",
+        "Segments go deeper, separated by /; array entries use indexes: /Products/0/Name.",
+        "Named models: {modelName>path}, for example {i18n>appTitle} or {view>/busy}.",
+        "OData paths use entity sets, keys and navigation: /Products('HT-1000')/ToSupplier/Name."
+      ],
+      "examples": [
+        {
+          "title": "Path examples",
+          "language": "xml",
+          "code": "<!-- JSONModel data: { company: { name: \"ACME\", address: { city: \"Berlin\" } }, Products: [...] } -->\n<Text text=\"{/company/name}\" />\n<Text text=\"{/company/address/city}\" />\n<Text text=\"{/Products/0/Name}\" />\n\n<!-- named models -->\n<Title text=\"{i18n>appTitle}\" />\n<BusyIndicator visible=\"{view>/busy}\" />\n\n<!-- OData V2 -->\n<Text text=\"{/Products('HT-1000')/Name}\" />"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "composite-binding",
+      "level": "elementary",
+      "title": "What is composite binding?",
+      "description": "A composite binding combines several bound values into one control property. There are two ways to write it. The simple way is to mix static text and several bindings in one string, like text=\"{firstName} {lastName}\" or text=\"Total: {/amount} {/currency}\"; UI5 builds the text from all parts and updates it when any of them changes. The more powerful way is the parts syntax: {parts: ['FirstName', 'LastName'], formatter: '.formatter.fullName'}, where the formatter receives all values as parameters, in the same order, and returns the result. Each part can be a plain path or an object with its own settings, like a different model or a type. Composite bindings are also used with composite types, the most common example being sap.ui.model.type.Currency, which needs two parts, the amount and the currency code: {parts: ['Price', 'CurrencyCode'], type: 'sap.ui.model.type.Currency'}. The mixed text form needs the complex binding syntax, which is active with data-sap-ui-compat-version=\"edge\" or data-sap-ui-binding-syntax=\"complex\" (the default in current versions).",
+      "keyPoints": [
+        "A composite binding combines several bound values in one property.",
+        "Mixed text: text=\"{firstName} {lastName}\" or \"Total: {/amount} {/currency}\".",
+        "parts + formatter: the formatter receives all part values in order.",
+        "Composite types, like Currency, use parts: ['Price', 'CurrencyCode']."
+      ],
+      "examples": [
+        {
+          "title": "Three forms of composite binding",
+          "language": "xml",
+          "code": "<!-- mixed static text and bindings -->\n<Text text=\"{FirstName} {LastName}\" />\n\n<!-- parts with a formatter -->\n<Text text=\"{parts: ['FirstName', 'LastName'], formatter: '.formatter.fullName'}\" />\n\n<!-- parts with a composite type -->\n<Text text=\"{\n  parts: ['Price', 'CurrencyCode'],\n  type: 'sap.ui.model.type.Currency',\n  formatOptions: { showMeasure: true }\n}\" />"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "expression-binding",
+      "level": "elementary",
+      "title": "What is expression binding, and when should you use a formatter instead?",
+      "description": "Expression binding lets you write a small calculation directly in the view, without a formatter in the controller. It starts with {= and ends with }, and model values are written with a $ and braces: ${path}, like ${/count} or ${product>Price}. Inside, you can use JavaScript-like operators: comparisons (===, >, <=), logical operators (&&, ||, !), the ternary operator (a ? b : c), arithmetic, and string literals in single quotes. It is typically used for visibility, enabled flags, and simple states: visible=\"{= ${/items}.length > 0 }\", or state=\"{= ${Price} > 1000 ? 'Warning' : 'None' }\". You can also use a few global objects, like Math and odata.compare, and modules declared with core:require. Expression bindings are one-way. Because the view is XML, the characters < and & must be escaped inside attributes: write &lt; instead of <, and &amp;&amp; instead of && (> can stay as it is). Use them only for short, simple conditions. Use a formatter function instead when the logic is longer than a simple condition, has several branches, is needed in more than one place, should be unit tested, or needs to call your own code. Long expressions in XML are hard to read, cannot be debugged easily, and mix logic into the view, which MVC is meant to avoid.",
+      "keyPoints": [
+        "Syntax: {= expression }, with model values as ${path} or ${model>path}.",
+        "Supports comparisons, &&, ||, !, the ternary operator, arithmetic, and strings in single quotes; in XML write &lt; for < and &amp;&amp; for &&.",
+        "Good for short conditions like visibility, enabled flags and simple states; it is one-way.",
+        "Use a formatter for longer, reused, or testable logic."
+      ],
+      "examples": [
+        {
+          "title": "Typical expression bindings",
+          "language": "xml",
+          "code": "<Button text=\"Delete\" enabled=\"{= ${view>/selectedCount} > 0 }\" />\n<MessageStrip text=\"No items\" visible=\"{= ${/Items}.length === 0 }\" />\n<ObjectStatus\n  text=\"{Status}\"\n  state=\"{= ${Stock} === 0 ? 'Error' : ${Stock} &lt; 10 ? 'Warning' : 'Success' }\" />\n<!-- in XML, < must be written as &lt; and && as &amp;&amp; -->\n<Button text=\"Order\" enabled=\"{= ${Stock} > 0 &amp;&amp; !${view>/busy} }\" />"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "i18n-binding-format-message",
+      "level": "elementary",
+      "title": "How does i18n binding work, and what is sap/base/strings/formatMessage used for?",
+      "description": "User-facing texts are not written directly into views; they live in the i18n.properties file as key=value pairs (plus one file per language), and are loaded into a ResourceModel, usually named i18n. In a view, you bind to a text with the model name and the key: text=\"{i18n>saveButton}\". In a controller, you get the resource bundle with this.getOwnerComponent().getModel(\"i18n\").getResourceBundle() and call getText(\"key\"). Texts can contain numbered placeholders, like itemsFound=Found {0} items in {1}. In code, you fill them with getText(\"itemsFound\", [5, \"Berlin\"]). In a view, the placeholders must be filled from bound values; for that you use the function formatMessage from the module sap/base/strings/formatMessage as a formatter: the first part of the binding is the text (with the pattern), and the next parts are the values for {0}, {1}, and so on. The module is made available in the view with core:require. formatMessage can also be used directly in code: formatMessage(\"Hello {0}\", [\"Ana\"]) returns \"Hello Ana\". Note that a single quote in a text with placeholders must be written as two quotes ('').",
+      "keyPoints": [
+        "Texts live in i18n.properties (key=value), loaded into a ResourceModel named i18n.",
+        "View: text=\"{i18n>key}\"; code: resourceBundle.getText(\"key\", [values]).",
+        "Placeholders {0}, {1} are filled in views with formatMessage as a formatter (declared via core:require).",
+        "A single quote in a text with placeholders is written as '' (two single quotes)."
+      ],
+      "examples": [
+        {
+          "title": "i18n.properties",
+          "language": "properties",
+          "code": "saveButton=Save\nitemsFound=Found {0} items in {1}"
+        },
+        {
+          "title": "Filling placeholders in the view",
+          "language": "xml",
+          "code": "<mvc:View\n  xmlns=\"sap.m\"\n  xmlns:mvc=\"sap.ui.core.mvc\"\n  xmlns:core=\"sap.ui.core\"\n  core:require=\"{ formatMessage: 'sap/base/strings/formatMessage' }\">\n\n  <Button text=\"{i18n>saveButton}\" />\n\n  <Text text=\"{\n    parts: ['i18n>itemsFound', 'view>/count', 'view>/city'],\n    formatter: 'formatMessage'\n  }\" />\n</mvc:View>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "binding-attribute",
+      "level": "elementary",
+      "title": "What is the standard binding attribute of a control?",
+      "description": "Every control (in fact, every element) has a special setting called binding. It is not a normal property: it creates an element (context) binding for that control, exactly like calling control.bindElement(path) in code. In XML, you write it like a property: <Panel binding=\"{/Products/0}\">. After that, all relative bindings inside the panel, such as {Name} and {Price}, refer to /Products/0. This is a convenient, declarative way to bind a section of a view to one object, without writing controller code. The value can also be an object with more settings, like a model name or OData parameters, for example binding=\"{path: '/Products(1)', parameters: {expand: 'Supplier'}}\". For a named model, include the model name: binding=\"{product>/Products/0}\", and then use the prefix in the relative bindings inside: {product>Name}. The same setting can be passed in JavaScript when creating a control, like new Panel({ binding: \"{/Products/0}\" }).",
+      "keyPoints": [
+        "binding is a special setting on every element that creates an element (context) binding.",
+        "binding=\"{/Products/0}\" is the declarative form of bindElement(\"/Products/0\").",
+        "Relative bindings inside the control then refer to that object.",
+        "It accepts an object with more settings (model, parameters) and works for named models too."
+      ],
+      "examples": [
+        {
+          "title": "Binding a section of the view to one object",
+          "language": "xml",
+          "code": "<VBox binding=\"{/Products/0}\">\n  <Title text=\"{Name}\" />\n  <Text text=\"{Description}\" />\n</VBox>\n\n<VBox binding=\"{supplier>/Suppliers/0}\">\n  <Title text=\"{supplier>CompanyName}\" />\n</VBox>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "factory-function",
+      "level": "basic",
+      "title": "What is the factory function concept in aggregation binding?",
+      "description": "In a normal aggregation binding, every entry of the list is rendered with the same template control. A factory function is the alternative when entries need different controls, depending on their data. Instead of a template, you give the binding a function; UI5 calls it once for every entry, with two arguments: a unique ID for the new control, and the entry's binding context. The function decides which control to create, creates it (passing the ID), and returns it. For example, a list of form fields can create a DatePicker for date fields, a CheckBox for boolean fields, and an Input for all others; or a list can show items that are out of stock with a different list item type. In XML, the factory is set with the factory setting of the binding, like items=\"{path: '/Fields', factory: '.createField'}\"; in code, it is passed as factory in bindAggregation. Because a new control is created for every entry, a factory is a bit slower than a template, so use it only when entries really need different controls; for small differences, a template with formatters or expression bindings is enough.",
+      "keyPoints": [
+        "A factory function creates the control for each entry instead of cloning one template.",
+        "It receives (id, context), creates a control with that ID, and returns it.",
+        "Use it when entries need different control types based on their data.",
+        "XML: items=\"{path: '/Fields', factory: '.createField'}\"; code: bindAggregation(name, { path, factory })."
+      ],
+      "examples": [
+        {
+          "title": "A factory that picks the control type",
+          "language": "javascript",
+          "code": "// View: <VBox items=\"{path: '/Fields', factory: '.createField'}\" />\n\ncreateField: function (id, context) {\n  const type = context.getProperty(\"type\");\n  switch (type) {\n    case \"date\":\n      return new DatePicker(id, { value: \"{value}\" });\n    case \"boolean\":\n      return new CheckBox(id, { selected: \"{value}\", text: \"{label}\" });\n    default:\n      return new Input(id, { value: \"{value}\", placeholder: \"{label}\" });\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "custom-filter-function",
+      "level": "basic",
+      "title": "How do you define a custom filtering function, and when is it useful?",
+      "description": "The standard filter operators (EQ, Contains, BT, and so on) cover most cases, but sometimes the rule for keeping an entry cannot be expressed with them, for example matching a value against a list of allowed values with special rules, comparing two properties of the same entry, fuzzy text matching, or checking a calculated value. For this, a filter can have a custom test function instead of an operator: new Filter({ path: \"Price\", test: function (value) { return ...; } }). UI5 calls the function for every entry, with the value at the given path, and keeps the entry if the function returns true. A test function with path \"\" (or a path to an object) can look at the whole entry. Important limitation: custom test functions only work on client-side bindings, like a JSONModel, where all data is in the browser. They cannot be used with an ODataModel that filters on the server, because a JavaScript function cannot be sent to the back end as a query. There is also a comparator setting to change how values are compared for the normal operators, for example for special sorting rules of strings.",
+      "keyPoints": [
+        "A filter can use a custom test function instead of an operator: new Filter({ path, test }).",
+        "test(value) is called for every entry; returning true keeps the entry.",
+        "Useful for rules the standard operators cannot express (calculated values, special matching).",
+        "Works only on client-side data (JSONModel), not for server-side OData filtering."
+      ],
+      "examples": [
+        {
+          "title": "Keeping only products with an even stock",
+          "language": "javascript",
+          "code": "const evenStock = new Filter({\n  path: \"Stock\",\n  test: function (stock) {\n    return stock % 2 === 0;\n  }\n});\n\nthis.byId(\"productList\").getBinding(\"items\").filter(evenStock);"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "grouper-function",
+      "level": "basic",
+      "title": "How do you use a grouper function?",
+      "description": "Grouping with new Sorter(\"Category\", false, true) creates one group for every different value of a property. When the groups should be based on something else, for example price ranges (cheap, medium, expensive) or the first letter of a name, you pass a grouper function as the third parameter of the Sorter instead of true. The function receives the binding context of each entry and returns the group the entry belongs to: either a string, or an object with a key (to identify the group) and a text (to show in the group header). Entries with the same key end up in the same group. Because a group header is shown each time the key changes, the list must be sorted so that entries of the same group are next to each other; that is why the grouper belongs to the Sorter, and why the sort path should match the grouping logic (for example, sort by Price when grouping by price ranges). In XML, a grouper can be referenced from the controller in the sorter settings of the binding.",
+      "keyPoints": [
+        "A grouper function decides the group of each entry, instead of grouping by a raw property value.",
+        "Pass it as the 3rd parameter of the Sorter: new Sorter(path, descending, grouperFn).",
+        "It receives the entry's context and returns a string or { key, text }.",
+        "Sort by a property that keeps each group's entries together (like Price for price ranges)."
+      ],
+      "examples": [
+        {
+          "title": "Grouping products by price range",
+          "language": "javascript",
+          "code": "const priceRange = function (context) {\n  const price = context.getProperty(\"Price\");\n  if (price < 100) {\n    return { key: \"low\", text: \"Under 100\" };\n  }\n  if (price < 1000) {\n    return { key: \"mid\", text: \"100 to 999\" };\n  }\n  return { key: \"high\", text: \"1000 and more\" };\n};\n\nthis.byId(\"productList\").getBinding(\"items\").sort(\n  new Sorter(\"Price\", false, priceRange)\n);"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "custom-data-type",
+      "level": "basic",
+      "title": "How do you create a custom data type, and why might you need one?",
+      "description": "The built-in types cover numbers, dates, currencies and similar values. When your app has its own kind of value with its own rules for display, input and validation, like an e-mail address, an IBAN, a phone number, or a product code, you can create a custom data type. It extends sap.ui.model.SimpleType and implements three methods. formatValue(value, targetType) converts the model value into what the control shows. parseValue(value, sourceType) converts the user's input back into the model's format, and throws a sap.ui.model.ParseException if it cannot. validateValue(value) checks the parsed value and throws a sap.ui.model.ValidateException if it breaks a rule. When an exception is thrown, the model keeps its old value and the control shows the error (with message handling enabled, as a red value state with the message text). The benefits are that the rule lives in one reusable place, works in every binding the same way, and validation happens automatically on input, without code in event handlers.",
+      "keyPoints": [
+        "Extend sap.ui.model.SimpleType for app-specific values (e-mail, IBAN, product code...).",
+        "formatValue: model value to display text; parseValue: input back to model format.",
+        "validateValue: check rules; throw ParseException / ValidateException to reject input.",
+        "On an exception the model is not changed and the control shows an error state."
+      ],
+      "examples": [
+        {
+          "title": "An e-mail type",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/ui/model/SimpleType\",\n  \"sap/ui/model/ValidateException\"\n], function (SimpleType, ValidateException) {\n  \"use strict\";\n\n  return SimpleType.extend(\"my.app.model.type.Email\", {\n    formatValue: function (value) {\n      return value;\n    },\n    parseValue: function (value) {\n      return value ? value.trim().toLowerCase() : value;\n    },\n    validateValue: function (value) {\n      if (value && !/^\\S+@\\S+\\.\\S+$/.test(value)) {\n        throw new ValidateException(\"'\" + value + \"' is not a valid e-mail address\");\n      }\n    }\n  });\n});\n\n// View: <Input value=\"{path: '/email', type: 'my.app.model.type.Email'}\" />"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "metamodel-binding",
+      "level": "basic",
+      "title": "What are the binding techniques of a MetaModel?",
+      "description": "An OData service describes itself in its metadata (entity types, properties, their types and lengths, and annotations like labels). The ODataModel makes this information available through a MetaModel, which you get with odataModel.getMetaModel(). For OData V2 it is a sap.ui.model.odata.ODataMetaModel, and it can be used like any other model, so you can bind controls to metadata, for example to show a property's label instead of hard-coding it. Because the metadata loads asynchronously, wait for metaModel.loaded() (a promise) before reading it in code. Common techniques are: (1) the V2 shortcut path on the data model, {/#Product/Name/@sap:label}, where /# switches from data to metadata (entity type, property, attribute); (2) setting the MetaModel as a named model (like meta) and binding to its paths; and (3) helper methods like metaModel.getODataEntityType(\"namespace.Product\"), getODataProperty(...) or getMetaContext(\"/Products\") to find the right place in code. MetaModels are also the basis of XML templating, where a view is generated from annotations before it is created; this is how smart controls and SAP Fiori elements build their UI. The OData V4 MetaModel uses its own path syntax, like /Products/Name@com.sap.vocabularies.Common.v1.Label.",
+      "keyPoints": [
+        "The MetaModel exposes the OData service metadata; get it with odataModel.getMetaModel().",
+        "Wait for metaModel.loaded() before reading metadata in code.",
+        "V2 shortcut binding: {/#Product/Name/@sap:label}; or set the MetaModel as a named model and bind to it.",
+        "Helpers like getODataEntityType / getMetaContext; MetaModels also drive XML templating (smart controls, Fiori elements)."
+      ],
+      "examples": [
+        {
+          "title": "Showing a label from the metadata (OData V2)",
+          "language": "xml",
+          "code": "<!-- /# switches from the data to the metadata of the entity type \"Product\" -->\n<Label text=\"{/#Product/Name/@sap:label}\" />\n<Text text=\"{Name}\" />"
+        },
+        {
+          "title": "Reading metadata in code",
+          "language": "javascript",
+          "code": "const metaModel = this.getOwnerComponent().getModel().getMetaModel();\nmetaModel.loaded().then(function () {\n  const entityType = metaModel.getODataEntityType(\"ZPRODUCTS_SRV.Product\");\n  console.log(entityType.key.propertyRef); // the key properties\n});"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

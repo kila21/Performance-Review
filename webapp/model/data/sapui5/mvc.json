@@ -1,0 +1,336 @@
+{
+  "topicId": "mvc",
+  "title": "MVC",
+  "questions": [
+    {
+      "id": "mvc-xml-view",
+      "level": "elementary",
+      "title": "What view types exist in SAPUI5, and what is the syntax of an XML view?",
+      "description": "SAPUI5 follows the Model-View-Controller (MVC) pattern: the model holds the data, the view describes the UI, and the controller contains the logic. A view can be written in several formats: XML views, typed views written in JavaScript or TypeScript, and the older JSON and HTML views. XML views are the recommended format, because they are declarative (they describe what the UI looks like, not how to build it), easy to read, and supported by tools like SAP Fiori tools and the UI adaptation features. An XML view's root element is mvc:View from the sap.ui.core.mvc namespace. Its controllerName attribute names the controller that belongs to the view. The xmlns attributes declare which control libraries are used: the default namespace (xmlns=\"sap.m\") lets you write controls from that library without a prefix, like <Button>, and named namespaces (xmlns:core=\"sap.ui.core\") need a prefix, like <core:Icon>. Inside, each XML element creates a control; attributes set its properties and events, and nested elements fill its aggregations. The file name ends with .view.xml, for example Main.view.xml.",
+      "keyPoints": [
+        "MVC: the model holds data, the view describes the UI, the controller holds the logic.",
+        "View types: XML (recommended), typed JS/TS views, and the older JSON and HTML views.",
+        "An XML view's root is <mvc:View>, with controllerName and xmlns namespace declarations.",
+        "Elements create controls, attributes set properties and events, and nested elements fill aggregations."
+      ],
+      "examples": [
+        {
+          "title": "A simple XML view (Main.view.xml)",
+          "language": "xml",
+          "code": "<mvc:View\n  controllerName=\"my.app.controller.Main\"\n  xmlns=\"sap.m\"\n  xmlns:mvc=\"sap.ui.core.mvc\"\n  xmlns:core=\"sap.ui.core\">\n  <Page title=\"{i18n>title}\">\n    <content>\n      <core:Icon src=\"sap-icon://employee\" />\n      <Input value=\"{/name}\" />\n      <Button text=\"{i18n>greet}\" press=\".onGreet\" />\n    </content>\n  </Page>\n</mvc:View>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "mvc-js-view",
+      "level": "elementary",
+      "title": "What is the syntax of a JS view (typed view)?",
+      "description": "A JS view describes the UI with JavaScript code instead of XML. In current SAPUI5 versions, this is done with a typed view: a module that extends sap.ui.core.mvc.View and implements createContent(controller), which creates the controls with new and returns the root control (or an array of controls). The view names its controller in getControllerName(). Inside createContent, controls should be created with this.createId(\"localId\") as their ID, so the IDs are prefixed with the view ID, just like in XML views. A typed view is created with View.create({ viewName: \"module:my/app/view/Main\" }) (the module: prefix tells UI5 to load it as a module), or used as a routing target. The older syntax, sap.ui.jsview(...) and the sap.ui.core.mvc.JSView class, is deprecated since UI5 1.90 and should not be used in new code. JS views are useful when the UI must be built dynamically from data at runtime, but for normal screens XML views are preferred, because they keep the UI declarative and separate from the logic.",
+      "keyPoints": [
+        "A typed view extends sap.ui.core.mvc.View and returns its controls from createContent(controller).",
+        "getControllerName() links the view to its controller; this.createId() prefixes control IDs with the view ID.",
+        "Create it with View.create({ viewName: \"module:my/app/view/Main\" }).",
+        "sap.ui.jsview and JSView are deprecated since 1.90; XML views stay the recommended default."
+      ],
+      "examples": [
+        {
+          "title": "A typed view",
+          "language": "javascript",
+          "code": "// webapp/view/Main.js\nsap.ui.define([\n  \"sap/ui/core/mvc/View\",\n  \"sap/m/Page\",\n  \"sap/m/Button\"\n], function (View, Page, Button) {\n  \"use strict\";\n\n  return View.extend(\"my.app.view.Main\", {\n    getControllerName: function () {\n      return \"my.app.controller.Main\";\n    },\n\n    createContent: function (controller) {\n      return new Page(this.createId(\"page\"), {\n        title: \"Hello\",\n        content: [\n          new Button(this.createId(\"greet\"), {\n            text: \"Greet\",\n            press: controller.onGreet.bind(controller)\n          })\n        ]\n      });\n    }\n  });\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "mvc-fragments",
+      "level": "elementary",
+      "title": "What are fragments, and what are they used for?",
+      "description": "A fragment is a small, reusable piece of UI, written in XML like a view (in a .fragment.xml file), but without its own controller. It is used for parts of the UI that appear in several places, or that are not shown all the time, like dialogs, popovers, or a form section that several views share. A fragment with more than one root control must wrap them in core:FragmentDefinition. Because a fragment has no controller, its event handlers (like press=\".onClose\") are looked up on the controller you pass when loading it, usually the controller of the view that uses it. The easiest way to load one from a controller is this.loadFragment({ name: \"my.app.view.MyDialog\" }) (available since 1.93): it returns a promise, prefixes the fragment's control IDs with the view ID (so this.byId() finds them), and adds the content to the view's dependents, so it gets the view's models and is destroyed with the view. The general API is Fragment.load({ id, name, controller }). A dialog should be loaded only once and then reused, instead of being created again on every click.",
+      "keyPoints": [
+        "A fragment is a reusable piece of UI (*.fragment.xml) without its own controller.",
+        "Typical uses: dialogs, popovers, and UI parts shared by several views.",
+        "Several root controls must be wrapped in core:FragmentDefinition; event handlers come from the controller you pass.",
+        "this.loadFragment({ name }) prefixes IDs with the view ID and adds the content to the view's dependents."
+      ],
+      "examples": [
+        {
+          "title": "A dialog fragment (HelloDialog.fragment.xml)",
+          "language": "xml",
+          "code": "<core:FragmentDefinition xmlns=\"sap.m\" xmlns:core=\"sap.ui.core\">\n  <Dialog id=\"helloDialog\" title=\"Hello\">\n    <Text text=\"Hello from a fragment\" />\n    <endButton>\n      <Button text=\"Close\" press=\".onCloseDialog\" />\n    </endButton>\n  </Dialog>\n</core:FragmentDefinition>"
+        },
+        {
+          "title": "Loading it once and reusing it",
+          "language": "javascript",
+          "code": "onOpenDialog: function () {\n  if (!this._pDialog) {\n    this._pDialog = this.loadFragment({ name: \"my.app.view.HelloDialog\" });\n  }\n  this._pDialog.then(function (dialog) {\n    dialog.open();\n  });\n},\n\nonCloseDialog: function () {\n  this.byId(\"helloDialog\").close();\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "controller-definition",
+      "level": "elementary",
+      "title": "How is a controller defined, and how does it get attached to a view?",
+      "description": "A controller is a module that extends sap.ui.core.mvc.Controller. It is defined with sap.ui.define and Controller.extend(\"full.name.of.Controller\", { ...methods }), and by convention its file is named after the view with .controller.js, for example Main.controller.js for Main.view.xml. The controller holds the view's logic: event handlers (like onPress), helper methods, and lifecycle methods. A view and its controller are connected by the view: in an XML view, the controllerName attribute (like controllerName=\"my.app.controller.Main\") tells UI5 which controller to create; UI5 loads the module my/app/controller/Main.controller.js and creates one controller instance for that view instance. In a typed JS view, getControllerName() returns the name instead. Inside the controller, this.getView() returns the view, this.byId(\"id\") finds a control of that view by its local ID, and this.getOwnerComponent() returns the component. In XML, an event handler written with a leading dot, like press=\".onPress\", is a method of this controller.",
+      "keyPoints": [
+        "A controller extends sap.ui.core.mvc.Controller, in a file named like View.controller.js.",
+        "The view names its controller (controllerName in XML, getControllerName() in typed views).",
+        "UI5 creates one controller instance per view instance.",
+        "In the controller: this.getView(), this.byId(id), this.getOwnerComponent(); in XML, \".onPress\" refers to a controller method."
+      ],
+      "examples": [
+        {
+          "title": "Main.controller.js",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/ui/core/mvc/Controller\",\n  \"sap/m/MessageToast\"\n], function (Controller, MessageToast) {\n  \"use strict\";\n\n  return Controller.extend(\"my.app.controller.Main\", {\n    onGreet: function () {\n      const name = this.byId(\"nameInput\").getValue();\n      MessageToast.show(\"Hello \" + name);\n    }\n  });\n});"
+        },
+        {
+          "title": "The view that uses it",
+          "language": "xml",
+          "code": "<mvc:View controllerName=\"my.app.controller.Main\" xmlns=\"sap.m\" xmlns:mvc=\"sap.ui.core.mvc\">\n  <Input id=\"nameInput\" />\n  <Button text=\"Greet\" press=\".onGreet\" />\n</mvc:View>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "controller-lifecycle",
+      "level": "elementary",
+      "title": "What are the lifecycle methods of a controller?",
+      "description": "A controller can implement four lifecycle hooks, which UI5 calls automatically at certain moments in the life of its view. onInit is called once, when the view has been created and all its controls exist, but before anything is shown on the screen. It is the right place for one-time setup: creating a local JSONModel, attaching a route-matched handler, or setting initial values. onBeforeRendering is called every time before the view is rendered (or re-rendered). onAfterRendering is called every time after the view has been rendered, when its HTML is in the page; it is the place for work that needs the DOM, but it can run many times, so it should not do heavy or one-time work. onExit is called once, when the view is destroyed; it is the place to clean up, for example to detach event handlers, stop timers, or destroy objects the controller created itself (like a dialog that is not a dependent of the view). All four are optional: you only write the ones you need.",
+      "keyPoints": [
+        "onInit: once, after the view's controls are created and before rendering. Use it for one-time setup.",
+        "onBeforeRendering: before every (re-)rendering of the view.",
+        "onAfterRendering: after every rendering, when the DOM exists; it can run many times.",
+        "onExit: once, when the view is destroyed. Use it for cleanup."
+      ],
+      "examples": [
+        {
+          "title": "All four hooks",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/ui/core/mvc/Controller\",\n  \"sap/ui/model/json/JSONModel\"\n], function (Controller, JSONModel) {\n  \"use strict\";\n\n  return Controller.extend(\"my.app.controller.Main\", {\n    onInit: function () {\n      this.getView().setModel(new JSONModel({ busy: false }), \"view\");\n      this._timer = setInterval(this._refresh.bind(this), 60000);\n    },\n\n    onBeforeRendering: function () {\n      // runs before every rendering\n    },\n\n    onAfterRendering: function () {\n      // the view's HTML exists now; runs after every rendering\n    },\n\n    onExit: function () {\n      clearInterval(this._timer); // clean up what onInit started\n    },\n\n    _refresh: function () {}\n  });\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "controller-inheritance-base-controller",
+      "level": "elementary",
+      "title": "How does controller inheritance work, how do you call a parent (super) method, and what is the BaseController best practice?",
+      "description": "Controllers are classes, so one controller can extend another and inherit all its methods. Instead of Controller.extend(...), the child controller calls ParentController.extend(...), after loading the parent module as a dependency. If the child overrides a method and still wants the parent's version to run, it calls it explicitly through the parent's prototype: ParentController.prototype.onInit.apply(this, arguments). (In TypeScript or ES classes, this is simply super.onInit().) Forgetting this call means the parent's logic is silently skipped. The BaseController best practice uses exactly this: you create one BaseController.js that extends sap.ui.core.mvc.Controller and contains helpers that every view needs, like getRouter(), getModel(name), setModel(model, name), getResourceBundle(), and a common onNavBack. All other controllers then extend BaseController instead of Controller, which removes duplicated code and keeps the controllers short.",
+      "keyPoints": [
+        "A child controller extends a parent with ParentController.extend(\"name\", { ... }).",
+        "Call an overridden parent method with ParentController.prototype.method.apply(this, arguments) (super.method() in TS/ES classes).",
+        "BaseController: one shared parent class with common helpers (getRouter, getModel, getResourceBundle, onNavBack).",
+        "All app controllers extend BaseController, which avoids repeating the same helper code."
+      ],
+      "examples": [
+        {
+          "title": "BaseController and a child controller",
+          "language": "javascript",
+          "code": "// controller/BaseController.js\nsap.ui.define([\n  \"sap/ui/core/mvc/Controller\",\n  \"sap/ui/core/UIComponent\"\n], function (Controller, UIComponent) {\n  \"use strict\";\n\n  return Controller.extend(\"my.app.controller.BaseController\", {\n    getRouter: function () {\n      return UIComponent.getRouterFor(this);\n    },\n    getResourceBundle: function () {\n      return this.getOwnerComponent().getModel(\"i18n\").getResourceBundle();\n    },\n    onInit: function () {\n      // shared setup\n    }\n  });\n});\n\n// controller/Detail.controller.js\nsap.ui.define([\"./BaseController\"], function (BaseController) {\n  \"use strict\";\n\n  return BaseController.extend(\"my.app.controller.Detail\", {\n    onInit: function () {\n      BaseController.prototype.onInit.apply(this, arguments); // call the parent\n      this.getRouter().getRoute(\"detail\").attachPatternMatched(this._onMatched, this);\n    },\n    _onMatched: function () {}\n  });\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "reuse-dialogs-custom-controller",
+      "level": "elementary",
+      "title": "How can a dialog be reused across views with its own (custom) controller?",
+      "description": "If the same dialog is needed in several views, copying its loading and event-handling code into every controller leads to duplication. Instead, you can move everything about the dialog into its own small class, sometimes called a dialog controller: a module that extends sap.ui.base.ManagedObject (or Object), which loads the fragment once, opens it, and contains the dialog's own event handlers, like onCloseDialog. Because this class is passed as the controller when the fragment is loaded, the fragment's handlers (\".onCloseDialog\") are found on it, not on a view controller. The class receives the view it should attach the dialog to, and adds the dialog to that view's dependents, so the dialog gets the view's models and is destroyed together with it. The instance is usually created once in the Component (or in a BaseController), so every view can open the same dialog with one line, like this.getOwnerComponent().openHelloDialog(). This keeps the view controllers small, and the dialog's logic lives in one place.",
+      "keyPoints": [
+        "Put the dialog's loading, opening, and event handlers into a separate class (for example extending ManagedObject).",
+        "Pass that class as the fragment's controller, so the fragment's handlers live there.",
+        "Add the dialog to the calling view's dependents, so it gets the view's models and is cleaned up with it.",
+        "Create the dialog class once (for example in the Component) and let every view reuse it."
+      ],
+      "examples": [
+        {
+          "title": "A reusable dialog class",
+          "language": "javascript",
+          "code": "// controller/HelloDialog.js\nsap.ui.define([\n  \"sap/ui/base/ManagedObject\",\n  \"sap/ui/core/Fragment\"\n], function (ManagedObject, Fragment) {\n  \"use strict\";\n\n  return ManagedObject.extend(\"my.app.controller.HelloDialog\", {\n    constructor: function (view) {\n      ManagedObject.call(this);\n      this._view = view;\n    },\n\n    open: function () {\n      if (!this._pDialog) {\n        this._pDialog = Fragment.load({\n          id: this._view.getId(),\n          name: \"my.app.view.HelloDialog\",\n          controller: this // handlers like .onCloseDialog are looked up here\n        }).then(function (dialog) {\n          this._view.addDependent(dialog);\n          return dialog;\n        }.bind(this));\n      }\n      return this._pDialog.then(function (dialog) {\n        dialog.open();\n      });\n    },\n\n    onCloseDialog: function () {\n      this._pDialog.then(function (dialog) {\n        dialog.close();\n      });\n    }\n  });\n});"
+        },
+        {
+          "title": "Creating it once in the Component",
+          "language": "javascript",
+          "code": "// in Component.js\ninit: function () {\n  UIComponent.prototype.init.apply(this, arguments);\n  this._helloDialog = new HelloDialog(this.getRootControl());\n  this.getRouter().initialize();\n},\n\nopenHelloDialog: function () {\n  return this._helloDialog.open();\n},\n\n// in any controller\nonShowHello: function () {\n  this.getOwnerComponent().openHelloDialog();\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "model-types",
+      "level": "elementary",
+      "title": "What are the main model types (JSON, OData, Resource), and what is each one used for?",
+      "description": "A model holds the data that the UI shows, and data binding connects it to the controls. SAPUI5 has client-side and server-side models. The JSONModel (sap.ui.model.json.JSONModel) is a client-side model: all its data is a JavaScript object, loaded completely into the browser (from code or from a .json URL). It is used for small data sets, mock data, and view state, like a busy flag or which buttons are enabled. Its default binding mode is TwoWay. The ODataModel is a server-side model: it talks to an OData service in the back end, loads only the data the UI actually needs (paging, filtering and sorting happen on the server), and sends changes back. There is one for OData V2 (sap.ui.model.odata.v2.ODataModel, default binding mode OneWay) and a separate one for OData V4 (sap.ui.model.odata.v4.ODataModel, default TwoWay), with different APIs. The ResourceModel (sap.ui.model.resource.ResourceModel) is used for translatable texts: it reads .properties files (the i18n files) for the user's language, and its texts are read-only (default binding mode OneWay). There is also an XMLModel for XML data, which is rarely used.",
+      "keyPoints": [
+        "JSONModel: client-side, all data in the browser; for small data, mock data, and view state. Default TwoWay.",
+        "ODataModel: server-side, loads data from an OData service on demand; V2 (default OneWay) and V4 (default TwoWay) are separate classes.",
+        "ResourceModel: translatable texts from i18n .properties files, read-only.",
+        "XMLModel exists for XML data, but is rarely used."
+      ],
+      "examples": [
+        {
+          "title": "Creating each model in code",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/ui/model/json/JSONModel\",\n  \"sap/ui/model/odata/v2/ODataModel\",\n  \"sap/ui/model/resource/ResourceModel\"\n], function (JSONModel, ODataModel, ResourceModel) {\n  \"use strict\";\n\n  const viewModel = new JSONModel({ busy: false, items: [] });\n  const odataModel = new ODataModel(\"/sap/opu/odata/sap/ZPRODUCTS_SRV/\");\n  const i18nModel = new ResourceModel({ bundleName: \"my.app.i18n.i18n\" });\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "model-declaration-places",
+      "level": "elementary",
+      "title": "Where can a model be declared: in the manifest, in the Component, or in a controller?",
+      "description": "A model can be created in three places, and the place decides where it is available. Declaring it in manifest.json, in the sap.ui5/models section, is the recommended way for app-wide models, like the main OData model and the i18n ResourceModel: the component creates them automatically during its init, before any view exists, and they are available in every view of the app. A dataSource from sap.app/dataSources can be referenced instead of writing the URL again. Creating it in the Component's init, with this.setModel(model, \"name\"), is used for app-wide models that need code to be created, like a device model built from sap/ui/Device. Creating it in a controller, usually in onInit with this.getView().setModel(model, \"name\"), is used for data that belongs to one view only, like a local view model with a busy flag or edit mode; it is available in that view and its children, but not in other views. Models set higher in the tree (component) are visible lower down (views and controls), not the other way around.",
+      "keyPoints": [
+        "manifest.json (sap.ui5/models): recommended for app-wide models like OData and i18n; created automatically by the component.",
+        "Component.init with this.setModel(): app-wide models that need code, like a device model.",
+        "Controller onInit with this.getView().setModel(): models for one view only, like view state.",
+        "A model is visible where it is set and below it, not above."
+      ],
+      "examples": [
+        {
+          "title": "In manifest.json",
+          "language": "json",
+          "code": "{\n  \"sap.ui5\": {\n    \"models\": {\n      \"\": { \"dataSource\": \"mainService\", \"preload\": true },\n      \"i18n\": {\n        \"type\": \"sap.ui.model.resource.ResourceModel\",\n        \"settings\": { \"bundleName\": \"my.app.i18n.i18n\" }\n      }\n    }\n  }\n}"
+        },
+        {
+          "title": "In the Component and in a controller",
+          "language": "javascript",
+          "code": "// Component.js, init\nthis.setModel(new JSONModel(Device), \"device\");\n\n// Main.controller.js, onInit\nthis.getView().setModel(new JSONModel({ editMode: false }), \"view\");"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "named-default-models",
+      "level": "elementary",
+      "title": "What is the difference between named and default models, and how do you bind to each?",
+      "description": "A control can see several models at the same time, so models are told apart by their name. The default model has no name: it is set with setModel(model) (or with the empty key \"\" in the manifest), and you bind to it with a plain path, like {/Products} or {Name}. A named model is set with a name, like setModel(model, \"view\"), and every binding to it starts with the name and a > sign, like {view>/busy}. Absolute paths start with a /, and always point to the same place in the model, like {view>/busy}. Relative paths have no leading /, like {Name}, and are resolved against the current binding context of the same model, for example the row of a list. For a named model, relative paths need the model name too, like {product>Name}, and the binding context must also come from that named model (for example items=\"{product>/Products}\" gives each row a context of the product model). In code, getModel() returns the default model, and getModel(\"view\") a named one.",
+      "keyPoints": [
+        "The default model has no name: setModel(model), bound with {/path} or {path}.",
+        "A named model: setModel(model, \"name\"), bound with {name>/path}.",
+        "Absolute paths start with /; relative paths are resolved against the binding context of the same model.",
+        "Relative binding on a named model needs the prefix too: {product>Name} inside items=\"{product>/Products}\"."
+      ],
+      "examples": [
+        {
+          "title": "Default and named models in one view",
+          "language": "xml",
+          "code": "<!-- default model: no prefix -->\n<Title text=\"{/companyName}\" />\n\n<!-- named model \"view\": absolute path -->\n<BusyIndicator visible=\"{view>/busy}\" />\n\n<!-- named model \"product\": relative paths inside the list rows -->\n<List items=\"{product>/Products}\">\n  <StandardListItem title=\"{product>Name}\" description=\"{product>Category}\" />\n</List>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "control-id-generation",
+      "level": "basic",
+      "title": "How are control IDs generated in a view?",
+      "description": "Every control has an ID, which must be unique in the whole page. In a view, you give controls a short local ID, like id=\"saveButton\", but UI5 automatically puts the view's ID in front of it, separated by two dashes: if the view's ID is container-myApp---main, the button's real (global) ID becomes container-myApp---main--saveButton. This prefixing is what lets the same view be created several times without ID conflicts. That is why, in a controller, you should always use this.byId(\"saveButton\") (or this.getView().byId(...)), which adds the prefix for you, instead of the global lookup by the full ID. If you create controls in code inside a view, use this.getView().createId(\"localId\") to get a prefixed ID. A control without an id attribute gets a generated ID, like __button3, which can change between runs, so it is not stable; stable IDs are needed for automated tests (OPA5) and for UI adaptation and extensibility features. Fragments are prefixed with the ID you pass when loading them, usually the view ID.",
+      "keyPoints": [
+        "Controls in a view get the view ID as a prefix: viewId--localId.",
+        "Use this.byId(\"localId\") in the controller; it adds the prefix automatically.",
+        "Controls created in code inside a view should use view.createId(\"localId\").",
+        "Controls without an ID get unstable generated IDs (like __button3); stable IDs are needed for tests and adaptation."
+      ],
+      "examples": [
+        {
+          "title": "Local ID in the view",
+          "language": "xml",
+          "code": "<!-- In the view: only the local ID -->\n<Button id=\"saveButton\" text=\"Save\" press=\".onSave\" />"
+        },
+        {
+          "title": "The full ID at runtime",
+          "language": "text",
+          "code": "view ID:    container-myApp---main\nlocal ID:   saveButton\nfull ID:    container-myApp---main--saveButton"
+        },
+        {
+          "title": "Finding it from the controller",
+          "language": "javascript",
+          "code": "onSave: function () {\n  const button = this.byId(\"saveButton\"); // the prefix is added automatically\n  button.setEnabled(false);\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "adding-dependents",
+      "level": "basic",
+      "title": "What does it mean to add a control as a dependent?",
+      "description": "Every control and view has a special aggregation called dependents. Controls in this aggregation are not rendered as part of their parent, but they become part of the parent's control tree. This is used for controls that are shown outside of the normal page layout, mainly dialogs, popovers, and action sheets, which open on top of the page in their own layer. Adding such a control with view.addDependent(dialog) gives two important benefits. First, the dialog inherits the parent's models and binding context, so bindings like {i18n>title} or {/selectedItem} work inside it, which they would not do otherwise, because the dialog has no parent in the tree. Second, the dialog's lifecycle is tied to the parent: when the view is destroyed, the dialog is destroyed too, so it does not stay in memory forever. this.loadFragment() in a controller adds the fragment's content to the view's dependents automatically.",
+      "keyPoints": [
+        "dependents is an aggregation for controls that belong to a parent but are not rendered inside it.",
+        "Typical dependents: dialogs, popovers, action sheets.",
+        "A dependent inherits the parent's models and binding context, so its bindings work.",
+        "A dependent is destroyed together with its parent; loadFragment() adds fragments as dependents automatically."
+      ],
+      "examples": [
+        {
+          "title": "Adding a dialog as a dependent",
+          "language": "javascript",
+          "code": "onOpenSettings: async function () {\n  if (!this._settingsDialog) {\n    this._settingsDialog = await Fragment.load({\n      id: this.getView().getId(),\n      name: \"my.app.view.SettingsDialog\",\n      controller: this\n    });\n    // the dialog now sees the view's models (i18n, default, ...)\n    // and is destroyed when the view is destroyed\n    this.getView().addDependent(this._settingsDialog);\n  }\n  this._settingsDialog.open();\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "js-vs-xml-views",
+      "level": "basic",
+      "title": "How do JS views and XML views compare, and when is each one useful or harmful?",
+      "description": "XML views are declarative: they describe the structure of the UI, and the logic stays in the controller. That makes them easy to read and review, forces a clean separation between UI and logic, and allows tooling support, such as the layout editor, UI adaptation by key users, and view extensions in extensibility scenarios, which all work on XML. XML views are therefore the recommended default for almost every screen. Their limit is that they cannot contain logic, so very dynamic UIs (where the controls themselves depend on runtime data) are awkward to build with them. JS (typed) views build the UI in code, so they are fully flexible: loops, conditions, and controls created from data at runtime are easy. But this flexibility is also their risk: UI structure and logic get mixed, the code is harder to read, tooling and adaptation support is limited, and every developer may build views differently. A good rule: use XML views, and use JS views (or create controls in the controller) only for parts that must really be generated at runtime. Often, aggregation binding with a factory function solves dynamic cases inside an XML view.",
+      "keyPoints": [
+        "XML views: declarative, readable, strict separation of UI and logic, best tooling and adaptation support.",
+        "XML views cannot contain logic, which makes very dynamic UIs awkward.",
+        "JS views: full flexibility for UIs generated at runtime, but they mix UI with logic and have weaker tooling support.",
+        "Default to XML views; use JS only where the UI must really be built from runtime data."
+      ],
+      "examples": [
+        {
+          "title": "The same button in both styles",
+          "language": "javascript",
+          "code": "// XML view:\n// <Button text=\"{i18n>save}\" type=\"Emphasized\" press=\".onSave\" />\n\n// Typed JS view, inside createContent(controller):\nnew Button(this.createId(\"save\"), {\n  text: \"{i18n>save}\",\n  type: \"Emphasized\",\n  press: controller.onSave.bind(controller)\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "model-propagation",
+      "level": "basic",
+      "title": "How are models propagated through the tree of views and controls?",
+      "description": "Models are not set on every single control. Instead, a model set on one element is automatically passed down (propagated) to all of its children in the control tree: from the Component to its root view, from a view to its controls, from a container (like a Panel) to its content, and so on. So a model set on the component with this.setModel(model) can be used by every view and control of the app, and a model set on a view is available to everything inside that view. Binding contexts are propagated the same way: after view.bindElement(\"/Products(1)\"), every relative binding inside the view refers to that product. If a child sets its own model with the same name, it overrides the inherited one for itself and its children. Controls that are not part of the tree do not receive anything: a dialog created in code has no parent, so it sees no models until you add it as a dependent of the view (addDependent). Note also that a ComponentContainer does not pass models from outside into its component by default (its propagateModel property is false), which keeps components independent.",
+      "keyPoints": [
+        "A model set on an element is propagated to all of its children in the control tree.",
+        "Component models reach all views; view models reach all controls inside the view.",
+        "Binding contexts (like from bindElement) propagate the same way; a child can override a model with the same name.",
+        "Controls outside the tree (like dialogs) get nothing until added as dependents; ComponentContainer.propagateModel is false by default."
+      ],
+      "examples": [
+        {
+          "title": "Where each model is visible",
+          "language": "javascript",
+          "code": "// Component.js: visible in all views\nthis.setModel(new JSONModel({ user: \"Ana\" }), \"session\");\n\n// Main.controller.js: visible in this view only\nthis.getView().setModel(new JSONModel({ busy: false }), \"view\");\n\n// A dialog created in code sees nothing until it joins the tree\nthis.getView().addDependent(dialog); // now {session>/user} and {view>/busy} work in it"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "model-events",
+      "level": "basic",
+      "title": "What are the main events of sap.ui.model.Model?",
+      "description": "All models inherit a few events from sap.ui.model.Model, which let your code react to what happens to the data. requestSent is fired when the model sends a request to load data (for example to the back end or a .json URL); requestCompleted is fired when that request has finished, whether it succeeded or not; and requestFailed is fired when it failed, with details like the status code and message. These three are useful, for example, to show and hide a busy indicator, or to display an error message. parseError is fired when the loaded data cannot be parsed. propertyChange is fired when a property value is changed through a two-way binding, that is, when the user edits an input field that is bound to the model; it is not fired when you call setProperty in code. Note: the event is named requestSent (not \"requestSend\"), and updateBindings is not an event but a method (model.updateBindings()), which tells all bindings of a model to check the data again and refresh the UI, for example after the data was changed directly, without setProperty. Server-side models add their own events on top, such as metadataLoaded or batchRequestCompleted in the OData V2 model.",
+      "keyPoints": [
+        "requestSent / requestCompleted / requestFailed: a data request was sent, finished, or failed.",
+        "parseError: the loaded data could not be parsed.",
+        "propertyChange: a value was changed through a two-way binding (user input), not by setProperty in code.",
+        "updateBindings() is a method, not an event: it refreshes all bindings of the model."
+      ],
+      "examples": [
+        {
+          "title": "Reacting to model events",
+          "language": "javascript",
+          "code": "const model = new JSONModel();\n\nmodel.attachRequestSent(function () {\n  view.setBusy(true);\n});\nmodel.attachRequestCompleted(function () {\n  view.setBusy(false);\n});\nmodel.attachRequestFailed(function (event) {\n  MessageBox.error(\"Loading failed: \" + event.getParameter(\"statusCode\"));\n});\nmodel.attachPropertyChange(function (event) {\n  console.log(event.getParameter(\"path\"), \"changed to\", event.getParameter(\"value\"));\n});\n\nmodel.loadData(\"model/products.json\");"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}
