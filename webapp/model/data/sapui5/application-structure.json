@@ -11,7 +11,8 @@
         "webapp/ contains everything that runs in the browser; Component.js and manifest.json sit directly inside it.",
         "view/, controller/ and model/ follow the MVC pattern; i18n/ holds texts, css/ holds custom styles.",
         "localService/ holds metadata and mock data for the mock server; test/ holds QUnit and OPA5 tests.",
-        "package.json and ui5.yaml are outside webapp; the build writes the deployable app to dist/."
+        "package.json and ui5.yaml are outside webapp; the build writes the deployable app to dist/.",
+        "The folder path is the module path: webapp/controller/Main.controller.js becomes the module my/app/controller/Main, mapped through resourceRoots. A typo in the namespace gives \"resource could not be loaded\"."
       ],
       "examples": [
         {
@@ -26,18 +27,24 @@
       "id": "component-definition",
       "level": "elementary",
       "title": "What is the Component, and how is it defined?",
-      "description": "The Component (Component.js) is the entry point and the main object of an SAPUI5 app. It bundles the whole app into one reusable, independent unit, which can be started on its own, inside the SAP Fiori launchpad, or inside another app. A UI component extends sap.ui.core.UIComponent; a component without any UI (for example, a reusable piece of logic) extends sap.ui.core.Component instead. In its metadata, the component points to its descriptor with manifest: \"json\", so all configuration (models, routing, root view) is read from manifest.json. Adding the interface sap.ui.core.IAsyncContentCreation makes the component create its root view asynchronously, which is the recommended setting. The init method runs once when the component is created: it must call the parent's init first (UIComponent.prototype.init.apply(this, arguments)), because that step creates the models and the router from the manifest, and then it typically starts the router with this.getRouter().initialize() and sets additional models, like a device model.",
+      "description": "The Component (Component.js) is the entry point and the main object of an SAPUI5 app. It bundles the whole app into one reusable, independent unit, which can be started on its own, inside the SAP Fiori launchpad, or inside another app. A UI component extends sap.ui.core.UIComponent; a component without any UI (for example, a reusable piece of logic) extends sap.ui.core.Component instead. In its metadata, the component points to its descriptor with manifest: \"json\", so all configuration (models, routing, root view) is read from manifest.json. Adding the interface sap.ui.core.IAsyncContentCreation makes the component create its root view asynchronously, which is the recommended setting. The init method runs once when the component is created: it must call the parent's init first (UIComponent.prototype.init.apply(this, arguments)), because that step creates the models and the router from the manifest, and then it typically starts the router with this.getRouter().initialize() and sets additional models, like a device model. Its lifecycle is constructor → init() → createContent() (creates the root view) → the app runs → exit() (cleanup when the component is destroyed). If you forget to call the parent init, there are no manifest models and getRouter() returns nothing.",
       "keyPoints": [
         "Component.js is the app's entry point and makes the app reusable and independent of where it runs.",
         "A UI component extends sap.ui.core.UIComponent and loads its configuration with metadata: { manifest: \"json\" }.",
         "init() must first call the parent init, which creates the manifest models and the router.",
-        "After that, init() usually calls this.getRouter().initialize(); IAsyncContentCreation enables asynchronous root view creation."
+        "After that, init() usually calls this.getRouter().initialize(); IAsyncContentCreation enables asynchronous root view creation.",
+        "Lifecycle: constructor → init() → createContent() → exit(). Forgetting the parent init means no models and no router."
       ],
       "examples": [
         {
           "title": "A typical Component.js",
           "language": "javascript",
           "code": "sap.ui.define([\n  \"sap/ui/core/UIComponent\",\n  \"sap/ui/model/json/JSONModel\",\n  \"sap/ui/Device\"\n], function (UIComponent, JSONModel, Device) {\n  \"use strict\";\n\n  return UIComponent.extend(\"my.app.Component\", {\n    metadata: {\n      manifest: \"json\",\n      interfaces: [\"sap.ui.core.IAsyncContentCreation\"]\n    },\n\n    init: function () {\n      // 1. Parent init: creates the models and the router from manifest.json\n      UIComponent.prototype.init.apply(this, arguments);\n\n      // 2. An extra model, set in code\n      const deviceModel = new JSONModel(Device);\n      deviceModel.setDefaultBindingMode(\"OneWay\");\n      this.setModel(deviceModel, \"device\");\n\n      // 3. Start routing: reads the current hash and shows the matching view\n      this.getRouter().initialize();\n    }\n  });\n});"
+        },
+        {
+          "title": "The same Component in TypeScript",
+          "language": "typescript",
+          "code": "import UIComponent from \"sap/ui/core/UIComponent\";\nimport JSONModel from \"sap/ui/model/json/JSONModel\";\nimport Device from \"sap/ui/Device\";\n\n/**\n * @namespace my.app\n */\nexport default class Component extends UIComponent {\n  public static metadata = {\n    manifest: \"json\",                              // read all config from manifest.json\n    interfaces: [\"sap.ui.core.IAsyncContentCreation\"]\n  };\n\n  public init(): void {\n    super.init();                                   // creates models + router from the manifest\n\n    const deviceModel = new JSONModel(Device);\n    deviceModel.setDefaultBindingMode(\"OneWay\");\n    this.setModel(deviceModel, \"device\");\n\n    this.getRouter().initialize();                  // the router does not start by itself\n  }\n}"
         }
       ],
       "assignment": null
@@ -46,13 +53,15 @@
       "id": "manifest-structure",
       "level": "elementary",
       "title": "What is manifest.json, and what are its main sections?",
-      "description": "manifest.json, also called the app descriptor, is one JSON file that describes the whole app: what it is, what it needs, and how it is configured. Keeping this in one file lets tools, the SAP Fiori launchpad, and the framework read the configuration without running any code. It has a few namespaces (top-level sections). \"_version\" is the version of the descriptor format itself. \"sap.app\" holds general app information: the unique id (which matches the app's namespace), type, title and description (often as {{placeholders}} for translated texts from the i18n file), applicationVersion, and dataSources, such as OData service URLs. \"sap.ui\" holds UI technology information, like the supported device types. \"sap.ui5\" holds everything specific to SAPUI5: the rootView, dependencies (minUI5Version and required libraries), models (like the i18n ResourceModel or an OData model based on a dataSource), routing (config, routes and targets), resources (extra CSS files), and contentDensities. Other sections, like \"sap.fiori\", are used for launchpad and Fiori-specific settings.",
+      "description": "manifest.json, also called the app descriptor, is one JSON file that describes the whole app: what it is, what it needs, and how it is configured. Keeping this in one file lets tools, the SAP Fiori launchpad, and the framework read the configuration without running any code. It has a few namespaces (top-level sections). \"_version\" is the version of the descriptor format itself. \"sap.app\" holds general app information: the unique id (which matches the app's namespace), type, title and description (often as {{placeholders}} for translated texts from the i18n file), applicationVersion, and dataSources, such as OData service URLs. \"sap.ui\" holds UI technology information, like the supported device types. \"sap.ui5\" holds everything specific to SAPUI5: the rootView, dependencies (minUI5Version and required libraries), models (like the i18n ResourceModel or an OData model based on a dataSource), routing (config, routes and targets), resources (extra CSS files), and contentDensities. Other sections, like \"sap.fiori\", are used for launchpad and Fiori-specific settings. Other useful sap.ui5 settings are resourceRoots, componentUsages (reuse components) and flexEnabled (allows key user adaptation), and sap.app also holds crossNavigation (the inbounds for launchpad tiles). Optional platform namespaces are sap.fiori, sap.platform.abap, sap.platform.cf and sap.cloud. Note the two text syntaxes: {{appTitle}} (double curly braces) is used only inside the manifest, while views use {i18n>appTitle}.",
       "keyPoints": [
         "manifest.json (the app descriptor) holds the app's whole configuration in one declarative file.",
         "sap.app: id, title, description, applicationVersion, dataSources (service URLs).",
         "sap.ui: UI technology and supported device types.",
         "sap.ui5: rootView, dependencies (minUI5Version, libs), models, routing, resources, contentDensities.",
-        "Texts like {{appTitle}} are placeholders, filled from the i18n file declared in sap.app."
+        "Texts like {{appTitle}} are placeholders, filled from the i18n file declared in sap.app.",
+        "More sap.ui5 settings: resourceRoots, componentUsages, flexEnabled. Platform namespaces: sap.fiori, sap.platform.abap, sap.platform.cf, sap.cloud.",
+        "{{key}} is the manifest-only text syntax; views use {i18n>key}."
       ],
       "examples": [
         {
@@ -64,15 +73,41 @@
       "assignment": null
     },
     {
+      "id": "component-manifest-together",
+      "level": "elementary",
+      "title": "How do the Component and manifest.json work together (descriptor first)?",
+      "description": "UI5 reads manifest.json before it runs any Component code. This is called \"manifest first\" or \"descriptor first\". The flow is: UI5 loads the manifest → it sees the required libraries (sap.ui5/dependencies/libs) and data sources → it starts loading them in parallel → it loads and creates the Component → the parent init() creates the models and the router from the manifest → createContent() creates the root view. The benefit is performance: the libraries and the OData $metadata document are requested at the same time instead of one after another, so the app starts faster. A model can even be marked with \"preload\": true, so its data request starts before the Component is created. You get this behavior when the component is created asynchronously with the manifest option, which is the default when you start it with ComponentSupport, Component.create(), or from the SAP Fiori launchpad.",
+      "keyPoints": [
+        "Descriptor first: UI5 reads manifest.json before Component.js runs.",
+        "Libraries and OData metadata declared in the manifest are loaded in parallel, which makes startup faster.",
+        "The parent init() then creates the models and the router from the manifest; createContent() creates the root view.",
+        "Component.create({ name, manifest: true }) and ComponentSupport use the manifest-first loading."
+      ],
+      "examples": [
+        {
+          "title": "Creating a component manifest first",
+          "language": "javascript",
+          "code": "sap.ui.require([\"sap/ui/core/Component\", \"sap/ui/core/ComponentContainer\"], function (Component, ComponentContainer) {\n  Component.create({\n    name: \"my.app\",\n    manifest: true          // 1. load manifest.json first, 2. preload libs + metadata in parallel\n  }).then(function (oComponent) {\n    new ComponentContainer({ component: oComponent, height: \"100%\" }).placeAt(\"content\");\n  });\n});"
+        },
+        {
+          "title": "Preloading a model's data from the manifest",
+          "language": "json",
+          "code": "\"sap.ui5\": {\n  \"models\": {\n    \"\": {\n      \"dataSource\": \"mainService\",\n      \"preload\": true,\n      \"settings\": { \"autoExpandSelect\": true }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
       "id": "ui5-versioning",
       "level": "elementary",
       "title": "How does the UI5 framework versioning (major / minor / patch) work?",
-      "description": "UI5 versions have three numbers: major.minor.patch, for example 1.120.15. The major version (1) changes only when compatibility is broken on purpose; it has stayed 1 for many years, and SAP is preparing UI5 2.x, which removes APIs that were deprecated in 1.x. The minor version (120) is a feature release: it brings new controls and features, and stays compatible with older 1.x code. The patch version (15) contains only bug fixes, no new features, so updating a patch is always safe. Some minor versions are long-term maintenance releases (for example 1.108 and 1.120), which receive patches for several years, so they are a good choice for apps that cannot upgrade often. An app declares the lowest UI5 version it needs with minUI5Version in manifest.json. At runtime, you can see the loaded version in the Technical Information dialog (Ctrl+Alt+Shift+P) or read it in code with sap/ui/VersionInfo.",
+      "description": "UI5 versions have three numbers: major.minor.patch, for example 1.120.15. The major version (1) changes only when compatibility is broken on purpose; it has stayed 1 for many years, and SAP is preparing UI5 2.x, which removes APIs that were deprecated in 1.x. The minor version (120) is a feature release: it brings new controls and features, and stays compatible with older 1.x code. The patch version (15) contains only bug fixes, no new features, so updating a patch is always safe. Some minor versions are long-term maintenance releases (for example 1.108 and 1.120), which receive patches for several years, so they are a good choice for apps that cannot upgrade often. An app declares the lowest UI5 version it needs with minUI5Version in manifest.json. At runtime, you can see the loaded version in the Technical Information dialog (Ctrl+Alt+Shift+P) or read it in code with sap/ui/VersionInfo. Nothing is deleted inside 1.x, it is only deprecated, which is why the framework grew so large and why SAP created 2.x. Version 1.136 is the baseline for this move: APIs deprecated there do not exist in OpenUI5 2.x, and the UI5 linter (@ui5/linter) checks your code for them.",
       "keyPoints": [
         "A UI5 version is major.minor.patch, like 1.120.15.",
         "Major: incompatible changes (UI5 2.x removes deprecated APIs). Minor: new features, compatible. Patch: bug fixes only.",
         "Long-term maintenance minor versions (like 1.108, 1.120) receive fixes for several years.",
-        "manifest.json declares the lowest supported version with sap.ui5/dependencies/minUI5Version."
+        "manifest.json declares the lowest supported version with sap.ui5/dependencies/minUI5Version.",
+        "Within 1.x nothing is removed, only deprecated; the UI5 linter finds deprecated API usage before a move to 2.x."
       ],
       "examples": [
         {
@@ -89,15 +124,42 @@
       "assignment": null
     },
     {
+      "id": "lts-version-choice",
+      "level": "elementary",
+      "title": "What is an LTS (long-term maintenance) version, and how do you choose the version for a project?",
+      "description": "Some minor versions get long-term maintenance and are supported with patches for years: 1.71, 1.84, 1.96, 1.108, 1.120 and 1.136. The other minor versions are short-lived \"innovation\" releases that stop getting fixes soon after the next one comes out. Productive projects normally pick an LTS version, and the target platform matters too: an on-premise ABAP system provides the version its SAP_UI component ships, while the CDN and SAP BTP offer many versions. The version shows up in three places, and each one means something different. ui5.yaml → framework.version is the version the UI5 tooling downloads for local development and the build. manifest.json → sap.ui5/dependencies/minUI5Version is the minimum version the app needs. The bootstrap URL in index.html (or the platform, like the launchpad) decides which version the browser really loads. To check what a running app uses, open the Technical Information dialog with Ctrl+Alt+Shift+P. SAP publishes the maintenance status of all versions on the \"Version Overview\" page of the SDK.",
+      "keyPoints": [
+        "LTS versions (1.71, 1.84, 1.96, 1.108, 1.120, 1.136) get patches for years; other minors are short-lived.",
+        "ui5.yaml framework.version: what the tooling uses for development and build.",
+        "manifest.json minUI5Version: the minimum version the app needs.",
+        "The bootstrap URL or the platform: the version that really runs. Check it with Ctrl+Alt+Shift+P."
+      ],
+      "examples": [
+        {
+          "title": "The version in ui5.yaml",
+          "language": "yaml",
+          "code": "specVersion: \"3.0\"\nmetadata:\n  name: my.app\ntype: application\nframework:\n  name: SAPUI5\n  version: \"1.120.15\"   # the tooling downloads and serves exactly this version\n  libraries:\n    - name: sap.m\n    - name: sap.ui.core\n    - name: themelib_sap_horizon"
+        },
+        {
+          "title": "The minimum version in manifest.json",
+          "language": "json",
+          "code": "\"sap.ui5\": {\n  \"dependencies\": {\n    \"minUI5Version\": \"1.120.0\",\n    \"libs\": { \"sap.m\": {}, \"sap.ui.core\": {} }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
       "id": "bootstrap-standalone-cdn",
       "level": "basic",
       "title": "How does a standalone SAPUI5 app bootstrap, and what is the difference between CDN and local SDK references?",
-      "description": "Bootstrapping means loading and starting the UI5 framework in the page. In a standalone app, index.html contains one script tag with id=\"sap-ui-bootstrap\" that loads sap-ui-core.js; its data-sap-ui-* attributes configure the framework. The most common ones are data-sap-ui-theme (like sap_horizon), data-sap-ui-resource-roots (maps your app's namespace to a folder, like {\"my.app\": \"./\"}), data-sap-ui-async=\"true\" (load modules asynchronously, recommended), data-sap-ui-compat-version=\"edge\" (use the newest behavior), and data-sap-ui-on-init, which says what to run when the core is ready, for example module:sap/ui/core/ComponentSupport, which finds a div with data-sap-ui-component in the page and creates the component named there. The src of the script decides where UI5 itself comes from. A CDN reference, like https://ui5.sap.com/resources/sap-ui-core.js (SAPUI5) or https://sdk.openui5.org/resources/sap-ui-core.js (OpenUI5), loads it from SAP's servers; adding a version to the path, like /1.120.15/resources/, pins one exact version. A local reference, like resources/sap-ui-core.js, loads it from your own server: during development, the UI5 tooling (ui5 serve) serves the framework there, and on an SAP system (ABAP or SAP BTP) the platform provides it.",
+      "description": "Bootstrapping means loading and starting the UI5 framework in the page. In a standalone app, index.html contains one script tag with id=\"sap-ui-bootstrap\" that loads sap-ui-core.js; its data-sap-ui-* attributes configure the framework. The most common ones are data-sap-ui-theme (like sap_horizon), data-sap-ui-resource-roots (maps your app's namespace to a folder, like {\"my.app\": \"./\"}), data-sap-ui-async=\"true\" (load modules asynchronously, recommended), data-sap-ui-compat-version=\"edge\" (use the newest behavior), and data-sap-ui-on-init, which says what to run when the core is ready, for example module:sap/ui/core/ComponentSupport, which finds a div with data-sap-ui-component in the page and creates the component named there. The src of the script decides where UI5 itself comes from. A CDN reference, like https://ui5.sap.com/resources/sap-ui-core.js (SAPUI5) or https://sdk.openui5.org/resources/sap-ui-core.js (OpenUI5), loads it from SAP's servers; adding a version to the path, like /1.120.15/resources/, pins one exact version. A local reference, like resources/sap-ui-core.js, loads it from your own server: during development, the UI5 tooling (ui5 serve) serves the framework there, and on an SAP system (ABAP or SAP BTP) the platform provides it. Two more attributes are worth knowing: data-sap-ui-libs lists the libraries to preload at start (like sap.m), and data-sap-ui-frame-options controls if the app may run in an iframe. Productive projects use a local or platform-served UI5 with a fixed version: it works offline, the version cannot change underneath you, and you can debug the sources. A CDN URL without a version always delivers the newest release, which is convenient for demos but risky for production. On an ABAP system the libraries come from /sap/public/bc/ui5_ui5/; on SAP BTP the app router serves them or points to the CDN.",
       "keyPoints": [
         "The bootstrap script (id=\"sap-ui-bootstrap\") loads sap-ui-core.js and is configured with data-sap-ui-* attributes.",
         "Common attributes: theme, resource-roots, async, compat-version, on-init.",
         "on-init=\"module:sap/ui/core/ComponentSupport\" creates the component declared in a div with data-sap-ui-component.",
-        "CDN src (ui5.sap.com or sdk.openui5.org, optionally with a version in the path) vs local src (resources/...) served by the UI5 tooling or the platform."
+        "CDN src (ui5.sap.com or sdk.openui5.org, optionally with a version in the path) vs local src (resources/...) served by the UI5 tooling or the platform.",
+        "data-sap-ui-libs preloads libraries; data-sap-ui-frame-options controls iframe embedding.",
+        "A CDN URL without a version always loads the newest release: fine for demos, risky for production."
       ],
       "examples": [
         {
@@ -132,12 +194,14 @@
       "id": "configuration-url-parameters",
       "level": "basic",
       "title": "What configuration options and URL parameters does an SAPUI5 app support?",
-      "description": "The UI5 runtime is configured with a set of options, such as the theme, the language, right-to-left mode, or debug mode. You can set them in several places: as data-sap-ui-* attributes on the bootstrap script tag, in a global configuration object (window[\"sap-ui-config\"]) defined before the bootstrap script, or as URL parameters, which are very handy because you can change a setting just by editing the address, without touching the code. Commonly used URL parameters are: sap-ui-debug=true (loads the readable, non-minified -dbg.js sources, for debugging), sap-ui-language=de (forces a language, which also picks i18n_de.properties), sap-ui-theme=sap_horizon_dark (switches the theme), sap-ui-rtl=true (right-to-left layout, for languages like Arabic or Hebrew), and sap-ui-xx-componentPreload=off (loads the app's single source files instead of the Component-preload.js bundle, useful when testing changes on a deployed app). Options with xx in their name are experimental. Not every option can be set through the URL, because some of them would be a security risk if anyone could change them by sending a link. Apps can also read their own URL parameters, for example startup parameters passed by the SAP Fiori launchpad.",
+      "description": "The UI5 runtime is configured with a set of options, such as the theme, the language, right-to-left mode, or debug mode. You can set them in several places: as data-sap-ui-* attributes on the bootstrap script tag, in a global configuration object (window[\"sap-ui-config\"]) defined before the bootstrap script, or as URL parameters, which are very handy because you can change a setting just by editing the address, without touching the code. Commonly used URL parameters are: sap-ui-debug=true (loads the readable, non-minified -dbg.js sources, for debugging), sap-ui-language=de (forces a language, which also picks i18n_de.properties), sap-ui-theme=sap_horizon_dark (switches the theme), sap-ui-rtl=true (right-to-left layout, for languages like Arabic or Hebrew), and sap-ui-xx-componentPreload=off (loads the app's single source files instead of the Component-preload.js bundle, useful when testing changes on a deployed app). Options with xx in their name are experimental. Not every option can be set through the URL, because some of them would be a security risk if anyone could change them by sending a link. Apps can also read their own URL parameters, for example startup parameters passed by the SAP Fiori launchpad. The precedence is: a URL parameter beats the bootstrap attributes and the global configuration object, which beat the default. Two more parameters are useful: sap-ui-animation=false turns off animations, which makes UI tests more stable, and sap-client=100 picks the ABAP client (a back-end parameter, not a UI5 one). Instead of URL parameters you can also open the Support Assistant with Ctrl+Alt+Shift+S and the Technical Information dialog (exact UI5 version, debug sources) with Ctrl+Alt+Shift+P. The SDK page \"Configuration Options and URL Parameters\" is the full reference list.",
       "keyPoints": [
         "Options can be set via bootstrap attributes (data-sap-ui-*), the window[\"sap-ui-config\"] object, or URL parameters.",
         "sap-ui-debug=true loads readable debug sources; sap-ui-language and sap-ui-theme switch language and theme.",
         "sap-ui-rtl=true turns on right-to-left mode; sap-ui-xx-componentPreload=off skips the preload bundle.",
-        "Options containing xx are experimental, and some options cannot be set via the URL for security reasons."
+        "Options containing xx are experimental, and some options cannot be set via the URL for security reasons.",
+        "Precedence: URL parameter > bootstrap attribute / global config > default.",
+        "sap-ui-animation=false stabilizes UI tests; sap-client picks the ABAP client. Ctrl+Alt+Shift+S opens the Support Assistant."
       ],
       "examples": [
         {

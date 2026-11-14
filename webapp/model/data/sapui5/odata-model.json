@@ -3,21 +3,48 @@
   "title": "ODataModel",
   "questions": [
     {
+      "id": "odata-v2-vs-v4",
+      "level": "elementary",
+      "title": "What is the relation between OData metadata and the ODataModel, and how do the V2 and V4 models differ?",
+      "description": "The metadata ($metadata) is the contract: an XML document that describes what the service offers, which entities exist, their keys and properties, how they relate, and which operations can be called. The ODataModel is the client: it reads that contract, builds the right HTTP requests, caches the responses, tracks changes, and feeds the UI through data binding. In one sentence: the metadata describes the service, the model consumes it. The concepts are the same in OData V2 and V4, but the APIs differ a lot. Internal storage: V2 has one flat cache for the whole model, V4 has a cache per binding. Reading: V2 has model.read(), V4 uses bindings, contexts and requestObject(). Writing: V2 has model.create/update/remove, V4 uses binding.create(), context.setProperty() and context.delete(). Sending: V2 submitChanges(), V4 submitBatch(groupId). Grouping: V2 groupId and deferred groups, V4 $$groupId and $$updateGroupId. Binding parameters: V2 expand/select, V4 $expand/$select plus $$... model options. SAP extensions: V2 uses sap:label or sap:filterable attributes, V4 uses standard annotations like @Common.Label and @Capabilities.*. Operations: V2 FunctionImport, V4 Function (GET) and Action (POST), bound or unbound. A good review answer gives the V2 answer and adds one line: \"in V4 this is X\".",
+      "keyPoints": [
+        "Metadata = the contract (entities, keys, relations, operations); the ODataModel = the client that consumes it.",
+        "Storage: V2 one flat model cache; V4 one cache per binding.",
+        "Read/write: V2 read/create/update/remove + submitChanges; V4 contexts (create, setProperty, delete) + submitBatch.",
+        "V2 sap:* attributes and FunctionImports → V4 standard annotations and Functions/Actions."
+      ],
+      "examples": [
+        {
+          "title": "The same create in V2 and V4",
+          "language": "javascript",
+          "code": "// OData V2: model API with callbacks\noModelV2.create(\"/ProductSet\", { Name: \"New\", Price: \"100.00\" }, {\n  success: () => MessageToast.show(\"Created\"),\n  error: () => MessageBox.error(\"Failed\")\n});\n\n// OData V4: through the list binding, promise-based\nconst oContext = this.byId(\"table\").getBinding(\"items\").create({ Name: \"New\", Price: 100 });\nawait oContext.created();\nMessageToast.show(\"Created\");"
+        }
+      ],
+      "assignment": null
+    },
+    {
       "id": "odata-v2-internal-storage-keys",
       "level": "elementary",
       "title": "How does the OData V2 model store data internally, what is an entity key, and how do you build one manually?",
-      "description": "The OData V2 model (sap.ui.model.odata.v2.ODataModel) keeps every entity it has loaded in an internal cache, a flat map where each entity is stored under its key: the entity set name followed by the key values in parentheses, like Products('HT-1000') or, for an entity with several key properties, SalesOrderItems(SalesOrderID='0500000001',ItemPosition='10'). The key is built from the entity set and all key properties defined in the metadata; string values are written in single quotes, numbers without, and other types use their OData literal format (like datetime'...' or guid'...'). Lists are not stored as arrays; a list binding only remembers the keys of the entities it shows, and every entity exists once in the cache, even if several lists show it. This is why the binding path to one entity is /Products('HT-1000'), and a property is /Products('HT-1000')/Name. To build a key in code without string concatenation (and with the correct formatting and encoding for each type), use model.createKey(\"/Products\", { ProductID: \"HT-1000\" }), which returns /Products('HT-1000') (the metadata must be loaded). You can then read a loaded value with model.getProperty(key + \"/Name\") or bind a view to it.",
+      "description": "The OData V2 model (sap.ui.model.odata.v2.ODataModel) keeps every entity it has loaded in an internal cache, a flat map where each entity is stored under its key: the entity set name followed by the key values in parentheses, like Products('HT-1000') or, for an entity with several key properties, SalesOrderItems(SalesOrderID='0500000001',ItemPosition='10'). The key is built from the entity set and all key properties defined in the metadata; string values are written in single quotes, numbers without, and other types use their OData literal format (like datetime'...' or guid'...'). Lists are not stored as arrays; a list binding only remembers the keys of the entities it shows, and every entity exists once in the cache, even if several lists show it. This is why the binding path to one entity is /Products('HT-1000'), and a property is /Products('HT-1000')/Name. To build a key in code without string concatenation (and with the correct formatting and encoding for each type), use model.createKey(\"/Products\", { ProductID: \"HT-1000\" }), which returns /Products('HT-1000') (the metadata must be loaded). You can then read a loaded value with model.getProperty(key + \"/Name\") or bind a view to it. Each cache entry also has __metadata (the canonical URI, the entity type, and the ETag used for optimistic concurrency), and a navigation property that was not loaded is stored as __deferred with the URL to fetch it later; an expanded entity is stored as its own entry, and the parent holds a __ref to it. The benefit of flat storage: the same product shown in three lists is stored once, so an update in one place updates all three lists. Key literal formats by type: Edm.String ('HT-1000'), Edm.Int32 (42), Edm.Guid (guid'0050568f-...'), Edm.DateTime (datetime'2026-01-01T00:00:00'), Edm.Decimal (123m). The key comes from the <Key> element of the EntityType, which is why the model cannot build a key before the metadata is loaded. Other ways to get a path without building it: context.getPath() from a clicked list item, or model.getKey(oEntity). In V4 there is no global flat cache: each binding has its own cache tied to its own request, which is more predictable, and you almost never build keys; you navigate through contexts, or use context.requestCanonicalPath() for the absolute path.",
       "keyPoints": [
         "Loaded entities are cached in a flat map, stored under their key, like Products('HT-1000').",
         "A key = entity set + all key properties in parentheses, formatted as OData literals.",
         "Lists only hold keys; each entity exists once in the cache.",
-        "model.createKey(\"/Products\", { ProductID: \"HT-1000\" }) builds a correctly formatted key (needs loaded metadata)."
+        "model.createKey(\"/Products\", { ProductID: \"HT-1000\" }) builds a correctly formatted key (needs loaded metadata).",
+        "Cache entries carry __metadata (uri, type, ETag); unloaded navigation is __deferred; expanded entities are separate entries (__ref).",
+        "Literal formats: 'text', 42, guid'...', datetime'...', 123m. V4: one cache per binding; use contexts, requestCanonicalPath()."
       ],
       "examples": [
         {
           "title": "Building and using a key",
           "language": "javascript",
           "code": "const model = this.getOwnerComponent().getModel();\n\nmodel.metadataLoaded().then(function () {\n  const path = model.createKey(\"/SalesOrderItems\", {\n    SalesOrderID: \"0500000001\",\n    ItemPosition: \"10\"\n  });\n  // \"/SalesOrderItems(SalesOrderID='0500000001',ItemPosition='10')\"\n\n  this.getView().bindElement(path);\n  const quantity = model.getProperty(path + \"/Quantity\"); // only if already loaded\n}.bind(this));"
+        },
+        {
+          "title": "What the flat cache looks like",
+          "language": "javascript",
+          "code": "// oModel.oData (internal - for understanding, do not access it in app code)\n{\n  \"ProductSet('HT-1000')\": {\n    ProductID: \"HT-1000\",\n    Name: \"Notebook Basic 15\",\n    Price: \"956.00\",\n    __metadata: {\n      uri: \"https://host/service/ProductSet('HT-1000')\",\n      type: \"MyService.Product\",\n      etag: \"W/\\\"20260101120000\\\"\"\n    },\n    Supplier: { __deferred: { uri: \"https://host/service/ProductSet('HT-1000')/Supplier\" } }\n  },\n  \"SupplierSet('100')\": { /* stored once, referenced by every product of this supplier */ }\n}\n\n// composite key\nconst sKey = oModel.createKey(\"SalesOrderItemSet\", { SalesOrderID: \"500000001\", ItemPosition: \"0000000010\" });\n// -> \"SalesOrderItemSet(SalesOrderID='500000001',ItemPosition='0000000010')\""
         }
       ],
       "assignment": null
@@ -26,12 +53,14 @@
       "id": "odata-v2-crud",
       "level": "elementary",
       "title": "How do you perform CRUD operations with the OData V2 model?",
-      "description": "CRUD means Create, Read, Update and Delete. The OData V2 model has one method for each, all of them asynchronous, with success and error callbacks in a parameters object. read(path, { filters, sorters, urlParameters, success, error }) loads data, like read(\"/Products\") or read(\"/Products('HT-1000')\"), and puts it into the model's cache (most of the time you do not call read yourself, because bindings load data automatically). create(\"/Products\", data, { success, error }) sends a POST that creates a new entity, and the success callback receives the created entity (with keys filled by the server). update(path, data, { success, error }) sends the changed properties of an existing entity (by default as a MERGE or PATCH, only with the given fields). remove(path, { success, error }) deletes an entity with a DELETE request. For forms bound with two-way binding, there is a more typical pattern: changes typed by the user are collected as pending changes (in the deferred group \"changes\") and sent together with submitChanges(), and createEntry(\"/Products\", { properties }) creates a temporary context for a new entity that is only sent on submitChanges. resetChanges() discards collected changes. By default, the model groups requests into $batch requests.",
+      "description": "CRUD means Create, Read, Update and Delete. The OData V2 model has one method for each, all of them asynchronous, with success and error callbacks in a parameters object. read(path, { filters, sorters, urlParameters, success, error }) loads data, like read(\"/Products\") or read(\"/Products('HT-1000')\"), and puts it into the model's cache (most of the time you do not call read yourself, because bindings load data automatically). create(\"/Products\", data, { success, error }) sends a POST that creates a new entity, and the success callback receives the created entity (with keys filled by the server). update(path, data, { success, error }) sends the changed properties of an existing entity (by default as a MERGE or PATCH, only with the given fields). remove(path, { success, error }) deletes an entity with a DELETE request. For forms bound with two-way binding, there is a more typical pattern: changes typed by the user are collected as pending changes (in the deferred group \"changes\") and sent together with submitChanges(), and createEntry(\"/Products\", { properties }) creates a temporary context for a new entity that is only sent on submitChanges. resetChanges() discards collected changes. By default, the model groups requests into $batch requests. In update, the option merge (default true) decides between MERGE/PATCH (only the given fields) and PUT (full replacement). In OData V4 everything is binding-based and promise-based: create with listBinding.create(data) and wait for context.created(), update with context.setProperty(\"Name\", value) (sent with the binding's update group), delete with context.delete(), and read values in code with context.requestProperty(\"Name\") or requestObject().",
       "keyPoints": [
         "read / create / update / remove map to GET / POST / MERGE-PATCH / DELETE.",
         "Each takes a parameters object with success and error callbacks (and filters, urlParameters...).",
         "Two-way changes are collected as pending changes and sent with submitChanges(); resetChanges() discards them.",
-        "createEntry() creates a temporary new entity that is sent with submitChanges()."
+        "createEntry() creates a temporary new entity that is sent with submitChanges().",
+        "update(..., { merge: false }) sends PUT (full replace) instead of MERGE.",
+        "V4: listBinding.create() + created(), context.setProperty(), context.delete(), submitBatch(group)."
       ],
       "examples": [
         {
@@ -43,6 +72,11 @@
           "title": "Form editing with pending changes",
           "language": "javascript",
           "code": "onCreate: function () {\n  const context = this.getView().getModel().createEntry(\"/Products\", {\n    properties: { Name: \"\", Price: \"0.00\" }\n  });\n  this.getView().setBindingContext(context); // the form edits the new entry\n},\n\nonSave: function () {\n  this.getView().getModel().submitChanges({\n    success: function () { /* sent in one $batch */ }\n  });\n},\n\nonCancel: function () {\n  this.getView().getModel().resetChanges();\n}"
+        },
+        {
+          "title": "The same operations with OData V4",
+          "language": "javascript",
+          "code": "const oBinding = this.byId(\"table\").getBinding(\"items\");   // sap.ui.model.odata.v4.ODataListBinding\n\n// CREATE\nconst oContext = oBinding.create({ Name: \"New\", Price: 100 });\nawait oContext.created();\n\n// UPDATE - two-way binding or code writes it, then submit the update group\nawait oContext.setProperty(\"Name\", \"Updated\");\nawait oModel.submitBatch(\"productChanges\");\n\n// DELETE\nawait oContext.delete();\n\n// READ in code (normally you just bind)\nconst sName = await oContext.requestProperty(\"Name\");"
         }
       ],
       "assignment": null
@@ -51,18 +85,25 @@
       "id": "odata-v2-function-import",
       "level": "elementary",
       "title": "What is a function import, and how do you call it?",
-      "description": "A function import is an operation that an OData V2 service offers in addition to the normal CRUD operations on entities. It is used for business actions that do not fit create, update or delete, like approving an order, releasing a document, recalculating prices, or reading a value that is calculated on the server. In the metadata, it has a name, an HTTP method (GET for operations without side effects, POST for actions that change data), its parameters, and an optional return type (an entity, a list, a complex type, or nothing). From UI5, it is called with model.callFunction(\"/ApproveOrder\", { method: \"POST\", urlParameters: { OrderID: \"4711\" }, success, error }); the parameters are passed as URL parameters, and the success callback receives the returned data. callFunction can also be part of a batch group, and it returns a handle with abort(). Another way, mostly in XML, is to bind a context to the function import and execute it later. In OData V4, function imports are replaced by actions and functions, which are called through an operation binding (bindContext(\"/ApproveOrder(...)\") followed by execute()).",
+      "description": "A function import is an operation that an OData V2 service offers in addition to the normal CRUD operations on entities. It is used for business actions that do not fit create, update or delete, like approving an order, releasing a document, recalculating prices, or reading a value that is calculated on the server. In the metadata, it has a name, an HTTP method (GET for operations without side effects, POST for actions that change data), its parameters, and an optional return type (an entity, a list, a complex type, or nothing). From UI5, it is called with model.callFunction(\"/ApproveOrder\", { method: \"POST\", urlParameters: { OrderID: \"4711\" }, success, error }); the parameters are passed as URL parameters, and the success callback receives the returned data. callFunction can also be part of a batch group, and it returns a handle with abort(). Another way, mostly in XML, is to bind a context to the function import and execute it later. In OData V4, function imports are replaced by actions and functions, which are called through an operation binding (bindContext(\"/ApproveOrder(...)\"), setParameter(...), then invoke(); invoke() replaced the older name execute() in UI5 1.123). There are three ways to call one in V2: a direct call; a deferred call in a deferred group, where handle.contextCreated() gives a context that a dialog can bind to so the user fills in the parameters before submitChanges({ groupId }); and from an annotation (UI.DataFieldForAction), where smart controls or SAP Fiori elements call it for you. In V4, a function is called with GET, does not change data and is composable in a URL; an action is called with POST, may change data, and is not composable. Both can be bound to an entity (bindContext(\"MyService.approve(...)\", oContext)) or unbound.",
       "keyPoints": [
         "A function import is a custom server operation, beyond CRUD (approve, release, calculate...).",
         "Metadata defines its name, HTTP method (GET or POST), parameters, and return type.",
         "Call it with model.callFunction(\"/Name\", { method, urlParameters, success, error }).",
-        "In OData V4, actions/functions are called through an operation binding and execute()."
+        "In OData V4, actions/functions are called through an operation binding and invoke() (older: execute()).",
+        "Three V2 ways: direct, deferred with contextCreated() for a parameter dialog, or via UI.DataFieldForAction.",
+        "V4: Function = GET, no side effects, composable; Action = POST, may change data; both bound or unbound."
       ],
       "examples": [
         {
           "title": "Calling a function import",
           "language": "javascript",
           "code": "onApprove: function () {\n  const orderId = this.getView().getBindingContext().getProperty(\"OrderID\");\n  this.getView().getModel().callFunction(\"/ApproveOrder\", {\n    method: \"POST\",\n    urlParameters: { OrderID: orderId },\n    success: function (result) {\n      MessageToast.show(\"Order approved\");\n    },\n    error: function () {\n      MessageBox.error(\"Approval failed\");\n    }\n  });\n}"
+        },
+        {
+          "title": "Deferred call, V4 operations and the CAP definition",
+          "language": "javascript",
+          "code": "// V2: deferred, so a dialog can bind to the parameters\nconst oHandle = oModel.callFunction(\"/ApproveOrder\", {\n  method: \"POST\",\n  urlParameters: { OrderID: \"500000001\", Comment: \"\" },\n  groupId: \"approvalGroup\"                  // a deferred group\n});\noHandle.contextCreated().then((oContext) => this.dialog.setBindingContext(oContext));\n// user fills the dialog and presses OK:\noModel.submitChanges({ groupId: \"approvalGroup\" });\n\n// V4: unbound action\nconst oOperation = oModelV4.bindContext(\"/ApproveOrder(...)\");\noOperation.setParameter(\"OrderID\", \"500000001\");\nawait oOperation.invoke();\n\n// V4: bound action on one entity\nawait oModelV4.bindContext(\"OrderService.approve(...)\", oOrderContext).invoke();\n\n// CAP (CDS):\n// service OrderService {\n//   entity Orders as projection on db.Orders actions {\n//     action approve(comment: String) returns Orders;   // bound action\n//   };\n//   action recalculateAll() returns Integer;              // unbound action\n// }"
         }
       ],
       "assignment": null
@@ -71,18 +112,25 @@
       "id": "odata-v2-aggregation-binding-parameters",
       "level": "elementary",
       "title": "Which parameters can be used in an aggregation binding with the OData V2 model?",
-      "description": "Besides path, template, sorter and filters, a list binding on an OData V2 model accepts a parameters object with OData-specific settings. expand loads related entities in the same request, using navigation properties, like expand: \"Supplier,Category\" (sent as $expand). select loads only some properties, like select: \"ProductID,Name,Price\" (sent as $select), which makes responses smaller. custom adds custom query options that the service understands, like custom: { search: \"notebook\" }. countMode (from sap.ui.model.odata.CountMode) decides how the total number of entries is requested, and operationMode (from sap.ui.model.odata.OperationMode) decides whether filtering and sorting happen on the server or in the browser. threshold sets how many entries are loaded in advance beyond the visible ones. groupId (formerly batchGroupId) puts the binding's requests into a specific batch group. Other options include faultTolerant, usePreliminaryContext, and transitionMessagesOnly. Next to parameters, the length setting limits how many entries are requested at once, and the growing feature of sap.m lists requests the next page automatically.",
+      "description": "Besides path, template, sorter and filters, a list binding on an OData V2 model accepts a parameters object with OData-specific settings. expand loads related entities in the same request, using navigation properties, like expand: \"Supplier,Category\" (sent as $expand). select loads only some properties, like select: \"ProductID,Name,Price\" (sent as $select), which makes responses smaller. custom adds custom query options that the service understands, like custom: { search: \"notebook\" }. countMode (from sap.ui.model.odata.CountMode) decides how the total number of entries is requested, and operationMode (from sap.ui.model.odata.OperationMode) decides whether filtering and sorting happen on the server or in the browser. threshold sets how many entries are loaded in advance beyond the visible ones. groupId (formerly batchGroupId) puts the binding's requests into a specific batch group. Other options include faultTolerant, usePreliminaryContext, and transitionMessagesOnly. Next to parameters, the length setting limits how many entries are requested at once, and the growing feature of sap.m lists requests the next page automatically. The most useful V2 tip: always use select. Without it the service returns every field of every row, which can be the difference between a 40 KB and a 2 MB response. OData V4 uses the OData names directly ($expand, $select, $count, $search, $filter, $orderby) plus $$ for model-specific options ($$groupId, $$updateGroupId, $$operationMode, $$ownRequest, $$patchWithoutSideEffects). With autoExpandSelect: true on the V4 model, $select and $expand are built automatically from the bindings in the view, so you usually do not write them by hand.",
       "keyPoints": [
         "expand: related entities in the same request ($expand); select: only some properties ($select).",
         "custom: custom query options, like custom: { search: \"notebook\" }.",
         "countMode and operationMode: how counts, filtering and sorting are done.",
-        "threshold (prefetch), groupId (batch group), and more; length limits the page size."
+        "threshold (prefetch), groupId (batch group), and more; length limits the page size.",
+        "Always use select in V2: it can shrink responses from megabytes to kilobytes.",
+        "V4: $expand, $select, $count, $search + $$groupId, $$updateGroupId, $$operationMode, $$ownRequest; autoExpandSelect builds $select/$expand."
       ],
       "examples": [
         {
           "title": "A list binding with OData parameters",
           "language": "xml",
           "code": "<Table\n  growing=\"true\"\n  growingThreshold=\"20\"\n  items=\"{\n    path: '/Products',\n    parameters: {\n      expand: 'Supplier',\n      select: 'ProductID,Name,Price,Supplier/CompanyName',\n      countMode: 'Inline'\n    },\n    sorter: { path: 'Name' }\n  }\">\n  <columns>\n    <Column><Text text=\"Product\" /></Column>\n    <Column><Text text=\"Supplier\" /></Column>\n  </columns>\n  <items>\n    <ColumnListItem>\n      <Text text=\"{Name}\" />\n      <Text text=\"{Supplier/CompanyName}\" />\n    </ColumnListItem>\n  </items>\n</Table>"
+        },
+        {
+          "title": "The V4 equivalent",
+          "language": "xml",
+          "code": "<Table items=\"{\n  path: '/Products',\n  parameters: {\n    $expand: 'Supplier($select=Name)',\n    $select: 'ID,Name,Price',\n    $count: true,\n    $search: 'laptop',\n    $$groupId: '$auto',\n    $$updateGroupId: 'productGroup',\n    $$operationMode: 'Server',\n    $$ownRequest: true\n  }\n}\">"
         }
       ],
       "assignment": null
@@ -91,12 +139,13 @@
       "id": "odata-query-options",
       "level": "elementary",
       "title": "What are the OData query options?",
-      "description": "Query options are URL parameters, starting with $, that tell an OData service what data to return. $filter restricts the entries, like $filter=Price lt 100 and Category eq 'Laptops' (with operators such as eq, ne, lt, le, gt, ge, and, or, not, and functions like substringof or startswith in V2, contains in V4). $orderby sorts them, like $orderby=Price desc. $top and $skip page through the data, like $skip=20&$top=10 for the third page of ten. $select returns only some properties, and $expand includes related entities through navigation properties, like $expand=Supplier. For counts, OData V2 has $inlinecount=allpages (adds the total count to the response) and the /$count path segment (returns only the number); OData V4 uses $count=true. $format chooses the response format, like json. OData V4 also adds $search for free-text search, and allows nested options inside $expand. In SAPUI5, you rarely write these yourself: the model creates them from your bindings, filters, sorters, and parameters (a Filter becomes $filter, a Sorter $orderby, growing $skip/$top, and the expand/select parameters $expand/$select).",
+      "description": "Query options are URL parameters, starting with $, that tell an OData service what data to return. $filter restricts the entries, like $filter=Price lt 100 and Category eq 'Laptops' (with operators such as eq, ne, lt, le, gt, ge, and, or, not, and functions like substringof or startswith in V2, contains in V4). $orderby sorts them, like $orderby=Price desc. $top and $skip page through the data, like $skip=20&$top=10 for the third page of ten. $select returns only some properties, and $expand includes related entities through navigation properties, like $expand=Supplier. For counts, OData V2 has $inlinecount=allpages (adds the total count to the response) and the /$count path segment (returns only the number); OData V4 uses $count=true. $format chooses the response format, like json. OData V4 also adds $search for free-text search, and allows nested options inside $expand. In SAPUI5, you rarely write these yourself: the model creates them from your bindings, filters, sorters, and parameters (a Filter becomes $filter, a Sorter $orderby, growing $skip/$top, and the expand/select parameters $expand/$select). Two more to recognize: $skiptoken, a cursor for server-driven paging, and $apply (V4, data aggregation), like $apply=groupby((Category),aggregate(Price with sum as Total)). Further $filter functions are endswith, tolower and length. You read these options mostly when debugging in the network tab.",
       "keyPoints": [
         "$filter, $orderby: restrict and sort; $top, $skip: paging.",
         "$select: only some properties; $expand: include related entities.",
         "Counts: $inlinecount=allpages or /$count in V2, $count=true in V4; $format chooses the format.",
-        "UI5 builds them from bindings: Filter = $filter, Sorter = $orderby, growing = $skip/$top."
+        "UI5 builds them from bindings: Filter = $filter, Sorter = $orderby, growing = $skip/$top.",
+        "Also: $skiptoken (server-driven paging), $apply (V4 aggregation), $search (V4)."
       ],
       "examples": [
         {
@@ -111,12 +160,13 @@
       "id": "odata-v2-filter-sort-operation-mode",
       "level": "elementary",
       "title": "How do you filter and sort a collection on the server or with local data (operation mode)?",
-      "description": "With an OData model, filters and sorters are applied to the list binding exactly as with a JSON model: binding.filter(filters) and binding.sort(sorters), or the filters and sorter settings in XML. What differs is where the work is done, which is controlled by the binding's operationMode parameter. In Server mode, the default, every filter or sort change sends a new request to the server with $filter and $orderby, and only the needed page of data is returned; this is the right choice for large data, because the browser never has to load everything. In Client mode, the binding loads all entries of the collection once, and then filters and sorts them in the browser without new requests, which is fast for small collections (like a list of a few dozen statuses) but bad for large ones. The older Auto mode, which tried to choose between the two based on a threshold, is deprecated since UI5 1.102. Note also the filter type in binding.filter(filters, type): FilterType.Application is for filters set by the app, and FilterType.Control for filters coming from the user through a control; both are combined with AND.",
+      "description": "With an OData model, filters and sorters are applied to the list binding exactly as with a JSON model: binding.filter(filters) and binding.sort(sorters), or the filters and sorter settings in XML. What differs is where the work is done, which is controlled by the binding's operationMode parameter. In Server mode, the default, every filter or sort change sends a new request to the server with $filter and $orderby, and only the needed page of data is returned; this is the right choice for large data, because the browser never has to load everything. In Client mode, the binding loads all entries of the collection once, and then filters and sorts them in the browser without new requests, which is fast for small collections (like a list of a few dozen statuses) but bad for large ones. The older Auto mode, which tried to choose between the two based on a threshold, is deprecated since UI5 1.102. Note also the filter type in binding.filter(filters, type): FilterType.Application is for filters set by the app, and FilterType.Control for filters coming from the user through a control; both are combined with AND. How to choose: Server for large collections (the default, and almost always right), Client for small, stable lists where the user filters a lot (instant response, no round trips). A custom filter test function only works in Client mode, because a JavaScript function cannot be turned into $filter. The back end can also refuse: a property in NonFilterableProperties or NonSortableProperties makes the request fail. In OData V4 the parameter is $$operationMode, and Client mode needs the whole collection to be loaded.",
       "keyPoints": [
         "Filters and sorters are applied the same way: binding.filter() / binding.sort() or in XML.",
         "operationMode Server (default): every change sends a new request with $filter / $orderby.",
         "operationMode Client: load everything once, then filter and sort in the browser; only for small data.",
-        "OperationMode.Auto is deprecated since 1.102; FilterType.Application and Control filters are ANDed."
+        "OperationMode.Auto is deprecated since 1.102; FilterType.Application and Control filters are ANDed.",
+        "Server for large data; Client for small, stable lists. Custom test filters need Client mode."
       ],
       "examples": [
         {
@@ -131,12 +181,13 @@
       "id": "odata-count-mode",
       "level": "elementary",
       "title": "What is the CountMode property, and what does each value mean?",
-      "description": "Lists often need the total number of entries, for example for \"Products (1,234)\" in a table title, or to know how many more items growing can load. sap.ui.model.odata.CountMode decides how an OData V2 list binding gets this number. Request: the count is requested with a separate request to /Products/$count (in the same $batch, if batching is on). Inline: the count is requested together with the first data request, with $inlinecount=allpages, and is not requested again when more pages are loaded. InlineRepeat: like Inline, but the count is requested again with every data request, so it stays correct if the data changes on the server. None: no count is requested at all, which saves work on the server when the number is not needed (but then a growing list cannot show the total). Both is an older value that is deprecated since 1.43. The mode can be set for the whole model (defaultCountMode in the model settings) or per binding (parameters: { countMode: 'Inline' }). After loading, the number is available through binding.getLength(), or in the binding's dataReceived event.",
+      "description": "Lists often need the total number of entries, for example for \"Products (1,234)\" in a table title, or to know how many more items growing can load. sap.ui.model.odata.CountMode decides how an OData V2 list binding gets this number. Request: the count is requested with a separate request to /Products/$count (in the same $batch, if batching is on). Inline: the count is requested together with the first data request, with $inlinecount=allpages, and is not requested again when more pages are loaded. InlineRepeat: like Inline, but the count is requested again with every data request, so it stays correct if the data changes on the server. None: no count is requested at all, which saves work on the server when the number is not needed (but then a growing list cannot show the total). Both is an older value that is deprecated since 1.43. The mode can be set for the whole model (defaultCountMode in the model settings) or per binding (parameters: { countMode: 'Inline' }). After loading, the number is available through binding.getLength(), or in the binding's dataReceived event. Request is the default. In practice Inline is usually best, because it halves the number of requests; None is for very large collections where counting is expensive and the user does not need a total (a $count request on a huge table can be slower than the data request itself). In OData V4 it is one boolean: parameters: { $count: true } (default false), and the count comes back as @odata.count, available with binding.getCount() or the $count path.",
       "keyPoints": [
         "CountMode decides how a V2 list binding gets the total number of entries.",
         "Request: separate $count request. Inline: $inlinecount with the first data request.",
         "InlineRepeat: $inlinecount with every request. None: no count. (Both is deprecated.)",
-        "Set it per model (defaultCountMode) or per binding; read the result with binding.getLength()."
+        "Set it per model (defaultCountMode) or per binding; read the result with binding.getLength().",
+        "Default is Request; Inline is usually best. V4: $count: true, read with getCount() (@odata.count)."
       ],
       "examples": [
         {
@@ -156,18 +207,25 @@
       "id": "odata-v2-group-ids-deferred",
       "level": "basic",
       "title": "What is a groupId, and what are deferred groups?",
-      "description": "By default, the OData V2 model sends requests in $batch requests: requests created in the same moment are collected and sent together in one HTTP request, which saves round trips. A groupId (formerly batchGroupId) is the name of such a collection: all requests with the same groupId end up in the same $batch. You can set it on a binding (parameters: { groupId: \"products\" }), on a single operation (read(path, { groupId })), or for changes. A deferred group is a group whose requests are not sent automatically, but kept until you send them yourself with submitChanges({ groupId }). You declare which groups are deferred with model.setDeferredGroups([\"myGroup\"]). By default, the model has one deferred group, \"changes\": all changes made through two-way binding (and createEntry) go into it, which is why they are only sent when submitChanges() is called. This is the mechanism behind \"edit a form, then press Save\": changes are collected, and sent together in one batch (and in one change set, so they succeed or fail together). setChangeGroups lets you route changes of specific entity types into other groups.",
+      "description": "By default, the OData V2 model sends requests in $batch requests: requests created in the same moment are collected and sent together in one HTTP request, which saves round trips. A groupId (formerly batchGroupId) is the name of such a collection: all requests with the same groupId end up in the same $batch. You can set it on a binding (parameters: { groupId: \"products\" }), on a single operation (read(path, { groupId })), or for changes. A deferred group is a group whose requests are not sent automatically, but kept until you send them yourself with submitChanges({ groupId }). You declare which groups are deferred with model.setDeferredGroups([\"myGroup\"]). By default, the model has one deferred group, \"changes\": all changes made through two-way binding (and createEntry) go into it, which is why they are only sent when submitChanges() is called. This is the mechanism behind \"edit a form, then press Save\": changes are collected, and sent together in one batch (and in one change set, so they succeed or fail together). setChangeGroups lets you route changes of specific entity types into other groups. A change set inside a batch is an atomic unit: all operations in it succeed or all are rolled back. With setChangeGroups, single: false puts all changes of the group into one change set (an all-or-nothing save), and single: true puts each change into its own change set. In OData V4 the same idea uses the model or binding settings groupId and updateGroupId and model.submitBatch(groupId). Special V4 group IDs are $auto (automatic batch), $auto.<name> (separate automatic batches), $direct (no batch) and $single; any other name is a deferred application group that is sent only with submitBatch.",
       "keyPoints": [
         "Requests created at the same time are sent together in one $batch; a groupId names that batch.",
         "groupId can be set on bindings, single operations, and changes.",
         "A deferred group is only sent when you call submitChanges({ groupId }); set them with setDeferredGroups.",
-        "The default deferred group \"changes\" collects two-way changes until submitChanges()."
+        "The default deferred group \"changes\" collects two-way changes until submitChanges().",
+        "A change set is atomic; setChangeGroups single:false = one change set (all-or-nothing).",
+        "V4: groupId / updateGroupId + submitBatch(); $auto, $auto.name, $direct, or an application (deferred) group."
       ],
       "examples": [
         {
           "title": "A custom deferred group",
           "language": "javascript",
           "code": "const model = this.getView().getModel();\nmodel.setDeferredGroups(model.getDeferredGroups().concat([\"notes\"]));\n\n// collected, not sent yet\nmodel.update(\"/Notes('1')\", { Text: \"Updated\" }, { groupId: \"notes\" });\nmodel.create(\"/Notes\", { Text: \"New\" }, { groupId: \"notes\" });\n\n// now both are sent in one $batch\nmodel.submitChanges({\n  groupId: \"notes\",\n  success: function () { MessageToast.show(\"Notes saved\"); }\n});"
+        },
+        {
+          "title": "Change groups in V2 and update groups in V4",
+          "language": "javascript",
+          "code": "// V2\noModel.setDeferredGroups([\"productChanges\"]);\noModel.setChangeGroups({\n  \"MyService.Product\": {\n    groupId: \"productChanges\",\n    changeSetId: \"changeSet1\",\n    single: false                // all changes in ONE change set\n  }\n});\n// the user edits fields - nothing is sent yet\noModel.submitChanges({ groupId: \"productChanges\" });\n\n// V4\nconst oModelV4 = new ODataModel({\n  serviceUrl: \"/odata/v4/products/\",\n  groupId: \"$auto\",              // reads\n  updateGroupId: \"productChanges\" // changes wait for submitBatch\n});\nawait oModelV4.submitBatch(\"productChanges\");"
         }
       ],
       "assignment": null
@@ -176,18 +234,24 @@
       "id": "odata-v2-dependent-bindings",
       "level": "basic",
       "title": "How can dependent bindings be optimized?",
-      "description": "A dependent binding is a binding that needs another binding's data first, typically a relative binding inside an element binding, like a table of order items (relative path ToItems) inside an order detail view. Without care, this causes a chain of requests: first the order is loaded, and only when its data arrives, the items are requested, and maybe then the supplier of each item. Several techniques reduce this. Use $expand (the expand parameter) on the parent binding, so the related entities come in the same response, for example bindElement({ path: \"/Orders('1')\", parameters: { expand: \"ToItems\" } }); the relative item binding then needs no request at all. Use $select to load only the properties the screen shows. Set usePreliminaryContext: true on the parent binding (or on the model), so dependent bindings can send their requests right away, in the same $batch as the parent, without waiting for the parent's data. Keep related requests in the same batch group, so they share one round trip. And avoid calling refresh() on the whole model when only one binding needs new data. Together, these turn many sequential requests into one or two.",
+      "description": "A dependent binding is a binding that needs another binding's data first, typically a relative binding inside an element binding, like a table of order items (relative path ToItems) inside an order detail view. Without care, this causes a chain of requests: first the order is loaded, and only when its data arrives, the items are requested, and maybe then the supplier of each item. Several techniques reduce this. Use $expand (the expand parameter) on the parent binding, so the related entities come in the same response, for example bindElement({ path: \"/Orders('1')\", parameters: { expand: \"ToItems\" } }); the relative item binding then needs no request at all. Use $select to load only the properties the screen shows. Set createPreliminaryContext: true on the parent (element) binding and usePreliminaryContext: true on the dependent binding (or on the model): the parent creates a preliminary context immediately, before its data arrives, so the dependent binding can build its request right away and both go out in the same $batch. Keep related requests in the same batch group, so they share one round trip. And avoid calling refresh() on the whole model when only one binding needs new data. Together, these turn many sequential requests into one or two. In V4 this is solved much better with one model setting: autoExpandSelect: true looks at all bindings in the view and builds one request with the right $expand and $select. Mentioning this shows you know why V2 needed the trick.",
       "keyPoints": [
         "Dependent bindings (relative bindings inside an element binding) can cause a chain of requests.",
         "$expand on the parent loads related entities in the same response; $select trims properties.",
-        "usePreliminaryContext lets dependent requests go in the same $batch without waiting for the parent.",
-        "Keep related requests in one batch group, and avoid refreshing the whole model."
+        "Parent: createPreliminaryContext: true; child: usePreliminaryContext: true; both requests go in the same $batch.",
+        "Keep related requests in one batch group, and avoid refreshing the whole model.",
+        "V4: autoExpandSelect: true merges dependent bindings into one request automatically."
       ],
       "examples": [
         {
           "title": "Loading an order with its items in one request",
           "language": "javascript",
           "code": "_onOrderMatched: function (event) {\n  const orderId = event.getParameter(\"arguments\").orderId;\n  this.getView().bindElement({\n    path: \"/Orders('\" + orderId + \"')\",\n    parameters: {\n      expand: \"ToItems,ToCustomer\",\n      select: \"OrderID,Status,ToCustomer/Name,ToItems/ProductID,ToItems/Quantity\"\n    }\n  });\n  // in the view: <Table items=\"{ToItems}\"> needs no extra request\n}"
+        },
+        {
+          "title": "Preliminary contexts in V2",
+          "language": "javascript",
+          "code": "// parent: element binding of the object page\nthis.getView().bindElement({\n  path: \"/OrderSet('500000001')\",\n  parameters: { createPreliminaryContext: true, groupId: \"orderGroup\" }\n});\n\n// child: relative table binding in the view\n// <Table items=\"{ path: 'to_Items', parameters: { usePreliminaryContext: true, groupId: 'orderGroup' } }\">\n\n// V4: no trick needed\n// new ODataModel({ serviceUrl: \"/odata/v4/orders/\", autoExpandSelect: true, earlyRequests: true })"
         }
       ],
       "assignment": null
@@ -196,12 +260,13 @@
       "id": "odata-v2-main-events",
       "level": "basic",
       "title": "What are the main events of the OData V2 model (metadata, annotations, and batch events)?",
-      "description": "Besides the generic model events, the OData V2 model fires events for its own loading steps. Metadata: metadataLoaded is fired when the service metadata ($metadata) has been loaded and parsed, and metadataFailed when it could not be loaded, for example because the service is down or the user has no authorization; the app should show an error then, because nothing will work without metadata. Annotations: if the model loads annotation files (configured in the data source), annotationsLoaded and annotationsFailed tell you whether they arrived. Batch: batchRequestSent, batchRequestCompleted and batchRequestFailed are fired for each $batch request, with details like the contained requests; they are useful to show a global busy indicator or to log errors. The single-request events requestSent, requestCompleted and requestFailed are also fired for each request inside a batch. All of these can be attached with the generated methods, like model.attachMetadataFailed(handler). For the common case \"do something once metadata is ready\", the metadataLoaded() promise is easier than the event.",
+      "description": "Besides the generic model events, the OData V2 model fires events for its own loading steps. Metadata: metadataLoaded is fired when the service metadata ($metadata) has been loaded and parsed, and metadataFailed when it could not be loaded, for example because the service is down or the user has no authorization; the app should show an error then, because nothing will work without metadata. Annotations: if the model loads annotation files (configured in the data source), annotationsLoaded and annotationsFailed tell you whether they arrived. Batch: batchRequestSent, batchRequestCompleted and batchRequestFailed are fired for each $batch request, with details like the contained requests; they are useful to show a global busy indicator or to log errors. The single-request events requestSent, requestCompleted and requestFailed are also fired for each request inside a batch. All of these can be attached with the generated methods, like model.attachMetadataFailed(handler). For the common case \"do something once metadata is ready\", the metadataLoaded() promise is easier than the event. The classic use cases are a global busy indicator (attach batchRequestSent and batchRequestCompleted once in Component.init(), so the whole app shows busy during any back-end call with no code in single controllers) and central error handling: one ErrorHandler class that listens to requestFailed and batchRequestFailed, instead of an error callback in every call.",
       "keyPoints": [
         "metadataLoaded / metadataFailed: the service metadata was loaded, or failed to load.",
         "annotationsLoaded / annotationsFailed: for annotation files configured for the service.",
         "batchRequestSent / batchRequestCompleted / batchRequestFailed: for each $batch request.",
-        "requestSent / requestCompleted / requestFailed also fire for single requests; attach with attachX()."
+        "requestSent / requestCompleted / requestFailed also fire for single requests; attach with attachX().",
+        "Use them once, centrally: a global busy indicator and an ErrorHandler class in the Component."
       ],
       "examples": [
         {
@@ -216,18 +281,24 @@
       "id": "odata-v2-metadata-loaded-promise",
       "level": "basic",
       "title": "What is the metadataLoaded promise, and when do you use it?",
-      "description": "Many operations of the OData V2 model need the service metadata: createKey needs to know the key properties and their types, the MetaModel needs the entity definitions, and building paths or reading annotations depends on it. Metadata is loaded asynchronously when the model is created, so code that runs early (for example in onInit) might run before it has arrived. model.metadataLoaded() returns a promise that resolves as soon as the metadata is available (immediately, if it already is), so you can safely wrap such code in metadataLoaded().then(...). It is easier and safer than the metadataLoaded event, which you could miss if the metadata had already loaded before you attached the handler. A typical use is in a route-matched handler: wait for the metadata, then build the entity path with createKey and bind the view. For annotations, there is the similar annotationsLoaded() promise. Note that the promise does not reject when the metadata fails to load; handle that case with the metadataFailed event.",
+      "description": "Many operations of the OData V2 model need the service metadata: createKey needs to know the key properties and their types, the MetaModel needs the entity definitions, and building paths or reading annotations depends on it. Metadata is loaded asynchronously when the model is created, so code that runs early (for example in onInit) might run before it has arrived. model.metadataLoaded() returns a promise that resolves as soon as the metadata is available (immediately, if it already is), so you can safely wrap such code in metadataLoaded().then(...). It is easier and safer than the metadataLoaded event, which you could miss if the metadata had already loaded before you attached the handler. A typical use is in a route-matched handler: wait for the metadata, then build the entity path with createKey and bind the view. For annotations, there is the similar annotationsLoaded() promise. By default the promise does not reject when the metadata fails to load; call metadataLoaded(true) to get a promise that rejects on failure, or handle the metadataFailed event. Operations that cannot work before the metadata exists: createKey(), reading the MetaModel (labels, annotations, value lists), building columns or filters dynamically, and test code that must wait before asserting. In V4 everything is promise-based by design: every MetaModel request* method (like requestObject) waits for the metadata itself, so there is no separate waiting step.",
       "keyPoints": [
         "Metadata loads asynchronously; some APIs (createKey, MetaModel) need it.",
         "model.metadataLoaded() returns a promise that resolves when the metadata is available.",
         "Safer than the event, which you could miss if the metadata already loaded.",
-        "Typical: metadataLoaded().then(() => bind with createKey); annotationsLoaded() exists for annotations."
+        "Typical: metadataLoaded().then(() => bind with createKey); annotationsLoaded() exists for annotations.",
+        "metadataLoaded(true) rejects on failure. V4: MetaModel request* methods wait by themselves."
       ],
       "examples": [
         {
           "title": "Waiting for the metadata before binding",
           "language": "javascript",
           "code": "_onProductMatched: function (event) {\n  const id = event.getParameter(\"arguments\").productId;\n  const model = this.getView().getModel();\n\n  model.metadataLoaded().then(function () {\n    const path = model.createKey(\"/Products\", { ProductID: id });\n    this.getView().bindElement({ path: path });\n  }.bind(this));\n}"
+        },
+        {
+          "title": "Rejecting on failure",
+          "language": "javascript",
+          "code": "oModel.metadataLoaded(true)          // true: reject if the metadata cannot be loaded\n  .then(() => this.setupView())\n  .catch(() => this.showServiceUnavailable());"
         }
       ],
       "assignment": null
@@ -236,12 +307,13 @@
       "id": "odata-v2-metamodel-purpose",
       "level": "basic",
       "title": "What is the OData MetaModel for, what are its main use cases, and what is its dynamic syntax?",
-      "description": "The MetaModel (odataModel.getMetaModel(), an sap.ui.model.odata.ODataMetaModel for V2) gives access to the service's metadata and annotations as a model, instead of as raw XML. Its purpose is to let the UI adapt to the service description: the same code works for different entity types without hard-coding their details. Main use cases: reading labels, field lengths, data types or units of properties (for example sap:label or sap:maxLength), checking whether a property is filterable or updatable (sap:filterable, sap:updatable), finding the key properties of an entity, and evaluating UI annotations. It is also the foundation of XML templating and of smart controls and SAP Fiori elements, which build whole screens from metadata and annotations. The dynamic syntax is a path into the metadata, used for binding or with getObject: with the V2 data model, a path starting with /#, like {/#Product/Name/@sap:label}, reads a metadata attribute; on the MetaModel itself, paths follow the metadata structure, like /dataServices/schema/0/entityType/0, and helper methods like getODataEntitySet(\"Products\"), getODataEntityType(\"ns.Product\") or getMetaContext(\"/Products('1')/Name\") return the right objects or contexts. Wait for metaModel.loaded() first.",
+      "description": "The MetaModel (odataModel.getMetaModel(), an sap.ui.model.odata.ODataMetaModel for V2) gives access to the service's metadata and annotations as a model, instead of as raw XML. Its purpose is to let the UI adapt to the service description: the same code works for different entity types without hard-coding their details. Main use cases: reading labels, field lengths, data types or units of properties (for example sap:label or sap:maxLength), checking whether a property is filterable or updatable (sap:filterable, sap:updatable), finding the key properties of an entity, and evaluating UI annotations. It is also the foundation of XML templating and of smart controls and SAP Fiori elements, which build whole screens from metadata and annotations. The dynamic syntax is a path into the metadata, used for binding or with getObject: with the V2 data model, a path starting with /#, like {/#Product/Name/@sap:label}, reads a metadata attribute; on the MetaModel itself, paths follow the metadata structure, like /dataServices/schema/0/entityType/0, and helper methods like getODataEntitySet(\"Products\"), getODataEntityType(\"ns.Product\") or getMetaContext(\"/Products('1')/Name\") return the right objects or contexts. Wait for metaModel.loaded() first. The OData V4 MetaModel uses annotation paths with @, like /Products/Name@com.sap.vocabularies.Common.v1.Label, and @@ for computed annotations (calling a function, like @@sap.ui.model.odata.v4.AnnotationHelper.label). The sentence to use in a review: the MetaModel is what turns annotations into UI; smart controls and SAP Fiori elements are just consumers of it.",
       "keyPoints": [
         "The MetaModel exposes metadata and annotations as a model: getMetaModel().",
         "Use cases: labels, lengths, types, filterable/updatable flags, keys, UI annotations.",
         "It powers XML templating, smart controls, and SAP Fiori elements.",
-        "Syntax: {/#Product/Name/@sap:label} on the data model, or MetaModel paths and helpers (getODataEntityType, getMetaContext)."
+        "Syntax: {/#Product/Name/@sap:label} on the data model, or MetaModel paths and helpers (getODataEntityType, getMetaContext).",
+        "V4 paths: /Products/Name@com.sap.vocabularies.Common.v1.Label; @@ for computed annotations."
       ],
       "examples": [
         {
@@ -256,12 +328,13 @@
       "id": "odata-v2-binding-path-parameters",
       "level": "basic",
       "title": "What is the OData binding path syntax, and how are extra binding parameters passed?",
-      "description": "OData binding paths follow the structure of the service. An entity set is addressed by its name, like /Products. One entity is addressed by its key in parentheses, like /Products('HT-1000') or, with several key properties, /SalesOrderItems(SalesOrderID='1',ItemPosition='10'). A property is appended with a slash, /Products('HT-1000')/Name, and a navigation property follows a relationship to another entity or list, like /Products('HT-1000')/ToSupplier or /SalesOrders('1')/ToItems. Relative paths, like Name or ToSupplier/CompanyName, are resolved against the current context, just like with other models. Extra settings are passed in the parameters object of a binding: for element (context) bindings, expand and select, and options like custom (custom query options) or groupId; for list bindings, also countMode, operationMode and threshold. In XML you use the object syntax of the binding, and in code bindElement / bindItems with a parameters object. The parameters are translated into query options ($expand, $select, custom parameters) of the requests that the binding sends.",
+      "description": "OData binding paths follow the structure of the service. An entity set is addressed by its name, like /Products. One entity is addressed by its key in parentheses, like /Products('HT-1000') or, with several key properties, /SalesOrderItems(SalesOrderID='1',ItemPosition='10'). A property is appended with a slash, /Products('HT-1000')/Name, and a navigation property follows a relationship to another entity or list, like /Products('HT-1000')/ToSupplier or /SalesOrders('1')/ToItems. Relative paths, like Name or ToSupplier/CompanyName, are resolved against the current context, just like with other models. Extra settings are passed in the parameters object of a binding: for element (context) bindings, expand and select, and options like custom (custom query options) or groupId; for list bindings, also countMode, operationMode and threshold. In XML you use the object syntax of the binding, and in code bindElement / bindItems with a parameters object. The parameters are translated into query options ($expand, $select, custom parameters) of the requests that the binding sends. The most common \"why is my field empty\" bug in V2: {Supplier/Name} only works if Supplier was expanded (or loaded otherwise). Without expand, the navigation property is stored as __deferred, and a property binding never loads it.",
       "keyPoints": [
         "Entity set: /Products; one entity: /Products('HT-1000'); several keys: (Key1='a',Key2='b').",
         "Property: /Products('HT-1000')/Name; navigation: /Products('HT-1000')/ToSupplier.",
         "Relative paths are resolved against the current binding context.",
-        "Extra settings go into parameters: expand, select, custom, groupId, countMode, operationMode..."
+        "Extra settings go into parameters: expand, select, custom, groupId, countMode, operationMode...",
+        "{Supplier/Name} stays empty without expand: 'Supplier' (the navigation is __deferred)."
       ],
       "examples": [
         {
@@ -276,12 +349,13 @@
       "id": "odata-v2-when-request",
       "level": "basic",
       "title": "When does data binding produce a back-end request, and when does it not?",
-      "description": "The OData model only sends a request when data is needed and not already in its cache. A request is sent when: an absolute list binding is created or its control is rendered (for example items=\"{/Products}\"), with the current filters, sorters, and page size; a list binding is filtered, sorted, refreshed, or a growing list loads its next page ($skip/$top); an element binding points to an entity that is not loaded yet, or needs $expand data that is missing; a relative binding follows a navigation property whose data was not expanded with the parent (a deferred navigation); refresh() is called on a binding or the model; or you call read, create, update, remove, callFunction, or submitChanges. No request is sent when: a property binding reads a value of an entity that is already loaded (property bindings themselves never trigger requests); a relative binding is resolved inside data that was already expanded; you call getProperty or getObject (they only read the cache); or an element binding points to an entity that is already cached with all needed data (the model can reuse it). Changes typed by the user are also not sent immediately, because they go into the deferred \"changes\" group until submitChanges().",
+      "description": "The OData model only sends a request when data is needed and not already in its cache. A request is sent when: an absolute list binding is created or its control is rendered (for example items=\"{/Products}\"), with the current filters, sorters, and page size; a list binding is filtered, sorted, refreshed, or a growing list loads its next page ($skip/$top); an element binding points to an entity that is not loaded yet, or needs $expand data that is missing; a relative binding follows a navigation property whose data was not expanded with the parent (a deferred navigation); refresh() is called on a binding or the model; or you call read, create, update, remove, callFunction, or submitChanges. No request is sent when: a property binding reads a value of an entity that is already loaded (property bindings themselves never trigger requests); a relative binding is resolved inside data that was already expanded; you call getProperty or getObject (they only read the cache); or an element binding points to an entity that is already cached with all needed data (the model can reuse it). Changes typed by the user are also not sent immediately, because they go into the deferred \"changes\" group until submitChanges(). The rule to remember: only list bindings and context (element) bindings trigger requests, property bindings never do. So <Text text=\"{Supplier/Name}\" /> without expand: 'Supplier' leaves the field empty. In V4 the rule is stricter: one binding = one request, and dependent bindings are merged into the parent's request with autoExpandSelect: true; $$ownRequest: true forces a binding to send its own request.",
       "keyPoints": [
         "Requests: absolute list bindings, filter/sort/refresh/growing, element bindings for unloaded entities.",
         "Requests: deferred navigation properties, explicit read/create/update/remove/callFunction/submitChanges.",
         "No request: property bindings, getProperty/getObject, relative bindings inside expanded data.",
-        "No immediate request for two-way changes; they wait in the deferred \"changes\" group."
+        "No immediate request for two-way changes; they wait in the deferred \"changes\" group.",
+        "Only list and context bindings cause requests; V4: one binding = one request, $$ownRequest forces a separate one."
       ],
       "examples": [
         {
@@ -296,12 +370,13 @@
       "id": "odata-v2-pending-changes",
       "level": "basic",
       "title": "How does the pending changes queue work?",
-      "description": "When the user edits a field that is two-way bound to an OData V2 model, the change is not sent to the server right away. The model records it as a pending change: it keeps the original value from the server, stores the new value separately, and the UI shows the new value. All pending changes are collected in a queue that belongs to a batch group, by default the deferred group \"changes\". Nothing is sent until the app calls submitChanges(): then all collected changes (MERGE/PATCH for updates, POST for entries from createEntry) are sent together in one $batch request, usually in one change set, so they are applied together or not at all. model.hasPendingChanges() tells whether there are unsaved changes, which is useful for a \"discard changes?\" question when the user leaves the page; getPendingChanges() returns them. resetChanges() throws them away and restores the original values (optionally only for some paths), and for temporary entries created with createEntry, deleteCreatedEntry removes them. If the server rejects a change, it stays pending, so the user can fix it and save again. This design gives the classic Edit, then Save or Cancel, behavior of business apps.",
+      "description": "When the user edits a field that is two-way bound to an OData V2 model, the change is not sent to the server right away. The model records it as a pending change: it keeps the original value from the server, stores the new value separately, and the UI shows the new value. All pending changes are collected in a queue that belongs to a batch group, by default the deferred group \"changes\". Nothing is sent until the app calls submitChanges(): then all collected changes (MERGE/PATCH for updates, POST for entries from createEntry) are sent together in one $batch request, usually in one change set, so they are applied together or not at all. model.hasPendingChanges() tells whether there are unsaved changes, which is useful for a \"discard changes?\" question when the user leaves the page; getPendingChanges() returns them. resetChanges() throws them away and restores the original values (optionally only for some paths), and for temporary entries created with createEntry, deleteCreatedEntry removes them. If the server rejects a change, it stays pending, so the user can fix it and save again. This design gives the classic Edit, then Save or Cancel, behavior of business apps. Typical uses: enable or disable the Save button, warn before leaving the page (check hasPendingChanges() in the route handler or in onNavBack), and Cancel with resetChanges(), which restores the original values without a back-end call. It also explains a common confusion: the UI shows the new value immediately because the model's cache is already updated, but the back end does not have it until submitChanges(). In V4 the equivalents are model.hasPendingChanges(), binding.hasPendingChanges() and context.hasPendingChanges() (more precise), binding.resetChanges(), and model.submitBatch(\"updateGroup\").",
       "keyPoints": [
         "Two-way changes become pending changes: kept locally, not sent immediately.",
         "They are queued in a batch group, by default the deferred group \"changes\".",
         "submitChanges() sends them together in one $batch (usually one change set).",
-        "hasPendingChanges / getPendingChanges / resetChanges support Save, Cancel and unsaved-changes checks."
+        "hasPendingChanges / getPendingChanges / resetChanges support Save, Cancel and unsaved-changes checks.",
+        "V4: hasPendingChanges() on model, binding or context; resetChanges(); submitBatch(updateGroup)."
       ],
       "examples": [
         {
@@ -316,12 +391,13 @@
       "id": "odata-search-focus-fuzziness",
       "level": "basic",
       "title": "What are the search focus and fuzziness concepts?",
-      "description": "These are features of SAP OData services for free-text search, mostly used by value helps, type-ahead suggestions, and the basic search of filter bars. In OData V2, SAP services support a custom query option search, like /Products?search=notebook, which searches across the properties that the service marks as searchable, instead of building a $filter for every property. The search focus narrows this down: the custom query option search-focus names the one property to search in, like search-focus=Name. This is what type-ahead in an input field uses, so that typing in a Name field only searches names, not every column. Fuzziness is about tolerance: a fuzzy search also finds results that are spelled slightly differently, like \"notebok\" finding \"notebook\". It is implemented in the back end (SAP HANA full-text search), and for CDS-based services it is configured with annotations: @Search.searchable: true on the entity, and on each relevant field @Search.defaultSearchElement: true and @Search.fuzzinessThreshold (a value between 0 and 1, where 1 means exact matches only, and around 0.8 allows small typos). The UI only sends the search text; whether the search is fuzzy, and which fields count, is decided by the service.",
+      "description": "These are features of SAP OData services for free-text search, mostly used by value helps, type-ahead suggestions, and the basic search of filter bars. In OData V2, SAP services support a custom query option search, like /Products?search=notebook, which searches across the properties that the service marks as searchable, instead of building a $filter for every property. The search focus narrows this down: the custom query option search-focus names the one property to search in, like search-focus=Name. This is what type-ahead in an input field uses, so that typing in a Name field only searches names, not every column. Fuzziness is about tolerance: a fuzzy search also finds results that are spelled slightly differently, like \"notebok\" finding \"notebook\". It is implemented in the back end (SAP HANA full-text search), and for CDS-based services it is configured with annotations: @Search.searchable: true on the entity, and on each relevant field @Search.defaultSearchElement: true and @Search.fuzzinessThreshold (a value between 0 and 1, where 1 means exact matches only, and around 0.8 allows small typos). The UI only sends the search text; whether the search is fuzzy, and which fields count, is decided by the service. Two honest caveats: this is not portable (SAP Gateway with a HANA back end; on a CAP service it does nothing unless implemented), and in OData V4 the standard option is $search, with fuzziness again a back-end feature. In the UI you meet it in the basic search field of a SmartFilterBar; the entity set must be sap:searchable=\"true\".",
       "keyPoints": [
         "SAP OData V2 services support a custom query option search for free-text search.",
         "search-focus=Property limits the search to one property (used by type-ahead and value helps).",
         "Fuzzy search also finds similar spellings; it runs in the back end (HANA full-text search).",
-        "CDS annotations: @Search.searchable, @Search.defaultSearchElement, @Search.fuzzinessThreshold (0 to 1)."
+        "CDS annotations: @Search.searchable, @Search.defaultSearchElement, @Search.fuzzinessThreshold (0 to 1).",
+        "SAP-specific and not portable; V4 uses the standard $search, fuzziness stays a back-end feature."
       ],
       "examples": [
         {
@@ -341,12 +417,13 @@
       "id": "odata-xsrf-token",
       "level": "basic",
       "title": "What is the XSRF token, and how does the OData model handle it?",
-      "description": "XSRF (or CSRF, cross-site request forgery) is an attack where a malicious website makes the user's browser send a request to another site where the user is logged in, so the browser automatically adds the user's session cookie, and the request runs with the user's rights. To protect against this, SAP Gateway and other SAP back ends require an XSRF token for every request that changes data (POST, PUT, MERGE/PATCH, DELETE). The token is a random value the client must first fetch and then send back in the X-CSRF-Token header; another website cannot read it, so it cannot forge valid requests. The OData model does all of this automatically: it fetches a token by sending a request with the header X-CSRF-Token: Fetch (usually a HEAD or GET to the service root), stores the token from the response, and adds it to every modifying request. If the token expires, the server answers 403 with X-CSRF-Token: Required; the model then fetches a new token and repeats the request once. Read requests (GET) do not need the token. In code, you rarely touch it; if needed, securityTokenAvailable() returns a promise with the token, and refreshSecurityToken() gets a new one.",
+      "description": "XSRF (or CSRF, cross-site request forgery) is an attack where a malicious website makes the user's browser send a request to another site where the user is logged in, so the browser automatically adds the user's session cookie, and the request runs with the user's rights. To protect against this, SAP Gateway and other SAP back ends require an XSRF token for every request that changes data (POST, PUT, MERGE/PATCH, DELETE). The token is a random value the client must first fetch and then send back in the X-CSRF-Token header; another website cannot read it, so it cannot forge valid requests. The OData model does all of this automatically: it fetches a token by sending a request with the header X-CSRF-Token: Fetch (usually a HEAD or GET to the service root), stores the token from the response, and adds it to every modifying request. If the token expires, the server answers 403 with X-CSRF-Token: Required; the model then fetches a new token and repeats the request once. Read requests (GET) do not need the token. In code, you rarely touch it; if needed, securityTokenAvailable() returns a promise with the token, and refreshSecurityToken() gets a new one. Why cookies alone are not enough: the browser sends cookies to the target domain no matter which page triggered the request, but an attacker's page cannot read the token, because the same-origin policy blocks reading the response. The error everyone eventually sees is 403 Forbidden, CSRF token validation failed; usual causes are an expired session (a stale token) or a proxy that strips the header. tokenHandling: true (the default) switches the automatic handling on.",
       "keyPoints": [
         "XSRF/CSRF: another site tricks the browser into sending a request with the user's session.",
         "SAP back ends require an X-CSRF-Token header on modifying requests (POST, PUT, MERGE/PATCH, DELETE).",
         "The model fetches it with X-CSRF-Token: Fetch, then sends it with every change.",
-        "On 403 with X-CSRF-Token: Required, the model refetches and retries; securityTokenAvailable() and refreshSecurityToken() exist."
+        "On 403 with X-CSRF-Token: Required, the model refetches and retries; securityTokenAvailable() and refreshSecurityToken() exist.",
+        "Typical 403 causes: expired session or a proxy removing the header. tokenHandling (default true) enables it."
       ],
       "examples": [
         {

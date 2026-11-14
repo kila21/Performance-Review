@@ -10,7 +10,7 @@
           "id": "application-structure",
           "title": "Application structure",
           "file": "application-structure.json",
-          "questionCount": 7,
+          "questionCount": 9,
           "resources": [
             {
               "type": "Documentation",
@@ -130,7 +130,7 @@
           "id": "custom-controls",
           "title": "Custom controls",
           "file": "custom-controls.json",
-          "questionCount": 9,
+          "questionCount": 10,
           "resources": [
             {
               "type": "API",
@@ -218,7 +218,7 @@
           "id": "odata-model",
           "title": "ODataModel",
           "file": "odata-model.json",
-          "questionCount": 17,
+          "questionCount": 18,
           "resources": [
             {
               "type": "API",
@@ -262,7 +262,7 @@
           "id": "smart-controls",
           "title": "Smart Controls",
           "file": "smart-controls.json",
-          "questionCount": 8,
+          "questionCount": 10,
           "resources": [
             {
               "type": "API",
@@ -374,7 +374,7 @@
           "id": "fe-basics",
           "title": "The basics",
           "file": "fe-basics.json",
-          "questionCount": 10,
+          "questionCount": 16,
           "resources": [
             {
               "type": "Documentation",

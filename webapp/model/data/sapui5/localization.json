@@ -6,12 +6,14 @@
       "id": "resource-model-aspects",
       "level": "elementary",
       "title": "How does the ResourceModel work: its binding type, where its texts come from, and how multiple languages are supported?",
-      "description": "The ResourceModel (sap.ui.model.resource.ResourceModel) makes translatable texts available for data binding. Its texts come from .properties files, plain text files with one key=value pair per line, usually in the i18n folder: i18n.properties (the raw file, often in English), plus one file per language with the language code in the name, like i18n_de.properties, i18n_fr.properties or i18n_de_CH.properties. The model is normally declared in manifest.json, with the bundleName (the file's module path without .properties, like my.app.i18n.i18n). Its texts are read-only: the default binding mode is OneWay (OneTime is also possible), never TwoWay. Which language is loaded is decided by the UI5 configuration (for example the sap-ui-language URL parameter, the launchpad user setting, or the browser language). For a user with de_CH, UI5 looks for the text in i18n_de_CH, then i18n_de, then the fallback locale (en by default), and finally the raw i18n.properties; if no file contains the key, the key itself is shown, which makes missing texts easy to spot. In manifest.json, sap.app/i18n can list supportedLocales and the fallbackLocale, so UI5 only requests files that really exist (avoiding failed requests). In views, texts are bound with {i18n>key}, and in code read with getResourceBundle().getText(key).",
+      "description": "The ResourceModel (sap.ui.model.resource.ResourceModel) makes translatable texts available for data binding. Its texts come from .properties files, plain text files with one key=value pair per line, usually in the i18n folder: i18n.properties (the raw file, often in English), plus one file per language with the language code in the name, like i18n_de.properties, i18n_fr.properties or i18n_de_CH.properties. The model is normally declared in manifest.json, with the bundleName (the file's module path without .properties, like my.app.i18n.i18n). Its texts are read-only: the default binding mode is OneWay (OneTime is also possible), never TwoWay. Which language is loaded is decided by the UI5 configuration (for example the sap-ui-language URL parameter, the launchpad user setting, or the browser language). For a user with de_CH, UI5 looks for the text in i18n_de_CH, then i18n_de, then the fallback locale (en by default), and finally the raw i18n.properties; if no file contains the key, the key itself is shown, which makes missing texts easy to spot. In manifest.json, sap.app/i18n can list supportedLocales and the fallbackLocale, so UI5 only requests files that really exist (avoiding failed requests). In views, texts are bound with {i18n>key}, and in code read with getResourceBundle().getText(key). The rule reviewers check: no visible text in a view or a controller is ever hard-coded; every string comes from i18n, because that is what makes the app translatable at all. Localization is not only texts: dates, numbers, currencies and calendars also follow the locale, through the data types and format classes. The language is picked, in order, from the sap-ui-language URL parameter, the sap-language parameter or user setting in the SAP Fiori launchpad, and finally the browser language. The properties files are read as UTF-8. Many apps bind i18n texts with OneTime for performance, because texts never change while the app runs. supportedLocales and fallbackLocale can be set in sap.app/i18n and in the settings of the i18n model in sap.ui5/models; without them, a Georgian browser triggers a request for i18n_ka.properties, gets a 404, and only then falls back. In a BaseController, reading texts is usually wrapped as this.getText(\"key\").",
       "keyPoints": [
         "Texts come from .properties files: i18n.properties plus one per language (i18n_de.properties...).",
         "Declared in the manifest with a bundleName; texts are read-only (OneWay or OneTime).",
         "Fallback chain: de_CH, then de, then the fallback locale (en), then the raw file; if all fail, the key is shown.",
-        "supportedLocales and fallbackLocale in sap.app/i18n avoid requests for files that do not exist."
+        "supportedLocales and fallbackLocale in sap.app/i18n avoid requests for files that do not exist.",
+        "Rule: no hard-coded visible text anywhere; dates, numbers and currencies follow the locale too.",
+        "Language order: sap-ui-language URL parameter → launchpad language/user setting → browser language."
       ],
       "examples": [
         {
@@ -23,6 +25,11 @@
           "title": "i18n.properties and i18n_de.properties",
           "language": "properties",
           "code": "# i18n.properties\nappTitle=Products\nsaveButton=Save\n\n# i18n_de.properties\nappTitle=Produkte\nsaveButton=Sichern"
+        },
+        {
+          "title": "Reading texts in a TypeScript controller",
+          "language": "typescript",
+          "code": "import ResourceModel from \"sap/ui/model/resource/ResourceModel\";\nimport ResourceBundle from \"sap/base/i18n/ResourceBundle\";\n\nconst bundle = (this.getOwnerComponent().getModel(\"i18n\") as ResourceModel)\n  .getResourceBundle() as ResourceBundle;\n\nconst text = bundle.getText(\"saveButton\");                          // simple\nconst msg = bundle.getText(\"welcomeUser\", [userName, String(count)]);  // with placeholders"
         }
       ],
       "assignment": null
@@ -36,7 +43,8 @@
         "Write the full sentence with numbered placeholders: Delete {0} items from {1}?",
         "In code: bundle.getText(\"key\", [value0, value1]).",
         "In views: a composite binding with formatMessage as formatter (declared with core:require).",
-        "A literal apostrophe in a text with placeholders is written as two single quotes ('')."
+        "A literal apostrophe in a text with placeholders is written as two single quotes ('').",
+        "Never join translated fragments (getText(\"deleted\") + \" \" + name): word order differs between languages."
       ],
       "examples": [
         {
@@ -56,12 +64,13 @@
       "id": "i18n-bundle-enhancing",
       "level": "basic",
       "title": "What is the i18n bundle enhancing mechanism?",
-      "description": "Enhancing a resource bundle means adding a second (or third) properties file on top of the original one, so that its texts override texts with the same key and can add new keys, without changing the original file. This is used mainly in extensibility scenarios: an app variant, a customer extension, or an adaptation project can change some labels (for example \"Customer\" to \"Client\") or add texts for its own new controls, while the original app stays untouched and can still be updated. In the manifest, it is declared with enhanceWith in the settings of the i18n model: an array of extra bundles, each given by bundleName or bundleUrl. When a text is requested, UI5 checks the enhancing bundles first, the last one in the list first, and only then the original bundle, so an enhancing bundle wins over the original. Language fallback works for each bundle as usual. The same can be done in code at runtime with resourceModel.enhance({ bundleName: ... }) or with an already loaded ResourceBundle.",
+      "description": "Enhancing a resource bundle means adding a second (or third) properties file on top of the original one, so that its texts override texts with the same key and can add new keys, without changing the original file. This is used mainly in extensibility scenarios: an app variant, a customer extension, or an adaptation project can change some labels (for example \"Customer\" to \"Client\") or add texts for its own new controls, while the original app stays untouched and can still be updated. In the manifest, it is declared with enhanceWith in the settings of the i18n model: an array of extra bundles, each given by bundleName or bundleUrl. When a text is requested, UI5 checks the enhancing bundles first, the last one in the list first, and only then the original bundle, so an enhancing bundle wins over the original. Language fallback works for each bundle as usual. The same can be done in code at runtime with resourceModel.enhance({ bundleName: ... }) or with an already loaded ResourceBundle. Why it exists, which is the point of the question: it is the i18n half of app extensibility. A customer extends a standard SAP Fiori app, adds fields and texts, and wants to rename one standard label, but cannot edit SAP's i18n.properties, because the next SAP upgrade would overwrite it; an enhancing bundle sits on top and survives the upgrade. A second use case is reuse libraries, where a library ships default texts that a consuming app overrides. The enhancing bundle only needs the keys it changes; everything else falls through to the original. With bundleUrlRelativeTo (\"component\" or \"manifest\") you say what a relative bundleUrl is resolved against.",
       "keyPoints": [
         "Enhancing adds extra properties files that override existing keys and add new ones.",
         "Used for app variants, extensions and adaptation projects, without touching the original texts.",
         "Manifest: \"enhanceWith\": [{ \"bundleName\": \"...\" }] in the i18n model's settings.",
-        "Enhancing bundles are checked first (the last one first); in code: resourceModel.enhance(...)."
+        "Enhancing bundles are checked first (the last one first); in code: resourceModel.enhance(...).",
+        "Upgrade-safe: the original SAP file stays untouched; the enhancing file holds only the changed or new keys."
       ],
       "examples": [
         {
@@ -81,12 +90,14 @@
       "id": "i18n-text-types",
       "level": "basic",
       "title": "What is the purpose of text classification (text types) in i18n files?",
-      "description": "In SAP projects, the properties files are translated into many languages by translators who never see the app. To translate a text correctly, they need to know what kind of text it is and how much space it has: \"Open\" on a button (an action) is translated differently than \"Open\" as a status. That is why every text is classified with a comment line directly above it, in the format #<text type>[,<maximum length>]: <optional explanation>. The text type is a short code: the first letter tells whether it is a short text (X, for labels, buttons, titles; under 120 characters) or a long text (Y, for longer messages and instructions), and the rest names the UI element, for example XTIT (title), XFLD (field label), XBUT (button), XCOL (column header), XTOL (tooltip), XMSG (short message), YMSG (long message), XLNK (link), XSEL (selection or status value) and XTXT (general text). The optional length, like #XBUT,20, tells the translator the maximum number of characters that fit. The comment after the colon gives extra context, like what a placeholder stands for. The translation tools read these annotations, and SAP's checks require them, so missing classifications are reported.",
+      "description": "In SAP projects, the properties files are translated into many languages by translators who never see the app. To translate a text correctly, they need to know what kind of text it is and how much space it has: \"Open\" on a button (an action) is translated differently than \"Open\" as a status. That is why every text is classified with a comment line directly above it, in the format #<text type>[,<maximum length>]: <optional explanation>. The text type is a short code: the first letter tells whether it is a short text (X, for labels, buttons, titles; under 120 characters) or a long text (Y, for longer messages and instructions), and the rest names the UI element, for example XTIT (title), XFLD (field label), XBUT (button), XCOL (column header), XTOL (tooltip), XMSG (short message), YMSG (long message), XLNK (link), XSEL (selection or status value) and XTXT (general text). The optional length, like #XBUT,20, tells the translator the maximum number of characters that fit. The comment after the colon gives extra context, like what a placeholder stands for. The translation tools read these annotations, and SAP's checks require them, so missing classifications are reported. More codes worth recognizing: XCKL (checkbox label), XMIT (menu item), XGRP (group title), XACT (accessibility text read by a screen reader) and YINS (an instruction for the user). The maximum length is the part that saves layouts: German texts are typically about 30% longer than English, and Georgian or Finnish can be longer still, so a 15-character button with a 28-character translation gets cut off. In SAP's translation process, the properties file is uploaded into the translation system and translators work only from the key, the value and this comment; no comment means guessed translations, and those cause bugs that appear in one language only, which are the most expensive to find.",
       "keyPoints": [
         "Every text gets a comment line above it: #<type>[,<max length>]: <explanation>.",
         "X = short text, Y = long text; then the UI element: XTIT, XFLD, XBUT, XCOL, XTOL, XMSG, YMSG, XSEL, XTXT...",
         "The optional maximum length (like #XBUT,20) tells translators how much space there is.",
-        "Translators see only the file, so type, length and context are needed for correct translations."
+        "Translators see only the file, so type, length and context are needed for correct translations.",
+        "More codes: XCKL, XMIT, XGRP, XACT (screen reader text), YINS (instruction).",
+        "Lengths matter: German is about 30% longer than English; missing context causes language-specific bugs."
       ],
       "examples": [
         {
