@@ -1,0 +1,450 @@
+{
+  "id": "sapui5",
+  "title": "SAPUI5",
+  "groups": [
+    {
+      "id": "core-concepts",
+      "title": "Core concepts",
+      "topics": [
+        {
+          "id": "application-structure",
+          "title": "Application structure",
+          "file": "application-structure.json",
+          "questionCount": 9,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "Descriptor for Applications (manifest.json)",
+              "url": "https://ui5.sap.com/#/topic/be0cf40f61184b358b5faedaec98b2da"
+            },
+            {
+              "type": "Documentation",
+              "title": "Use Asynchronous Loading",
+              "url": "https://ui5.sap.com/#/topic/676b636446c94eada183b1218a824717"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.core.UIComponent",
+              "url": "https://ui5.sap.com/#/api/sap.ui.core.UIComponent"
+            }
+          ]
+        },
+        {
+          "id": "modules",
+          "title": "Modules",
+          "file": "modules.json",
+          "questionCount": 4,
+          "resources": [
+            {
+              "type": "API",
+              "title": "sap.ui.define",
+              "url": "https://ui5.sap.com/#/api/sap.ui.define"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.require",
+              "url": "https://ui5.sap.com/#/api/sap.ui.require"
+            }
+          ]
+        },
+        {
+          "id": "mvc",
+          "title": "MVC",
+          "file": "mvc.json",
+          "questionCount": 15,
+          "resources": [
+            {
+              "type": "API",
+              "title": "sap.ui.core.mvc.XMLView",
+              "url": "https://ui5.sap.com/#/api/sap.ui.core.mvc.XMLView"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.core.mvc.Controller",
+              "url": "https://ui5.sap.com/#/api/sap.ui.core.mvc.Controller"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.core.Fragment",
+              "url": "https://ui5.sap.com/#/api/sap.ui.core.Fragment"
+            }
+          ]
+        },
+        {
+          "id": "data-binding",
+          "title": "Data Binding",
+          "file": "data-binding.json",
+          "questionCount": 21,
+          "resources": [
+            {
+              "type": "API",
+              "title": "sap.ui.model.json.JSONModel",
+              "url": "https://ui5.sap.com/#/api/sap.ui.model.json.JSONModel"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.model.Filter",
+              "url": "https://ui5.sap.com/#/api/sap.ui.model.Filter"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.model.Sorter",
+              "url": "https://ui5.sap.com/#/api/sap.ui.model.Sorter"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.model.BindingMode",
+              "url": "https://ui5.sap.com/#/api/sap.ui.model.BindingMode"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.model.type",
+              "url": "https://ui5.sap.com/#/api/sap.ui.model.type"
+            }
+          ]
+        },
+        {
+          "id": "controls",
+          "title": "Controls",
+          "file": "controls.json",
+          "questionCount": 13,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "Handling Events in XML Views",
+              "url": "https://ui5.sap.com/#/topic/b0fb4de7364f4bcbb053a99aa645affe"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.core.Control",
+              "url": "https://ui5.sap.com/#/api/sap.ui.core.Control"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.core.CustomData",
+              "url": "https://ui5.sap.com/#/api/sap.ui.core.CustomData"
+            }
+          ]
+        },
+        {
+          "id": "custom-controls",
+          "title": "Custom controls",
+          "file": "custom-controls.json",
+          "questionCount": 10,
+          "resources": [
+            {
+              "type": "API",
+              "title": "sap.ui.core.Control",
+              "url": "https://ui5.sap.com/#/api/sap.ui.core.Control"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.core.RenderManager",
+              "url": "https://ui5.sap.com/#/api/sap.ui.core.RenderManager"
+            }
+          ]
+        },
+        {
+          "id": "routing",
+          "title": "Routing",
+          "file": "routing.json",
+          "questionCount": 10,
+          "resources": [
+            {
+              "type": "API",
+              "title": "sap.m.routing.Router",
+              "url": "https://ui5.sap.com/#/api/sap.m.routing.Router"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.core.routing.Router",
+              "url": "https://ui5.sap.com/#/api/sap.ui.core.routing.Router"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.core.routing.History",
+              "url": "https://ui5.sap.com/#/api/sap.ui.core.routing.History"
+            }
+          ]
+        },
+        {
+          "id": "localization",
+          "title": "Localization",
+          "file": "localization.json",
+          "questionCount": 4,
+          "resources": [
+            {
+              "type": "API",
+              "title": "sap.ui.model.resource.ResourceModel",
+              "url": "https://ui5.sap.com/#/api/sap.ui.model.resource.ResourceModel"
+            },
+            {
+              "type": "API",
+              "title": "module:sap/base/i18n/ResourceBundle",
+              "url": "https://ui5.sap.com/#/api/module:sap/base/i18n/ResourceBundle"
+            }
+          ]
+        },
+        {
+          "id": "layouting",
+          "title": "Layouting & Responsiveness",
+          "file": "layouting.json",
+          "questionCount": 13,
+          "resources": [
+            {
+              "type": "API",
+              "title": "sap.f.DynamicPage",
+              "url": "https://ui5.sap.com/#/api/sap.f.DynamicPage"
+            },
+            {
+              "type": "API",
+              "title": "sap.uxap.ObjectPageLayout",
+              "url": "https://ui5.sap.com/#/api/sap.uxap.ObjectPageLayout"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.layout.Grid",
+              "url": "https://ui5.sap.com/#/api/sap.ui.layout.Grid"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data-backend",
+      "title": "Data & back end",
+      "topics": [
+        {
+          "id": "odata-model",
+          "title": "ODataModel",
+          "file": "odata-model.json",
+          "questionCount": 18,
+          "resources": [
+            {
+              "type": "API",
+              "title": "sap.ui.model.odata.v2.ODataModel",
+              "url": "https://ui5.sap.com/#/api/sap.ui.model.odata.v2.ODataModel"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.model.odata.CountMode",
+              "url": "https://ui5.sap.com/#/api/sap.ui.model.odata.CountMode"
+            }
+          ]
+        },
+        {
+          "id": "odata-metadata",
+          "title": "OData Metadata",
+          "file": "odata-metadata.json",
+          "questionCount": 6,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0 (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/"
+            }
+          ]
+        },
+        {
+          "id": "abap-backend",
+          "title": "ABAP repository & back end",
+          "file": "abap-backend.json",
+          "questionCount": 6,
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "smart-extensibility",
+      "title": "Smart controls & extensibility",
+      "topics": [
+        {
+          "id": "smart-controls",
+          "title": "Smart Controls",
+          "file": "smart-controls.json",
+          "questionCount": 10,
+          "resources": [
+            {
+              "type": "API",
+              "title": "sap.ui.comp.smarttable.SmartTable",
+              "url": "https://ui5.sap.com/#/api/sap.ui.comp.smarttable.SmartTable"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.comp.smartfilterbar.SmartFilterBar",
+              "url": "https://ui5.sap.com/#/api/sap.ui.comp.smartfilterbar.SmartFilterBar"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.comp.smartfield.SmartField",
+              "url": "https://ui5.sap.com/#/api/sap.ui.comp.smartfield.SmartField"
+            }
+          ]
+        },
+        {
+          "id": "extension",
+          "title": "Extension capabilities",
+          "file": "extension.json",
+          "questionCount": 9,
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "quality-delivery",
+      "title": "Quality & delivery",
+      "topics": [
+        {
+          "id": "testing",
+          "title": "Testing",
+          "file": "testing.json",
+          "questionCount": 9,
+          "resources": [
+            {
+              "type": "API",
+              "title": "sap.ui.test.Opa5",
+              "url": "https://ui5.sap.com/#/api/sap.ui.test.Opa5"
+            },
+            {
+              "type": "API",
+              "title": "sap.ui.core.util.MockServer",
+              "url": "https://ui5.sap.com/#/api/sap.ui.core.util.MockServer"
+            }
+          ]
+        },
+        {
+          "id": "security",
+          "title": "Security",
+          "file": "security.json",
+          "questionCount": 6,
+          "resources": []
+        },
+        {
+          "id": "accessibility",
+          "title": "Accessibility",
+          "file": "accessibility.json",
+          "questionCount": 5,
+          "resources": [
+            {
+              "type": "Guideline",
+              "title": "SAP Fiori Design Guidelines",
+              "url": "https://experience.sap.com/fiori-design/"
+            }
+          ]
+        },
+        {
+          "id": "build-deployment",
+          "title": "Build & deployment",
+          "file": "build-deployment.json",
+          "questionCount": 8,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "UI5 Tooling",
+              "url": "https://sap.github.io/ui5-tooling/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "misc-group",
+      "title": "Misc",
+      "topics": [
+        {
+          "id": "misc",
+          "title": "Misc",
+          "file": "misc.json",
+          "questionCount": 14,
+          "resources": [
+            {
+              "type": "Guideline",
+              "title": "OpenUI5 coding guidelines",
+              "url": "https://github.com/SAP/openui5/blob/master/docs/guidelines.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fiori-elements",
+      "title": "Fiori elements",
+      "topics": [
+        {
+          "id": "fe-basics",
+          "title": "The basics",
+          "file": "fe-basics.json",
+          "questionCount": 16,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "SAP Fiori elements documentation (SAP-docs on GitHub)",
+              "url": "https://github.com/SAP-docs/sapui5/tree/main/docs/06_SAP_Fiori_Elements"
+            },
+            {
+              "type": "Guideline",
+              "title": "SAP Fiori design guidelines",
+              "url": "https://experience.sap.com/fiori-design/"
+            }
+          ]
+        },
+        {
+          "id": "fe-tools",
+          "title": "Tools",
+          "file": "fe-tools.json",
+          "questionCount": 3,
+          "resources": []
+        },
+        {
+          "id": "fe-list-report",
+          "title": "List Report features",
+          "file": "fe-list-report.json",
+          "questionCount": 11,
+          "resources": []
+        },
+        {
+          "id": "fe-object-page",
+          "title": "Object Page features",
+          "file": "fe-object-page.json",
+          "questionCount": 16,
+          "resources": []
+        },
+        {
+          "id": "fe-op-extensions",
+          "title": "Object Page extensions",
+          "file": "fe-op-extensions.json",
+          "questionCount": 5,
+          "resources": []
+        },
+        {
+          "id": "fe-worklist",
+          "title": "Worklist features",
+          "file": "fe-worklist.json",
+          "questionCount": 3,
+          "resources": []
+        },
+        {
+          "id": "fe-tables",
+          "title": "Tables features",
+          "file": "fe-tables.json",
+          "questionCount": 8,
+          "resources": []
+        },
+        {
+          "id": "fe-overview-page",
+          "title": "Overview Pages features",
+          "file": "fe-overview-page.json",
+          "questionCount": 7,
+          "resources": []
+        },
+        {
+          "id": "fe-misc",
+          "title": "Misc (Fiori elements)",
+          "file": "fe-misc.json",
+          "questionCount": 5,
+          "resources": []
+        }
+      ]
+    }
+  ]
+}

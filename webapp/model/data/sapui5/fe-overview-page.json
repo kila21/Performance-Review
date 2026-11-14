@@ -1,0 +1,151 @@
+{
+  "topicId": "fe-overview-page",
+  "title": "FE: Overview Pages features",
+  "questions": [
+    {
+      "id": "ovp-purpose",
+      "level": "elementary",
+      "title": "What is the purpose of the overview page floorplan, and what are its use cases?",
+      "description": "The overview page (OVP) is a data-driven dashboard: a single page made of cards, where each card shows one aspect of a business area at a glance, such as a list of overdue invoices, a chart of revenue by region, a table of top customers, a set of useful links, or a stack of tasks. All cards are filtered together by a global filter at the top, so users can focus on a period, a company code, or a region, and every card updates. Its purpose is to give a role-based entry point into a business domain: users see the most important information and what needs their attention, and can jump from a card into the detailed apps (for example a list report or an object page) to act. Like other Fiori elements floorplans, the cards are built from annotations and manifest settings, without UI code. Typical use cases are overviews for a role, like a procurement overview (open purchase orders, supplier spend, contract expiry), a sales overview (pipeline, top deals, revenue charts), or a manager's dashboard. It is meant for monitoring and navigation, not for editing data or processing items in detail.",
+      "keyPoints": [
+        "The overview page is a role-based dashboard made of cards.",
+        "Each card shows one aspect (list, table, chart, links, stack) at a glance.",
+        "A global filter filters all cards together; cards navigate to detailed apps.",
+        "Built from annotations and manifest settings; for monitoring and navigation, not editing."
+      ],
+      "examples": [
+        {
+          "title": "Overview page structure",
+          "language": "text",
+          "code": "[ Global filter: Company code | Period | Region            (Go) ]\n+-----------------+  +-----------------+  +-----------------+\n| Overdue invoices|  | Revenue by      |  | Top customers   |\n| (list card)     |  | region (chart)  |  | (table card)    |\n+-----------------+  +-----------------+  +-----------------+\n+-----------------+  +-----------------+\n| Useful links    |  | My tasks        |\n| (link list)     |  | (stack card)    |\n+-----------------+  +-----------------+"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "ovp-descriptor-global-filter",
+      "level": "basic",
+      "title": "What are the descriptor (manifest) configuration aspects of an overview page, and how is the global filter configured?",
+      "description": "An overview page is configured in manifest.json under the sap.ovp section (the app's component is the OVP component, sap.ovp.app). The main settings are: globalFilterModel, the name of the OData model used for the global filter, and globalFilterEntitySet, the entity set whose properties are offered as global filters; containerLayout, which decides how cards are arranged (for example a fixed or resizable layout); enableLiveFilter, to apply filter changes immediately instead of waiting for Go; showDateInRelativeFormat, refreshIntervalInMinutes, and smartVariantRequired (variant management for the filter); and cards, the list of cards, each with an ID, the model, the card template, and its settings. The global filter is a smart filter bar at the top of the page: its default visible fields come from the UI.SelectionFields annotation of the global filter entity type, and it supports value helps, variants, and (with filterSettings) date ranges. Its values are applied to every card whose entity set contains the filtered properties, so all cards stay consistent. Basic search can be shown when the entity set is searchable (sap:searchable=\"true\").",
+      "keyPoints": [
+        "Configured in manifest.json under sap.ovp.",
+        "globalFilterModel + globalFilterEntitySet define the global filter; cards lists the cards.",
+        "Also: containerLayout, enableLiveFilter, refreshIntervalInMinutes, smartVariantRequired...",
+        "The global filter is a smart filter bar (fields from UI.SelectionFields) applied to all matching cards."
+      ],
+      "examples": [
+        {
+          "title": "A minimal sap.ovp section",
+          "language": "json",
+          "code": "{\n  \"sap.ovp\": {\n    \"globalFilterModel\": \"mainService\",\n    \"globalFilterEntitySet\": \"SalesOrders\",\n    \"containerLayout\": \"resizable\",\n    \"enableLiveFilter\": true,\n    \"cards\": {\n      \"overdueInvoices\": {\n        \"model\": \"mainService\",\n        \"template\": \"sap.ovp.cards.list\",\n        \"settings\": {\n          \"title\": \"{{overdueInvoices}}\",\n          \"entitySet\": \"Invoices\",\n          \"annotationPath\": \"com.sap.vocabularies.UI.v1.LineItem#Overdue\"\n        }\n      }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "ovp-card-parts",
+      "level": "basic",
+      "title": "What are the basic parts of an OVP card?",
+      "description": "Every OVP card has the same basic structure, so users can read different cards in the same way. The header is at the top: it shows the card's title and subtitle (from the card settings, often i18n texts), optionally a counter (like \"5 of 120\", how many items are shown out of the total), and, in analytical and KPI headers, a key figure with its trend and status color, defined by a UI.DataPoint (through dataPointAnnotationPath) or a KPI. Clicking the header navigates to a related app, usually showing the full data. The content area below shows the card's actual data: a list (list card), a table (table card), a chart (analytical card), links (link list card), or a preview of stacked cards (stack card). Clicking an item in the content navigates to that item's details. Depending on the card type, there can be a footer, for example with actions in quick view and stack cards, or a view switch in the header area that lets users change between several views of the same card. The content is limited to a few items (cards are an overview), and the header navigation leads to the complete list.",
+      "keyPoints": [
+        "Header: title, subtitle, optional counter (shown of total), and an optional KPI/data point with trend and color.",
+        "Clicking the header navigates to a related app with the full data.",
+        "Content area: list, table, chart, links, or stacked cards; items navigate to details.",
+        "Optional footer with actions, and a view switch to change between views of the card."
+      ],
+      "examples": [
+        {
+          "title": "A card with title, subtitle and a data point in the header",
+          "language": "json",
+          "code": "{\n  \"model\": \"mainService\",\n  \"template\": \"sap.ovp.cards.list\",\n  \"settings\": {\n    \"title\": \"{{topProducts}}\",\n    \"subTitle\": \"{{byRevenue}}\",\n    \"entitySet\": \"Products\",\n    \"annotationPath\": \"com.sap.vocabularies.UI.v1.LineItem#TopProducts\",\n    \"dataPointAnnotationPath\": \"com.sap.vocabularies.UI.v1.DataPoint#TotalRevenue\"\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "ovp-card-types",
+      "level": "basic",
+      "title": "What types of OVP cards exist (table, list, link list, stack, analytical), and how are they configured?",
+      "description": "The card type is chosen with the template property of the card in the manifest. A list card (sap.ovp.cards.list) shows a list of items, with listType (extended, two lines per item, or condensed, one line) and listFlavor (standard, bar for a bar visualization of a value, or carousel); its fields come from a UI.LineItem (annotationPath). A table card (sap.ovp.cards.table) shows a small table with up to three columns, from a UI.LineItem. A link list card (sap.ovp.cards.linklist) shows a list of links with titles, subtitles, images or icons, and can open contact quick views; the links can be static (listed in the manifest with staticContent) or dynamic (read from an entity set). A stack card (sap.ovp.cards.stack) groups many related items of the same kind as quick view cards: the card shows a preview, and clicking it opens an object stream where the user can go through the cards (up to 20) and trigger actions. An analytical card (sap.ovp.cards.charts.analytical) shows a chart (line, column, bar, donut, bubble, combination, and others) defined by a UI.Chart (chartAnnotationPath), with a KPI header from a data point. Each card type can be customized with its settings, such as sortBy and sortOrder, filters, navigation, and the view switch.",
+      "keyPoints": [
+        "template selects the card: sap.ovp.cards.list, .table, .linklist, .stack, .charts.analytical.",
+        "List: listType (extended/condensed) and listFlavor (standard/bar/carousel); table: up to three columns.",
+        "Link list: static (staticContent) or dynamic links; stack: object stream of quick view cards.",
+        "Analytical: a UI.Chart (chartAnnotationPath) with a KPI header."
+      ],
+      "examples": [
+        {
+          "title": "Different card templates",
+          "language": "json",
+          "code": "{\n  \"sap.ovp\": {\n    \"globalFilterModel\": \"mainService\",\n    \"globalFilterEntitySet\": \"SalesOrders\",\n    \"cards\": {\n      \"topCustomers\": {\n        \"model\": \"mainService\",\n        \"template\": \"sap.ovp.cards.table\",\n        \"settings\": { \"entitySet\": \"Customers\", \"title\": \"{{topCustomers}}\",\n          \"annotationPath\": \"com.sap.vocabularies.UI.v1.LineItem#Top\" }\n      },\n      \"revenueChart\": {\n        \"model\": \"mainService\",\n        \"template\": \"sap.ovp.cards.charts.analytical\",\n        \"settings\": { \"entitySet\": \"SalesOrders\", \"title\": \"{{revenue}}\",\n          \"chartAnnotationPath\": \"com.sap.vocabularies.UI.v1.Chart#Revenue\",\n          \"dataPointAnnotationPath\": \"com.sap.vocabularies.UI.v1.DataPoint#Revenue\" }\n      },\n      \"tasks\": {\n        \"model\": \"mainService\",\n        \"template\": \"sap.ovp.cards.stack\",\n        \"settings\": { \"entitySet\": \"Tasks\", \"title\": \"{{myTasks}}\" }\n      }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "ovp-card-properties-1",
+      "level": "basic",
+      "title": "How do you configure OVP card properties: entity sets with input parameters, navigation, filters, sort properties, and the $select parameter?",
+      "description": "Entity set with input parameters: some (analytical) entity sets need input parameters before they return data, like a currency or a date. They are provided with a UI.SelectionVariant whose Parameters section contains the values, and the card references it with selectionAnnotationPath; the global filter can also supply them. Card navigation: cards support navigation from the header and from items. External navigation (to another app) is defined with a UI.Identification annotation containing a DataFieldForIntentBasedNavigation (or DataFieldWithUrl), referenced by identificationAnnotationPath; internal navigation can lead to the object page of the item. Navigation from the header can be switched off with navigation: \"noHeaderNav\". Card filters: a card's data can be limited with a UI.SelectionVariant (filters in its SelectOptions), referenced by selectionAnnotationPath; these filters are combined with the global filter. Sort properties: sortBy names the property to sort by, and sortOrder is ascending or descending (alternatively, a UI.PresentationVariant with a SortOrder). The OData $select parameter: list and table cards do not add $select to their requests automatically; addODataSelect: true makes the card request only the properties it needs, which reduces the response size.",
+      "keyPoints": [
+        "Input parameters: UI.SelectionVariant with Parameters, via selectionAnnotationPath (or the global filter).",
+        "Navigation: identificationAnnotationPath to a UI.Identification (intent-based or URL); navigation: \"noHeaderNav\" disables header navigation.",
+        "Filters: UI.SelectionVariant (SelectOptions) via selectionAnnotationPath, combined with the global filter.",
+        "sortBy / sortOrder for sorting; addODataSelect: true adds $select for list and table cards."
+      ],
+      "examples": [
+        {
+          "title": "Card settings",
+          "language": "json",
+          "code": "{\n  \"model\": \"mainService\",\n  \"template\": \"sap.ovp.cards.list\",\n  \"settings\": {\n    \"title\": \"{{expensiveProducts}}\",\n    \"entitySet\": \"Products\",\n    \"annotationPath\": \"com.sap.vocabularies.UI.v1.LineItem#bar\",\n    \"selectionAnnotationPath\": \"com.sap.vocabularies.UI.v1.SelectionVariant#Expensive\",\n    \"identificationAnnotationPath\": \"com.sap.vocabularies.UI.v1.Identification#bar\",\n    \"sortBy\": \"Price\",\n    \"sortOrder\": \"descending\",\n    \"listFlavor\": \"bar\",\n    \"addODataSelect\": true\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "ovp-card-properties-2",
+      "level": "basic",
+      "title": "How do you configure the view switch, units of measure, numeric formatting and highlighting, threshold colors, and authorizations for OVP cards?",
+      "description": "View switch: the tabs setting of a card defines several views, each with its own value (label) and its own annotation paths (for example a different line item, selection variant, or chart); the card shows a dropdown in its header to switch between them, so one card can show several related views. Unit of measure: amounts and quantities are shown with their unit or currency when the measure property is annotated with Measures.Unit or Measures.ISOCurrency, pointing to the property that holds the unit. Formatting numeric values: the number of decimals comes from the property's Scale in the metadata, and the UI.DataPoint's ValueFormat (like NumberOfFractionalDigits and ScaleFactor, for example to show thousands as K) refines it. Highlighting numeric values: a UI.DataPoint with Criticality (a fixed value or path) or CriticalityCalculation colors the value (good, critical, bad). Coloring cards based on threshold values: CriticalityCalculation with ImprovementDirection (Maximize, Minimize, Target) and threshold values like ToleranceRangeLowValue and DeviationRangeLowValue lets the card calculate the color from the actual value, for example in a KPI header or chart. Authorizations: requireAppAuthorization names an intent (like #SalesOrder-display); the card is shown only if the user is authorized for that app.",
+      "keyPoints": [
+        "View switch: tabs with several views (each with its own annotation paths), shown as a dropdown.",
+        "Units: Measures.Unit / Measures.ISOCurrency on the measure; formatting: Scale and DataPoint ValueFormat.",
+        "Highlighting: DataPoint Criticality or CriticalityCalculation; thresholds with ImprovementDirection and range values.",
+        "requireAppAuthorization: show the card only if the user is authorized for the given intent."
+      ],
+      "examples": [
+        {
+          "title": "A card with a view switch and an authorization check",
+          "language": "json",
+          "code": "{\n  \"model\": \"mainService\",\n  \"template\": \"sap.ovp.cards.list\",\n  \"settings\": {\n    \"title\": \"{{salesOrders}}\",\n    \"entitySet\": \"SalesOrders\",\n    \"requireAppAuthorization\": \"#SalesOrder-display\",\n    \"tabs\": [\n      {\n        \"value\": \"{{open}}\",\n        \"annotationPath\": \"com.sap.vocabularies.UI.v1.LineItem#Open\",\n        \"selectionAnnotationPath\": \"com.sap.vocabularies.UI.v1.SelectionVariant#Open\"\n      },\n      {\n        \"value\": \"{{overdue}}\",\n        \"annotationPath\": \"com.sap.vocabularies.UI.v1.LineItem#Overdue\",\n        \"selectionAnnotationPath\": \"com.sap.vocabularies.UI.v1.SelectionVariant#Overdue\"\n      }\n    ]\n  }\n}"
+        },
+        {
+          "title": "Threshold-based coloring in a data point",
+          "language": "xml",
+          "code": "<Annotation Term=\"UI.DataPoint\" Qualifier=\"Revenue\">\n  <Record Type=\"UI.DataPointType\">\n    <PropertyValue Property=\"Title\" String=\"Revenue\" />\n    <PropertyValue Property=\"Value\" Path=\"Revenue\" />\n    <PropertyValue Property=\"CriticalityCalculation\">\n      <Record Type=\"UI.CriticalityCalculationType\">\n        <PropertyValue Property=\"ImprovementDirection\" EnumMember=\"UI.ImprovementDirectionType/Maximize\" />\n        <PropertyValue Property=\"ToleranceRangeLowValue\" Decimal=\"80000\" />\n        <PropertyValue Property=\"DeviationRangeLowValue\" Decimal=\"50000\" />\n      </Record>\n    </PropertyValue>\n  </Record>\n</Annotation>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "ovp-annotations",
+      "level": "basic",
+      "title": "Which annotations are used in overview pages?",
+      "description": "OVP cards are mostly driven by annotations of the entity sets they show. UI.LineItem defines the fields of list and table cards (the first fields fill the title, description and value positions of list items). UI.HeaderInfo provides titles, for example in quick views and stack cards. UI.DataPoint defines key figures: values shown in the card header (KPI), the bar in bar list cards, and criticality colors (Criticality, CriticalityCalculation) and formatting (ValueFormat). UI.Chart defines the chart of analytical cards (chart type, dimensions, measures). UI.Identification defines the navigation of a card (DataFieldForIntentBasedNavigation, DataFieldWithUrl) and actions in quick views. UI.SelectionVariant defines card filters and input parameters, UI.PresentationVariant the sorting (and the visualization), and UI.SelectionPresentationVariant combines both, for example for a KPI. UI.SelectionFields defines the default fields of the global filter, and Common.ValueList the value helps. UI.Facets and UI.FieldGroup describe the content of quick view cards in stack cards, and Communication.Contact the contact quick views in link list cards. On the metadata level, Measures.Unit / Measures.ISOCurrency and the property Scale decide units and decimals, and sap:searchable enables search in the global filter.",
+      "keyPoints": [
+        "UI.LineItem (list/table fields), UI.HeaderInfo (titles), UI.DataPoint (KPIs, bars, colors, formatting).",
+        "UI.Chart (analytical cards), UI.Identification (navigation and quick view actions).",
+        "UI.SelectionVariant, UI.PresentationVariant, UI.SelectionPresentationVariant (filters, parameters, sorting).",
+        "UI.SelectionFields + Common.ValueList (global filter); UI.Facets/FieldGroup and Communication.Contact (quick views)."
+      ],
+      "examples": [
+        {
+          "title": "Annotations used by a list card",
+          "language": "xml",
+          "code": "<Annotations Target=\"SALES_SRV.ProductType\">\n  <Annotation Term=\"UI.LineItem\" Qualifier=\"bar\">\n    <Collection>\n      <Record Type=\"UI.DataField\">\n        <PropertyValue Property=\"Value\" Path=\"Name\" />\n      </Record>\n      <Record Type=\"UI.DataFieldForAnnotation\">\n        <PropertyValue Property=\"Target\" AnnotationPath=\"@UI.DataPoint#Price\" />\n      </Record>\n    </Collection>\n  </Annotation>\n  <Annotation Term=\"UI.Identification\" Qualifier=\"bar\">\n    <Collection>\n      <Record Type=\"UI.DataFieldForIntentBasedNavigation\">\n        <PropertyValue Property=\"SemanticObject\" String=\"Product\" />\n        <PropertyValue Property=\"Action\" String=\"display\" />\n      </Record>\n    </Collection>\n  </Annotation>\n</Annotations>"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

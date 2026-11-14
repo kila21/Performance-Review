@@ -1,0 +1,218 @@
+{
+  "topicId": "extension",
+  "title": "Extension capabilities",
+  "questions": [
+    {
+      "id": "why-extensibility",
+      "level": "elementary",
+      "title": "Why does extensibility matter in SAP business applications? Give some real use cases.",
+      "description": "SAP delivers standard apps that thousands of companies use, but no two companies work exactly the same way. Extensibility lets a customer or partner adapt a standard app to their own processes without copying or changing SAP's original code. This is essential, because a modified copy would no longer receive SAP's updates, bug fixes, and security patches, while an extension is stored separately and stays in place when the standard app is upgraded. Real use cases: a company adds its own custom field (like an internal cost center) to a sales order screen; a retailer hides fields it never uses, so the screen is simpler for its users; a manufacturer adds a button that calls its own approval process; a business renames a label to its own terminology (\"Customer\" to \"Client\"); a partner builds an industry-specific variant of a standard app; or a team changes the default sorting and filters of a list for its users. SAP supports this on several levels: key users can adapt the UI themselves at runtime (UI adaptation), developers can create adaptation projects or extension apps (with extension points, controller extensions and view modifications), and end users can personalize their own views (variants). The problem it solves: if a customer edits SAP's source directly, every upgrade overwrites it or forces a painful manual merge (the old ABAP \"modification adjustment\" pain). With extensibility, changes live in a separate layer that is merged on top of the original at runtime. There is also a commercial reason: SAP maintains one product for thousands of customers, which only works if customers extend rather than fork. The important framing for the review: most use cases are not development work. Hiding a field, renaming a label, reordering fields and adding an existing service field are key user adaptations done in the browser in minutes; only new logic (a validation, an action calling an external system, a section with data from a customer-specific service) needs a developer. Who changes what: end users personalize for themselves (table layout, filters, saved views), key users adapt for everyone (UI adaptation), developers build extension projects (new logic, views, back-end fields).",
+      "keyPoints": [
+        "Extensibility adapts standard apps to a company's processes without modifying SAP's code.",
+        "Extensions survive upgrades; modified copies would lose SAP's updates and fixes.",
+        "Use cases: custom fields, hiding fields, extra actions, renamed labels, industry variants, default filters.",
+        "Levels: key user adaptation, developer extensions (adaptation projects), and end-user personalization.",
+        "Most changes (hide, rename, reorder, add existing field) are key user work; new logic needs a developer.",
+        "End user = personalization; key user = UI adaptation for everyone; developer = extension project."
+      ],
+      "examples": [
+        {
+          "title": "Where an extension lives",
+          "language": "text",
+          "code": "Standard app (from SAP, updated by SAP)\n  └─ stays unchanged\nExtension (from the customer or partner, stored separately)\n  ├─ adds a custom field into an extension point\n  ├─ hides an unused field\n  ├─ overrides a few i18n texts\n  └─ adds a button with its own logic (controller extension)\n\nRuntime = standard app + extension, merged by the framework"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "ui-adaptation-editor",
+      "level": "elementary",
+      "title": "What can the UI adaptation editor (layout editor) do?",
+      "description": "The UI adaptation editor lets you change an app's UI visually, without writing code, and save those changes as separate adaptations instead of changing the app itself. Key users (business experts with special authorization) can start it at runtime in the SAP Fiori launchpad, with the Adapt UI option in the user menu (this is SAPUI5 flexibility, also called key user adaptation). Developers use the same editor at design time, in SAP Fiori tools (in SAP Business Application Studio or VS Code) inside an adaptation project, and earlier in the SAP Web IDE, where the layout editor and the visual editor offered similar drag-and-drop editing. Typical changes are: moving fields and groups within a form, hiding or revealing fields, adding fields that the service already provides (or custom fields), renaming labels, combining or splitting fields, adding sections, and creating app variants. The changes are stored as small change files (deltas) in the layered repository and are applied on top of the original app every time it starts. Which changes are possible depends on the controls (they must support flexibility) and on the app having stable IDs. Key user changes are stored in the CUSTOMER layer, so they apply to every user of the app, without a transport or a deployment (they can be transported later). Preconditions: \"flexEnabled\": true in manifest.json, stable IDs on the controls, XML views (JS views are not supported), and the key user role in the launchpad. Its limits are worth saying too: it changes layout and labels, not behavior. No new logic, no new back-end call, no new validation; as soon as the requirement is \"when X, then do Y\", it is a developer task.",
+      "keyPoints": [
+        "Changes the UI visually, without code, and saves adaptations separately from the app.",
+        "Key users: Adapt UI in the launchpad (runtime); developers: SAP Fiori tools adaptation projects (formerly Web IDE layout/visual editor).",
+        "Typical changes: move, hide/reveal, add fields, rename labels, combine/split, add sections, app variants.",
+        "Changes are stored as deltas in the layered repository; controls must support it and IDs must be stable.",
+        "Needs flexEnabled: true, stable IDs, XML views and the key user role; changes go to the CUSTOMER layer.",
+        "Changes layout and labels only, never behavior (no logic, no validation, no new calls)."
+      ],
+      "examples": [
+        {
+          "title": "A change file created by the editor (simplified)",
+          "language": "json",
+          "code": "{\n  \"fileName\": \"id_1700000000000_hideControl\",\n  \"fileType\": \"change\",\n  \"changeType\": \"hideControl\",\n  \"layer\": \"CUSTOMER\",\n  \"reference\": \"my.app\",\n  \"selector\": { \"id\": \"my.app::Detail--noteField\", \"idIsLocal\": false },\n  \"content\": {}\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "stable-ids",
+      "level": "basic",
+      "title": "What is the stable IDs concept?",
+      "description": "A stable ID is a control ID that is defined explicitly and stays the same every time the app runs and after every update. Extensibility and adaptation depend on it: a UI adaptation or an extension says something like \"hide the control with ID my.app::Detail--noteField\" or \"put this field after the control with ID ...\", so the control must have exactly the same ID the next time the app starts, and also after the app is upgraded. Controls without an explicit ID get generated IDs, like __button3 or __xmlview2--__table0, which depend on creation order and can change at any time; changes that refer to them would get lost or be applied to the wrong control. The rules are: give every view and every relevant control an id in XML, give the Component and the root view fixed IDs, create views from routing with fixed target IDs, and create controls in code with createId(\"...\") so they are prefixed consistently. Also keep IDs unchanged between releases. Stable IDs are also needed for OPA tests and for analytics. UI5 helps with checks: the Support Assistant has rules that report controls with generated IDs, and the UI adaptation editor warns when an app does not have stable IDs. Without stable IDs, a saved change is silently lost, or worse, applied to the wrong control. Stable IDs are the precondition for key user adaptation, developer extensions, variant management, personalization and OPA tests, and they make support easier (an ID like productList in a stack trace means something). More rules: never build an ID from dynamic data (id=\"{= 'row' + ${ID}}\" is unstable by definition), and never rename IDs between releases (renaming saveButton to btnSave breaks every customer adaptation that referenced it). The UI5 linter and SAP Fiori tools check for missing stable IDs, and in an app meant to be extensible this is treated as an error, not a warning.",
+      "keyPoints": [
+        "A stable ID is explicitly set and never changes between runs and releases.",
+        "Adaptations and extensions refer to controls by ID, so the IDs must stay stable.",
+        "Generated IDs (__button3) depend on creation order and can change; changes on them break.",
+        "Give views, controls, component and routing targets explicit IDs; the Support Assistant checks for this.",
+        "Never derive IDs from data or rename them between releases; the UI5 linter / Fiori tools flag missing IDs."
+      ],
+      "examples": [
+        {
+          "title": "Stable vs generated IDs",
+          "language": "xml",
+          "code": "<!-- stable: explicit IDs on the view's controls -->\n<f:SimpleForm id=\"orderForm\" xmlns:f=\"sap.ui.layout.form\">\n  <Label id=\"noteLabel\" text=\"Note\" />\n  <Input id=\"noteInput\" value=\"{Note}\" />\n</f:SimpleForm>\n\n<!-- not stable: this button gets a generated ID like __button7 -->\n<Button text=\"Save\" />"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "view-extensions",
+      "level": "basic",
+      "title": "How can views be extended through the manifest: extension points, view extension, view modification, and view replacement?",
+      "description": "A custom app (an extension project) declares its changes in its own manifest.json, in sap.ui5/extends: the component it extends, and an extensions object. There are three view-related mechanisms. View extension (sap.ui.viewExtensions): the original view must contain an extension point, written as <core:ExtensionPoint name=\"extDetailBottom\" /> in its XML, which is a named placeholder where SAP allows custom content. The extension project registers a fragment for that point, and the fragment's controls are inserted there at runtime. An extension point can also have default content, which is replaced by the extension. View modification (sap.ui.viewModifications): changes properties of existing controls in a view, addressed by their ID; officially only the visible property is supported, so this is used to hide controls. View replacement (sap.ui.viewReplacements): replaces a whole view with a custom one; this is the most powerful but also the most risky option, because the custom view no longer receives SAP's changes to the original view, so it should be used only as a last resort. Extension points and the IDs used in modifications are only stable if SAP documents them as extension options for that app. The six mechanisms of an extension project, from the lightest to the most invasive, are: controller extension, hooks in the standard controller, view extension (extension points), view modification, view replacement and controller replacement, plus sap.ui.modelExtensions. All are declared under sap.ui5/extends, with the component being extended and its minVersion. Note: some guides show view modifications that change other properties like a label text; officially only visible is supported, and a renamed label is better done with i18n enhancement or key user adaptation. View modifications are the developer-side equivalent of what a key user does in UI adaptation and depend entirely on stable IDs.",
+      "keyPoints": [
+        "Extensions are declared in the custom app's manifest: sap.ui5/extends with component and extensions.",
+        "View extension: a fragment is inserted at a <core:ExtensionPoint> of the original view.",
+        "View modification: changes properties of existing controls by ID (officially only visible).",
+        "View replacement: replaces a whole view; most powerful, but loses SAP's updates to that view, so use it last.",
+        "Order of preference: controller extension / hooks → extension points → view modification → replacements."
+      ],
+      "examples": [
+        {
+          "title": "An extension point in the original view",
+          "language": "xml",
+          "code": "<mvc:View controllerName=\"sap.orders.controller.Detail\" xmlns=\"sap.m\" xmlns:mvc=\"sap.ui.core.mvc\"\n  xmlns:core=\"sap.ui.core\">\n  <ObjectHeader id=\"header\" title=\"{OrderID}\" />\n  <core:ExtensionPoint name=\"extDetailBottom\" />\n</mvc:View>"
+        },
+        {
+          "title": "The extension project's manifest",
+          "language": "json",
+          "code": "{\n  \"sap.ui5\": {\n    \"extends\": {\n      \"component\": \"sap.orders\",\n      \"extensions\": {\n        \"sap.ui.viewExtensions\": {\n          \"sap.orders.view.Detail\": {\n            \"extDetailBottom\": {\n              \"className\": \"sap.ui.core.Fragment\",\n              \"fragmentName\": \"customer.orders.ext.view.DetailBottom\",\n              \"type\": \"XML\"\n            }\n          }\n        },\n        \"sap.ui.viewModifications\": {\n          \"sap.orders.view.Detail\": {\n            \"header\": { \"visible\": false }\n          }\n        },\n        \"sap.ui.viewReplacements\": {\n          \"sap.orders.view.Settings\": {\n            \"viewName\": \"customer.orders.ext.view.Settings\",\n            \"type\": \"XML\"\n          }\n        }\n      }\n    }\n  }\n}"
+        },
+        {
+          "title": "The extends section of an extension project",
+          "language": "json",
+          "code": "\"sap.ui5\": {\n  \"extends\": {\n    \"component\": \"sap.standard.product.app\",\n    \"minVersion\": \"1.2.0\",\n    \"extensions\": {\n      \"sap.ui.controllerExtensions\": {\n        \"sap.standard.product.app.controller.Detail\": { \"controllerName\": \"customer.ext.controller.DetailExt\" }\n      },\n      \"sap.ui.viewExtensions\": {\n        \"sap.standard.product.app.view.Detail\": {\n          \"extListItemContent\": { \"className\": \"sap.ui.core.Fragment\", \"fragmentName\": \"customer.ext.fragment.ExtraFields\", \"type\": \"XML\" }\n        }\n      },\n      \"sap.ui.viewModifications\": {\n        \"sap.standard.product.app.view.Detail\": { \"weightField\": { \"visible\": false } }\n      },\n      \"sap.ui.viewReplacements\": { },\n      \"sap.ui.controllerReplacements\": { }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "controller-extensions",
+      "level": "basic",
+      "title": "How do controller extensions (with hooks) and controller replacement work?",
+      "description": "Controller extension (sap.ui.controllerExtensions in sap.ui5/extends/extensions) adds custom logic to an existing controller without replacing it. The extension controller's methods are merged with the original controller: lifecycle methods (like onInit) of both are called (the original first for onInit), new methods can be used as event handlers of controls added through view extensions, and hooks let the original app call custom code at defined places. A hook is a method name that the standard controller checks for and calls if it exists, like if (this.extHookModifyFilters) { this.extHookModifyFilters(filters); }; SAP documents which hooks an app offers, and the extension simply implements that method. In newer code, the sap.ui.core.mvc.ControllerExtension class is used instead: an extension can declare an override section, which wraps public methods of the original controller (with before, after, or instead of the original logic), but only for methods the original controller makes overridable. Controller replacement (sap.ui.controllerReplacements) replaces the whole controller with a custom one; like view replacement, it loses all future changes of SAP's controller, so it is a last resort, used only when no hook or extension option exists. The rule to remember: the lifecycle methods (onInit, onExit, onBeforeRendering, onAfterRendering) of both controllers are executed, the original first, then the extension; any other method must go into override if you want to replace it. Hooks are the safest mechanism, because SAP guarantees the hook exists and when it is called. SAP Fiori elements V2 has a documented set of them (like onInitSmartFilterBarExtension, onBeforeRebindTableExtension, onListNavigationExtension, beforeSaveExtension), and V4 replaced them with the controller extension overrides of the flexible programming model.",
+      "keyPoints": [
+        "Controller extension adds custom logic merged with the original controller, which stays in place.",
+        "Hooks: methods (like extHook...) that the standard controller calls if the extension implements them.",
+        "ControllerExtension with override wraps public, overridable methods of the original controller.",
+        "Controller replacement replaces the whole controller; last resort, because SAP's changes are lost.",
+        "Lifecycle methods of both run (original first); other methods are replaced only via override.",
+        "Fiori elements V2 hooks: onBeforeRebindTableExtension, onListNavigationExtension...; V4: flexible programming model overrides."
+      ],
+      "examples": [
+        {
+          "title": "A hook in the standard controller",
+          "language": "javascript",
+          "code": "// standard app: sap.orders.controller.List\nonSearch: function () {\n  const filters = this._buildFilters();\n  if (this.extHookModifyFilters) {  // documented hook\n    this.extHookModifyFilters(filters);\n  }\n  this._table.getBinding(\"items\").filter(filters);\n}"
+        },
+        {
+          "title": "The extension implements it",
+          "language": "javascript",
+          "code": "// customer.orders.ext.controller.ListExtension, registered in the manifest under\n// \"sap.ui.controllerExtensions\": { \"sap.orders.controller.List\": { \"controllerName\": \"customer.orders.ext.controller.ListExtension\" } }\nsap.ui.define([\n  \"sap/ui/core/mvc/Controller\",\n  \"sap/ui/model/Filter\",\n  \"sap/ui/model/FilterOperator\"\n], function (Controller, Filter, FilterOperator) {\n  \"use strict\";\n  return Controller.extend(\"customer.orders.ext.controller.ListExtension\", {\n    extHookModifyFilters: function (filters) {\n      filters.push(new Filter(\"Region\", FilterOperator.EQ, \"EMEA\"));\n    }\n  });\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "extension-i18n",
+      "level": "basic",
+      "title": "How do you provide localized texts for an extended app?",
+      "description": "An extension adds new controls (through view extensions or adaptations) that need translated texts, and sometimes wants to change texts of the original app. The extension project has its own i18n folder with its own properties files (i18n.properties plus one per language), so its texts are translated and delivered together with the extension, and never copied into SAP's files. To make them available in the original app's i18n model, the extension enhances the original resource bundle: in the extension's manifest, the i18n model is declared with settings.enhanceWith, listing the extension's bundle (bundleName or bundleUrl). Because enhancing bundles are checked before the original bundle, the extension can both add new keys, used in its fragments as {i18n>myNewKey}, and override existing keys, to change the wording of standard labels. In adaptation projects created with SAP Fiori tools, this is set up automatically, with the extension's texts in an i18n file of the adaptation project, and key user adaptations that rename labels store the new texts as part of the change. Keep the extension's keys unique (for example with a prefix), to avoid accidentally overriding standard texts. Two reasons this matters: you cannot edit SAP's i18n.properties (the next upgrade would overwrite it), and your extension must be translated too; a German user of an extended app should not suddenly see one English field label. Do not forget the text classification comments (#XFLD, #XBUT) in your own bundle; the translation process needs them just as much.",
+      "keyPoints": [
+        "The extension has its own i18n folder and translations; SAP's files are never changed.",
+        "The extension's bundle enhances the original i18n model via enhanceWith in its manifest.",
+        "Enhancing bundles are checked first: they add new keys and can override existing ones.",
+        "Adaptation projects set this up automatically; use a key prefix to avoid accidental overrides.",
+        "Classify the extension's texts too (#XFLD, #XBUT...) so they get translated properly."
+      ],
+      "examples": [
+        {
+          "title": "Enhancing the original i18n model from the extension",
+          "language": "json",
+          "code": "{\n  \"sap.ui5\": {\n    \"extends\": { \"component\": \"sap.orders\" },\n    \"models\": {\n      \"i18n\": {\n        \"type\": \"sap.ui.model.resource.ResourceModel\",\n        \"settings\": {\n          \"bundleName\": \"sap.orders.i18n.i18n\",\n          \"enhanceWith\": [\n            { \"bundleName\": \"customer.orders.ext.i18n.i18n\" }\n          ]\n        }\n      }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "extension-limitations",
+      "level": "basic",
+      "title": "What are the limitations, caveats, and supportability rules of extending apps?",
+      "description": "Extensions are powerful, but they have clear limits. You can only extend what the original app allows: extension points, hooks, and stable control IDs are a contract only where SAP documents them for that app; relying on undocumented IDs, private methods, or internal structure may break with the next update, and SAP does not support it. Replacements (of views or controllers) cut the connection to SAP's further development, so new features and fixes in the replaced part are lost, and the custom copy must be maintained by the customer; they should be the last option. View modifications officially support only the visible property. Every upgrade of the original app should be followed by a regression test of the extensions. Performance can suffer if extensions add many fields, requests or heavy logic. Some apps, like most SAP Fiori elements apps, are extended differently (through annotations, flexible programming model building blocks, or their own extension APIs) rather than classic view and controller extensions. Supportability: problems in custom code are the customer's responsibility, so in an incident, it must be possible to test the app without the extension, to show whether the problem comes from the standard app or from the extension. Keep extensions small, clearly named, and documented. Further caveats: never use private members (anything starting with _, or an internal control ID you found by inspecting the DOM); they are not an API and can change in any patch. Testing after every upgrade of the standard app and of UI5 is the real ongoing cost of an extension, and it should be planned, not discovered. Key user adaptation cannot change behavior, and JS views are not supported by the adaptation and extension tooling. SAP supports the extension mechanism, not the customer's code inside the extension. The sentence that shows judgment: \"The extension mechanism is stable; what is fragile is the assumption that the standard app's internal structure will not change. So I prefer hooks and extension points over modifications, and modifications over replacements, and I keep the extension as small as the requirement allows.\"",
+      "keyPoints": [
+        "Only documented extension points, hooks, and stable IDs are a supported contract.",
+        "Replacements lose SAP's future changes; use them as a last resort.",
+        "Retest extensions after every upgrade; watch performance; Fiori elements apps use other extension APIs.",
+        "Custom code is the customer's responsibility; it must be possible to test the app without the extension.",
+        "No private members (_...) or DOM-discovered IDs; plan regression tests after every upgrade."
+      ],
+      "examples": [
+        {
+          "title": "Preferred order of extension options",
+          "language": "text",
+          "code": "1. Configuration / key user adaptation (no code)\n2. Documented extension points and controller hooks\n3. Controller extensions with documented overridable methods\n4. View modification (hide controls)\n5. View or controller replacement  <- last resort: no more updates from SAP for that part"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "extensibility-documentation",
+      "level": "basic",
+      "title": "Where do you find the extensibility information for a standard app?",
+      "description": "Before extending a standard SAP app, you must know which extension options that specific app offers, because only those are supported. SAP documents them per app. In the SAP Help Portal, the documentation of a standard SAP Fiori app usually has an Extensibility section, which lists its extension points (view name and extension point name), its controller hooks (with their parameters and when they are called), the views and controllers that may be replaced, the OData service and entities that can be extended with custom fields, and sometimes example scenarios. The SAP Fiori apps reference library shows, for each app, its technical data, like the component ID, the OData services, and which extension options exist. Inside companies that build apps (including SAP itself), teams usually also keep extensibility information in their own documentation or wiki, describing what they allow customers to extend; such internal pages are not public. When a needed extension option is not documented, the right path is to request it, or to use a supported mechanism like key user adaptation, rather than relying on undocumented internals.",
+      "keyPoints": [
+        "Each standard app documents its supported extension options; only those are supported.",
+        "SAP Help Portal app documentation: an Extensibility section with extension points, hooks, and replaceable parts.",
+        "The SAP Fiori apps reference library lists technical data (component ID, services) per app.",
+        "Development teams may keep internal extensibility docs (not public); request missing options instead of using internals."
+      ],
+      "examples": [
+        {
+          "title": "What an app's extensibility documentation typically lists",
+          "language": "text",
+          "code": "View: sap.orders.view.Detail\n  Extension point: extDetailBottom      - after the item table\n  Extension point: extHeaderAttributes  - extra header attributes\nController: sap.orders.controller.List\n  Hook: extHookModifyFilters(filters)   - before the list is filtered\nOData service: ZORDERS_SRV\n  Entity SalesOrder: extensible with custom fields"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "sapui5-flexibility",
+      "level": "basic",
+      "title": "What are the SAPUI5 flexibility features (runtime adaptation)?",
+      "description": "SAPUI5 flexibility (the sap.ui.fl library) is the framework that applies UI changes on top of an app at runtime, without changing the app's code. Changes are stored as small change files (deltas) in a layered repository (LREP) on the ABAP server or in SAP BTP, and are applied every time the app starts. They are kept in layers, from the developer to the end user, like VENDOR (SAP), PARTNER, CUSTOMER_BASE, CUSTOMER (key users), PUBLIC (variants shared with other users) and USER (personal settings); higher layers are applied on top of lower ones, so each group can adapt the app without touching the others' work, and the changes survive upgrades of the original app. The features built on it are: key user adaptation (Adapt UI in the launchpad: move, hide, add, rename, combine fields, add sections, create app variants for other user groups), personalization by end users (like table column settings, and saved filter or table variants with variant management), and developer adaptation through adaptation projects in SAP Fiori tools. To support flexibility, an app needs stable IDs and controls that support it; SAP Fiori elements and smart controls support it out of the box. Changes can be activated, transported to other systems like other development objects, and reset. A change is a small JSON object containing the control ID (selector), the change type (like hideControl, moveControls, rename, addFields, propertyChange), the new value, and the layer; USER-layer changes are also keyed by the user. When the app loads, flexibility fetches the applicable changes and applies them while the view is being created, before the user sees anything. Design time vs. run time: a developer works on an adaptation project in SAP Business Application Studio with the adaptation editor (the result is a deployable project), while a key user adapts the live app in the browser (the result is a set of flex changes). The UI5 tooling task generateFlexChangesBundle bundles an app's own flex changes into the deployed app. What a developer must do to enable all of this: \"flexEnabled\": true in the manifest, stable IDs and XML views; they cost nothing if done from the start, which is exactly why a reviewer asks about them.",
+      "keyPoints": [
+        "sap.ui.fl applies UI changes at runtime; changes are deltas stored in the layered repository.",
+        "Layers: VENDOR, PARTNER, CUSTOMER_BASE, CUSTOMER, PUBLIC, USER; higher layers are applied on top.",
+        "Features: key user adaptation (Adapt UI), end-user personalization and variants, developer adaptation projects.",
+        "Needs stable IDs and flexibility-enabled controls; changes survive upgrades and can be transported.",
+        "A change = selector (control ID) + change type (hideControl, moveControls, rename, addFields) + value + layer.",
+        "Preconditions: flexEnabled: true, stable IDs, XML views. generateFlexChangesBundle ships the app's own changes."
+      ],
+      "examples": [
+        {
+          "title": "How layers stack",
+          "language": "text",
+          "code": "USER           personal settings (my table columns, my default variant)\nPUBLIC         variants shared with other users\nCUSTOMER       key user adaptation in the customer's system (Adapt UI)\nCUSTOMER_BASE  customer developers' adaptation projects\nPARTNER        partner adaptations\nVENDOR         SAP's own adaptations\n---------------------------------------------------------------\nOriginal app   (code delivered by SAP, never modified)"
+        },
+        {
+          "title": "Enabling flexibility",
+          "language": "json",
+          "code": "\"sap.ui5\": {\n  \"flexEnabled\": true\n}"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

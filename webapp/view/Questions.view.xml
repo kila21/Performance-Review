@@ -26,14 +26,23 @@
                 <core:Icon src="sap-icon://question-mark" class="sapUiSmallMarginEnd" />
                 <Text text="{topic>title}" />
               </HBox>
+              <HBox alignItems="Center" class="prNoShrink">
+              <ObjectStatus
+                text="{parts: [{path: 'topic>level'}, {path: 'i18n>levelElementary'}, {path: 'i18n>levelBasic'}], formatter: '.formatter.levelText'}"
+                state="{path: 'topic>level', formatter: '.formatter.levelState'}"
+                inverted="true"
+                visible="{= !!${topic>level} }"
+                class="sapUiSmallMarginBegin"
+              />
               <ObjectStatus
                 text="{i18n>assignmentLabel}"
                 icon="sap-icon://edit"
                 state="Information"
                 inverted="true"
                 visible="{= !!${topic>assignment} }"
-                class="sapUiSmallMarginBegin prNoShrink"
+                class="sapUiSmallMarginBegin"
               />
+              </HBox>
             </HBox>
           </CustomListItem>
         </items>

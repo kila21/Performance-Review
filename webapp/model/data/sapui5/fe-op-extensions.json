@@ -1,0 +1,111 @@
+{
+  "topicId": "fe-op-extensions",
+  "title": "FE: Object Page extensions",
+  "questions": [
+    {
+      "id": "op-ext-header-facet",
+      "level": "elementary",
+      "title": "What are the extension points for object page header facets?",
+      "description": "When the header needs content that annotations cannot describe, for example a custom KPI visualization, a special status control, or a button group, a fragment can be added to the header through extension points. They are registered in manifest.json under sap.ui.viewExtensions for the object page view (sap.suite.ui.generic.template.ObjectPage.view.Details), each with a key that says where the fragment goes. The main keys are: ReplaceHeaderExtensionFacet|<EntitySet>, which adds a custom header facet area (replacing the extension facet slot); BeforeHeaderFacet|<EntitySet>|<annotation info> and AfterHeaderFacet|<EntitySet>|<annotation info>, which place a custom facet before or after an existing annotation-based header facet (the annotation info identifies it, like headerEditable::com.sap.vocabularies.UI.v1.Chart::SpecificationWidthBulletChart); BeforeHeaderDataPoint / AfterHeaderDataPoint for data points; AfterImageExtensionFacet|<EntitySet> right after the header image; and AfterSimpleHeaderFacet when simple header facets are used. The value of each key is the fragment (className sap.ui.core.Fragment, fragmentName, type XML). Its controls can be bound relatively to the object, and to the ui model for the edit state. Use extensions only when annotations are not enough.",
+      "keyPoints": [
+        "Registered in sap.ui.viewExtensions for sap.suite.ui.generic.template.ObjectPage.view.Details.",
+        "ReplaceHeaderExtensionFacet|<EntitySet> adds a custom header facet.",
+        "BeforeHeaderFacet / AfterHeaderFacet|<EntitySet>|<annotation info> position it relative to an existing facet.",
+        "Also: Before/AfterHeaderDataPoint, AfterImageExtensionFacet, AfterSimpleHeaderFacet; the value is an XML fragment."
+      ],
+      "examples": [
+        {
+          "title": "A custom header facet",
+          "language": "json",
+          "code": "{\n  \"sap.ui5\": {\n    \"extends\": {\n      \"extensions\": {\n        \"sap.ui.viewExtensions\": {\n          \"sap.suite.ui.generic.template.ObjectPage.view.Details\": {\n            \"ReplaceHeaderExtensionFacet|C_SalesOrder\": {\n              \"className\": \"sap.ui.core.Fragment\",\n              \"fragmentName\": \"my.app.ext.fragment.HeaderRiskFacet\",\n              \"type\": \"XML\"\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-ext-sections",
+      "level": "elementary",
+      "title": "What are the extension points for object page sections: adding a section and adding dynamic side content?",
+      "description": "Adding a section: a custom section with your own content (for example a map, a custom chart, or a tree) is added with the extension keys BeforeFacet|<EntitySet>|<facet> or AfterFacet|<EntitySet>|<facet> in sap.ui.viewExtensions for the object page view. The facet part identifies the existing annotation-based section next to which the new one is placed, either by the facet's ID (like GeneralInformation) or by its annotation path (like to_ProductText::com.sap.vocabularies.UI.v1.LineItem). Besides the fragment, the entry can have a sap.ui.generic.app object with the section's title and type (for example a translatable title from i18n). To add several sections at the same position, a further key is appended to the extension name. Dynamic side content: a subsection can show a side content panel next to its main content (sap.ui.layout.DynamicSideContent), for additional information that is shown on wide screens and can be opened on demand on small screens. It is added with the keys BeforeMainContent|<EntitySet>|<subsection> or AfterMainContent|<EntitySet>|<subsection>, whose fragment becomes the side content. The subsection then gets buttons to show and hide the side content; their texts can be adapted with keys like ShowSideContent|<EntitySet>|<subsection> and HideSideContent|<EntitySet>|<subsection>.",
+      "keyPoints": [
+        "New section: BeforeFacet|<EntitySet>|<facet ID or annotation path> or AfterFacet|... in sap.ui.viewExtensions.",
+        "The entry can define the section's title and type; append a key to add several sections at one position.",
+        "Dynamic side content: BeforeMainContent / AfterMainContent|<EntitySet>|<subsection> adds a side panel to a subsection.",
+        "Show/hide buttons appear; their texts use keys like ShowSideContent|<EntitySet>|<subsection>."
+      ],
+      "examples": [
+        {
+          "title": "A custom section after the General Information section",
+          "language": "json",
+          "code": "{\n  \"sap.ui5\": {\n    \"extends\": {\n      \"extensions\": {\n        \"sap.ui.viewExtensions\": {\n          \"sap.suite.ui.generic.template.ObjectPage.view.Details\": {\n            \"AfterFacet|C_SalesOrder|GeneralInformation\": {\n              \"className\": \"sap.ui.core.Fragment\",\n              \"fragmentName\": \"my.app.ext.fragment.DeliveryMap\",\n              \"type\": \"XML\",\n              \"sap.ui.generic.app\": {\n                \"title\": \"{{deliveryMap}}\"\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-ext-subsections",
+      "level": "elementary",
+      "title": "What are the extension points for object page subsections?",
+      "description": "Inside an existing section, custom content can be added as a subsection instead of a whole new section. The keys are BeforeSubSection|<EntitySet>|<subsection> and AfterSubSection|<EntitySet>|<subsection>, which insert the fragment as a new subsection before or after an existing annotation-based subsection, and ReplaceSubSection|<EntitySet>|<subsection>, which replaces an existing subsection's content with the fragment. The subsection is identified the same way as sections: by the facet's ID or by its annotation path, for example to_ProductSalesData::com.sap.vocabularies.UI.v1.LineItem for a subsection showing a table. Like other view extensions, they are registered in sap.ui.viewExtensions for sap.suite.ui.generic.template.ObjectPage.view.Details, with a fragment, and they can define a title. Subsection extensions are useful when the custom content belongs to an existing topic, like an extra chart in the Sales section, so it appears under the same anchor bar entry. Replacing a subsection should be a last resort, because the replaced part no longer benefits from the annotation-based features.",
+      "keyPoints": [
+        "BeforeSubSection / AfterSubSection|<EntitySet>|<subsection> insert a custom subsection.",
+        "ReplaceSubSection|<EntitySet>|<subsection> replaces an existing subsection's content (last resort).",
+        "Subsections are identified by facet ID or annotation path (like to_X::com.sap.vocabularies.UI.v1.LineItem).",
+        "Registered in sap.ui.viewExtensions for the object page view, with an XML fragment."
+      ],
+      "examples": [
+        {
+          "title": "A custom subsection after a table subsection",
+          "language": "json",
+          "code": "{\n  \"sap.ui5\": {\n    \"extends\": {\n      \"extensions\": {\n        \"sap.ui.viewExtensions\": {\n          \"sap.suite.ui.generic.template.ObjectPage.view.Details\": {\n            \"AfterSubSection|C_Product|to_ProductSalesData::com.sap.vocabularies.UI.v1.LineItem\": {\n              \"className\": \"sap.ui.core.Fragment\",\n              \"fragmentName\": \"my.app.ext.fragment.SalesForecast\",\n              \"type\": \"XML\"\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-ext-forms",
+      "level": "basic",
+      "title": "What are the extension points for forms on the object page?",
+      "description": "To add custom fields to an existing form (a field group shown as a smart form) on the object page, use the form extension point. Its key is SmartFormExtension|<EntitySet>|<field group annotation>, for example SmartFormExtension|C_Product|com.sap.vocabularies.UI.v1.FieldGroup::GeneralInformation, registered in sap.ui.viewExtensions for sap.suite.ui.generic.template.ObjectPage.view.Details. The fragment contains sap.ui.comp.smartform.GroupElement controls (usually with SmartFields, or other controls), which are added to that field group's form, after the annotation-based fields. Because they are inside the smart form, they follow the form's layout, labels, and edit mode. Bindings are relative to the object, and the ui model can be used to adapt to the mode. This is the right choice for a field that needs special behavior or a custom control; a simple extra field should be added with annotations instead (a DataField in the field group). Do not put layout containers into the group elements, as this can break the form's layout and keyboard navigation.",
+      "keyPoints": [
+        "Key: SmartFormExtension|<EntitySet>|<field group annotation> in sap.ui.viewExtensions for the object page view.",
+        "The fragment contains smartform GroupElements, added to that field group's form.",
+        "They follow the form's layout, labels, and edit mode; bindings are relative to the object.",
+        "Prefer annotations for simple fields; no layout containers inside group elements."
+      ],
+      "examples": [
+        {
+          "title": "Fragment for a form extension",
+          "language": "xml",
+          "code": "<core:FragmentDefinition\n  xmlns=\"sap.m\"\n  xmlns:core=\"sap.ui.core\"\n  xmlns:smartForm=\"sap.ui.comp.smartform\"\n  xmlns:smartField=\"sap.ui.comp.smartfield\">\n  <smartForm:GroupElement id=\"riskElement\">\n    <smartField:SmartField value=\"{RiskScore}\" />\n  </smartForm:GroupElement>\n  <smartForm:GroupElement id=\"ratingElement\" label=\"Rating\">\n    <RatingIndicator value=\"{Rating}\" editable=\"{ui>/editable}\" />\n  </smartForm:GroupElement>\n</core:FragmentDefinition>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-ext-prefill-create",
+      "level": "basic",
+      "title": "How do you prefill fields when creating a new entity using an extension point?",
+      "description": "When a user creates a new object, some fields can be filled in advance. Fiori elements V2 offers three ways. From the filter bar with an extension: if a user searched in the list report and then presses Create, they probably want to create what they did not find, so values from the filter bar can be passed to the new object. To enable this, set createWithFilters: { strategy: \"extension\" } in the list report settings, and implement getPredefinedValuesForCreateExtension(oSmartFilterBar) in the list report's controller extension: it reads the filter bar and returns an object with the property values for the new instance, like { CustomerID: \"1000\" }. From the back end: a DefaultValuesFunction (annotated with Common.DefaultValuesFunction) is a function that the back end evaluates to suggest default values when an object is created. With cross-app navigation: when another app navigates to the create page, the navigation parameters can prefill fields. Prefilled values are only suggestions; users can still change them, and the back end should validate everything on save.",
+      "keyPoints": [
+        "Filter bar values: createWithFilters: { strategy: \"extension\" } in the list report settings.",
+        "Implement getPredefinedValuesForCreateExtension(oSmartFilterBar) returning { Property: value }.",
+        "Back end: Common.DefaultValuesFunction suggests default values.",
+        "Cross-app navigation parameters can also prefill; values remain editable and are validated on save."
+      ],
+      "examples": [
+        {
+          "title": "Manifest setting and the extension method",
+          "language": "json",
+          "code": "{\n  \"sap.ui.generic.app\": {\n    \"pages\": {\n      \"ListReport|C_SalesOrder\": {\n        \"entitySet\": \"C_SalesOrder\",\n        \"component\": {\n          \"name\": \"sap.suite.ui.generic.template.ListReport\",\n          \"list\": true,\n          \"settings\": {\n            \"createWithFilters\": { \"strategy\": \"extension\" }\n          }\n        }\n      }\n    }\n  }\n}"
+        },
+        {
+          "title": "getPredefinedValuesForCreateExtension",
+          "language": "javascript",
+          "code": "sap.ui.define([], function () {\n  \"use strict\";\n  return {\n    getPredefinedValuesForCreateExtension: function (oSmartFilterBar) {\n      const filterData = oSmartFilterBar.getFilterData();\n      const values = {};\n      if (filterData.CustomerID && filterData.CustomerID.items && filterData.CustomerID.items.length === 1) {\n        values.CustomerID = filterData.CustomerID.items[0].key;\n      }\n      return values;\n    }\n  };\n});"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

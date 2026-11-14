@@ -1,0 +1,257 @@
+{
+  "topicId": "smart-controls",
+  "title": "Smart Controls",
+  "questions": [
+    {
+      "id": "smart-control-concept",
+      "level": "elementary",
+      "title": "What is a smart control, how does it work, and what is its OData V4 equivalent?",
+      "description": "A smart control builds its UI itself from the OData metadata and annotations. You do not define columns, labels, filters or value helps in the view: you point the control at an entity set (or a bound property), and it reads the service description and renders the right UI. Internally, the control gets for example entitySet=\"Products\", asks the model for its MetaModel, reads the annotations for that entity set (which fields, which labels, which are sortable, which need a value help), then creates the inner controls and the binding and requests the data. The smart controls live in the library sap.ui.comp: SmartTable (a table from UI.LineItem), SmartFilterBar (a filter bar from UI.SelectionFields and the filter restrictions), SmartField (one field with the right control and value help), SmartForm (a form of SmartFields in groups), SmartVariantManagement (saves filter and layout variants), plus SmartChart and SmartLink. The benefit is less code, and the UI follows the back end: when the service adds a field or changes a label, the app follows without a front-end change. The cost is less direct control: behavior can only be changed through annotations, configuration properties and a few extension points (custom columns, custom filters, events), and when an annotation is wrong, the UI is wrong, so debugging happens in the metadata. Important: sap.ui.comp works with OData V2 only. With an OData V4 service (for example a CAP back end), the equivalent is SAP Fiori elements with building blocks (macros) from sap.fe.macros, like Table, FilterBar and Field. The annotation vocabulary is almost the same (UI.LineItem, UI.SelectionFields, Common.ValueList, Common.SideEffects, Common.FieldControl), so the knowledge transfers directly; in CAP you write them as CDS annotations instead of an XML annotation file.",
+      "keyPoints": [
+        "A smart control reads metadata + annotations at runtime (via the MetaModel) and generates its UI and binding.",
+        "Library sap.ui.comp: SmartTable, SmartFilterBar, SmartField, SmartForm, SmartVariantManagement, SmartChart, SmartLink.",
+        "Benefit: little code, UI follows the back end. Cost: changes only through annotations, settings and extension points.",
+        "OData V2 only; for OData V4 use Fiori elements building blocks (sap.fe.macros Table, FilterBar, Field) with the same vocabulary."
+      ],
+      "examples": [
+        {
+          "title": "One line gives a full table",
+          "language": "xml",
+          "code": "<mvc:View xmlns:mvc=\"sap.ui.core.mvc\" xmlns:smartTable=\"sap.ui.comp.smarttable\">\n  <!-- columns, sorting, filtering, personalization and Excel export\n       all come from the metadata and annotations of \"Products\" -->\n  <smartTable:SmartTable entitySet=\"Products\" tableType=\"ResponsiveTable\" />\n</mvc:View>"
+        },
+        {
+          "title": "The OData V4 equivalent: building blocks",
+          "language": "xml",
+          "code": "<mvc:View xmlns:mvc=\"sap.ui.core.mvc\" xmlns:macros=\"sap.fe.macros\">\n  <macros:FilterBar id=\"filterBar\" metaPath=\"@com.sap.vocabularies.UI.v1.SelectionFields\" />\n  <macros:Table id=\"table\" metaPath=\"@com.sap.vocabularies.UI.v1.LineItem\" filterBar=\"filterBar\" />\n</mvc:View>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "smarttable-annotations",
+      "level": "elementary",
+      "title": "What is the SmartTable, and which annotations drive it (LineItem, PresentationVariant, DataField, restrictions, SemanticObject, Criticality, TextArrangement)?",
+      "description": "sap.ui.comp.smarttable.SmartTable is a smart control for OData V2 services: you give it an entitySet, and it builds a complete table (columns, toolbar, count, personalization, export) from the service metadata and annotations, instead of you defining every column. The annotations decide what it shows. UI.LineItem is the list of columns: each entry is usually a UI.DataField with a Value (the property path) and optionally a Label and a Criticality; other record types add buttons (DataFieldForAction) or navigation links. UI.PresentationVariant defines the default presentation, such as the initial SortOrder, GroupBy, and which properties must always be requested (RequestAtLeast). Capabilities.SortRestrictions and Capabilities.FilterRestrictions (or the V2 attributes sap:sortable and sap:filterable) tell which columns may be sorted or filtered, so the table does not offer what the service cannot do. Common.SemanticObject on a property turns its values into SmartLinks for navigation to related apps. Criticality (a value or a path in the DataField) colors a value as positive, critical or negative. UI.TextArrangement, together with Common.Text, decides how a code and its description are combined, like \"Open (O)\" with TextFirst, \"O (Open)\" with TextLast, TextOnly, or TextSeparate. The DataField record types to know are: UI.DataField (a plain property), UI.DataFieldWithUrl (a link to a URL), UI.DataFieldWithIntentBasedNavigation (a link to another Fiori app via a semantic object), UI.DataFieldForAnnotation (points to another annotation, like a UI.DataPoint or a Communication.Contact), UI.DataFieldForAction (a button that calls an action or function import) and UI.DataFieldForIntentBasedNavigation (a button that navigates to another app). UI.SelectionVariant defines default filter values, and UI.SelectionPresentationVariant combines a selection and a presentation variant. Capabilities.FilterRestrictions/RequiredProperties is the one users notice: those filters become mandatory (marked with *), and the table does not load until they are filled. Criticality values are 0 Neutral, 1 Negative (red), 2 Critical (orange), 3 Positive (green), either constant or a path per row. UI.Importance (High, Medium, Low) decides which columns of a responsive table stay visible on a small screen and which move into the pop-in area.",
+      "keyPoints": [
+        "SmartTable builds a full table from an entitySet's metadata and annotations (OData V2).",
+        "UI.LineItem = the columns (DataField with Value, Label, Criticality; DataFieldForAction for buttons).",
+        "UI.PresentationVariant: default sorting, grouping, RequestAtLeast; Sort/FilterRestrictions limit what is offered.",
+        "Common.SemanticObject: navigation links; Criticality: colors; TextArrangement + Common.Text: code and text display.",
+        "DataField types: DataField, WithUrl, WithIntentBasedNavigation, ForAnnotation, ForAction, ForIntentBasedNavigation.",
+        "Criticality: 0 Neutral, 1 Negative, 2 Critical, 3 Positive. UI.Importance decides which columns pop in on small screens.",
+        "RequiredProperties make filters mandatory; without restrictions users can sort/filter fields the service rejects (HTTP 400)."
+      ],
+      "examples": [
+        {
+          "title": "Annotations for a SmartTable (CDS syntax)",
+          "language": "text",
+          "code": "annotate service.SalesOrders with @(\n  UI.LineItem: [\n    { $Type: 'UI.DataField', Value: SalesOrderID, Label: 'Order' },\n    { $Type: 'UI.DataField', Value: Status, Criticality: StatusCriticality },\n    { $Type: 'UI.DataField', Value: GrossAmount },\n    { $Type: 'UI.DataFieldForAction', Action: 'service.approve', Label: 'Approve' }\n  ],\n  UI.PresentationVariant: {\n    SortOrder: [{ Property: CreatedAt, Descending: true }],\n    Visualizations: ['@UI.LineItem']\n  },\n  Capabilities.SortRestrictions: { NonSortableProperties: [Note] }\n);\n\nannotate service.SalesOrders with {\n  Status   @Common.Text: StatusText @UI.TextArrangement: #TextFirst;\n  Customer @Common.SemanticObject: 'Customer';\n};"
+        },
+        {
+          "title": "The SmartTable in a view",
+          "language": "xml",
+          "code": "<smartTable:SmartTable\n  id=\"ordersTable\"\n  entitySet=\"SalesOrders\"\n  tableType=\"ResponsiveTable\"\n  header=\"Sales orders\"\n  showRowCount=\"true\"\n  enableAutoBinding=\"true\"\n  smartFilterId=\"filterBar\" />"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "smarttable-customization",
+      "level": "elementary",
+      "title": "How do you customize a SmartTable: custom columns, personalization, variant management, the SmartFilterBar link, and the beforeRebindTable event?",
+      "description": "Several features make the SmartTable flexible. Custom columns: when a column needs a control the annotations cannot describe (like a progress bar or a special button), you put your own inner table (for example a sap.m.Table) into the SmartTable in XML, with your columns, and give each one custom data p13nData with a columnKey and the leadingProperty it is based on; the SmartTable merges these with the annotation-based columns and includes them in personalization. Personalization: with useTablePersonalisation (true by default), the user can choose and reorder columns, and sort, filter and group the data through the settings dialog. Variant management: with useVariantManagement and a persistencyKey, users can save these settings as named views (variants), mark one as default, and share them. SmartFilterBar link: smartFilterId points to a SmartFilterBar, so the table automatically uses its filter values and searches when the user presses Go. The beforeRebindTable event fires each time the table is about to (re)bind its data; its bindingParams parameter lets the controller add filters, sorters, or binding parameters (like expand or select) that are not visible in the UI, for example a fixed filter for the current user. The initialise event fires once the table has been created. The p13nData keys are columnKey (a unique ID used to save personalization), leadingProperty (the field added to $select, which is what makes the data arrive), additionalProperty (extra fields for $select), sortProperty and filterProperty (the fields the sort and filter dialogs use) and columnIndex (the position among the generated columns). The two classic mistakes are forgetting leadingProperty (the cell stays empty) and forgetting columnKey (personalization does not remember the column); in XML, the opening brace must be escaped as \\{ so UI5 does not read it as a binding. Personalization is only saved when a persistencyKey is set (in the SAPUI5 flexibility layer: LREP on ABAP, the flexibility service on SAP BTP); without it, everything resets on reload. Changing the persistencyKey after go-live deletes all saved user settings. ignoreFromPersonalisation hides technical fields from the dialog, showTablePersonalisation() opens it from code, and useExportToExcel adds the export button. enableAutoBinding=\"true\" loads data immediately on start; set it to false when filters are mandatory and the user should press Go first. Variant management concepts: the standard variant (delivered default), the default variant (loads automatically for this user), private and public variants (public needs authorization), and Apply Automatically. To have one variant selector for both the filter bar and the table, use SmartVariantManagement and link both controls to it with the smartVariant association, which is what a list report does. beforeRebindTable has five typical use cases: mandatory or security filters the user must not remove, a default sorting that is not in the annotations, $expand or custom parameters the back end needs, filters from custom filter fields, and a busy state or error handling through dataRequested / dataReceived.",
+      "keyPoints": [
+        "Custom columns: your own inner table/columns with p13nData custom data (columnKey, leadingProperty).",
+        "Personalization: choose columns, sort, filter, group (useTablePersonalisation).",
+        "Variant management: useVariantManagement + persistencyKey to save named views.",
+        "smartFilterId links a SmartFilterBar; beforeRebindTable lets the controller add filters, sorters, or parameters.",
+        "p13nData: columnKey (saves personalization) + leadingProperty (adds to $select); escape { as \\{ in XML.",
+        "persistencyKey is required to save personalization; renaming it deletes users' saved settings.",
+        "enableAutoBinding=false when filters are mandatory; SmartVariantManagement + smartVariant shares one variant for filter bar and table.",
+        "beforeRebindTable: fixed filters, default sorter, $expand/custom parameters, custom filter values, busy/error handling."
+      ],
+      "examples": [
+        {
+          "title": "A custom column and beforeRebindTable",
+          "language": "xml",
+          "code": "<smartTable:SmartTable\n  id=\"ordersTable\"\n  entitySet=\"SalesOrders\"\n  smartFilterId=\"filterBar\"\n  useVariantManagement=\"true\"\n  persistencyKey=\"ordersTableVariants\"\n  beforeRebindTable=\".onBeforeRebindTable\"\n  enableAutoBinding=\"true\">\n  <Table>\n    <columns>\n      <Column>\n        <customData>\n          <core:CustomData key=\"p13nData\"\n            value='\\{\"columnKey\": \"progress\", \"leadingProperty\": \"Progress\", \"columnIndex\": 3}' />\n        </customData>\n        <Text text=\"Progress\" />\n      </Column>\n    </columns>\n    <items>\n      <ColumnListItem>\n        <ProgressIndicator percentValue=\"{Progress}\" />\n      </ColumnListItem>\n    </items>\n  </Table>\n</smartTable:SmartTable>"
+        },
+        {
+          "title": "The handler",
+          "language": "javascript",
+          "code": "onBeforeRebindTable: function (event) {\n  const bindingParams = event.getParameter(\"bindingParams\");\n  bindingParams.filters.push(new Filter(\"CreatedBy\", FilterOperator.EQ, this._currentUser));\n  bindingParams.parameters.expand = \"ToCustomer\";\n}"
+        },
+        {
+          "title": "A custom column with full p13nData",
+          "language": "xml",
+          "code": "<smartTable:SmartTable\n  id=\"smartTable\"\n  entitySet=\"Products\"\n  tableType=\"ResponsiveTable\"\n  smartFilterId=\"smartFilterBar\"\n  useTablePersonalisation=\"true\"\n  persistencyKey=\"ProductsTable\"\n  useExportToExcel=\"true\"\n  ignoreFromPersonalisation=\"TechnicalField\"\n  enableAutoBinding=\"false\"\n  beforeRebindTable=\".onBeforeRebindTable\">\n  <Table id=\"innerTable\">\n    <columns>\n      <Column id=\"statusColumn\"\n        app:p13nData='\\{\"columnKey\":\"StatusCol\",\"leadingProperty\":\"Status\",\"additionalProperty\":\"StatusText\",\"sortProperty\":\"Status\",\"filterProperty\":\"Status\",\"columnIndex\":\"3\"}'>\n        <Text text=\"{i18n>status}\" />\n      </Column>\n    </columns>\n    <items>\n      <ColumnListItem>\n        <cells>\n          <ObjectStatus text=\"{StatusText}\" state=\"{path: 'Status', formatter: '.formatter.statusState'}\" />\n        </cells>\n      </ColumnListItem>\n    </items>\n  </Table>\n</smartTable:SmartTable>"
+        },
+        {
+          "title": "beforeRebindTable: the five use cases (TypeScript)",
+          "language": "typescript",
+          "code": "public onBeforeRebindTable(event: SmartTable$BeforeRebindTableEvent): void {\n  const params = event.getParameter(\"bindingParams\");\n\n  // 1. a mandatory filter the user cannot see or remove\n  params.filters.push(new Filter(\"CompanyCode\", FilterOperator.EQ, this.companyCode));\n\n  // 2. a default sorter\n  params.sorter.push(new Sorter(\"CreatedAt\", true));\n\n  // 3. $expand or custom URL parameters\n  params.parameters.expand = \"Supplier,Category\";\n  params.parameters.custom = { myBackendFlag: \"X\" };\n\n  // 4. a custom filter field of the filter bar\n  const range = this.byId(\"dateRange\") as DateRangeSelection;\n  if (range.getDateValue()) {\n    params.filters.push(new Filter(\"Date\", FilterOperator.BT, range.getDateValue(), range.getSecondDateValue()));\n  }\n\n  // 5. busy state and error handling\n  params.events = {\n    dataRequested: () => this.getView().setBusy(true),\n    dataReceived: () => this.getView().setBusy(false)\n  };\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "smartfilterbar-annotations",
+      "level": "elementary",
+      "title": "What is the SmartFilterBar, and which annotations drive it (FilterRestrictions, FieldGroup, ValueList, Hidden)?",
+      "description": "sap.ui.comp.smartfilterbar.SmartFilterBar builds a filter bar for an OData V2 entitySet from metadata and annotations: it decides which filter fields exist, how each field behaves, and which value helps it offers. Capabilities.FilterRestrictions (or the V2 attributes sap:filterable, sap:required-in-filter and sap:filter-restriction) control filtering: NonFilterableProperties are not offered at all, RequiredProperties must be filled before searching (the field becomes mandatory), and FilterExpressionRestrictions limit a field to a single value, multiple single values, or a single interval (range). UI.SelectionFields lists the fields that are shown in the filter bar by default. UI.FieldGroup groups fields, and the groups appear as sections in the Adapt Filters dialog (the SmartFilterBar's groupConfiguration can also be used). Common.ValueList defines the value help of a field: which entity set provides the values (CollectionPath), which properties are shown in the help dialog, and which are copied back (In/Out parameters); with Common.ValueListWithFixedValues, the field becomes a dropdown instead of a dialog. UI.Hidden hides a property from the UI, so it does not appear as a filter field. Common.Label gives the filter label. FilterExpressionRestrictions decide which control the user gets: a single input, a multi-input with tokens, or a range control.",
+      "keyPoints": [
+        "SmartFilterBar builds filter fields for an entitySet from metadata and annotations.",
+        "FilterRestrictions: non-filterable, required, and single value / multi value / interval restrictions.",
+        "UI.SelectionFields: default visible fields; UI.FieldGroup: groups in the Adapt Filters dialog.",
+        "Common.ValueList: value help (fixed values = dropdown); UI.Hidden: the field is not offered.",
+        "FilterExpressionRestrictions decide the control: single input, multi-input with tokens, or range."
+      ],
+      "examples": [
+        {
+          "title": "Annotations for a filter bar (CDS syntax)",
+          "language": "text",
+          "code": "annotate service.SalesOrders with @(\n  UI.SelectionFields: [ SalesOrderID, Customer, Status, CreatedAt ],\n  Capabilities.FilterRestrictions: {\n    RequiredProperties: [ CompanyCode ],\n    NonFilterableProperties: [ Note ]\n  }\n);\n\nannotate service.SalesOrders with {\n  Status @Common.ValueListWithFixedValues\n         @Common.ValueList: {\n           CollectionPath: 'OrderStatuses',\n           Parameters: [\n             { $Type: 'Common.ValueListParameterInOut', LocalDataProperty: Status, ValueListProperty: 'Code' },\n             { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'Text' }\n           ]\n         };\n  InternalFlag @UI.Hidden;\n};"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "smartfilterbar-features",
+      "level": "elementary",
+      "title": "Which SmartFilterBar features should you know: custom filter items, Adapt Filters, variant management, and basic search?",
+      "description": "Beyond the annotation-based fields, the SmartFilterBar has several features. Custom filter items: when a filter needs a control the annotations cannot express, you add a ControlConfiguration to its controlConfiguration aggregation, with a key and your own customControl (for example a Select or a SegmentedButton); you then turn its value into filters yourself, typically in the linked SmartTable's beforeRebindTable event. A ControlConfiguration can also change an annotation field, for example its label, its position (index), or whether it is visible by default (visibleInAdvancedArea). Adapt Filters: the filter bar has an Adapt Filters button that opens a dialog where the user chooses which filter fields are shown, searches among all available fields, and enters values. Variant management: with useVariantManagement and a persistencyKey, users can save their filter values and visible fields as named variants, choose a default, and reuse them later; with considerSelectionVariants, UI.SelectionVariant annotations can provide predefined variants. Basic search: with enableBasicSearch=\"true\", a free-text search field is added, which sends the search custom query option to the service; this works only if the entity set supports it (sap:searchable). The search event fires when the user presses Go, and a linked SmartTable then rebinds automatically. There are two situations for custom filter items. A: the field exists in the entity set, but you want your own control (ControlConfiguration with that key and a customControl). B: the field does not exist in the entity set: add a ControlConfiguration with its own key and a groupId (like _BASIC), and read the value yourself in beforeRebindTable, because the filter bar has no metadata for it. Useful API: getFilterData() / setFilterData() (all values as an object), getFilters() (as Filter objects) and getBasicSearchValue(). To store the values of custom controls in variants, handle the beforeVariantFetch event (put the values into the filter data with setFilterData) and afterVariantLoad (read them back into your control). Adapt Filters is enabled with showFilterConfiguration (on by default); its button shows a counter, like Adapt Filters (3), for fields with values; visible=\"false\" on a ControlConfiguration removes a field completely. It matters because an entity can have 40 filterable fields: UI.SelectionFields gives a useful default, and Adapt Filters gives the rest on demand. For basic search, the value is sent as a search parameter (search= in OData V2, the standard $search in OData V4), not as $filter, and the back end decides which fields to search, so it is fuzzy and back-end-defined, while a filter is exact and front-end-defined. If the back end does not support search, the field does nothing.",
+      "keyPoints": [
+        "Custom filter items: ControlConfiguration with a customControl; convert its value into filters yourself.",
+        "ControlConfiguration also changes annotation fields (label, index, visibleInAdvancedArea).",
+        "Adapt Filters lets users choose and arrange filter fields; variants save filters (useVariantManagement + persistencyKey).",
+        "enableBasicSearch adds free-text search (needs sap:searchable); search fires on Go.",
+        "Custom field not in the entity set: ControlConfiguration with groupId, then turn its value into a filter in beforeRebindTable.",
+        "Custom values in variants: beforeVariantFetch (setFilterData) + afterVariantLoad (restore the control).",
+        "Basic search is sent as search=/$search, not $filter; the back end decides the fields."
+      ],
+      "examples": [
+        {
+          "title": "A custom filter item and basic search",
+          "language": "xml",
+          "code": "<smartFilterBar:SmartFilterBar\n  id=\"filterBar\"\n  entitySet=\"SalesOrders\"\n  enableBasicSearch=\"true\"\n  useVariantManagement=\"true\"\n  persistencyKey=\"ordersFilterVariants\">\n  <smartFilterBar:controlConfiguration>\n    <smartFilterBar:ControlConfiguration key=\"Status\" index=\"1\" visibleInAdvancedArea=\"true\" />\n    <smartFilterBar:ControlConfiguration key=\"priorityFilter\" label=\"Priority\" visibleInAdvancedArea=\"true\">\n      <smartFilterBar:customControl>\n        <Select id=\"prioritySelect\">\n          <core:Item key=\"\" text=\"All\" />\n          <core:Item key=\"H\" text=\"High\" />\n          <core:Item key=\"L\" text=\"Low\" />\n        </Select>\n      </smartFilterBar:customControl>\n    </smartFilterBar:ControlConfiguration>\n  </smartFilterBar:controlConfiguration>\n</smartFilterBar:SmartFilterBar>"
+        },
+        {
+          "title": "A custom filter field that is not in the entity set",
+          "language": "xml",
+          "code": "<smartFilterBar:SmartFilterBar id=\"smartFilterBar\" entitySet=\"Products\" persistencyKey=\"ProductsFilter\"\n  enableBasicSearch=\"true\" basicSearchFieldName=\"SearchTerm\"\n  beforeVariantFetch=\".onBeforeVariantFetch\" afterVariantLoad=\".onAfterVariantLoad\">\n  <smartFilterBar:controlConfiguration>\n    <smartFilterBar:ControlConfiguration key=\"DateRange\" label=\"{i18n>dateRange}\"\n      groupId=\"_BASIC\" index=\"1\" visibleInAdvancedArea=\"true\">\n      <smartFilterBar:customControl>\n        <DateRangeSelection id=\"dateRange\" />\n      </smartFilterBar:customControl>\n    </smartFilterBar:ControlConfiguration>\n  </smartFilterBar:controlConfiguration>\n</smartFilterBar:SmartFilterBar>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "smartfield-concepts",
+      "level": "elementary",
+      "title": "What is the SmartField: its annotations, field types, value help, and field control?",
+      "description": "sap.ui.comp.smartfield.SmartField is a single smart input or display field. You bind its value to an OData property, like value=\"{Price}\", and it chooses and creates the right inner control from the property's metadata. Field types: in edit mode, it becomes an Input for strings and numbers (with the right type and maximum length), a DatePicker or DateTimePicker for dates, a CheckBox for booleans, an Input with a unit field for amounts with a currency or unit (sap:unit or Measures annotations), and a ComboBox or Select for fields with fixed values; in display mode (editable=\"false\"), it shows a Text, a link, or an ObjectStatus. Its annotations: the label comes from sap:label or Common.Label, a description text from Common.Text (with TextArrangement), and validation from the type facets. Value help: if the property has a Common.ValueList annotation, the SmartField automatically adds a value help dialog with search and filters (and type-ahead suggestions); with ValueListWithFixedValues, a dropdown is shown instead. Field control: through sap:field-control or Common.FieldControl, a property's value decides at runtime whether the field is hidden, read-only, optional, or mandatory, and the SmartField applies this automatically. Settings like mandatory, editable, and the configuration aggregation (controlType) can override the defaults. More annotations it reads: Common.SemanticObject (renders a SmartLink), Measures.ISOCurrency and Measures.Unit (amount + currency or unit, displayed as an ObjectNumber), Core.Immutable (can be set on create, never changed) and Core.Computed (always set by the back end, so read-only), and a Criticality (displayed as a colored ObjectStatus). The configuration aggregation can also set displayBehaviour, like descriptionAndId. The value of one tag: the right control, formatting, validation and value help, instead of 20 or more lines per field.",
+      "keyPoints": [
+        "SmartField picks its inner control from the bound property's metadata.",
+        "Edit mode: Input, DatePicker, CheckBox, ComboBox/Select, amount + unit; display mode: Text, link, ObjectStatus.",
+        "Value help comes automatically from Common.ValueList (fixed values = dropdown).",
+        "Field control (sap:field-control / Common.FieldControl) hides it or makes it read-only, optional, or mandatory at runtime.",
+        "Also reads Measures.ISOCurrency/Unit, Core.Immutable/Computed, SemanticObject (SmartLink) and Criticality (ObjectStatus)."
+      ],
+      "examples": [
+        {
+          "title": "SmartFields in a view",
+          "language": "xml",
+          "code": "<VBox>\n  <smartField:SmartLabel labelFor=\"customerField\" />\n  <smartField:SmartField id=\"customerField\" value=\"{CustomerID}\" />   <!-- value help from Common.ValueList -->\n  <smartField:SmartField value=\"{OrderDate}\" />                       <!-- DatePicker -->\n  <smartField:SmartField value=\"{GrossAmount}\" />                     <!-- amount + currency -->\n  <smartField:SmartField value=\"{IsUrgent}\" />                        <!-- CheckBox -->\n</VBox>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "value-help-config",
+      "level": "elementary",
+      "title": "What is the value help concept, and how is it configured with Common.ValueList?",
+      "description": "A value help lets the user pick a valid value: a dropdown for short lists, or a dialog with its own filter bar and result table for long ones, plus type-ahead suggestions while typing. Smart controls and SAP Fiori elements configure it entirely through the Common.ValueList annotation on the property. CollectionPath names the entity set that provides the values, SearchSupported enables a search field in the dialog, and Parameters map value help properties to the fields of your entity. The parameter types are what reviewers ask about: ValueListParameterInOut (the field itself: its value filters the help, and the selected value is written back), ValueListParameterIn (a value from the form is passed into the help as a filter), ValueListParameterOut (the selected value is written into another field of the form), ValueListParameterDisplayOnly (only shown as a column in the help, not transferred), and ValueListParameterConstant (a fixed filter value). In parameters create dependent value helps: pick a company code first, and the plant value help only shows the plants of that company. With Common.ValueListWithFixedValues: true, a short, stable list becomes a dropdown that is loaded once. For huge lists, preventInitialDataFetchInValueHelpDialog=\"true\" (on a ControlConfiguration or a SmartField) stops the dialog from loading everything when it opens.",
+      "keyPoints": [
+        "Configured with Common.ValueList: CollectionPath (source entity set), SearchSupported, Parameters.",
+        "Parameter types: InOut (the field), In (filter from the form), Out (write to another field), DisplayOnly, Constant.",
+        "In parameters create dependent value helps (company code → plants of that company).",
+        "ValueListWithFixedValues → dropdown; preventInitialDataFetchInValueHelpDialog for very long lists."
+      ],
+      "examples": [
+        {
+          "title": "A value help with In and DisplayOnly parameters (CDS syntax)",
+          "language": "javascript",
+          "code": "annotate service.Products with {\n  CategoryID @Common.ValueList: {\n    CollectionPath : 'Categories',\n    SearchSupported: true,\n    Parameters     : [\n      { $Type: 'Common.ValueListParameterInOut',       LocalDataProperty: CategoryID,  ValueListProperty: 'ID' },\n      { $Type: 'Common.ValueListParameterDisplayOnly',                                 ValueListProperty: 'Name' },\n      { $Type: 'Common.ValueListParameterIn',          LocalDataProperty: CompanyCode, ValueListProperty: 'CompanyCode' }\n    ]\n  };\n\n  // short, stable list -> dropdown\n  Status @Common.ValueListWithFixedValues;\n};"
+        },
+        {
+          "title": "The same in an XML annotation file (OData V2)",
+          "language": "xml",
+          "code": "<Annotations Target=\"Service.Product/CategoryID\">\n  <Annotation Term=\"Common.ValueList\">\n    <Record>\n      <PropertyValue Property=\"CollectionPath\" String=\"CategorySet\"/>\n      <PropertyValue Property=\"SearchSupported\" Bool=\"true\"/>\n      <PropertyValue Property=\"Parameters\">\n        <Collection>\n          <Record Type=\"Common.ValueListParameterInOut\">\n            <PropertyValue Property=\"LocalDataProperty\" PropertyPath=\"CategoryID\"/>\n            <PropertyValue Property=\"ValueListProperty\" String=\"ID\"/>\n          </Record>\n          <Record Type=\"Common.ValueListParameterDisplayOnly\">\n            <PropertyValue Property=\"ValueListProperty\" String=\"Name\"/>\n          </Record>\n        </Collection>\n      </PropertyValue>\n    </Record>\n  </Annotation>\n</Annotations>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "smartform-concepts",
+      "level": "basic",
+      "title": "What is the SmartForm, and how do annotations affect it?",
+      "description": "sap.ui.comp.smartform.SmartForm is a form container for SmartFields, used for detail and edit screens. It is organized in Groups (sap.ui.comp.smartform.Group, with a label) that contain GroupElements, each holding one or more SmartFields (or other controls). The SmartForm gives you a lot for free: labels for every field from the metadata (sap:label or Common.Label), a responsive layout (with the layout aggregation, for example a ColumnLayout or a GridData-based Layout, so groups are arranged in columns), and edit handling: with editTogglable=\"true\" it shows an Edit button, and switching its editable property switches all SmartFields inside between display and edit mode at once. checkButton adds a check that validates all fields. The annotations act through the SmartFields: field types, value helps (Common.ValueList), texts and text arrangement, units and currencies, mandatory and read-only state through field control, and UI.Hidden for fields that must not be shown. In annotation-driven apps (like SAP Fiori elements object pages), the groups themselves come from UI.FieldGroup annotations, referenced by UI.Facets, so the form content is defined in the back end rather than in the view. It also offers smartForm.check() and checkClientSideValidation() to validate all fields of the form at once, and flexEnabled=\"true\" for UI adaptation, so a key user can move or hide fields without a developer.",
+      "keyPoints": [
+        "SmartForm = Groups > GroupElements > SmartFields.",
+        "Labels, responsive layout, and one Edit toggle (editTogglable / editable) for all fields.",
+        "Annotations work through the SmartFields: types, value helps, texts, units, field control, UI.Hidden.",
+        "In annotation-driven apps, groups come from UI.FieldGroup (referenced by UI.Facets).",
+        "check() / checkClientSideValidation() validate the whole form; flexEnabled=\"true\" allows key user adaptation."
+      ],
+      "examples": [
+        {
+          "title": "A SmartForm",
+          "language": "xml",
+          "code": "<smartForm:SmartForm\n  id=\"orderForm\"\n  title=\"{SalesOrderID}\"\n  editTogglable=\"true\"\n  editable=\"false\">\n  <smartForm:layout>\n    <smartForm:ColumnLayout columnsM=\"2\" columnsL=\"2\" columnsXL=\"3\" />\n  </smartForm:layout>\n  <smartForm:Group label=\"General\">\n    <smartForm:GroupElement>\n      <smartField:SmartField value=\"{CustomerID}\" />\n    </smartForm:GroupElement>\n    <smartForm:GroupElement>\n      <smartField:SmartField value=\"{OrderDate}\" />\n    </smartForm:GroupElement>\n  </smartForm:Group>\n  <smartForm:Group label=\"Amounts\">\n    <smartForm:GroupElement>\n      <smartField:SmartField value=\"{GrossAmount}\" />\n    </smartForm:GroupElement>\n  </smartForm:Group>\n</smartForm:SmartForm>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "dynamic-field-control-ui-hidden",
+      "level": "basic",
+      "title": "What is the dynamic field control concept, and what does the UI.Hidden annotation do?",
+      "description": "Dynamic field control means the back end decides, for each record and at runtime, how a field behaves in the UI, instead of the UI hard-coding it. For example, a discount field may be editable only while an order is in status New, and mandatory for certain customers. In OData V2, a property gets sap:field-control=\"DiscountFC\", and in the vocabulary-based annotations Common.FieldControl: DiscountFC (a path), pointing to another property that holds a number: 0 means hidden (in newer guidance, Inapplicable), 1 read-only, 3 optional (editable), and 7 mandatory. The service computes this number per entity, and smart controls and SAP Fiori elements apply it automatically, so the field changes its state when the data changes. Common.FieldControl can also be a fixed value, like #ReadOnly or #Mandatory, for static cases. UI.Hidden is a separate annotation that removes a field (or an action) from the UI completely. It can be static (UI.Hidden: true, for technical fields that should never be shown), or dynamic, with a path to a boolean property (UI.Hidden: IsHidden), so the field is hidden for some records only. The difference: field control describes how an existing field behaves (read-only, mandatory...), while UI.Hidden decides whether it appears at all. The control property (like DiscountReason_fc) is usually of type Edm.Byte, filled by the back end per record. Typical use cases are status-dependent editing (editable while draft, read-only after approval), conditionally mandatory fields (a reason is mandatory only when the status is Rejected), authorization-based read-only fields, and business rules the front end does not know, so they cannot drift out of sync. To keep it correct while the user edits, you need side effects: when the status changes, the control values must be read again. UI.Hidden can be put on a property (hides the field or column), on a DataFieldForAction (hides the button), or on a facet (hides a whole object page section); FieldControl 0 also hides the field, while 1 shows it read-only. The important sentence for the review: field control and UI.Hidden are convenience, not security. The data is still in the payload, so real authorization must be enforced in the back end. In OData V4, the same exists with Common.FieldControl paths, and @Core.OperationAvailable controls actions.",
+      "keyPoints": [
+        "Dynamic field control: the back end sets a field's behavior per record at runtime.",
+        "sap:field-control / Common.FieldControl points to a property: 0 hidden, 1 read-only, 3 optional, 7 mandatory.",
+        "Static values (#ReadOnly, #Mandatory) are also possible.",
+        "UI.Hidden removes a field or action from the UI, statically (true) or per record (path to a boolean).",
+        "Use cases: status-dependent editing, conditional mandatory, authorization-based read-only.",
+        "Not security: the data is still in the payload; enforce authorization in the back end. Keep control values fresh with side effects."
+      ],
+      "examples": [
+        {
+          "title": "Field control and UI.Hidden (CDS syntax)",
+          "language": "text",
+          "code": "annotate service.SalesOrders with {\n  // 1 = read-only, 3 = editable, 7 = mandatory, computed by the service per order\n  Discount     @Common.FieldControl: DiscountFieldControl;\n  // never shown in the UI\n  TechnicalKey @UI.Hidden;\n  // hidden only for some orders\n  CreditLimit  @UI.Hidden: IsCreditLimitHidden;\n};"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "smartfield-side-effects",
+      "level": "basic",
+      "title": "What are side effects for smart fields?",
+      "description": "A side effect describes that changing one value on the screen affects other values that must then be reloaded from the server. For example, changing the quantity of an order item changes its net amount, and the order's total; changing the customer may change the delivery address. Without side effects, the UI would still show the old totals until the page is reloaded. The Common.SideEffects annotation declares this on an entity type: SourceProperties (or SourceEntities) are the triggers, like Quantity, and TargetProperties (or TargetEntities) are what must be refreshed, like NetAmount and the navigation to the order header; optionally, a TriggerAction names a function import that the server should run first (for example to recalculate). Smart controls and SAP Fiori elements (in V2 mostly together with draft handling) read this annotation: when the user changes a source field and leaves it, the framework sends the change and then requests the target properties again, so the dependent values update on the screen right away. Side effects keep the calculation logic in the back end, in one place, instead of duplicating it in the UI. Side effects fire when the user leaves the source field. If several source fields belong to one field group, the side effect fires once when the user leaves the whole group, which saves back-end round trips. Typical cases: quantity → recalculate total, tax and discount; country → reload the region value help; status → refresh field control values; currency → convert amounts. The concept is identical in OData V4 and SAP Fiori elements V4, so it is directly useful in daily work.",
+      "keyPoints": [
+        "A side effect: changing a value requires other values to be reloaded (totals, dependent fields).",
+        "Common.SideEffects: SourceProperties/SourceEntities trigger, TargetProperties/TargetEntities are refreshed.",
+        "Optional TriggerAction: a function import the server runs first.",
+        "Smart controls / Fiori elements send the change and reload the targets automatically; the logic stays in the back end.",
+        "Fires when the user leaves the source field (once per field group); same concept in OData V4 / Fiori elements V4."
+      ],
+      "examples": [
+        {
+          "title": "A SideEffects annotation (CDS syntax)",
+          "language": "text",
+          "code": "annotate service.SalesOrderItems with @(\n  Common.SideEffects #QuantityChanged: {\n    SourceProperties: [ Quantity, UnitPrice ],\n    TargetProperties: [ NetAmount ],\n    TargetEntities:   [ ToSalesOrder ]   // refresh the order header totals too\n  }\n);"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

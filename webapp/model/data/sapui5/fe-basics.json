@@ -1,0 +1,348 @@
+{
+  "topicId": "fe-basics",
+  "title": "FE: The basics",
+  "questions": [
+    {
+      "id": "fe-purpose",
+      "level": "elementary",
+      "title": "What is the purpose of SAP Fiori elements, and what are its use cases?",
+      "description": "SAP Fiori elements is a framework that generates complete SAP Fiori apps from metadata instead of from hand-written UI code. The app's UI is described by the OData service's metadata and annotations (which fields to show in a table, which are filter fields, how the object page is structured) and by a few settings in manifest.json; the framework provides ready-made page types, called floorplans, that render these descriptions: the list report, the object page, the overview page, the analytical list page, and the worklist. Its purpose is to build standard business apps fast and consistently: every app automatically follows the SAP Fiori design guidelines, has the same behavior (filtering, variants, draft handling, messages, navigation, responsiveness, accessibility, theming), and gets new framework features and fixes with UI5 updates, with very little code to maintain. Typical use cases are the classic transactional and analytical apps: searching and filtering a list of business objects and showing or editing their details (manage sales orders, products, purchase requisitions), worklists of items to process, and overview dashboards made of cards. When a requirement goes beyond what annotations can describe, apps can be extended at defined extension points; when the UI is completely non-standard, a freestyle UI5 app is the better choice.",
+      "keyPoints": [
+        "Fiori elements generates apps from OData metadata, annotations, and manifest settings.",
+        "Floorplans: list report, object page, overview page, analytical list page, worklist.",
+        "Benefits: fast, consistent Fiori design and behavior, little code, features and fixes through UI5 updates.",
+        "Use cases: standard transactional and analytical apps; extend at extension points, or go freestyle for non-standard UIs."
+      ],
+      "examples": [
+        {
+          "title": "A Fiori elements V2 app is mostly configuration",
+          "language": "json",
+          "code": "{\n  \"sap.ui.generic.app\": {\n    \"pages\": [\n      {\n        \"entitySet\": \"C_SalesOrder\",\n        \"component\": {\n          \"name\": \"sap.suite.ui.generic.template.ListReport\",\n          \"list\": true,\n          \"settings\": {\n            \"smartVariantManagement\": true,\n            \"tableType\": \"ResponsiveTable\",\n            \"multiSelect\": true\n          }\n        },\n        \"pages\": [\n          {\n            \"entitySet\": \"C_SalesOrder\",\n            \"component\": {\n              \"name\": \"sap.suite.ui.generic.template.ObjectPage\"\n            }\n          }\n        ]\n      }\n    ]\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-floorplans-generations",
+      "level": "elementary",
+      "title": "Which floorplans exist, when do you use each, and what are the V2 and V4 generations of Fiori elements?",
+      "description": "List Report: the most common floorplan, a filter bar on top and a table below; users search through many objects (sales orders, products, invoices) and click through to the detail. Object Page: the detail of one object, with a header of key information, an anchor bar, and sections built from field groups and tables of related items; it is the target of a list report and the place for editing. Worklist: a list without the filter bar, pre-filtered to the things assigned to me that need action, for approval and task inboxes where the user does not search. Analytical List Page (ALP): a chart and a table over the same data with a shared filter bar; users switch between visual and tabular views, drill down and filter by clicking chart segments, for analysis like spend by category. Overview Page (OVP): a page of cards, each with its own data source (list, chart, KPI, link list); it is the landing page of a business area, not a working screen. Form Entry Object Page: an object page in create mode, when the task is \"enter one new record\". In a CAP project you normally build a List Report + Object Page pair, which the SAP Fiori tools generator scaffolds in one step. There are two generations: for OData V2 the library sap.suite.ui.generic.template, with extension points and controller extensions and annotations from an XML file or sap: attributes; for OData V4 the library sap.fe.templates, with building blocks (sap.fe.macros), the flexible programming model, and CDS annotations with standard vocabularies. New development, and anything on CAP, uses V4 and sap.fe. Compared with smart controls, the difference is scope: a SmartTable generates one control, while Fiori elements generates the whole app, including the routing between pages, draft handling, messages and variant management.",
+      "keyPoints": [
+        "List Report (search many objects), Object Page (detail/edit), Worklist (my tasks, no filter bar).",
+        "ALP (chart + table for analysis), OVP (card dashboard, landing page), Form Entry Object Page (create one record).",
+        "V2: sap.suite.ui.generic.template, extension points; V4: sap.fe.templates, macros, flexible programming model.",
+        "New and CAP-based apps use V4; a typical CAP app is List Report + Object Page."
+      ],
+      "examples": [
+        {
+          "title": "How a V4 app is generated at runtime",
+          "language": "text",
+          "code": "CDS model + annotations  ->  Fiori elements template  ->  running application\n\nmanifest.json names a template target (sap.fe.templates.ListReport)\n  -> the template loads\n  -> reads the entity set's annotations from the MetaModel\n  -> builds the filter bar, table, header, sections\n  -> binds them and requests the data"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-annotations-overview",
+      "level": "elementary",
+      "title": "Which annotations drive a Fiori elements app?",
+      "description": "The same vocabulary as smart controls, applied to the whole app. UI.LineItem defines the columns of the list report table, UI.SelectionFields the fields of the filter bar, UI.HeaderInfo the object page header (type name, title, description, image), UI.Facets the sections of the object page, UI.FieldGroup a group of fields inside a section, UI.Identification the main actions and fields of the header area, UI.DataPoint a single value with criticality, target and trend (for KPIs), UI.Chart the chart of an ALP or an OVP card, UI.PresentationVariant the default sorting and grouping (and chart/table default), and UI.SelectionVariant default filter values. Common.Label gives field labels, Common.Text with TextArrangement a code plus description, Common.ValueList the value help, Common.SideEffects the refresh of dependent fields, Common.FieldControl read-only / mandatory / hidden per record, Capabilities.* what the service allows (filter, sort, insert, update, delete), and UI.Hidden hides a field, action or facet. The important structural point: UI.Facets is what creates the object page sections. A ReferenceFacet pointing to a FieldGroup becomes a form section, one pointing to a related entity's LineItem becomes a table section, and a CollectionFacet groups several facets into one section with subsections. In CAP you write all of this as CDS annotations, which is far more readable than the XML form.",
+      "keyPoints": [
+        "List report: UI.LineItem (columns), UI.SelectionFields (filters), PresentationVariant / SelectionVariant (defaults).",
+        "Object page: UI.HeaderInfo (header), UI.Facets (sections), UI.FieldGroup, UI.Identification, UI.DataPoint.",
+        "Common.Label / Text / ValueList / SideEffects / FieldControl; Capabilities.*; UI.Hidden.",
+        "ReferenceFacet → FieldGroup = form section; → items/@UI.LineItem = table section; CollectionFacet = subsections."
+      ],
+      "examples": [
+        {
+          "title": "A list report and object page in CDS annotations",
+          "language": "javascript",
+          "code": "annotate ProductService.Products with @(\n  UI: {\n    HeaderInfo: {\n      TypeName       : 'Product',\n      TypeNamePlural : 'Products',\n      Title          : { Value: name },\n      Description    : { Value: category.name }\n    },\n    SelectionFields: [ category_ID, price, status ],\n    LineItem: [\n      { Value: name,          Label: 'Product'  },\n      { Value: category.name, Label: 'Category' },\n      { Value: price,         Label: 'Price'    },\n      { Value: status,        Criticality: statusCriticality },\n      { $Type: 'UI.DataFieldForAction', Action: 'ProductService.approve', Label: 'Approve' }\n    ],\n    Facets: [\n      { $Type: 'UI.ReferenceFacet', Label: 'General', Target: '@UI.FieldGroup#General' },\n      { $Type: 'UI.ReferenceFacet', Label: 'Items',   Target: 'items/@UI.LineItem' }\n    ],\n    FieldGroup #General: {\n      Data: [ { Value: name }, { Value: description }, { Value: price } ]\n    }\n  }\n);\n\nannotate ProductService.Products with {\n  name     @Common.Label: 'Product Name';\n  category @Common.Text: category.name\n           @Common.ValueList: { entity: 'Categories', type: #fixed };\n};"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-v4-manifest",
+      "level": "elementary",
+      "title": "How is a Fiori elements V4 app configured in manifest.json?",
+      "description": "There are no view files. The routing targets name a template component instead, and the configuration goes into the target's options/settings. The parts to know: type \"Component\" and name \"sap.fe.templates.ListReport\" (or ObjectPage), which make the target a template component; contextPath (entitySet in older apps), which says which entity the page is about; navigation, which says how the list navigates to the object page; variantManagement (Page, Control or None); and controlConfiguration, the main tuning knob, with settings per annotation term, like the table type, selection mode and personalization for @com.sap.vocabularies.UI.v1.LineItem, or custom filter fields for SelectionFields. The OData V4 model is usually declared with autoExpandSelect and earlyRequests. Everything else, the views, the controllers, the bindings, does not exist in your project; that is the point.",
+      "keyPoints": [
+        "Targets: type \"Component\", name \"sap.fe.templates.ListReport\" / \"ObjectPage\", no view files.",
+        "settings.contextPath (older: entitySet) and navigation (list → object page route).",
+        "variantManagement: Page | Control | None.",
+        "controlConfiguration per annotation term: tableSettings (type, selectionMode, personalization), filterFields."
+      ],
+      "examples": [
+        {
+          "title": "Routing and settings of a V4 list report + object page",
+          "language": "json",
+          "code": "\"routing\": {\n  \"routes\": [\n    { \"name\": \"ProductsList\",   \"pattern\": \":?query:\",                \"target\": \"ProductsList\" },\n    { \"name\": \"ProductsObject\", \"pattern\": \"Products({key}):?query:\", \"target\": \"ProductsObject\" }\n  ],\n  \"targets\": {\n    \"ProductsList\": {\n      \"type\": \"Component\",\n      \"id\": \"ProductsList\",\n      \"name\": \"sap.fe.templates.ListReport\",\n      \"options\": {\n        \"settings\": {\n          \"contextPath\": \"/Products\",\n          \"variantManagement\": \"Page\",\n          \"initialLoad\": \"Enabled\",\n          \"navigation\": {\n            \"Products\": { \"detail\": { \"route\": \"ProductsObject\" } }\n          },\n          \"controlConfiguration\": {\n            \"@com.sap.vocabularies.UI.v1.LineItem\": {\n              \"tableSettings\": {\n                \"type\": \"ResponsiveTable\",\n                \"selectionMode\": \"Multi\",\n                \"personalization\": { \"column\": true, \"sort\": true, \"filter\": true }\n              }\n            }\n          }\n        }\n      }\n    },\n    \"ProductsObject\": {\n      \"type\": \"Component\",\n      \"id\": \"ProductsObject\",\n      \"name\": \"sap.fe.templates.ObjectPage\",\n      \"options\": {\n        \"settings\": {\n          \"contextPath\": \"/Products\",\n          \"editableHeaderContent\": false,\n          \"sectionLayout\": \"Tabs\"\n        }\n      }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-ui-model",
+      "level": "elementary",
+      "title": "What is the standard \"ui\" model in a Fiori elements app?",
+      "description": "Every Fiori elements (V2) app provides a JSON model named ui that describes the current UI state of the page, so that annotations, fragments from extensions, and expression bindings can react to it. Its main properties are /editable (true when the object page is in edit mode, for example while a draft is being edited, and false in display mode), /createMode (true while a new object is being created), and /enabled (false while the page is busy, for example during a request). Fiori elements itself uses this model to switch fields between display and edit, and to show buttons only in the right mode. App developers mainly use it in extensions: a custom field or button added through an extension point can bind to it, for example visible=\"{ui>/editable}\" to show a button only in edit mode, or editable=\"{ui>/editable}\" to make a custom input follow the page's mode. It should be treated as read-only by app code: the mode is changed by the framework's own actions (Edit, Save, Cancel), not by setting the model's properties. Note that this describes Fiori elements for OData V2; the V4 version (sap.fe) has a similar ui model with different properties, like /editMode and /isEditable.",
+      "keyPoints": [
+        "Fiori elements provides a JSON model named ui with the page's UI state.",
+        "Main properties: /editable (edit vs display), /createMode (creating a new object), /enabled (not busy).",
+        "Extensions bind to it, like visible=\"{ui>/editable}\", to follow the page's mode.",
+        "Treat it as read-only; the mode is changed by the framework's Edit / Save / Cancel actions."
+      ],
+      "examples": [
+        {
+          "title": "A custom button that is visible only in edit mode",
+          "language": "xml",
+          "code": "<core:FragmentDefinition xmlns=\"sap.m\" xmlns:core=\"sap.ui.core\">\n  <Button\n    text=\"{i18n>recalculate}\"\n    visible=\"{ui>/editable}\"\n    enabled=\"{ui>/enabled}\"\n    press=\".onRecalculate\" />\n</core:FragmentDefinition>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-actions",
+      "level": "elementary",
+      "title": "How are actions configured in the Fiori elements floorplans?",
+      "description": "Actions are the buttons that let users do something with the data. Fiori elements has two kinds. Generic (standard) actions come from the framework automatically, based on the service's capabilities: Create and Delete in the list report table toolbar, Edit, Delete, Save, and Cancel on the object page, plus Copy (when an action is annotated as a copy action), Share, and table personalization and export. They are hidden or disabled with annotations, for example UI.CreateHidden, UI.DeleteHidden, UI.UpdateHidden, or with the restrictions of the service (sap:creatable, sap:deletable, sap:updatable, or Capabilities annotations). Application-specific actions are the service's own function imports (or bound actions), added with annotations: a UI.DataFieldForAction record in UI.LineItem puts the action into the table toolbar (with Inline=true, as a button in each row), in UI.Identification it appears in the object page header, and in a UI.FieldGroup it appears in a form section. With Determining=true, it becomes a determining action in the footer. Actions that do not exist in the service, or need UI logic, are added as custom actions through the manifest's extension points (sap.ui.controllerExtensions with Actions), implemented in a controller extension. Critical actions can ask for confirmation (Common.IsActionCritical), and context-dependent actions are enabled per object with an applicable-path.",
+      "keyPoints": [
+        "Generic actions (Create, Edit, Delete, Save, Copy, Share...) come from the framework and the service capabilities.",
+        "Hide them with UI.CreateHidden / UI.DeleteHidden / UI.UpdateHidden or service restrictions.",
+        "App-specific actions: UI.DataFieldForAction in LineItem (toolbar or Inline per row), Identification (header), FieldGroup (form); Determining for the footer.",
+        "Custom actions without a service operation: manifest extension + controller extension."
+      ],
+      "examples": [
+        {
+          "title": "Annotating actions for the table and the header",
+          "language": "xml",
+          "code": "<Annotations Target=\"SALESORDER_SRV.C_SalesOrderType\">\n  <Annotation Term=\"UI.LineItem\">\n    <Collection>\n      <Record Type=\"UI.DataField\">\n        <PropertyValue Property=\"Value\" Path=\"SalesOrderID\" />\n      </Record>\n      <Record Type=\"UI.DataFieldForAction\">\n        <PropertyValue Property=\"Label\" String=\"Approve\" />\n        <PropertyValue Property=\"Action\" String=\"SALESORDER_SRV.SALESORDER_SRV_Entities/Approve\" />\n      </Record>\n    </Collection>\n  </Annotation>\n  <Annotation Term=\"UI.Identification\">\n    <Collection>\n      <Record Type=\"UI.DataFieldForAction\">\n        <PropertyValue Property=\"Label\" String=\"Release\" />\n        <PropertyValue Property=\"Action\" String=\"SALESORDER_SRV.SALESORDER_SRV_Entities/Release\" />\n      </Record>\n    </Collection>\n  </Annotation>\n</Annotations>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-messages",
+      "level": "elementary",
+      "title": "How are messages (transient and state messages) handled on the list report and the object page?",
+      "description": "Fiori elements shows the messages that come from the back end automatically, using UI5's central message handling. There are two kinds. Transient messages belong to one moment, typically the result of an action or a save (\"Sales order 4711 was released\", or an error that the action failed). They are sent once and are not kept: Fiori elements shows them right away, a single success message as a message toast, and errors or several messages in a message dialog. State messages describe the current state of data, for example a validation error on a field of a draft (\"Quantity must be greater than 0\"). They stay as long as the problem exists: on the object page, they are shown with the affected fields (value states) and in the message popover, opened from the message button in the footer, from where the user can jump to the field; when the problem is fixed and the data is sent again, the message disappears. In OData V2, back ends send messages in the sap-message header (as transient messages or bound to targets) and in error responses. On the list report, messages mainly appear for actions on table items (as dialogs or toasts). Apps can adapt transient messages before they are shown with the adaptTransientMessageExtension controller extension method, and add their own messages through Messaging.",
+      "keyPoints": [
+        "Back-end messages are shown automatically via UI5's central message handling.",
+        "Transient messages (results of actions or saves) are shown once: toast for single success, dialog otherwise.",
+        "State messages (like draft validation errors) stay, shown on fields and in the footer's message popover.",
+        "V2 sends them in the sap-message header and error responses; adaptTransientMessageExtension adapts transient ones."
+      ],
+      "examples": [
+        {
+          "title": "Adapting transient messages in a controller extension",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/ui/core/mvc/ControllerExtension\",\n  \"sap/ui/core/Messaging\"\n], function (ControllerExtension, Messaging) {\n  \"use strict\";\n  return {\n    // registered for sap.suite.ui.generic.template.ObjectPage.view.Details\n    adaptTransientMessageExtension: function () {\n      Messaging.getMessageModel().getData().forEach(function (message) {\n        if (message.getCode() === \"ZSD/012\") {\n          message.setMessage(\"The order was released and the customer has been notified.\");\n        }\n      });\n    }\n  };\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-flexible-column-layout",
+      "level": "elementary",
+      "title": "How is the flexible column layout enabled in a Fiori elements app?",
+      "description": "By default, a Fiori elements V2 app shows the list report and the object page as separate full-screen pages. With the flexible column layout (FCL), they can be shown side by side: the list report in the first column, the object page of the selected item in the second, and a subobject page in the third, so users can switch between items without leaving the list. It is enabled for the whole app in manifest.json, in the settings of sap.ui.generic.app: add a flexibleColumnLayout object with defaultTwoColumnLayoutType (the layout when two columns are shown, like TwoColumnsMidExpanded or TwoColumnsBeginExpanded) and defaultThreeColumnLayoutType (like ThreeColumnsMidExpanded or ThreeColumnsEndExpanded). These values are the layout types of the sap.f.FlexibleColumnLayout control. Once enabled, Fiori elements handles the columns, the full-screen and close buttons in the object page header, and the navigation automatically. Note that a list report with the FCL should not use features that only make sense in full screen, and on smaller screens fewer columns are shown automatically.",
+      "keyPoints": [
+        "The FCL shows the list report, object page, and subobject page side by side in up to three columns.",
+        "Enabled in manifest.json under sap.ui.generic.app/settings/flexibleColumnLayout.",
+        "defaultTwoColumnLayoutType and defaultThreeColumnLayoutType take sap.f.LayoutType values.",
+        "Fiori elements then handles columns, full-screen/close buttons, and navigation automatically."
+      ],
+      "examples": [
+        {
+          "title": "Enabling the flexible column layout",
+          "language": "json",
+          "code": "{\n  \"sap.ui.generic.app\": {\n    \"settings\": {\n      \"flexibleColumnLayout\": {\n        \"defaultTwoColumnLayoutType\": \"TwoColumnsMidExpanded\",\n        \"defaultThreeColumnLayoutType\": \"ThreeColumnsEndExpanded\"\n      }\n    },\n    \"pages\": []\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-header-variants",
+      "level": "elementary",
+      "title": "How does a Fiori elements app adopt its header (title) and manage variants?",
+      "description": "The header of a list report shows either variant management or a title. By default, the list report header contains variant management: the page's title area is a variant selector, where users save the current filter values and table settings (columns, sorting, grouping) as named views, choose a default, and share them. With smartVariantManagement: true in the list report settings (the default in newer apps), this is page-level variant management: one variant stores the filter bar and the table together. With it set to false, the filter bar and the table each have their own control-level variant management. If an app does not need variants, setting variantManagementHidden: true removes it, and the app's title is shown instead; a custom title can then be provided with the i18n key subTitleIfVariantMgmtHidden. On the object page, the header is built from the UI.HeaderInfo annotation of the entity (TypeName, Title, Description, and an image), and tables in object page sections can also get control-level variant management. Inside the SAP Fiori launchpad, the shell bar above the page shows the app title and the back button.",
+      "keyPoints": [
+        "The list report header shows variant management (saved views of filters and table settings) or a title.",
+        "smartVariantManagement: true = page-level variants; false = separate filter and table variants.",
+        "variantManagementHidden: true shows the app title instead; subTitleIfVariantMgmtHidden (i18n) sets a custom title.",
+        "The object page header comes from UI.HeaderInfo (TypeName, Title, Description, image)."
+      ],
+      "examples": [
+        {
+          "title": "List report without variant management",
+          "language": "json",
+          "code": "{\n  \"sap.ui.generic.app\": {\n    \"pages\": [\n      {\n        \"entitySet\": \"C_SalesOrder\",\n        \"component\": {\n          \"name\": \"sap.suite.ui.generic.template.ListReport\",\n          \"list\": true,\n          \"settings\": {\n            \"variantManagementHidden\": true\n          }\n        }\n      }\n    ]\n  }\n}"
+        },
+        {
+          "title": "A custom title in the i18n file",
+          "language": "properties",
+          "code": "subTitleIfVariantMgmtHidden=Sales Orders to Review"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-responsiveness-images",
+      "level": "elementary",
+      "title": "How do the responsiveness options (UI.Importance) and the handling of images and initials work?",
+      "description": "Fiori elements tables and headers adapt to the screen size automatically, but they need to know what is important. The annotation com.sap.vocabularies.UI.v1.Importance gives a field a priority: UI.ImportanceType/High, Medium or Low. It is added to DataField records, for example in UI.LineItem. In a responsive table, columns with high importance stay visible as columns on small screens, while less important ones move into the pop-in area or are hidden; similar rules apply to header facets and data points on the object page. So every line item should mark its one or two key columns with High importance. Images are shown from annotations too. On the object page header, UI.HeaderInfo/ImageUrl points to a property holding the image URL of the object (like a product picture), and TypeImageUrl gives a generic icon or image for the object type. If no image is available, the header can show initials instead, configured with HeaderInfo.Initials, such as the initials of a person's name. In tables, a column shows an image when its property is annotated with UI.IsImageUrl (the value is a URL), and users can enlarge it.",
+      "keyPoints": [
+        "UI.Importance (High, Medium, Low) on DataFields tells responsive tables and headers what to keep on small screens.",
+        "High-importance columns stay; others move into the pop-in or are hidden.",
+        "Object page images: HeaderInfo/ImageUrl (object image), TypeImageUrl (type icon), Initials as a fallback.",
+        "Table images: annotate the URL property with UI.IsImageUrl."
+      ],
+      "examples": [
+        {
+          "title": "Importance and header image annotations",
+          "language": "xml",
+          "code": "<Annotations Target=\"PRODUCT_SRV.C_ProductType\">\n  <Annotation Term=\"UI.LineItem\">\n    <Collection>\n      <Record Type=\"UI.DataField\">\n        <PropertyValue Property=\"Value\" Path=\"ProductID\" />\n        <Annotation Term=\"UI.Importance\" EnumMember=\"UI.ImportanceType/High\" />\n      </Record>\n      <Record Type=\"UI.DataField\">\n        <PropertyValue Property=\"Value\" Path=\"Description\" />\n        <Annotation Term=\"UI.Importance\" EnumMember=\"UI.ImportanceType/Low\" />\n      </Record>\n    </Collection>\n  </Annotation>\n  <Annotation Term=\"UI.HeaderInfo\">\n    <Record>\n      <PropertyValue Property=\"TypeName\" String=\"Product\" />\n      <PropertyValue Property=\"TypeNamePlural\" String=\"Products\" />\n      <PropertyValue Property=\"ImageUrl\" Path=\"ProductPictureURL\" />\n      <PropertyValue Property=\"Title\">\n        <Record Type=\"UI.DataField\">\n          <PropertyValue Property=\"Value\" Path=\"ProductName\" />\n        </Record>\n      </PropertyValue>\n    </Record>\n  </Annotation>\n</Annotations>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-smart-table-basics",
+      "level": "basic",
+      "title": "What are the basic concepts of the smart tables in Fiori elements: toolbar actions, draft indicators, table types, row navigation, and item actions?",
+      "description": "Tables in Fiori elements V2 are smart tables generated from UI.LineItem. Toolbar: the table toolbar shows the title (with the number of items), generic actions like Create, Delete, export, and table personalization, plus app actions from UI.DataFieldForAction. Draft values: in draft-enabled apps, the list report's filter bar offers the Editing Status filter (all, own drafts, locked by another user, unsaved changes by another user...), so users can show or hide drafts in the result. Editing status in the first column: in a responsive table, the first column (the semantic key, like the order number) shows the editing status of each row, for example Draft, Locked by, or Unsaved Changes by, with a popover for details. Table types: the same LineItem can be rendered as a responsive table (sap.m.Table, the default, with pop-in for small screens), a grid table (sap.ui.table.Table, for many rows and columns, with horizontal scrolling), an analytical table (for aggregated, grouped data from an analytical service) or a tree table (hierarchical data, read-only); the type is set with tableType in the page settings. Navigation at row level: if the entity has an object page, each row is clickable and navigates to it (the chevron in responsive tables). Item-level actions: a DataFieldForAction with Inline=true puts an action button into each row, acting on that row.",
+      "keyPoints": [
+        "Toolbar: title with count, Create/Delete, export, personalization, and app actions.",
+        "Draft apps: the Editing Status filter shows or hides drafts; the first column shows each row's editing status.",
+        "tableType: ResponsiveTable (default), GridTable, AnalyticalTable (aggregated data), TreeTable (hierarchies, read-only).",
+        "Rows navigate to the object page; Inline=true DataFieldForAction adds an action button per row."
+      ],
+      "examples": [
+        {
+          "title": "Choosing the table type",
+          "language": "json",
+          "code": "{\n  \"entitySet\": \"C_SalesOrder\",\n  \"component\": {\n    \"name\": \"sap.suite.ui.generic.template.ListReport\",\n    \"list\": true,\n    \"settings\": {\n      \"tableType\": \"GridTable\",\n      \"multiSelect\": true\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-draft-handling",
+      "level": "basic",
+      "title": "What are the principles of draft handling in Fiori elements: editing status and inconsistent input?",
+      "description": "A draft is an interim, server-side copy of a business object that the user is editing, saved automatically in the back end while they work. When the user presses Edit, the back end creates a draft of the active object (or, for Create, a new draft), and the object page switches to edit mode on the draft. Every change is sent to the back end right away (field by field, when the user leaves a field), so nothing is lost if the browser is closed, and the back end can validate and calculate values immediately (side effects). Pressing Save activates the draft: the back end checks it completely and replaces the active version with it; Cancel (or Discard Draft) deletes it. The draft also locks the object, so other users cannot edit it at the same time. The editing status describes this for each object: active (no draft), Draft (your own draft), Locked by another user (someone else is editing it), Unsaved changes by another user (someone's draft whose lock has expired, which you can take over). Inconsistent input is a key benefit of drafts: the user can save intermediate, even invalid, values in the draft (like an incomplete address), and the back end returns state messages for them; only activation (Save) requires the data to be consistent. Fiori elements handles all of this automatically for draft-enabled services (in V2, annotated with Common.DraftRoot). In CAP, enabling draft is one annotation, @odata.draft.enabled on the entity: CAP generates the draft tables and actions, and Fiori elements renders the whole flow, including the lock (another user sees \"Locked by\" and can only display), the draft indicator in the list, continue-editing and discard-draft dialogs, and the editing status filter. Underneath, every draft-enabled entity has the IsActiveEntity and HasDraftEntity flags, a DraftAdministrativeData association (who created it, when, in which session), and the standard actions draftEdit, draftActivate and draftPrepare (V4). The related mechanism for non-draft entities is the ETag for optimistic concurrency: the client sends back the version it read, and the server rejects the update with 412 Precondition Failed if someone else changed the record meanwhile. In the ABAP world, the same draft concept was implemented with BOPF and now with RAP (the ABAP RESTful Application Programming Model).",
+      "keyPoints": [
+        "A draft is a server-side working copy; changes are saved to the back end continuously.",
+        "Edit creates a draft; Save activates it (full check); Cancel / Discard deletes it; the draft also locks the object.",
+        "Editing status: active, Draft, Locked by another user, Unsaved changes by another user.",
+        "Drafts accept inconsistent intermediate input (with state messages); only Save requires consistency.",
+        "CAP: @odata.draft.enabled; IsActiveEntity / HasDraftEntity / DraftAdministrativeData; draftEdit, draftActivate, draftPrepare.",
+        "Non-draft concurrency: ETag → 412 Precondition Failed. ABAP: BOPF, today RAP."
+      ],
+      "examples": [
+        {
+          "title": "The draft life cycle",
+          "language": "text",
+          "code": "Active object --Edit--> Draft (locked for others)\n                          |  every field change is sent to the back end\n                          |  validation messages appear as state messages\n                          +--Save--> checks pass -> Active object updated, draft removed\n                          +--Discard--> draft deleted, active object unchanged"
+        },
+        {
+          "title": "Draft in CAP",
+          "language": "javascript",
+          "code": "service ProductService {\n  @odata.draft.enabled\n  entity Products as projection on db.Products;\n}\n\n// Display -> [Edit]   -> draft created (private copy, locked to this user)\n//         -> edits are saved continuously into the draft\n//         -> [Save]   -> draft activated, becomes the active record\n//         -> [Cancel] -> draft discarded, the active record is untouched"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-non-draft-apps",
+      "level": "basic",
+      "title": "What are the features and limitations of non-draft apps?",
+      "description": "A non-draft app works on the active data directly, without a server-side working copy. It is simpler to build (the service only needs normal create, update and delete), and is meant for simple scenarios without complex flows. The main difference for users is that changes are kept only in the browser until they press Save: the app does not send each change to the back end, so data typed on the UI is lost if they leave the page or close the browser without saving, and the framework warns about unsaved changes when leaving the page. Several features behave differently or are limited compared with draft apps: there is no automatic intermediate saving and no resuming of work later; no locking through drafts, so concurrent changes must be handled with ETags; validation and calculations from the back end (side effects) happen only on save; there is no editing status and no Editing Status filter; and creating subitems on the object page requires saving the main object first, or uses creation dialogs. All changes of one save are sent together, typically in one change set. Because of these limits, SAP recommends draft-enabled apps for anything beyond simple editing.",
+      "keyPoints": [
+        "Non-draft apps edit active data directly; changes stay in the browser until Save.",
+        "Unsaved data is lost when leaving without saving; the framework warns about it.",
+        "No intermediate saving, no draft locking (use ETags), back-end validation only on save, no editing status.",
+        "Subitem creation needs the parent saved first (or a dialog); recommended only for simple scenarios."
+      ],
+      "examples": [
+        {
+          "title": "Draft vs non-draft at a glance",
+          "language": "text",
+          "code": "                          Draft app                       Non-draft app\nChanges sent to back end  on every field change           only on Save\nUnsaved work after crash  kept as draft                   lost\nLocking                   via the draft                   ETags only\nBack-end validation       immediately (state messages)    on Save\nEditing status / filter   yes                             no"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-building-blocks",
+      "level": "basic",
+      "title": "What are building blocks (macros) in Fiori elements V4, and when do you use them?",
+      "description": "Building blocks are single Fiori elements controls that you can put into your own XML view; they are the middle ground between a fully generated app and pure freestyle. The library is sap.fe.macros: macros:Table (a full table from UI.LineItem, with personalization and export), macros:FilterBar (from UI.SelectionFields), macros:Field (one field with the right control, formatting and value help), macros:Form (from a FieldGroup), macros:Chart (from UI.Chart), macros:MicroChart, macros:ValueHelp, and macros:FlexibleColumnLayout. Each building block gets a metaPath (the annotation) and a contextPath (the entity). The controller of such a page extends sap.fe.core.PageController, which gives access to the Fiori elements services like the edit flow, routing and messages. Use macros when the page layout is custom but the pieces are standard: for example a chart, a custom KPI area and a table on one screen, for which no floorplan exists, while the table should still have personalization, export and value helps without writing them. The benefit over a plain sap.m.Table is that macros stay annotation-driven, so a back-end change still updates the UI, and you keep the standard Fiori behavior for free. They are also the OData V4 equivalent of the V2 smart controls.",
+      "keyPoints": [
+        "sap.fe.macros: Table, FilterBar, Field, Form, Chart, MicroChart, ValueHelp, FlexibleColumnLayout.",
+        "Configured with metaPath (annotation) and contextPath (entity); the controller extends sap.fe.core.PageController.",
+        "Use them for custom layouts built from standard, annotation-driven pieces.",
+        "They are the V4 equivalent of V2 smart controls."
+      ],
+      "examples": [
+        {
+          "title": "A custom page with a filter bar and a table",
+          "language": "xml",
+          "code": "<mvc:View\n  controllerName=\"my.app.ext.CustomPage\"\n  xmlns=\"sap.m\"\n  xmlns:mvc=\"sap.ui.core.mvc\"\n  xmlns:macros=\"sap.fe.macros\">\n  <Page title=\"{i18n>products}\">\n    <macros:FilterBar\n      id=\"filterBar\"\n      metaPath=\"@com.sap.vocabularies.UI.v1.SelectionFields\"\n      contextPath=\"/Products\"\n      search=\".onSearch\" />\n    <macros:Table\n      id=\"productTable\"\n      metaPath=\"@com.sap.vocabularies.UI.v1.LineItem\"\n      contextPath=\"/Products\"\n      filterBar=\"filterBar\" />\n  </Page>\n</mvc:View>"
+        },
+        {
+          "title": "Its controller",
+          "language": "typescript",
+          "code": "import PageController from \"sap/fe/core/PageController\";\n\n/**\n * @namespace my.app.ext\n */\nexport default class CustomPage extends PageController {\n  public onInit(): void {\n    super.onInit();\n    // this.getExtensionAPI() gives access to edit flow, routing, messages\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-v4-flexible-programming-model",
+      "level": "basic",
+      "title": "How do you extend a Fiori elements V4 app (the flexible programming model)?",
+      "description": "The V4 answer is the flexible programming model: a defined set of extension points, all declared in the manifest, so the extension survives an upgrade of the template. (1) Custom columns in a generated table, under controlConfiguration/@...LineItem/columns, with a header, a position (placement and anchor), a fragment template and properties; properties matters, because it adds the fields to $select, exactly like leadingProperty in a SmartTable. (2) Custom sections on the object page, under content/body/sections, with a title, position and template. (3) Custom actions, under content/header/actions (or table actions), with a text, a press handler given by module path, requiresSelection, and an enabled expression. (4) Controller extensions, registered under sap.ui.controllerExtensions for sap.fe.templates.ObjectPage.ObjectPageController (or ListReportController), which override lifecycle methods and the standard flows: editFlow (onBeforeEdit, onBeforeSave, onAfterSave, onBeforeDiscard, onBeforeDelete), routing (onBeforeNavigation, onAfterBinding), viewState, share and massEdit. (5) Custom pages built with building blocks. The rule that keeps an extension maintainable: only use the documented extension points. Reaching into the generated control tree with byId(\"...::LineItem::field\") works until the next UI5 version renames something; the template is SAP's code, and the extension points are the contract.",
+      "keyPoints": [
+        "Everything is declared in the manifest: custom columns, sections, actions, controller extensions, custom pages.",
+        "Custom column properties add fields to $select (like leadingProperty in V2).",
+        "Controller extension overrides: editFlow (onBeforeSave...), routing (onBeforeNavigation, onAfterBinding), viewState.",
+        "Use only documented extension points; never rely on generated IDs."
+      ],
+      "examples": [
+        {
+          "title": "A custom column, section and action (manifest)",
+          "language": "json",
+          "code": "\"controlConfiguration\": {\n  \"@com.sap.vocabularies.UI.v1.LineItem\": {\n    \"columns\": {\n      \"customStatus\": {\n        \"header\": \"{i18n>statusColumn}\",\n        \"position\": { \"placement\": \"After\", \"anchor\": \"DataField::price\" },\n        \"template\": \"my.app.ext.fragment.StatusColumn\",\n        \"properties\": [\"status\", \"statusText\"],\n        \"width\": \"8rem\"\n      }\n    }\n  }\n},\n\"content\": {\n  \"body\": {\n    \"sections\": {\n      \"customHistory\": {\n        \"title\": \"{i18n>historySection}\",\n        \"position\": { \"placement\": \"After\", \"anchor\": \"GeneralSection\" },\n        \"template\": \"my.app.ext.view.HistorySection\"\n      }\n    }\n  },\n  \"header\": {\n    \"actions\": {\n      \"customPrint\": {\n        \"text\": \"{i18n>print}\",\n        \"press\": \"my.app.ext.controller.Actions.onPrint\",\n        \"requiresSelection\": false\n      }\n    }\n  }\n}"
+        },
+        {
+          "title": "A controller extension",
+          "language": "javascript",
+          "code": "// manifest.json -> sap.ui5/extends/extensions/sap.ui.controllerExtensions:\n// \"sap.fe.templates.ObjectPage.ObjectPageController\": { \"controllerName\": \"my.app.ext.controller.ObjectPageExt\" }\n\nsap.ui.define([\"sap/ui/core/mvc/ControllerExtension\"], function (ControllerExtension) {\n  \"use strict\";\n  return ControllerExtension.extend(\"my.app.ext.controller.ObjectPageExt\", {\n    override: {\n      onInit: function () { /* runs in addition to the template's onInit */ },\n      editFlow: {\n        onBeforeSave: function (oEvent) {\n          // validate before the draft is activated; return a rejected promise to stop\n        },\n        onAfterSave: function (oEvent) { }\n      },\n      routing: {\n        onAfterBinding: function (oContext) { }\n      }\n    }\n  });\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "fe-vs-freestyle",
+      "level": "basic",
+      "title": "What do you gain and lose with Fiori elements compared to a freestyle app?",
+      "description": "Gain: an app in days instead of weeks for a standard pattern; consistency, because every Fiori elements app behaves the same way and users do not relearn; features that are genuinely expensive to build yourself (draft with locking, variant management, personalization, Excel export, messages on the right field, side effects, value helps with dependent filters); upgrades that improve your app for free, when SAP adds accessibility fixes or new table features to the template; and a single source of truth, because the annotations describe the service and every consumer reads the same description. Lose: direct control (changing something means finding the right annotation or extension point, which can take longer than editing a view); debuggability (the control tree is generated, IDs are long and unfamiliar, and the problem may be in the annotation rather than in your code); a hard ceiling (when requirements keep falling outside the model, extensions pile up and the app becomes harder to maintain than a freestyle one); and a dependency on annotation quality (a wrong or missing annotation shows as a UI bug with no stack trace). The rule of thumb: if the app is \"list → detail, with CRUD\", use Fiori elements; use freestyle when the UI is genuinely unusual, like a graphical editor, a planning board or a custom dashboard. The balanced answer for a review: \"For a standard list-and-detail app on a CAP service, Fiori elements is clearly the right choice; the free draft and message handling alone justify it. I would go freestyle when the interaction model is genuinely unusual, and use sap.fe.macros in between when the layout is custom but the components are standard.\"",
+      "keyPoints": [
+        "Gain: speed, consistency, expensive features for free (draft, variants, export, messages, side effects), upgrades.",
+        "Lose: direct control, debuggability, a hard ceiling, dependency on annotation quality.",
+        "List → detail with CRUD: Fiori elements. Genuinely unusual UI: freestyle.",
+        "Custom layout from standard pieces: building blocks (sap.fe.macros)."
+      ],
+      "examples": [
+        {
+          "title": "Freestyle vs Fiori elements at a glance",
+          "language": "text",
+          "code": "                     Freestyle                 Fiori elements\nScreens              you write the views       generated from annotations\nEffort (standard)    high                      very low\nConsistency          depends on the team       guaranteed\nFeatures for free    none                      draft, messages, variants, export, value help, personalization\nFlexibility          unlimited                 within the extension points\nUpgrades             you own everything        SAP improves the template, you get it"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

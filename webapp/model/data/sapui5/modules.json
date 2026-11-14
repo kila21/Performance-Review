@@ -1,0 +1,108 @@
+{
+  "topicId": "modules",
+  "title": "Modules",
+  "questions": [
+    {
+      "id": "module-definition",
+      "level": "elementary",
+      "title": "How do you define a module in SAPUI5?",
+      "description": "In SAPUI5, every JavaScript file is a module: a separate unit of code that declares which other modules it needs, and gives back one value (its export). A module is defined with sap.ui.define(dependencies, factory). The first argument is an array of module names it depends on, written as paths without the .js ending, like \"sap/m/MessageToast\" or \"./model/formatter\" (a path starting with ./ is relative to the current module). The second argument is the factory function: UI5 loads all dependencies first, then calls the factory with them as parameters, in the same order as the array. Whatever the factory returns is the module's value, for example a controller class, a formatter object, or a function. A module's code runs only once: every other module that depends on it receives the same returned value. Each file should contain exactly one sap.ui.define call, and the factory usually starts with \"use strict\". In TypeScript projects, you write normal import / export statements instead, and the UI5 tooling converts them into sap.ui.define calls. Rules to remember: paths use slashes, never dots (\"sap/m/Button\", not \"sap.m.Button\"); the order of the parameters must match the order of the dependencies; \"use strict\" goes inside the factory, not at the top of the file; and a path is resolved from the resource roots, so \"my/app/model/formatter\" maps to webapp/model/formatter.js. Before modules, UI5 used global objects (sap.m.Button, jQuery.sap.*), which meant everything had to be loaded up front, names could collide, and the browser blocked while scripts loaded one after another; modules solve all three problems. You still need to understand sap.ui.define in TypeScript projects, because that is what runs in the browser and what you see in all older code.",
+      "keyPoints": [
+        "A module is defined with sap.ui.define([dependencies], factory).",
+        "Dependencies are module paths without .js; ./ makes a path relative to the current module.",
+        "The factory receives the loaded dependencies as parameters, in the same order, and returns the module's value.",
+        "A module runs only once; every consumer gets the same exported value. One sap.ui.define per file.",
+        "Slashes, not dots; parameter order = dependency order; \"use strict\" inside the factory.",
+        "In TypeScript you write import/export; the build produces sap.ui.define, which is what runs in the browser."
+      ],
+      "examples": [
+        {
+          "title": "A formatter module",
+          "language": "javascript",
+          "code": "// webapp/model/formatter.js\nsap.ui.define([], function () {\n  \"use strict\";\n\n  return {\n    statusText: function (status) {\n      return status === \"A\" ? \"Active\" : \"Inactive\";\n    }\n  };\n});"
+        },
+        {
+          "title": "A controller that depends on other modules",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/ui/core/mvc/Controller\",\n  \"sap/m/MessageToast\",\n  \"../model/formatter\"\n], function (Controller, MessageToast, formatter) {\n  \"use strict\";\n\n  return Controller.extend(\"my.app.controller.Main\", {\n    formatter: formatter,\n\n    onPress: function () {\n      MessageToast.show(\"Hello\");\n    }\n  });\n});"
+        },
+        {
+          "title": "The same controller as TypeScript source",
+          "language": "typescript",
+          "code": "import Controller from \"sap/ui/core/mvc/Controller\";\nimport MessageToast from \"sap/m/MessageToast\";\nimport formatter from \"../model/formatter\";\n\n/**\n * @namespace my.app.controller\n */\nexport default class Main extends Controller {\n  public formatter = formatter;\n\n  public onPress(): void {\n    MessageToast.show(\"Hello\");\n  }\n}\n// the UI5 TypeScript build turns these imports into sap.ui.define([...], function (...) { ... })"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "module-consumption",
+      "level": "elementary",
+      "title": "How do you use (consume) a module: sap.ui.define vs sap.ui.require?",
+      "description": "There are two ways to get access to another module. The usual way is to list it in the dependency array of sap.ui.define at the beginning of your file; then it is loaded before your module's code runs, and is available everywhere inside your module. Use this for anything your module always needs. The second way is sap.ui.require(dependencies, callback), which you can call anywhere in your code, at the moment you actually need a module. It loads the modules asynchronously and calls the callback once they are ready. This is useful for code that is only needed in some situations, for example a large dialog or a library that is used only after a button press, so it does not slow down the app's start. Unlike sap.ui.define, sap.ui.require does not define a new module. sap.ui.require also has a second, synchronous form with a single string, sap.ui.require(\"sap/m/MessageBox\"): it never loads anything, it only returns the module if it has already been loaded, and undefined otherwise. The old synchronous loader functions, like jQuery.sap.require, are deprecated. Good reasons for sap.ui.require are a rarely used heavy library (like sap/ui/export/Spreadsheet for an Excel export), a code path that depends on a condition, or breaking a circular dependency (module A needs B and B needs A; the loader then passes undefined for the unfinished one). The default rule: use define, and reach for require only with a concrete reason. In XML views, core:require loads a module directly into the view, so you can use it as a formatter or a type without a controller method: core:require=\"{ formatMessage: 'sap/base/strings/formatMessage' }\".",
+      "keyPoints": [
+        "sap.ui.define dependencies are loaded before the module runs: use them for what the module always needs.",
+        "sap.ui.require([...], callback) loads modules on demand, asynchronously, anywhere in the code.",
+        "Loading rarely used code on demand keeps the app's start fast.",
+        "sap.ui.require(\"name\") with one string only returns an already loaded module (or undefined); it never loads.",
+        "Use require for heavy, rarely used libraries, conditional code, or to break a circular dependency; otherwise define.",
+        "core:require in XML views loads modules for formatters or types directly in the view."
+      ],
+      "examples": [
+        {
+          "title": "Loading a module only when it is needed",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/ui/core/mvc/Controller\"\n], function (Controller) {\n  \"use strict\";\n\n  return Controller.extend(\"my.app.controller.Main\", {\n    onDeletePress: function () {\n      // MessageBox is loaded only when the user presses Delete\n      sap.ui.require([\"sap/m/MessageBox\"], function (MessageBox) {\n        MessageBox.confirm(\"Delete this item?\");\n      });\n    }\n  });\n});"
+        },
+        {
+          "title": "Promise style and core:require",
+          "language": "javascript",
+          "code": "// promise style for on-demand loading\nconst [Spreadsheet] = await new Promise((resolve, reject) =>\n  sap.ui.require([\"sap/ui/export/Spreadsheet\"], (...modules) => resolve(modules), reject)\n);\n\n// synchronous lookup: ONLY returns a module that is already loaded\nconst MessageBox = sap.ui.require(\"sap/m/MessageBox\");   // may be undefined\n\n// in an XML view:\n// <mvc:View core:require=\"{ formatMessage: 'sap/base/strings/formatMessage' }\" ...>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "amd-concept",
+      "level": "basic",
+      "title": "What is the AMD concept, and how does SAPUI5 use it?",
+      "description": "AMD stands for Asynchronous Module Definition. It is a pattern for writing modular JavaScript in the browser, from the time before native ES modules were available everywhere. Its main ideas are: every module declares its dependencies up front, the loader downloads them asynchronously (without blocking the browser), and the module's code runs in a factory function only after all of them are ready. Because each module gets its dependencies as function parameters, nothing needs to be stored in global variables. SAPUI5's module system, the ui5loader, follows AMD: sap.ui.define corresponds to AMD's define, and sap.ui.require corresponds to AMD's require. Since the loader knows the full list of dependencies, it can load files in parallel, load each module only once, and detect what is missing. During the build, many modules are bundled into one preload file (like Component-preload.js), so the browser does not need one request per file. Modern TypeScript or ES-module code in UI5 projects is still turned into this AMD format by the tooling. Compare it with the old way: several script tags, where every file blocks the next one, the order must be perfect and manual, everything loads even if unused, and every file writes into the global namespace. Other module patterns are CommonJS (Node.js, const x = require(\"x\"), synchronous) and ES modules (import x from \"x\", the standard today). The ui5loader is a UI5-specific AMD implementation, which is why the syntax is sap.ui.define and paths are slash-separated. In interview form, the benefits are: no globals, parallel loading, lazy loading, automatic dependency order, and one instance per module (a natural singleton).",
+      "keyPoints": [
+        "AMD (Asynchronous Module Definition): modules declare dependencies up front and are loaded asynchronously.",
+        "The module's code runs in a factory function, after its dependencies are ready, and receives them as parameters.",
+        "No global variables are needed; each module is loaded and executed only once.",
+        "SAPUI5's ui5loader is AMD-based: sap.ui.define = define, sap.ui.require = require.",
+        "Benefits: no globals, parallel + lazy loading, automatic dependency order, one instance per module.",
+        "Other patterns: CommonJS (Node, synchronous require) and ES modules (import, today's standard)."
+      ],
+      "examples": [
+        {
+          "title": "AMD vs SAPUI5 syntax",
+          "language": "javascript",
+          "code": "// Generic AMD (for example RequireJS)\ndefine([\"./helper\"], function (helper) {\n  return { run: helper.run };\n});\n\n// The same in SAPUI5\nsap.ui.define([\"./helper\"], function (helper) {\n  \"use strict\";\n  return { run: helper.run };\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "dbg-js-files",
+      "level": "basic",
+      "title": "What is the *-dbg.js version of a module?",
+      "description": "When an SAPUI5 app or library is built for production, every JavaScript file is minified: comments, spaces, and long variable names are removed, so the file becomes much smaller and loads faster, but is very hard to read. The build keeps the original, readable source next to it, with -dbg added to the name: for example Main.controller.js is the minified version, and Main.controller-dbg.js is the readable one. The framework's own files work the same way. Normally, the browser loads the small minified files. When you need to debug, you add the URL parameter sap-ui-debug=true, and UI5 loads the -dbg.js versions instead, so you can read the code and set breakpoints in the browser's developer tools. Because loading all debug sources is slow, you can also limit it to some modules, for example sap-ui-debug=my/app/ loads only your app's debug sources. Minified files are also delivered with source maps, which let the browser's developer tools show the original source even without debug mode. sap-ui-debug=true also switches off the preload bundles, so every module is requested on its own; that makes the app much slower, so it is a debugging tool, never a production setting. You can also use it for one module (sap-ui-debug=sap/m/Button.js) or one package (sap-ui-debug=sap/m/). The Technical Information dialog (Ctrl+Alt+Shift+P) has a Debug Sources switch that does the same. You need it to step into UI5's own code or to read a stack trace that otherwise shows only a.b(c).",
+      "keyPoints": [
+        "The build minifies each .js file and keeps the readable original as *-dbg.js.",
+        "By default the minified files are loaded; sap-ui-debug=true loads the -dbg.js versions instead.",
+        "sap-ui-debug can be limited to some modules, like sap-ui-debug=my/app/, to keep loading fast.",
+        "Source maps also let the developer tools show readable sources for the minified files.",
+        "sap-ui-debug=true also disables preload bundles (slow, never in production); Ctrl+Alt+Shift+P has a Debug Sources switch."
+      ],
+      "examples": [
+        {
+          "title": "Files after a build",
+          "language": "text",
+          "code": "dist/controller/Main.controller.js        <- minified, loaded by default\ndist/controller/Main.controller-dbg.js    <- readable original, loaded with sap-ui-debug=true\ndist/controller/Main.controller.js.map    <- source map\n\nhttps://myhost/my-app/index.html?sap-ui-debug=true\nhttps://myhost/my-app/index.html?sap-ui-debug=my/app/"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

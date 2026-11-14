@@ -1,0 +1,326 @@
+{
+  "topicId": "fe-object-page",
+  "title": "FE: Object Page features",
+  "questions": [
+    {
+      "id": "op-main-elements",
+      "level": "elementary",
+      "title": "What are the main elements of the object page, and what is each one for?",
+      "description": "The object page shows one business object, like a sales order, with all its details, and lets users display, edit, and act on it. Its main elements are: the page title (the object's title, like the order number, from UI.HeaderInfo); the object header, which contains the title and subtitle, the editing status in draft apps, the header toolbar with actions (Edit, Delete, Copy, app actions from UI.Identification, related apps, share), an optional image, and the header facets, which show key information at a glance, either as label-value pairs (field groups, data points) or as smart controls (micro charts, progress indicators, contact cards); the anchor navigation area (anchor bar), with one entry per section, which scrolls to it (or tabs, if the sections are shown as an icon tab bar); the content area with the sections, defined by UI.Facets, each with subsections containing forms (field groups), tables of related items (line items of a navigation property), charts, or reuse components; pagination buttons (next/previous) in the header of a subobject page, to move to the next or previous sibling item without going back; and the footer, a floating toolbar with Save and Cancel in edit mode, determining actions, and the message button.",
+      "keyPoints": [
+        "Page title and object header: title, subtitle, editing status, header toolbar with actions, image.",
+        "Header facets: key information as label-value pairs or smart controls (micro charts, contact, progress).",
+        "Anchor bar to jump between sections; content area with sections and subsections (forms, tables, charts).",
+        "Next/previous pagination for subitems, and a floating footer (Save/Cancel, determining actions, messages)."
+      ],
+      "examples": [
+        {
+          "title": "Header and sections from annotations (overview)",
+          "language": "text",
+          "code": "UI.HeaderInfo      -> title, subtitle, image\nUI.Identification  -> header actions (DataFieldForAction)\nUI.HeaderFacets    -> header facets (field groups, data points, charts, contact...)\nUI.Facets          -> sections / subsections (field groups, line items of navigation properties...)"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-header-basics",
+      "level": "elementary",
+      "title": "How do you set up the basic parts of the object page header: title, subtitle, and image of the object?",
+      "description": "The basic header parts all come from the UI.HeaderInfo annotation of the entity type. TypeName and TypeNamePlural give the readable name of the object type (\"Sales Order\", \"Sales Orders\"), which is used in titles, messages and dialogs. Title is a DataField whose Value is the property shown as the object's title, like the order number or a product name; it is also used, for example, in the Delete dialog text. Description is a DataField for the subtitle, like the customer name or a short description. ImageUrl points to a property containing the URL of an image of this object instance, like a product photo or an employee picture; TypeImageUrl can provide a generic image or icon for the object type, and Initials can be shown when there is no image. If no image is defined, no image area is shown. In draft apps, the header also shows the editing status (like Draft) automatically next to the title. These parts appear in both the expanded header and, in reduced form, in the snapped header when the user scrolls.",
+      "keyPoints": [
+        "All basic header parts come from UI.HeaderInfo.",
+        "TypeName / TypeNamePlural: the object type's name, used in titles, messages and dialogs.",
+        "Title (DataField) = object title; Description (DataField) = subtitle.",
+        "ImageUrl = image of the object instance; TypeImageUrl and Initials as alternatives."
+      ],
+      "examples": [
+        {
+          "title": "UI.HeaderInfo",
+          "language": "xml",
+          "code": "<Annotation Term=\"UI.HeaderInfo\">\n  <Record Type=\"UI.HeaderInfoType\">\n    <PropertyValue Property=\"TypeName\" String=\"Sales Order\" />\n    <PropertyValue Property=\"TypeNamePlural\" String=\"Sales Orders\" />\n    <PropertyValue Property=\"Title\">\n      <Record Type=\"UI.DataField\">\n        <PropertyValue Property=\"Value\" Path=\"SalesOrderID\" />\n      </Record>\n    </PropertyValue>\n    <PropertyValue Property=\"Description\">\n      <Record Type=\"UI.DataField\">\n        <PropertyValue Property=\"Value\" Path=\"CustomerName\" />\n      </Record>\n    </PropertyValue>\n    <PropertyValue Property=\"ImageUrl\" Path=\"CustomerLogoURL\" />\n  </Record>\n</Annotation>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-header-facets",
+      "level": "elementary",
+      "title": "Which header facets can the object page show (simple header facet, plain text, contact, header field group, data points, form, address)?",
+      "description": "Header facets are defined in the UI.HeaderFacets annotation, as a collection of UI.ReferenceFacet records, each pointing (Target) to another annotation that decides how the facet looks. A header field group (form facet) points to a UI.FieldGroup and shows a small form of label-value pairs, like the order date and the sales organization. A data point facet points to a UI.DataPoint and shows one key value prominently, for example an amount, a status with criticality coloring, a rating, or a progress indicator (DataPoint with Visualization). A plain text facet points to a field group whose field is a long text, marked with UI.MultiLineText, and shows a block of text with a title, like a description. A contact facet points to a Communication.Contact annotation (often of a navigation property, like the customer contact) and shows the contact's name as a link with a contact quick view. An address facet points to a Communication.Address annotation and shows a formatted postal address. Micro chart facets point to a UI.Chart. In V2, simpleHeaderFacets: true in the object page settings switches to a simpler header facet rendering, which can display more content. Each facet has a Label, which becomes its title.",
+      "keyPoints": [
+        "UI.HeaderFacets holds UI.ReferenceFacet records whose Target decides the facet type.",
+        "Field group (form facet): label-value pairs; data point: one key value (with criticality, rating, progress).",
+        "Plain text: a field group with UI.MultiLineText; contact: Communication.Contact; address: Communication.Address.",
+        "Micro charts via UI.Chart; simpleHeaderFacets: true enables the simple header facet (V2)."
+      ],
+      "examples": [
+        {
+          "title": "Header facets",
+          "language": "xml",
+          "code": "<Annotation Term=\"UI.HeaderFacets\">\n  <Collection>\n    <Record Type=\"UI.ReferenceFacet\">\n      <PropertyValue Property=\"Label\" String=\"General\" />\n      <PropertyValue Property=\"Target\" AnnotationPath=\"@UI.FieldGroup#HeaderGeneral\" />\n    </Record>\n    <Record Type=\"UI.ReferenceFacet\">\n      <PropertyValue Property=\"Target\" AnnotationPath=\"@UI.DataPoint#GrossAmount\" />\n    </Record>\n    <Record Type=\"UI.ReferenceFacet\">\n      <PropertyValue Property=\"Label\" String=\"Contact\" />\n      <PropertyValue Property=\"Target\" AnnotationPath=\"to_Customer/@Communication.Contact\" />\n    </Record>\n  </Collection>\n</Annotation>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-header-actions-subpages",
+      "level": "elementary",
+      "title": "How do you enable actions in the object page header, and how do you add subpages?",
+      "description": "Actions in the header toolbar: besides the generic actions (Edit, Delete, Copy, Share), app-specific actions are added as UI.DataFieldForAction records in the entity's UI.Identification annotation; they appear as buttons in the header toolbar and act on the displayed object. Navigation buttons to other apps can be added the same way with UI.DataFieldForIntentBasedNavigation. A DataFieldForAction with Determining=true appears in the footer instead. Subpages: an object page can have its own object pages for related items, for example a sales order item page under the sales order page. In manifest.json (sap.ui.generic.app), the object page entry gets a nested pages array, with an object page for the item entity set and the navigationProperty that leads to it (like to_Item). The table of items in the parent's section then becomes navigable: clicking a row opens the subobject page, which has its own header, sections, and next/previous buttons for moving between sibling items. Subpages can be nested further.",
+      "keyPoints": [
+        "Header actions: UI.DataFieldForAction in UI.Identification (DataFieldForIntentBasedNavigation for app links).",
+        "Determining=true moves an action to the footer.",
+        "Subpages: a nested pages entry under the object page, with the item entitySet and navigationProperty.",
+        "Item table rows then navigate to the subobject page, which has next/previous pagination."
+      ],
+      "examples": [
+        {
+          "title": "A subobject page in the manifest",
+          "language": "json",
+          "code": "{\n  \"sap.ui.generic.app\": {\n    \"pages\": [\n      {\n        \"entitySet\": \"C_SalesOrder\",\n        \"component\": { \"name\": \"sap.suite.ui.generic.template.ListReport\", \"list\": true },\n        \"pages\": [\n          {\n            \"entitySet\": \"C_SalesOrder\",\n            \"component\": {\n              \"name\": \"sap.suite.ui.generic.template.ObjectPage\",\n              \"settings\": { \"showRelatedApps\": true },\n              \"pages\": [\n                {\n                  \"navigationProperty\": \"to_Item\",\n                  \"entitySet\": \"C_SalesOrderItem\",\n                  \"component\": { \"name\": \"sap.suite.ui.generic.template.ObjectPage\" }\n                }\n              ]\n            }\n          }\n        ]\n      }\n    ]\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-sections-basics",
+      "level": "elementary",
+      "title": "How do you define sections on the object page: facets, a table in a section, and action buttons in forms?",
+      "description": "The content of the object page is defined by the UI.Facets annotation. Each top-level facet becomes a section (an entry in the anchor bar). A UI.CollectionFacet groups other facets: a collection facet with reference facets inside creates a section with subsections. A UI.ReferenceFacet points to the content: to a UI.FieldGroup (rendered as a smart form with label-value pairs), to UI.Identification, or to the UI.LineItem of a navigation property, like to_Item/@UI.LineItem, which renders a smart table of the related items in that section (with its own toolbar, Create and Delete in edit mode, and navigation to a subobject page if configured). Each facet has a Label (the section or subsection title) and should have an ID, so it can be referenced by extensions and settings. Action buttons in forms: a UI.DataFieldForAction inside a UI.FieldGroup that is shown as a form adds the action as a button in that form's toolbar, acting on the current object, which places the action close to the data it relates to.",
+      "keyPoints": [
+        "UI.Facets defines the sections; top-level facets become anchor bar entries.",
+        "CollectionFacet groups facets into a section with subsections; ReferenceFacet points to the content.",
+        "Target FieldGroup = form; Target navigation/@UI.LineItem = table of related items.",
+        "Give facets a Label and an ID; DataFieldForAction in a FieldGroup adds a button to that form."
+      ],
+      "examples": [
+        {
+          "title": "Sections with a form and a table",
+          "language": "xml",
+          "code": "<Annotation Term=\"UI.Facets\">\n  <Collection>\n    <Record Type=\"UI.CollectionFacet\">\n      <PropertyValue Property=\"ID\" String=\"GeneralInformation\" />\n      <PropertyValue Property=\"Label\" String=\"General Information\" />\n      <PropertyValue Property=\"Facets\">\n        <Collection>\n          <Record Type=\"UI.ReferenceFacet\">\n            <PropertyValue Property=\"Label\" String=\"Basic Data\" />\n            <PropertyValue Property=\"Target\" AnnotationPath=\"@UI.FieldGroup#Basic\" />\n          </Record>\n        </Collection>\n      </PropertyValue>\n    </Record>\n    <Record Type=\"UI.ReferenceFacet\">\n      <PropertyValue Property=\"ID\" String=\"Items\" />\n      <PropertyValue Property=\"Label\" String=\"Items\" />\n      <PropertyValue Property=\"Target\" AnnotationPath=\"to_Item/@UI.LineItem\" />\n    </Record>\n  </Collection>\n</Annotation>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-ui-hidden",
+      "level": "elementary",
+      "title": "How do you hide features with the UI.Hidden annotation (static and dynamic values, header facets, sections)?",
+      "description": "UI.Hidden hides a feature of the object page. Written without a value, its default is true, so the annotated element is not shown. Static values: Bool=\"true\" always hides it, and Bool=\"false\" always shows it. Dynamic values: Path=\"...\" points to a Boolean property of the entity, so the back end decides per object (and per state) whether it is hidden, for example a property that is true while the order is not yet released. It can be applied to different things: to a property or a DataField, to hide a field in forms and tables; to a UI.ReferenceFacet or UI.CollectionFacet in UI.HeaderFacets, to hide a header facet; and to a facet in UI.Facets, to hide a whole section or subsection. Because dynamic values are evaluated against the current object, the UI updates when the property changes (for example after a side effect or a save). UI.Hidden removes the element completely, unlike field control, which makes a field read-only or mandatory. Related to this, the object page also shows confirmation popups at certain moments, for example when leaving a draft without saving (draftDiscardConfirmationSettings) or showing warnings before activation (showConfirmationOnDraftActivate).",
+      "keyPoints": [
+        "UI.Hidden without a value = true (hidden); Bool=\"true\"/\"false\" are static values.",
+        "Path=\"Prop\" points to a Boolean property: hidden per object and state (dynamic).",
+        "Apply it to fields/DataFields, header facets, and sections or subsections (facets).",
+        "It removes the element; confirmation popups (draft discard, activation warnings) are configured in the manifest."
+      ],
+      "examples": [
+        {
+          "title": "Static and dynamic UI.Hidden on facets",
+          "language": "xml",
+          "code": "<Annotation Term=\"UI.HeaderFacets\">\n  <Collection>\n    <Record Type=\"UI.ReferenceFacet\">\n      <PropertyValue Property=\"Target\" AnnotationPath=\"@UI.DataPoint#CreditLimit\" />\n      <Annotation Term=\"UI.Hidden\" Path=\"IsCreditLimitHidden\" />\n    </Record>\n  </Collection>\n</Annotation>\n<Annotation Term=\"UI.Facets\">\n  <Collection>\n    <Record Type=\"UI.ReferenceFacet\">\n      <PropertyValue Property=\"ID\" String=\"InternalNotes\" />\n      <PropertyValue Property=\"Target\" AnnotationPath=\"@UI.FieldGroup#Notes\" />\n      <Annotation Term=\"UI.Hidden\" Bool=\"true\" />\n    </Record>\n  </Collection>\n</Annotation>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-reuse-components",
+      "level": "elementary",
+      "title": "How are reuse components injected into object page sections?",
+      "description": "A reuse component is an encapsulated, independent UI5 component that can be embedded in many Fiori elements apps, for example SAP's attachment service, output management, change documents, or a company's own component that is needed in several apps. Instead of rebuilding such a UI in every app, the object page can show it as a section. It is configured in manifest.json, in the object page's settings, with embeddedComponents: each entry has an ID (key), the componentName (or a componentUsage declared in sap.ui5/componentUsages), a title (ideally an i18n key), and optionally settings that are passed to the component, and a position relative to an existing section (leadingSectionIdOrPath, like after a given facet ID). It can also be shown for a navigation property of the object. Fiori elements creates the component, places it into the section, and passes it the current object's context and the UI mode (display or edit), so the component can follow the page. The component itself must be built as a reuse component for Fiori elements: technically a subclass of UIComponent that calls ReuseComponentSupport.mixInto (from sap/suite/ui/generic/template/extensionAPI/ReuseComponentSupport), so it can react to the page's binding and mode.",
+      "keyPoints": [
+        "Reuse components are encapsulated UI5 components embedded in many apps (attachments, output management...).",
+        "Configured in the object page settings: embeddedComponents with ID, componentName / componentUsage, title.",
+        "Optional settings for the component and a position relative to an existing section.",
+        "Fiori elements passes the object's context and the UI mode; the component must support this."
+      ],
+      "examples": [
+        {
+          "title": "Embedding an attachment component as a section",
+          "language": "json",
+          "code": "{\n  \"sap.ui.generic.app\": {\n    \"pages\": [\n      {\n        \"entitySet\": \"C_SalesOrder\",\n        \"component\": { \"name\": \"sap.suite.ui.generic.template.ListReport\", \"list\": true },\n        \"pages\": [\n          {\n            \"entitySet\": \"C_SalesOrder\",\n            \"component\": {\n              \"name\": \"sap.suite.ui.generic.template.ObjectPage\",\n              \"settings\": {\n                \"embeddedComponents\": {\n                  \"attachments\": {\n                    \"id\": \"attachments\",\n                    \"componentName\": \"sap.se.mi.plm.lib.attachmentservice.attachment\",\n                    \"title\": \"{{@Attachments}}\",\n                    \"settings\": {\n                      \"mode\": \"{= ${ui>/editable} ? 'C' : 'D' }\",\n                      \"objectType\": \"SALESORDER\"\n                    }\n                  }\n                }\n              }\n            }\n          }\n        ]\n      }\n    ]\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-smartform-column-layout",
+      "level": "basic",
+      "title": "How do you define the SmartForm column layout on the object page?",
+      "description": "Forms in object page sections (field groups) are rendered as smart forms. By default, they use a column layout: the form's groups are arranged in columns depending on the screen width, with up to six columns on extra-large screens. Two manifest settings change this, both in sap.ui.generic.app/settings. objectPageColumns lets you change the number of columns, for example objectPageColumns: { screenSizeXL: 4 } to show at most four columns on extra-large screens instead of six. useColumnLayoutForSmartForm: false switches the smart forms from the column layout to the older responsive grid layout. The guidelines also say not to put layout or container controls into a form's group elements (and not to use views there), because that can break the visual layout and keyboard navigation. On small screens, the form shows fewer columns automatically.",
+      "keyPoints": [
+        "Object page forms are smart forms with a column layout (up to six columns on XL screens).",
+        "objectPageColumns: { screenSizeXL: 4 } changes the number of columns on XL screens.",
+        "useColumnLayoutForSmartForm: false switches to the responsive grid layout.",
+        "Do not put layout containers or views into group elements; fewer columns on small screens."
+      ],
+      "examples": [
+        {
+          "title": "Changing the form columns",
+          "language": "json",
+          "code": "{\n  \"sap.ui.generic.app\": {\n    \"settings\": {\n      \"objectPageColumns\": {\n        \"screenSizeXL\": 4\n      }\n    },\n    \"pages\": []\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-actions-by-mode",
+      "level": "basic",
+      "title": "How do you display actions based on the page mode (display, edit, create)?",
+      "description": "The object page has three modes: display (viewing an active object), edit (changing an object, usually a draft), and create (a new object). Fiori elements already switches its generic actions by mode: Edit, Delete and Copy are offered in display mode, while Save and Cancel (or Discard Draft) appear in the footer in edit and create mode. For app-specific actions and custom buttons, there are three tools. The ui model, which contains the mode (ui>/editable, ui>/createMode), can be used in expression bindings: for buttons added through extensions directly in their fragment (visible=\"{= !${ui>/editable} }\"), and for annotation-based elements through property binding changes created with the Page Editor, which can, for example, show header content only in edit mode or control the visibility of a section. A dynamic UI.Hidden with a path to a Boolean property lets the back end decide when an action or element is hidden. And for enabling rather than hiding, actions can be bound to a property that tells whether they are currently allowed (sap:applicable-path in V2, or Core.OperationAvailable), which is evaluated for the current object.",
+      "keyPoints": [
+        "Modes: display, edit, create; generic actions switch automatically (Edit/Delete vs Save/Cancel).",
+        "Custom buttons: bind visible to the ui model, like {= !${ui>/editable} } or ui>/createMode.",
+        "Annotation elements: property binding changes (Page Editor) or a dynamic UI.Hidden path.",
+        "Enablement per object: sap:applicable-path (V2) or Core.OperationAvailable."
+      ],
+      "examples": [
+        {
+          "title": "A custom header button shown only in display mode",
+          "language": "xml",
+          "code": "<core:FragmentDefinition xmlns=\"sap.m\" xmlns:core=\"sap.ui.core\">\n  <Button\n    text=\"{i18n>sendReminder}\"\n    visible=\"{= !${ui>/editable} &amp;&amp; !${ui>/createMode} }\"\n    press=\".onSendReminder\" />\n</core:FragmentDefinition>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-header-micro-charts",
+      "level": "basic",
+      "title": "How do you set up micro chart facets in the object page header (area, bullet, column, line, Harvey, stacked bar)?",
+      "description": "A micro chart facet shows a small chart in the object page header, to give a visual overview of a key figure, like the trend of revenue or the share of a budget used. It is defined with a UI.ReferenceFacet in UI.HeaderFacets that points to a UI.Chart annotation (often of a navigation property, for data with several points). The chart's ChartType decides the micro chart: Area (area micro chart, a trend with target and thresholds), Bullet (bullet micro chart, an actual value against a target, with thresholds), Column (column micro chart, values per category or period), Line (line micro chart, a trend over time), Pie (rendered as the Harvey micro chart, showing a fraction of a total), and BarStacked (stacked bar micro chart, how a total is composed). The UI.Chart lists its Measures and MeasureAttributes, which reference a UI.DataPoint; the data point gives the value, and can add a TargetValue, ForecastValue, CriticalityCalculation (thresholds that color the chart), or MaximumValue (for the Harvey chart). The facet's title and subtitle come from the chart's Title and Description. These micro charts are smart micro charts (sap.ui.comp.smartmicrochart), created by Fiori elements.",
+      "keyPoints": [
+        "A ReferenceFacet in UI.HeaderFacets points to a UI.Chart; ChartType selects the micro chart.",
+        "Area, Bullet, Column, Line, Pie (= Harvey micro chart), BarStacked (= stacked bar micro chart).",
+        "Measures / MeasureAttributes reference a UI.DataPoint with value, target, thresholds, or maximum.",
+        "Rendered as smart micro charts; title and subtitle come from the chart's Title and Description."
+      ],
+      "examples": [
+        {
+          "title": "A bullet micro chart facet",
+          "language": "xml",
+          "code": "<Annotation Term=\"UI.Chart\" Qualifier=\"BudgetBullet\">\n  <Record Type=\"UI.ChartDefinitionType\">\n    <PropertyValue Property=\"Title\" String=\"Budget\" />\n    <PropertyValue Property=\"ChartType\" EnumMember=\"UI.ChartType/Bullet\" />\n    <PropertyValue Property=\"Measures\">\n      <Collection>\n        <PropertyPath>SpentAmount</PropertyPath>\n      </Collection>\n    </PropertyValue>\n    <PropertyValue Property=\"MeasureAttributes\">\n      <Collection>\n        <Record Type=\"UI.ChartMeasureAttributeType\">\n          <PropertyValue Property=\"Measure\" PropertyPath=\"SpentAmount\" />\n          <PropertyValue Property=\"Role\" EnumMember=\"UI.ChartMeasureRoleType/Axis1\" />\n          <PropertyValue Property=\"DataPoint\" AnnotationPath=\"@UI.DataPoint#SpentAmount\" />\n        </Record>\n      </Collection>\n    </PropertyValue>\n  </Record>\n</Annotation>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-header-smart-controls-editable-related-apps",
+      "level": "basic",
+      "title": "What else can the object page header do: smart controls in the header, editable header fields, and the related apps button?",
+      "description": "Smart controls in the header: header facets are rendered with smart controls, so they get the same intelligence as the rest of the page: smart micro charts for charts, smart links for fields with a semantic object (which open a navigation popover), contact quick views, and value formatting from the metadata (units, currencies, texts). Editable header fields: by default, header content is display-only, and the header fields cannot be changed in edit mode. With editableHeaderContent: true in the object page settings, Fiori elements adds a Header section to the page in edit mode, which shows the header's title, description and field groups as editable fields (data points are not editable), so users can change them like any other data. Related apps button: with showRelatedApps: true in the object page settings, the header toolbar shows a Related Apps button, which lists other apps (intents) available for the object's semantic object, so users can jump to related apps for the same object, with the object's key passed as a parameter.",
+      "keyPoints": [
+        "Header facets use smart controls: smart micro charts, smart links, quick views, metadata-based formatting.",
+        "editableHeaderContent: true adds an editable Header section in edit mode (title, description, field groups).",
+        "showRelatedApps: true adds a Related Apps button listing apps for the object's semantic object.",
+        "Both are object page settings in manifest.json."
+      ],
+      "examples": [
+        {
+          "title": "Object page settings",
+          "language": "json",
+          "code": "{\n  \"sap.ui.generic.app\": {\n    \"pages\": [\n      {\n        \"entitySet\": \"C_SalesOrder\",\n        \"component\": { \"name\": \"sap.suite.ui.generic.template.ListReport\", \"list\": true },\n        \"pages\": [\n          {\n            \"entitySet\": \"C_SalesOrder\",\n            \"component\": {\n              \"name\": \"sap.suite.ui.generic.template.ObjectPage\",\n              \"settings\": {\n                \"editableHeaderContent\": true,\n                \"showRelatedApps\": true\n              }\n            }\n          }\n        ]\n      }\n    ]\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-sections-advanced",
+      "level": "basic",
+      "title": "How can sections be adapted: increased table height, IDs for collection facets, contact and address facets, chart facets, and see more / see less?",
+      "description": "Increased height: if the object page has only one section with just one table (or uses tabs for sections and a section has only one table), Fiori elements makes the section and table use the available space: a grid table (sap.ui.table) fills the page height, and a responsive table shows 20 rows. IDs for collection facets: every UI.CollectionFacet (and ReferenceFacet) should get an ID property; IDs make the section's control IDs stable, and they are needed to reference the section from extensions, manifest settings, and UI adaptation. Contact facet: a ReferenceFacet in UI.Facets that targets a Communication.Contact annotation shows a contact card section (name, role, phone, e-mail). Address facet in sections: a ReferenceFacet targeting Communication.Address shows a formatted address. Chart facet: a ReferenceFacet targeting a UI.Chart (usually of a navigation property) shows a smart chart in the section, and DataFieldForAction records in the chart's Actions add buttons to its toolbar. See more / see less: a reference facet annotated with UI.PartOfPreview = false is hidden at first, and the subsection shows a Show More link that reveals it (and Show Less to hide it again), which keeps long sections short.",
+      "keyPoints": [
+        "One section with one table: the table grows (grid table fills the page; responsive table shows 20 rows).",
+        "Give collection (and reference) facets an ID for stable control IDs, extensions, and adaptation.",
+        "ReferenceFacets can target Communication.Contact, Communication.Address, or a UI.Chart (chart actions in the toolbar).",
+        "UI.PartOfPreview = false hides a facet behind Show More / Show Less."
+      ],
+      "examples": [
+        {
+          "title": "A contact section and a facet behind Show More",
+          "language": "xml",
+          "code": "<Annotation Term=\"UI.Facets\">\n  <Collection>\n    <Record Type=\"UI.CollectionFacet\">\n      <PropertyValue Property=\"ID\" String=\"PartnerSection\" />\n      <PropertyValue Property=\"Label\" String=\"Partners\" />\n      <PropertyValue Property=\"Facets\">\n        <Collection>\n          <Record Type=\"UI.ReferenceFacet\">\n            <PropertyValue Property=\"Label\" String=\"Contact\" />\n            <PropertyValue Property=\"Target\" AnnotationPath=\"to_Contact/@Communication.Contact\" />\n          </Record>\n          <Record Type=\"UI.ReferenceFacet\">\n            <PropertyValue Property=\"Label\" String=\"Additional Data\" />\n            <PropertyValue Property=\"Target\" AnnotationPath=\"@UI.FieldGroup#Additional\" />\n            <Annotation Term=\"UI.PartOfPreview\" Bool=\"false\" />\n          </Record>\n        </Collection>\n      </PropertyValue>\n    </Record>\n  </Collection>\n</Annotation>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-ui-hidden-datafields",
+      "level": "basic",
+      "title": "How do you hide content with UI.Hidden in quick views and DataField records (header facets, facets, smart tables)?",
+      "description": "Besides hiding whole facets and sections, UI.Hidden can hide single fields wherever they are shown through DataField records. In quick views: the content of a quick view (the popover that opens from a smart link) comes from annotations of the target entity, such as UI.QuickViewFacets; fields in it can be hidden with UI.Hidden. In header facets: a DataField inside a field group used in UI.HeaderFacets is hidden with a UI.Hidden annotation on that record. In facets (sections): a DataField in a field group shown as a form can be hidden the same way. In smart tables: a DataField in UI.LineItem with UI.Hidden is not shown as a column (and the property is not offered as a column in personalization). In all these places, the value can be static (Bool=\"true\") or dynamic (Path to a Boolean property), so the field can depend on the object's data. Annotating the property itself with UI.Hidden hides it everywhere it would be shown, while annotating a DataField record hides it only in that one place.",
+      "keyPoints": [
+        "UI.Hidden on a DataField record hides that field only where the record is used.",
+        "Works in quick views, header facet field groups, form facets, and table line items (no column).",
+        "Static (Bool) or dynamic (Path to a Boolean) values.",
+        "UI.Hidden on the property itself hides it everywhere."
+      ],
+      "examples": [
+        {
+          "title": "Hiding a field in a header field group and a table column",
+          "language": "xml",
+          "code": "<Annotation Term=\"UI.FieldGroup\" Qualifier=\"HeaderGeneral\">\n  <Record Type=\"UI.FieldGroupType\">\n    <PropertyValue Property=\"Data\">\n      <Collection>\n        <Record Type=\"UI.DataField\">\n          <PropertyValue Property=\"Value\" Path=\"SalesOrganization\" />\n        </Record>\n        <Record Type=\"UI.DataField\">\n          <PropertyValue Property=\"Value\" Path=\"InternalReference\" />\n          <Annotation Term=\"UI.Hidden\" Path=\"IsInternalReferenceHidden\" />\n        </Record>\n      </Collection>\n    </PropertyValue>\n  </Record>\n</Annotation>\n<Annotation Term=\"UI.LineItem\">\n  <Collection>\n    <Record Type=\"UI.DataField\">\n      <PropertyValue Property=\"Value\" Path=\"TechnicalStatus\" />\n      <Annotation Term=\"UI.Hidden\" Bool=\"true\" />\n    </Record>\n  </Collection>\n</Annotation>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-save-navigation-options",
+      "level": "basic",
+      "title": "What save and navigation options does the object page offer?",
+      "description": "By default, when users create, edit and save a draft or non-draft object, they stay on the object page: after Save, the page switches back to display mode and shows the saved object, with a success message. A few manifest settings change this. navToListOnSave: true in the object page's settings returns the user to the list report after saving, which suits apps where users process many objects one after another. editFlow: \"display\" in the list report's settings controls how the object page is opened from the list (in display mode first). Other related options are the confirmation popups: showConfirmationOnDraftActivate: true shows a popup with warnings from the back end before a draft is activated, so the user can decide whether to save anyway, and draftDiscardConfirmationSettings (in sap.ui.generic.app/settings) controls when a confirmation is shown before a draft is discarded, for example when the user leaves the page. Navigation inside the app also includes the next/previous buttons on subobject pages, and the back navigation of the launchpad, which keeps the list report's state (filters, scroll position) through the app state.",
+      "keyPoints": [
+        "Default: after Save, the user stays on the object page in display mode.",
+        "navToListOnSave: true (object page settings) returns to the list report after saving.",
+        "editFlow in the list report settings controls how the object page opens.",
+        "showConfirmationOnDraftActivate and draftDiscardConfirmationSettings control confirmation popups."
+      ],
+      "examples": [
+        {
+          "title": "Save and navigation settings",
+          "language": "json",
+          "code": "{\n  \"sap.ui.generic.app\": {\n    \"settings\": {\n      \"draftDiscardConfirmationSettings\": { \"enabled\": \"restricted\" }\n    },\n    \"pages\": {\n      \"ListReport|C_SalesOrder\": {\n        \"entitySet\": \"C_SalesOrder\",\n        \"component\": {\n          \"name\": \"sap.suite.ui.generic.template.ListReport\",\n          \"list\": true,\n          \"settings\": { \"editFlow\": \"display\" }\n        },\n        \"pages\": {\n          \"ObjectPage|C_SalesOrder\": {\n            \"entitySet\": \"C_SalesOrder\",\n            \"component\": {\n              \"name\": \"sap.suite.ui.generic.template.ObjectPage\",\n              \"settings\": {\n                \"navToListOnSave\": true,\n                \"showConfirmationOnDraftActivate\": true\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-delete-dialog",
+      "level": "basic",
+      "title": "How do you adapt the text of the Delete dialog on the object page, including for a nested smart table?",
+      "description": "The object page has two delete situations. Deleting the whole object with the Delete button in the header shows a confirmation dialog like \"Delete object 4711?\", where the object's name comes from UI.HeaderInfo/Title. Deleting items in a nested smart table (a table of related items in a section, in edit mode) shows a dialog for the selected items. Both texts can be adapted. The default texts are framework i18n texts, which the app can override in its own i18n texts for the object page (with the corresponding keys, such as ST_GENERIC_DELETE_SELECTED for deleting selected items). For dynamic texts, for example mentioning consequences that depend on the object, the object page's controller extension (registered for sap.suite.ui.generic.template.ObjectPage.view.Details) implements beforeDeleteExtension, which returns an object with the texts to show (title, text, and others), in the same way as on the list report; the SAP documentation describes both cases, for the object page header and for the nested smart table, as app extensions. As with all app extensions, use them only when i18n overrides are not enough.",
+      "keyPoints": [
+        "Two cases: deleting the whole object (header Delete) and deleting items of a nested smart table.",
+        "The object name comes from UI.HeaderInfo/Title; default texts are framework i18n texts that apps can override.",
+        "Dynamic texts: beforeDeleteExtension in the ObjectPage.view.Details controller extension returns the texts.",
+        "Prefer i18n overrides; use extensions only when needed."
+      ],
+      "examples": [
+        {
+          "title": "Registering the object page controller extension",
+          "language": "json",
+          "code": "{\n  \"sap.ui5\": {\n    \"extends\": {\n      \"extensions\": {\n        \"sap.ui.controllerExtensions\": {\n          \"sap.suite.ui.generic.template.ObjectPage.view.Details\": {\n            \"controllerName\": \"my.app.ext.controller.ObjectPageExt\"\n          }\n        }\n      }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "op-multi-input",
+      "level": "basic",
+      "title": "How is the smart multi-input control enabled on the object page?",
+      "description": "A multi-input field shows several values of a 1:n relationship in one form field, as tokens, like the list of tags of a product or the supported materials of an equipment, instead of needing a separate table section. Users can add values (by typing or with a value help) and remove them by deleting tokens, in edit mode. In Fiori elements, it is not enabled with a setting, but recognized from the data model: if a DataField in a field group (form) points through a 1:n association (navigation property) to a property, like Value Path=\"to_Tags/TagName\", Fiori elements renders it as a multi-input field automatically. So the requirements are a 1:n association in the service, a DataField with a path through that association, and, for a good input experience, a value help (Common.ValueList) on the target property. In edit mode, adding a token creates an entry in the associated entity set, and removing one deletes it, so the service must allow create and delete for it. Field control (like Mandatory) can also be applied.",
+      "keyPoints": [
+        "A multi-input field shows the values of a 1:n relationship as tokens in one form field.",
+        "Enabled automatically when a DataField's path goes through a 1:n association (like to_Tags/TagName).",
+        "Add a value help (Common.ValueList) on the target property for a good input experience.",
+        "Adding/removing tokens creates/deletes entries in the associated entity set."
+      ],
+      "examples": [
+        {
+          "title": "A DataField through a 1:n association",
+          "language": "xml",
+          "code": "<Annotation Term=\"UI.FieldGroup\" Qualifier=\"AdditionalInformation\">\n  <Record Type=\"UI.FieldGroupType\">\n    <PropertyValue Property=\"Data\">\n      <Collection>\n        <Record Type=\"UI.DataField\">\n          <PropertyValue Property=\"Label\" String=\"Tags\" />\n          <PropertyValue Property=\"Value\" Path=\"to_Tags/TagName\" />\n        </Record>\n      </Collection>\n    </PropertyValue>\n  </Record>\n</Annotation>"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

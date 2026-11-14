@@ -7,6 +7,13 @@
 >
   <!-- The question itself is the page title in the shell header; Previous / Next live in the shell footer. -->
   <VBox id="detailContent" class="prPage">
+    <HBox visible="{= !!${topic>level} }" class="prCard">
+      <ObjectStatus
+        text="{parts: [{path: 'topic>level'}, {path: 'i18n>levelElementary'}, {path: 'i18n>levelBasic'}], formatter: '.formatter.levelText'}"
+        state="{path: 'topic>level', formatter: '.formatter.levelState'}"
+        inverted="true"
+      />
+    </HBox>
     <!-- Self-test mode: the answer stays hidden until the user asks for it. -->
     <Panel
       class="prCard"

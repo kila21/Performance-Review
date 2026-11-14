@@ -1,0 +1,246 @@
+{
+  "topicId": "fe-list-report",
+  "title": "FE: List Report features",
+  "questions": [
+    {
+      "id": "lr-main-elements",
+      "level": "elementary",
+      "title": "What are the main elements of the list report, and what is each one for?",
+      "description": "The list report floorplan lets users find, filter, and act on a large list of business objects. It has four main elements. The header (dynamic page title) shows variant management, where users choose and save views of their filter and table settings, or the app title when variant management is hidden; it can collapse while scrolling. The smart filter bar, in the header area, holds the filter fields defined by UI.SelectionFields (plus any field the user adds through Adapt Filters), the optional basic search field, and the Go button (or live update); it decides which data is loaded. The smart table, in the content area, shows the result list, with columns from UI.LineItem, a toolbar with the title and item count, generic and app-specific actions, personalization and export, and navigation from each row to the object page. The footer toolbar is shown only when there is something for it, typically determining actions (UI.DataFieldForAction with Determining=true), which act on the selected items, and the message button. Together, they support the typical flow: filter, scan the results, select, and act or drill down.",
+      "keyPoints": [
+        "Header: variant management (or the app title), collapses on scroll.",
+        "Smart filter bar: filter fields (UI.SelectionFields + Adapt Filters), basic search, Go.",
+        "Smart table: UI.LineItem columns, toolbar with count and actions, personalization, export, row navigation.",
+        "Footer toolbar: determining actions and messages, shown only when needed."
+      ],
+      "examples": [
+        {
+          "title": "Annotations behind the filter bar and table",
+          "language": "xml",
+          "code": "<Annotations Target=\"SALES_SRV.C_SalesOrderType\">\n  <Annotation Term=\"UI.SelectionFields\">\n    <Collection>\n      <PropertyPath>SalesOrderID</PropertyPath>\n      <PropertyPath>CustomerID</PropertyPath>\n      <PropertyPath>Status</PropertyPath>\n    </Collection>\n  </Annotation>\n  <Annotation Term=\"UI.LineItem\">\n    <Collection>\n      <Record Type=\"UI.DataField\">\n        <PropertyValue Property=\"Value\" Path=\"SalesOrderID\" />\n      </Record>\n      <Record Type=\"UI.DataField\">\n        <PropertyValue Property=\"Value\" Path=\"GrossAmount\" />\n      </Record>\n    </Collection>\n  </Annotation>\n</Annotations>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "lr-enable-variant-management",
+      "level": "elementary",
+      "title": "How do you enable (and configure) variant management in the list report?",
+      "description": "Variant management lets users save their current filter values and table settings (visible columns, sorting, grouping, filters in the table) as named views, choose a default view, mark favorites, and share views with others. In a Fiori elements V2 list report, it is available by default. It is configured with smartVariantManagement in the list report's settings in manifest.json. With smartVariantManagement: true, there is page-level variant management: one variant selector in the page title stores the filter bar and the table together, which is the recommended setup. With false, the filter bar and the table each get their own variant management (control level). enableTableFilterInPageVariant: true additionally stores filters that the user set directly on the table in the page variant. To remove variant management completely, use variantManagementHidden: true. Saved variants are stored by SAPUI5 flexibility (in the layered repository), public variants are visible to other users, and key users can also define standard variants for everyone.",
+      "keyPoints": [
+        "Variants save filter values and table settings as named, shareable views.",
+        "smartVariantManagement: true = one page-level variant for filter bar and table (recommended).",
+        "false = separate control-level variants; enableTableFilterInPageVariant includes table filters.",
+        "variantManagementHidden: true removes it; variants are stored by SAPUI5 flexibility."
+      ],
+      "examples": [
+        {
+          "title": "Page-level variant management",
+          "language": "json",
+          "code": "{\n  \"sap.ui.generic.app\": {\n    \"pages\": [\n      {\n        \"entitySet\": \"C_SalesOrder\",\n        \"component\": {\n          \"name\": \"sap.suite.ui.generic.template.ListReport\",\n          \"list\": true,\n          \"settings\": {\n            \"smartVariantManagement\": true,\n            \"enableTableFilterInPageVariant\": true\n          }\n        }\n      }\n    ]\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "lr-actions",
+      "level": "elementary",
+      "title": "How do you add actions to the list report: app-specific actions, generic Create/Delete, personalization, and line item actions?",
+      "description": "The list report table toolbar combines several kinds of actions. App-specific actions are back-end operations (function imports) added with a UI.DataFieldForAction record in the entity's UI.LineItem annotation; they are shown as text buttons (text only, no icons, per SAP Fiori guidelines) in the table toolbar and are enabled when the user selects one or more rows (if the action is bound to the entity). Generic actions come from the framework: Create (opens a new object page, a new draft in draft apps) and Delete (deletes the selected items after a confirmation), shown when the entity set allows them, and hidden with UI.CreateHidden / UI.DeleteHidden or the service's sap:creatable / sap:deletable. Generic personalization is the table settings button, where users choose columns, sort, filter and group, and the export to spreadsheet button; it is available automatically. Actions for line items: a DataFieldForAction with Inline=true appears as a button in each row, acting on that row only, and a DataFieldForAction with Determining=true appears in the footer toolbar. Actions with no back-end operation are added as custom actions in the manifest (in the list report's controller extension, under Actions), with a press handler implemented in the controller extension.",
+      "keyPoints": [
+        "App-specific actions: UI.DataFieldForAction in UI.LineItem; text-only toolbar buttons, enabled by selection.",
+        "Generic Create and Delete from the framework; hide with UI.CreateHidden / UI.DeleteHidden or service restrictions.",
+        "Generic personalization (table settings) and export are built in.",
+        "Line item actions: Inline=true (button in each row), Determining=true (footer); custom actions via manifest + controller extension."
+      ],
+      "examples": [
+        {
+          "title": "Toolbar action, inline action, and a custom action",
+          "language": "xml",
+          "code": "<Annotation Term=\"UI.LineItem\">\n  <Collection>\n    <Record Type=\"UI.DataFieldForAction\">\n      <PropertyValue Property=\"Label\" String=\"Approve\" />\n      <PropertyValue Property=\"Action\" String=\"SALES_SRV.SALES_SRV_Entities/Approve\" />\n    </Record>\n    <Record Type=\"UI.DataFieldForAction\">\n      <PropertyValue Property=\"Label\" String=\"Copy\" />\n      <PropertyValue Property=\"Action\" String=\"SALES_SRV.SALES_SRV_Entities/Copy\" />\n      <PropertyValue Property=\"Inline\" Bool=\"true\" />\n    </Record>\n  </Collection>\n</Annotation>"
+        },
+        {
+          "title": "A custom action in the manifest",
+          "language": "json",
+          "code": "{\n  \"sap.ui5\": {\n    \"extends\": {\n      \"extensions\": {\n        \"sap.ui.controllerExtensions\": {\n          \"sap.suite.ui.generic.template.ListReport.view.ListReport\": {\n            \"controllerName\": \"my.app.ext.controller.ListReportExt\",\n            \"sap.ui.generic.app\": {\n              \"C_SalesOrder\": {\n                \"EntitySet\": \"C_SalesOrder\",\n                \"Actions\": {\n                  \"remind\": {\n                    \"id\": \"remindButton\",\n                    \"text\": \"{@i18n>remind}\",\n                    \"press\": \"onRemind\",\n                    \"requiresSelection\": true\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "lr-external-navigation",
+      "level": "elementary",
+      "title": "How do you add external navigation from the list report: via a smart link, a button, or a link?",
+      "description": "External navigation means jumping from the list report to another app, through the SAP Fiori launchpad's intent-based navigation (a semantic object and an action), so no URLs are hard-coded. There are three ways. Via a smart link: annotate a property with Common.SemanticObject (like Customer); its values in the table become links that open a popover with the available target apps for that semantic object (the ones the user is authorized for), plus a quick view of the object; a click navigates there and passes the row's context. Via a button: a UI.DataFieldForIntentBasedNavigation record in UI.LineItem, with SemanticObject and Action, adds a button to the table toolbar that navigates to that specific app for the selected row (with Inline=true, as a button in each row). Via a link: a UI.DataFieldWithIntentBasedNavigation record shows a column value as a link that navigates directly to the given intent, without a popover; a UI.DataFieldWithUrl shows a link to a URL. The launchpad's target mappings decide which app is started, and the parameters are filled from the row's properties.",
+      "keyPoints": [
+        "External navigation uses intents (semantic object + action) resolved by the launchpad.",
+        "Smart link: Common.SemanticObject on a property gives a link with a popover of target apps.",
+        "Button: UI.DataFieldForIntentBasedNavigation in UI.LineItem (toolbar, or Inline per row).",
+        "Link: UI.DataFieldWithIntentBasedNavigation (direct link to one intent); DataFieldWithUrl for URLs."
+      ],
+      "examples": [
+        {
+          "title": "All three variants",
+          "language": "xml",
+          "code": "<Annotations Target=\"SALES_SRV.C_SalesOrderType/CustomerID\">\n  <Annotation Term=\"Common.SemanticObject\" String=\"Customer\" />\n</Annotations>\n\n<Annotations Target=\"SALES_SRV.C_SalesOrderType\">\n  <Annotation Term=\"UI.LineItem\">\n    <Collection>\n      <Record Type=\"UI.DataFieldForIntentBasedNavigation\">\n        <PropertyValue Property=\"Label\" String=\"Display Delivery\" />\n        <PropertyValue Property=\"SemanticObject\" String=\"OutboundDelivery\" />\n        <PropertyValue Property=\"Action\" String=\"display\" />\n      </Record>\n      <Record Type=\"UI.DataFieldWithIntentBasedNavigation\">\n        <PropertyValue Property=\"Value\" Path=\"ProductID\" />\n        <PropertyValue Property=\"SemanticObject\" String=\"Product\" />\n        <PropertyValue Property=\"Action\" String=\"display\" />\n      </Record>\n    </Collection>\n  </Annotation>\n</Annotations>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "lr-custom-filter-fields",
+      "level": "elementary",
+      "title": "How do you add custom fields to the smart filter bar of a list report?",
+      "description": "When a filter cannot be described by annotations, for example a filter on a calculated value or a special control like a slider or a segmented button, you add a custom filter field through an extension. First, in the manifest's view extensions for the list report, you register a fragment under the extension point SmartFilterBarControlConfigurationExtension|<entitySet>. The fragment contains a smartfilterbar:ControlConfiguration with a key, a label, visibleInAdvancedArea, and your control in customControl. Second, in the list report's controller extension, you turn the field's value into a real filter: implement onBeforeRebindTableExtension(event), read the value from your control, and add an sap.ui.model.Filter to the binding parameters (bindingParams.filters), or a custom query parameter. Third, so that the field also works with variants and app states (saving, sharing, back navigation), implement getCustomAppStateDataExtension(customData) to store the value, and restoreCustomAppStateDataExtension(customData) to restore it. Without the last step, the custom filter value would be lost when a variant is loaded or the user navigates back.",
+      "keyPoints": [
+        "Register a fragment at SmartFilterBarControlConfigurationExtension|<entitySet> in the manifest.",
+        "The fragment has a ControlConfiguration (key, label, visibleInAdvancedArea) with a customControl.",
+        "onBeforeRebindTableExtension adds the value as a Filter to bindingParams.filters.",
+        "getCustomAppStateDataExtension / restoreCustomAppStateDataExtension keep the value in variants and app states."
+      ],
+      "examples": [
+        {
+          "title": "Manifest and fragment",
+          "language": "json",
+          "code": "{\n  \"sap.ui5\": {\n    \"extends\": {\n      \"extensions\": {\n        \"sap.ui.viewExtensions\": {\n          \"sap.suite.ui.generic.template.ListReport.view.ListReport\": {\n            \"SmartFilterBarControlConfigurationExtension|C_SalesOrder\": {\n              \"className\": \"sap.ui.core.Fragment\",\n              \"fragmentName\": \"my.app.ext.fragment.PriorityFilter\",\n              \"type\": \"XML\"\n            }\n          }\n        },\n        \"sap.ui.controllerExtensions\": {\n          \"sap.suite.ui.generic.template.ListReport.view.ListReport\": {\n            \"controllerName\": \"my.app.ext.controller.ListReportExt\"\n          }\n        }\n      }\n    }\n  }\n}"
+        },
+        {
+          "title": "The controller extension",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/ui/model/Filter\",\n  \"sap/ui/model/FilterOperator\"\n], function (Filter, FilterOperator) {\n  \"use strict\";\n  return {\n    onBeforeRebindTableExtension: function (event) {\n      const bindingParams = event.getParameter(\"bindingParams\");\n      const priority = this.byId(\"priorityFilter\").getSelectedKey();\n      if (priority) {\n        bindingParams.filters.push(new Filter(\"Priority\", FilterOperator.EQ, priority));\n      }\n    },\n    getCustomAppStateDataExtension: function (customData) {\n      customData.priority = this.byId(\"priorityFilter\").getSelectedKey();\n    },\n    restoreCustomAppStateDataExtension: function (customData) {\n      this.byId(\"priorityFilter\").setSelectedKey(customData.priority || \"\");\n    }\n  };\n});"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "lr-without-variant-management",
+      "level": "basic",
+      "title": "How do you create a list report without variant management and set up a title instead?",
+      "description": "Some apps do not need saved views, for example simple apps with only a few filters. Then the list report can be created without variant management. In manifest.json, set variantManagementHidden: true in the settings of the list report component. The variant selector is then removed from the page title, and the application's title is shown there instead. If the title should be different from the app title, add the key subTitleIfVariantMgmtHidden to the app's i18n file with the text you want, for example subTitleIfVariantMgmtHidden=Open Sales Orders. If variantManagementHidden is false or not set, variant management is available as usual (and controlled by smartVariantManagement). Note that without variant management, users can no longer save and share their filter and table settings, and key users cannot define standard views, so hide it only when that is really not needed.",
+      "keyPoints": [
+        "Set variantManagementHidden: true in the list report component's settings.",
+        "The variant selector is removed and the app title is shown instead.",
+        "A custom title comes from the i18n key subTitleIfVariantMgmtHidden.",
+        "Without it, users cannot save or share views; hide it only when not needed."
+      ],
+      "examples": [
+        {
+          "title": "Manifest setting",
+          "language": "json",
+          "code": "{\n  \"sap.ui.generic.app\": {\n    \"pages\": [\n      {\n        \"entitySet\": \"C_SalesOrder\",\n        \"component\": {\n          \"name\": \"sap.suite.ui.generic.template.ListReport\",\n          \"list\": true,\n          \"settings\": {\n            \"variantManagementHidden\": true\n          }\n        }\n      }\n    ]\n  }\n}"
+        },
+        {
+          "title": "Custom title in i18n.properties",
+          "language": "properties",
+          "code": "subTitleIfVariantMgmtHidden=Open Sales Orders"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "lr-multiple-views-single-table",
+      "level": "basic",
+      "title": "How do you add multiple views to a list report table in single table mode (segmented button)?",
+      "description": "Multiple views let users switch between predefined subsets of the data in the list report, like All, Open, and Overdue orders, without changing the filters. In single table mode, there is one table, and the user switches between views with a segmented button in the table toolbar (with more than three views, a select control is shown instead); each view applies its own filter (and optionally sorting or columns) to the same table. To set it up, first define the views as annotations on the entity type: a UI.SelectionVariant with a qualifier (like #Expensive) and a Text, describing the filter, or a UI.SelectionPresentationVariant if the view should also change the presentation (like a different UI.LineItem or sort order). Then, in manifest.json, add quickVariantSelection to the list report settings, with a variants object listing each view with a key and the annotationPath of its variant, like com.sap.vocabularies.UI.v1.SelectionVariant#Expensive. With showCounts: true, each view shows the number of its items.",
+      "keyPoints": [
+        "Single table mode: one table, views switched with a segmented button (select for more than three).",
+        "Define each view as a UI.SelectionVariant (or SelectionPresentationVariant) with a qualifier and Text.",
+        "manifest: quickVariantSelection.variants with key + annotationPath for each view.",
+        "showCounts: true shows the number of items per view."
+      ],
+      "examples": [
+        {
+          "title": "quickVariantSelection in the manifest",
+          "language": "json",
+          "code": "{\n  \"sap.ui.generic.app\": {\n    \"pages\": [\n      {\n        \"entitySet\": \"C_SalesOrder\",\n        \"component\": {\n          \"name\": \"sap.suite.ui.generic.template.ListReport\",\n          \"list\": true,\n          \"settings\": {\n            \"quickVariantSelection\": {\n              \"showCounts\": true,\n              \"variants\": {\n                \"0\": {\n                  \"key\": \"_tab1\",\n                  \"annotationPath\": \"com.sap.vocabularies.UI.v1.SelectionVariant#Expensive\"\n                },\n                \"1\": {\n                  \"key\": \"_tab2\",\n                  \"annotationPath\": \"com.sap.vocabularies.UI.v1.SelectionVariant#Cheap\"\n                }\n              }\n            }\n          }\n        }\n      }\n    ]\n  }\n}"
+        },
+        {
+          "title": "A selection variant annotation",
+          "language": "xml",
+          "code": "<Annotation Term=\"UI.SelectionVariant\" Qualifier=\"Expensive\">\n  <Record>\n    <PropertyValue Property=\"Text\" String=\"Expensive\" />\n    <PropertyValue Property=\"SelectOptions\">\n      <Collection>\n        <Record Type=\"UI.SelectOptionType\">\n          <PropertyValue Property=\"PropertyName\" PropertyPath=\"GrossAmount\" />\n          <PropertyValue Property=\"Ranges\">\n            <Collection>\n              <Record Type=\"UI.SelectionRangeType\">\n                <PropertyValue Property=\"Sign\" EnumMember=\"UI.SelectionRangeSignType/I\" />\n                <PropertyValue Property=\"Option\" EnumMember=\"UI.SelectionRangeOptionType/GE\" />\n                <PropertyValue Property=\"Low\" String=\"5000\" />\n              </Record>\n            </Collection>\n          </PropertyValue>\n        </Record>\n      </Collection>\n    </PropertyValue>\n  </Record>\n</Annotation>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "lr-multiple-views-multiple-tables",
+      "level": "basic",
+      "title": "How do you add multiple views in multiple table mode (icon tab bar, charts, different entity sets)?",
+      "description": "In multiple table mode, each view has its own table (or chart), and the user switches between them with an icon tab bar above the content. This is more flexible than single table mode: each tab can show a different presentation (different columns, sorting, or table settings), a tab can show a chart instead of a table, and tabs can even show data from different entity sets. It is configured with quickVariantSelectionX in the list report settings. Its variants object lists the tabs, each with a key, an annotationPath pointing to a UI.SelectionVariant or a UI.SelectionPresentationVariant (the PresentationVariant decides whether a table (UI.LineItem) or a chart (UI.Chart) is shown), and optionally an entitySet; if no entity set is given, the list report's main entity set is used. showCounts adds the number of items to each tab title, and each tab is loaded only when it is selected. Because every tab has its own table, users can also have different column settings per tab. All tabs share the same filter bar.",
+      "keyPoints": [
+        "Multiple table mode: one table or chart per view, switched with an icon tab bar.",
+        "Configured with quickVariantSelectionX.variants (key, annotationPath, optional entitySet).",
+        "A SelectionPresentationVariant decides table (LineItem) or chart (UI.Chart); tabs can use different entity sets.",
+        "showCounts shows item counts; all tabs share the filter bar."
+      ],
+      "examples": [
+        {
+          "title": "quickVariantSelectionX with a chart and another entity set",
+          "language": "json",
+          "code": "{\n  \"sap.ui.generic.app\": {\n    \"pages\": [\n      {\n        \"entitySet\": \"C_SalesOrder\",\n        \"component\": {\n          \"name\": \"sap.suite.ui.generic.template.ListReport\",\n          \"list\": true,\n          \"settings\": {\n            \"quickVariantSelectionX\": {\n              \"showCounts\": true,\n              \"variants\": {\n                \"0\": {\n                  \"key\": \"_tab1\",\n                  \"annotationPath\": \"com.sap.vocabularies.UI.v1.SelectionPresentationVariant#OpenOrders\"\n                },\n                \"1\": {\n                  \"key\": \"_tab2\",\n                  \"annotationPath\": \"com.sap.vocabularies.UI.v1.SelectionPresentationVariant#RevenueChart\"\n                },\n                \"2\": {\n                  \"key\": \"_tab3\",\n                  \"entitySet\": \"C_SalesOrderItem\",\n                  \"annotationPath\": \"com.sap.vocabularies.UI.v1.SelectionVariant#Items\"\n                }\n              }\n            }\n          }\n        }\n      }\n    ]\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "lr-disable-editing-status-filter",
+      "level": "basic",
+      "title": "How do you disable the Editing Status filter in a list report?",
+      "description": "In draft-enabled apps, the list report's filter bar contains an Editing Status filter by default, which lets users filter by All, Own Drafts, Locked by Another User, Unsaved Changes by Another User, and No Changes. If an app does not want it, it is disabled with an annotation, not with a manifest setting: the entity set gets a Capabilities.NavigationRestrictions annotation, whose RestrictedProperties contain a NavigationPropertyRestriction for the navigation property DraftAdministrativeData with FilterRestrictions Filterable = false. Because the editing status filter is based on the draft administrative data, making it non-filterable removes the filter from the filter bar. The same can be expressed in ABAP CDS with the corresponding capabilities annotation. The editing status of each row is still shown in the table; only the filter is removed.",
+      "keyPoints": [
+        "Draft apps show an Editing Status filter in the list report by default.",
+        "It is disabled with an annotation, not a manifest setting.",
+        "Capabilities.NavigationRestrictions: DraftAdministrativeData with FilterRestrictions/Filterable = false.",
+        "The editing status in the table rows is still shown."
+      ],
+      "examples": [
+        {
+          "title": "Disabling the filter",
+          "language": "xml",
+          "code": "<Annotations Target=\"SALES_SRV.SALES_SRV_Entities/C_SalesOrder\">\n  <Annotation Term=\"Capabilities.NavigationRestrictions\">\n    <Record Type=\"Capabilities.NavigationRestrictionsType\">\n      <PropertyValue Property=\"RestrictedProperties\">\n        <Collection>\n          <Record Type=\"Capabilities.NavigationPropertyRestriction\">\n            <PropertyValue Property=\"NavigationProperty\" NavigationPropertyPath=\"DraftAdministrativeData\" />\n            <PropertyValue Property=\"FilterRestrictions\">\n              <Record Type=\"Capabilities.FilterRestrictionsType\">\n                <PropertyValue Property=\"Filterable\" Bool=\"false\" />\n              </Record>\n            </PropertyValue>\n          </Record>\n        </Collection>\n      </PropertyValue>\n    </Record>\n  </Annotation>\n</Annotations>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "lr-smart-filter-bar-adaptation",
+      "level": "basic",
+      "title": "What are the adaptation possibilities of the smart filter bar: adding filters and enabling search?",
+      "description": "The filter fields shown by default in a list report come from the UI.SelectionFields annotation of the entity type, in the given order. Every other filterable property is still available: users add it to the filter bar through Adapt Filters (the filter dialog), where they can search all fields, select which ones are visible, and enter values; their choice is stored in variants. Which properties can be filtered at all is controlled by the service (sap:filterable in V2, or Capabilities.FilterRestrictions), and properties can be marked as mandatory filters (sap:required-in-filter or RequiredProperties), restricted to single values or intervals, or given a value help (Common.ValueList, or a dropdown with ValueListWithFixedValues). Default values for filter fields can be provided with a UI.SelectionVariant or the Common.FilterDefaultValue annotation. Search: the filter bar shows a basic search field (a free-text search over the searchable fields) when the root entity set is marked as searchable, with sap:searchable=\"true\" in the V2 metadata. Key users can additionally adapt the filter bar with UI adaptation, and developers can add custom filter fields through an extension.",
+      "keyPoints": [
+        "Default filter fields come from UI.SelectionFields; users add others via Adapt Filters (stored in variants).",
+        "Filterability, mandatory filters, single/interval restrictions and value helps come from the service and annotations.",
+        "Default values: UI.SelectionVariant or Common.FilterDefaultValue.",
+        "Basic search appears when the root entity set has sap:searchable=\"true\" (V2)."
+      ],
+      "examples": [
+        {
+          "title": "Searchable entity set and a filter default",
+          "language": "xml",
+          "code": "<EntitySet Name=\"C_SalesOrder\" EntityType=\"SALES_SRV.C_SalesOrderType\"\n  sap:searchable=\"true\" xmlns:sap=\"http://www.sap.com/Protocols/SAPData\" />\n\n<Annotations Target=\"SALES_SRV.C_SalesOrderType/Status\">\n  <Annotation Term=\"Common.FilterDefaultValue\" String=\"O\" />\n</Annotations>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "lr-delete-dialog",
+      "level": "basic",
+      "title": "How do you configure the Delete dialog box on the list report (adapting its text)?",
+      "description": "When users delete items from the list report, Fiori elements asks for confirmation in a Delete dialog, with a text like \"Delete object 500000000?\". The object's name in that text is taken from the Title of the UI.HeaderInfo annotation of the entity, so a meaningful HeaderInfo title (like the order number or a name) already makes the text clearer. To change the default text itself, override the framework's i18n key ST_GENERIC_DELETE_SELECTED in the app's i18n texts for the list report (in V2, texts for the templates are adapted through the app's own i18n files registered for the list report or object page). For full control, for example a different title, text, or a warning that depends on the selected items, implement beforeDeleteExtension in the list report's controller extension: it receives information about the items selected for deletion and returns an object with the texts to use, with the properties title, text, unsavedChanges and undeletableText (it can also return a promise, and can be combined with extensionAPI.securedExecution). The dialog also mentions unsaved changes when selected items have drafts by other users.",
+      "keyPoints": [
+        "The Delete dialog asks for confirmation; the object name comes from UI.HeaderInfo/Title.",
+        "Change the default text by overriding the i18n key ST_GENERIC_DELETE_SELECTED.",
+        "Full control: beforeDeleteExtension in the list report controller extension returns the texts to show.",
+        "The dialog also warns about unsaved changes of other users."
+      ],
+      "examples": [
+        {
+          "title": "beforeDeleteExtension",
+          "language": "javascript",
+          "code": "sap.ui.define([], function () {\n  \"use strict\";\n  return {\n    // controller extension of sap.suite.ui.generic.template.ListReport.view.ListReport\n    // beforeDeleteProperties contains information about the items selected for deletion\n    beforeDeleteExtension: function (beforeDeleteProperties) {\n      return {\n        title: \"Delete Sales Orders\",\n        text: \"Delete the selected sales orders? Their deliveries will also be cancelled.\",\n        unsavedChanges: \"Some of these orders have unsaved changes by other users.\",\n        undeletableText: \"Some of the selected orders cannot be deleted.\"\n      };\n    }\n  };\n});"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

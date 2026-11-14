@@ -1,0 +1,256 @@
+{
+  "topicId": "routing",
+  "title": "Routing",
+  "questions": [
+    {
+      "id": "hash-in-route",
+      "level": "elementary",
+      "title": "What is the purpose of the # sign in a route, and how does the browser react when it changes?",
+      "description": "In a URL like https://host/app/index.html#/products/42, the part after the # is the hash (also called the fragment). The browser never sends the hash to the server, and changing it does not reload the page; it only adds an entry to the browser history and fires a hashchange event. Single-page apps, including SAPUI5 apps, use this to represent where the user is in the app: the hash stores the current \"page\" (like products/42), so every screen has its own URL. UI5's router listens to hash changes (through the HashChanger): when the hash changes, it finds the route whose pattern matches, and shows the targets (views) of that route, without loading the page again. Because each screen is part of the URL, the user can bookmark it, share the link, reload the page and land on the same screen, and use the browser's Back and Forward buttons, which simply move between hashes. Inside the SAP Fiori launchpad, the hash also contains the app's intent, like #Product-display, and the app's own route comes after an & / part, like #Product-display&/products/42. The alternative technique is the History API (pushState, URLs without #), but it needs server configuration so that every URL returns index.html; UI5 uses hash-based routing by default because it works without any server setup. In the launchpad, UI5 uses the shell's own HashChanger, so the intent part and the app part of the hash do not interfere.",
+      "keyPoints": [
+        "The hash is the URL part after #; it is not sent to the server and does not reload the page.",
+        "Changing it adds a browser history entry and fires a hashchange event.",
+        "The UI5 router maps the hash to a route and shows that route's views.",
+        "This enables bookmarks, shareable links, reloads, and Back/Forward navigation.",
+        "In the launchpad: #Intent-action&/app-route; the shell's HashChanger keeps both parts apart."
+      ],
+      "examples": [
+        {
+          "title": "Hashes and what they show",
+          "language": "text",
+          "code": "index.html#                   -> route \"home\"       (pattern \"\")\nindex.html#/products/42       -> route \"product\"    (pattern \"products/{productId}\")\nindex.html#/products/42?tab=2 -> route \"product\"    with a query parameter\n\nIn the SAP Fiori launchpad:\n#Product-display&/products/42  -> app intent, then the app's own route"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "router-config-property",
+      "level": "elementary",
+      "title": "What is the config property in the manifest's routing section?",
+      "description": "The routing configuration in manifest.json (under sap.ui5/routing) has three parts: config, routes and targets. config holds the default settings shared by all targets, so you do not repeat them for every target; a target can still override any of them. Typical settings are: routerClass (for sap.m apps, sap.m.routing.Router, which supports page transitions), type (\"View\") and viewType (\"XML\"), path (the namespace where the views are, like my.app.view), controlId (the ID of the container control that shows the views, like app), controlAggregation (the aggregation of that control that receives the views, like pages for an sap.m.App), transition (the default animation, like slide), clearControlAggregation (whether the container is emptied before a view is added), and bypassed (what to show when no route matches, like {\"target\": \"notFound\"}). With async: true (needed for older manifest versions; asynchronous is the only mode in manifest version 2), views are loaded asynchronously. The container named in controlId is usually defined in the root view (App.view.xml). The router class depends on the container: sap.ui.core.routing.Router for plain containers without animation, sap.m.routing.Router for App, NavContainer and SplitApp (supports transitions), and sap.f.routing.Router for the FlexibleColumnLayout (handles the three columns). Note on syntax versions: the modern target keys are type / name / path; older apps use viewType / viewName / viewPath. Both work, but new code should use the first form.",
+      "keyPoints": [
+        "config holds default settings for all targets; a target can override them.",
+        "routerClass (sap.m.routing.Router), type, viewType, path (views' namespace).",
+        "controlId + controlAggregation: which container shows the views, like app / pages.",
+        "Also: transition, clearControlAggregation, bypassed (no route matched), async.",
+        "Router classes: sap.ui.core.routing.Router (plain), sap.m.routing.Router (App/NavContainer/SplitApp), sap.f.routing.Router (FlexibleColumnLayout).",
+        "Modern keys: type / name / path; older: viewType / viewName / viewPath."
+      ],
+      "examples": [
+        {
+          "title": "A routing config",
+          "language": "json",
+          "code": "{\n  \"sap.ui5\": {\n    \"routing\": {\n      \"config\": {\n        \"routerClass\": \"sap.m.routing.Router\",\n        \"type\": \"View\",\n        \"viewType\": \"XML\",\n        \"path\": \"my.app.view\",\n        \"controlId\": \"app\",\n        \"controlAggregation\": \"pages\",\n        \"transition\": \"slide\",\n        \"async\": true,\n        \"bypassed\": { \"target\": \"notFound\" }\n      },\n      \"routes\": [],\n      \"targets\": {}\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "route-patterns-parameters",
+      "level": "elementary",
+      "title": "How are routes defined, and what is the syntax for mandatory, optional and query parameters?",
+      "description": "Each entry in the routes array of the routing configuration has a name (used in code, like navTo(\"product\")), a pattern (what the hash must look like), and a target (or several) to display. The pattern can contain parameters, which become the route's arguments. A mandatory parameter is written in curly braces: \"products/{productId}\" matches #/products/42 and gives the argument productId = \"42\"; without it, the route does not match. An optional parameter is written between colons: \"products/:productId:\" matches both #/products and #/products/42. Query parameters (key=value pairs after a ?) are declared with a question mark inside the braces: \"products{?query}\" makes the query mandatory, and \"products:?query:\" makes it optional; the argument \"?query\" is then an object, like { tab: \"info\" } for ?tab=info. There is also a rest parameter, written with a star, like \":all*:\", which matches everything that follows (including slashes). Routes are checked in the order they are defined, and the first match wins, so more specific patterns should come first. The empty pattern \"\" is the start page. In the route-matched handler, all parameters are read with event.getParameter(\"arguments\"). When to use which: a mandatory parameter for what the screen cannot exist without (the key of the displayed object), an optional parameter for a filter or view mode with a sensible default, and query parameters for state that is additional, not identifying (sorting, paging, an open tab). Query parameters arrive under the literal key \"?query\", which surprises everyone the first time. Because the first match wins, a catch-all route like \":all*:\" must be the last route.",
+      "keyPoints": [
+        "A route has a name, a pattern, and one or more targets.",
+        "Mandatory parameter: {productId}; optional: :productId:.",
+        "Query: {?query} (mandatory) or :?query: (optional); the argument \"?query\" is an object of key/values.",
+        "Rest parameter :all*: matches the remaining hash; the first matching route wins; \"\" is the start page.",
+        "Mandatory = the object's key; optional = filter/view mode; query = extra state (sorting, paging, tab).",
+        "A catch-all route (\":all*:\") must be the last one."
+      ],
+      "examples": [
+        {
+          "title": "Routes with parameters",
+          "language": "json",
+          "code": "{\n  \"routes\": [\n    { \"name\": \"home\", \"pattern\": \"\", \"target\": \"home\" },\n    { \"name\": \"productList\", \"pattern\": \"products:?query:\", \"target\": \"productList\" },\n    { \"name\": \"product\", \"pattern\": \"products/{productId}\", \"target\": \"product\" },\n    { \"name\": \"order\", \"pattern\": \"orders/:orderId:\", \"target\": \"order\" }\n  ]\n}"
+        },
+        {
+          "title": "Reading the arguments",
+          "language": "javascript",
+          "code": "// #/products/42\nonInit: function () {\n  this.getOwnerComponent().getRouter()\n    .getRoute(\"product\")\n    .attachPatternMatched(this._onProductMatched, this);\n},\n\n_onProductMatched: function (event) {\n  const args = event.getParameter(\"arguments\");\n  console.log(args.productId); // \"42\"\n}"
+        },
+        {
+          "title": "Reading all kinds of arguments (TypeScript)",
+          "language": "typescript",
+          "code": "private onRouteMatched(event: Route$PatternMatchedEvent): void {\n  const args = event.getParameter(\"arguments\") as {\n    id: string;\n    category?: string;\n    \"?query\"?: { sortBy?: string; page?: string };\n  };\n\n  const id = args.id;                       // mandatory\n  const category = args.category;           // optional - may be undefined\n  const query = args[\"?query\"] ?? {};       // note the key name!\n  const sortBy = query.sortBy;\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "route-targets",
+      "level": "elementary",
+      "title": "What does the targets property define, what are controlId and controlAggregation, and which transitions exist?",
+      "description": "A target describes what to display and where. In the targets object of the routing configuration, each target has a key (referenced by routes), and settings such as the view's name (and optionally its id and level), plus where to put it: controlId is the ID of the container control (for example the sap.m.App or NavContainer in the root view, or a SplitApp), and controlAggregation is that container's aggregation that receives the view, for example pages for an App, or masterPages / detailPages for a SplitApp. If these are not set in the target, the defaults from config are used. When a route matches, the router creates (or reuses) the target's view and places it into that aggregation. For containers that switch between pages, like App and NavContainer, the target (or config) can define the transition animation: slide (the default), baseSlide, show (no animation), flip, or fade, plus any custom transitions registered on the container. The level of a target can also be used to decide the direction of the slide animation (forward or back). A target can also have a parent target, to place a view inside another view. The aggregations per container are: pages for sap.m.App and NavContainer, masterPages and detailPages for sap.m.SplitApp, beginColumnPages, midColumnPages and endColumnPages for sap.f.FlexibleColumnLayout, and content for a sap.m.Page. Other useful target keys are clearControlAggregation (remove existing content first) and title (used for the browser tab title and the launchpad history). A route can display several targets at once, like \"target\": [\"master\", \"detail\"]. Transition notes: slide is direction-aware (UI5 decides with the routing history), transitionParameters like { \"duration\": 300 } fine-tune it, show is a good choice for error pages and the first view so the app does not animate on startup, and in a FlexibleColumnLayout the column animation is handled by the layout itself.",
+      "keyPoints": [
+        "A target defines which view to show (name, id, level) and where.",
+        "controlId: the container control (like the App in the root view); controlAggregation: its aggregation (like pages).",
+        "Settings not given in a target are taken from config.",
+        "Transitions for App/NavContainer: slide (default), baseSlide, show, flip, fade.",
+        "Aggregations: App/NavContainer pages; SplitApp masterPages/detailPages; FCL begin/mid/endColumnPages.",
+        "A route can show several targets: \"target\": [\"master\", \"detail\"]. Use show for error pages and the first view."
+      ],
+      "examples": [
+        {
+          "title": "Targets",
+          "language": "json",
+          "code": "{\n  \"targets\": {\n    \"home\": {\n      \"id\": \"home\",\n      \"name\": \"Home\",\n      \"level\": 1\n    },\n    \"product\": {\n      \"id\": \"product\",\n      \"name\": \"Product\",\n      \"level\": 2,\n      \"transition\": \"flip\"\n    },\n    \"notFound\": {\n      \"id\": \"notFound\",\n      \"name\": \"NotFound\",\n      \"transition\": \"show\"\n    }\n  }\n}"
+        },
+        {
+          "title": "The container in the root view",
+          "language": "xml",
+          "code": "<mvc:View controllerName=\"my.app.controller.App\" xmlns=\"sap.m\" xmlns:mvc=\"sap.ui.core.mvc\">\n  <App id=\"app\" />  <!-- controlId \"app\", controlAggregation \"pages\" -->\n</mvc:View>"
+        },
+        {
+          "title": "Several targets, a nested target and transitions",
+          "language": "json",
+          "code": "\"routes\": [\n  { \"name\": \"detail\", \"pattern\": \"detail/{id}\", \"target\": [\"master\", \"detail\"] }\n],\n\"targets\": {\n  \"detail\":   { \"id\": \"detail\", \"name\": \"Detail\", \"transition\": \"slide\", \"transitionParameters\": { \"duration\": 300 } },\n  \"notFound\": { \"id\": \"notFound\", \"name\": \"NotFound\", \"transition\": \"show\" },\n  \"chart\": {\n    \"id\": \"chart\",\n    \"name\": \"ChartView\",\n    \"parent\": \"detail\",\n    \"controlId\": \"detailPage\",\n    \"controlAggregation\": \"content\"\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "nav-to",
+      "level": "elementary",
+      "title": "How do you navigate in code with the router's navTo method?",
+      "description": "To navigate from code, for example when the user presses a list item, you call navTo on the router: this.getOwnerComponent().getRouter().navTo(routeName, parameters, componentTargetInfo, replace). (The older three-argument form navTo(routeName, parameters, replace) is still accepted: a boolean in the third position is treated as replace, but the four-argument form is clearer.) routeName is the name of a route from the manifest. parameters is an object with the values for the pattern's parameters, like { productId: \"42\" } for the pattern products/{productId}; query parameters are passed under the key \"?query\" as an object, like { \"?query\": { tab: \"reviews\" } }. If all mandatory parameters are not given, the hash cannot be built. replace is a boolean: when true, the new hash replaces the current history entry instead of adding a new one, so the browser's Back button will not return to the current screen; this is useful for redirects, like replacing an empty start hash with a default page. navTo only changes the hash; the router then reacts to the hash change as usual and shows the route's targets. This means you should never show views manually when the user moves between screens, but always navigate, so the URL stays in sync. A common helper in a BaseController is getRouter(), using UIComponent.getRouterFor(this). replace: true is essential after a create or save; without it, pressing Back returns the user to the screen they just finished. Encode values that may contain / or # with encodeURIComponent, otherwise the hash breaks. To show a view without changing the URL (for example an error page), use the lower-level API this.getRouter().getTargets().display(\"notFound\").",
+      "keyPoints": [
+        "navTo(routeName, parameters, componentTargetInfo, replace) changes the hash to the given route (older code: navTo(name, params, replace)).",
+        "parameters fills the pattern, like { productId: \"42\" }; query values go under \"?query\".",
+        "replace: true replaces the history entry instead of adding one (no Back to the current screen).",
+        "navTo only changes the hash; the router then displays the matching targets.",
+        "Use replace after create/save; encodeURIComponent values that may contain / or #.",
+        "getTargets().display(\"name\") shows a target without changing the hash."
+      ],
+      "examples": [
+        {
+          "title": "Navigating from a list item press",
+          "language": "javascript",
+          "code": "onProductPress: function (event) {\n  const product = event.getSource().getBindingContext().getObject();\n  this.getOwnerComponent().getRouter().navTo(\"product\", {\n    productId: product.ProductID,\n    \"?query\": { tab: \"reviews\" }\n  });\n  // hash becomes: #/products/42?tab=reviews\n},\n\nonStart: function () {\n  // redirect without leaving a history entry\n  this.getOwnerComponent().getRouter().navTo(\"home\", {}, true);\n}"
+        },
+        {
+          "title": "All navTo variants (TypeScript)",
+          "language": "typescript",
+          "code": "this.getRouter().navTo(\"main\");                                   // no parameters\nthis.getRouter().navTo(\"detail\", { id: \"HT-1000\" });               // mandatory parameter\nthis.getRouter().navTo(\"list\", {});                                // optional parameter omitted\nthis.getRouter().navTo(\"list\", { category: \"laptops\" });           // optional parameter given\nthis.getRouter().navTo(\"search\", {                                  // query parameters\n  term: \"laptop\",\n  \"?query\": { sortBy: \"price\", page: \"2\" }\n});\nthis.getRouter().navTo(\"main\", {}, undefined, true);                // replace the history entry\n\n// from a list row\npublic onItemPress(event: ListBase$ItemPressEvent): void {\n  const id = event.getParameter(\"listItem\").getBindingContext().getProperty(\"ID\");\n  this.getRouter().navTo(\"detail\", { id: encodeURIComponent(id) });\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "router-events",
+      "level": "elementary",
+      "title": "What are the main Router events (routePatternMatched, routeMatched, and patternMatched / matched on a Route), and when do you use them?",
+      "description": "The router and each route fire events when a hash matches, so controllers can load the right data. On the Router, routePatternMatched is fired when the hash matches the pattern of one of its routes; it is fired once per navigation, for the route that actually matched, and its parameters include the route's name and arguments. routeMatched is fired too, but also when the hash matches a sub-route or nested route of a route (for example in nested components), so for a normal app routePatternMatched is the more precise one. On a single Route (router.getRoute(\"product\")), the matching events are patternMatched (only when this route's own pattern matched) and matched (also for its sub-routes or nested routes). The most common use is in a detail controller's onInit: router.getRoute(\"product\").attachPatternMatched(this._onMatched, this); the handler reads event.getParameter(\"arguments\") and binds the view to the right object. Using the route's event instead of the router's means the handler only runs for that one route. There are also before... events (beforeRouteMatched, beforeMatched), and the router's bypassed event, which is fired when no route matches. The router also fires titleChanged when the title of a displayed target changes. matched vs. patternMatched is a favorite review question: with nested routes, navigating to #/products/1/reviews fires matched on the parent route products/{id} and on products/{id}/reviews, but patternMatched only on products/{id}/reviews. So use patternMatched for data binding (you want it exactly once, for the screen the user is really on), and matched when a parent must also react, for example to keep a master list item highlighted. A common bug is using attachMatched for bindElement and then wondering why the detail view re-binds when a sub-route opens. The global routeMatched event is a good place for analytics or logging.",
+      "keyPoints": [
+        "Router.routePatternMatched: the hash matched a route's own pattern; parameters: name, arguments.",
+        "Router.routeMatched: also fires for matched sub-routes / nested routes.",
+        "Route.patternMatched (own pattern only) and Route.matched (including sub-routes) for one specific route.",
+        "Typical: attachPatternMatched in a detail controller's onInit to bind data from the arguments.",
+        "Nested routes: matched fires on parent and child, patternMatched only on the route really hit; bind data in patternMatched.",
+        "routeMatched (global) for analytics/logging; bypassed for unknown hashes; titleChanged for target titles."
+      ],
+      "examples": [
+        {
+          "title": "Reacting to one route and to all routes",
+          "language": "javascript",
+          "code": "onInit: function () {\n  const router = this.getOwnerComponent().getRouter();\n\n  // only for the \"product\" route\n  router.getRoute(\"product\").attachPatternMatched(this._onProductMatched, this);\n\n  // for every route, for example to track the current page\n  router.attachRoutePatternMatched(function (event) {\n    console.log(\"now on route\", event.getParameter(\"name\"));\n  });\n},\n\n_onProductMatched: function (event) {\n  const id = event.getParameter(\"arguments\").productId;\n  this.getView().bindElement(\"/Products('\" + id + \"')\");\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "nav-back-history",
+      "level": "elementary",
+      "title": "How do navigation back and the history work?",
+      "description": "Because every screen of a routed app is a hash, the browser's history contains the user's path through the app, and the browser's Back button simply goes to the previous hash. For an in-app back button (like showNavButton on a Page), the recommended approach uses sap/ui/core/routing/History: History.getInstance(). getPreviousHash() returns the previous hash inside the app. If it is not undefined, the user came from another screen of the app, so you call window.history.go(-1), which behaves exactly like the browser's Back button. If it is undefined, the user opened this screen directly (for example from a bookmark or a shared link), and going back in the browser would leave the app; instead, you navigate to a sensible parent screen with navTo, using replace: true, so no extra history entry is created. This logic is usually written once, as onNavBack in a BaseController. History.getInstance().getDirection() can also tell whether the last navigation was forwards, backwards, or a new entry. Inside the SAP Fiori launchpad, cross-app back navigation is handled by the shell. getPreviousHash() returns undefined when there is no previous hash inside this app: the user arrived by bookmark, deep link, or from the launchpad. getDirection() returns Backwards, Forwards, NewEntry or Unknown, which UI5 itself uses to decide whether slide animates left or right. In the SAP Fiori launchpad, the shell has its own back button that moves between apps, separate from your in-app back button, and both must work.",
+      "keyPoints": [
+        "The browser history holds the visited hashes; Back returns to the previous hash.",
+        "History.getInstance().getPreviousHash() tells whether there is a previous screen inside the app.",
+        "If there is one: window.history.go(-1); if not: navTo(parentRoute, {}, true).",
+        "Put this in a BaseController's onNavBack, used by all pages' back buttons.",
+        "getDirection(): Backwards | Forwards | NewEntry | Unknown. The launchpad shell back button is separate; both must work."
+      ],
+      "examples": [
+        {
+          "title": "onNavBack in a BaseController",
+          "language": "javascript",
+          "code": "sap.ui.define([\n  \"sap/ui/core/mvc/Controller\",\n  \"sap/ui/core/routing/History\",\n  \"sap/ui/core/UIComponent\"\n], function (Controller, History, UIComponent) {\n  \"use strict\";\n\n  return Controller.extend(\"my.app.controller.BaseController\", {\n    onNavBack: function () {\n      const previousHash = History.getInstance().getPreviousHash();\n      if (previousHash !== undefined) {\n        window.history.go(-1);\n      } else {\n        UIComponent.getRouterFor(this).navTo(\"home\", {}, true);\n      }\n    }\n  });\n});"
+        }
+      ],
+      "assignment": {
+        "task": "Write onNavBack(fallbackRoute) for a BaseController that goes back in the browser history when there is a previous hash, and otherwise navigates to fallbackRoute (default \"home\") without adding a history entry.",
+        "starterCode": "onNavBack: function (fallbackRoute) {\n  // your code here\n}",
+        "solution": "onNavBack: function (fallbackRoute) {\n  const previousHash = History.getInstance().getPreviousHash();\n  if (previousHash !== undefined) {\n    window.history.go(-1);\n  } else {\n    this.getOwnerComponent().getRouter().navTo(fallbackRoute || \"home\", {}, true);\n  }\n}"
+      }
+    },
+    {
+      "id": "not-found-handling",
+      "level": "elementary",
+      "title": "How do you catch invalid hashes and show a Not Found page?",
+      "description": "If the user opens a hash that matches no route (a typo, an old bookmark), the app should show a friendly Not Found page instead of an empty screen. The routing config supports this with the bypassed setting: \"bypassed\": { \"target\": \"notFound\" } in config tells the router to display the notFound target whenever no route matches; the router also fires its bypassed event, with the unmatched hash. You then create a simple NotFound view, typically with an IllustratedMessage (or a MessagePage in older code) and a button to go back to the start page. A second case is a hash that matches a route, but whose data does not exist, like #/products/999999: the route is fine, but the product is not. Here the detail controller detects the problem (for example in the dataReceived event, when no data came back) and displays the Not Found target without changing the hash: router.getTargets().display(\"notFound\"). Keeping the hash lets the user see and correct the wrong URL. Make sure every route's pattern is specific enough, and that a catch-all route, if you have one, is defined last. Besides bypassed, a catch-all route ({ \"name\": \"catchall\", \"pattern\": \":all*:\", \"target\": \"notFound\" }, defined last) gives the case a route name; a good app uses both. The \"object not found\" case is the one people forget: the hash is valid and the route matched, so bypassed does not fire, but the ID does not exist. sap.m.MessagePage is deprecated; use sap.m.IllustratedMessage inside a Page for the standard Fiori empty-state look.",
+      "keyPoints": [
+        "config.bypassed: { \"target\": \"notFound\" } shows a target when no route matches.",
+        "The router's bypassed event also fires for unmatched hashes.",
+        "For a valid route with missing data: router.getTargets().display(\"notFound\") without changing the hash.",
+        "Use an IllustratedMessage (or MessagePage) with a way back to the start page.",
+        "A catch-all route (:all*:, last) is an alternative to bypassed; MessagePage is deprecated in favor of IllustratedMessage."
+      ],
+      "examples": [
+        {
+          "title": "Displaying the Not Found target for missing data",
+          "language": "javascript",
+          "code": "_onProductMatched: function (event) {\n  const id = event.getParameter(\"arguments\").productId;\n  this.getView().bindElement({\n    path: \"/Products('\" + id + \"')\",\n    events: {\n      dataReceived: function (dataEvent) {\n        if (!dataEvent.getParameter(\"data\")) {\n          this.getOwnerComponent().getRouter().getTargets().display(\"notFound\");\n        }\n      }.bind(this)\n    }\n  });\n}"
+        },
+        {
+          "title": "Detecting a missing object (TypeScript)",
+          "language": "typescript",
+          "code": "private onObjectMatched(event: Route$PatternMatchedEvent): void {\n  const id = (event.getParameter(\"arguments\") as { id: string }).id;\n  this.getView().bindElement({\n    path: `/Products('${id}')`,\n    events: {\n      change: () => {\n        if (!this.getView().getBindingContext()) {\n          this.getRouter().getTargets().display(\"objectNotFound\");   // hash stays unchanged\n        }\n      },\n      dataReceived: (e: Event) => {\n        if (!e.getParameter(\"data\")) {\n          this.getRouter().getTargets().display(\"objectNotFound\");\n        }\n      }\n    }\n  });\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "spa-routing-general",
+      "level": "basic",
+      "title": "How does routing work in a single-page application (SPA) in general?",
+      "description": "A single-page application loads one HTML page once, and then changes what is shown with JavaScript, instead of loading a new page from the server for every screen. Without routing, the URL would never change, so the user could not bookmark a screen, share a link, reload without losing their place, or use the browser's Back button. Routing solves this by keeping the URL in sync with what is on the screen. There are two common techniques. Hash-based routing uses the part after # (like #/products/42): changing it never reloads the page, and the browser keeps it in its history; this is what SAPUI5 uses, and it needs no special server configuration. History-API routing uses pushState to change the path itself (like /products/42), which looks cleaner, but the server must then answer every such path with the app's single page. In both cases, a router maps URL patterns to screens: when the URL changes (by a link, by code, or by Back / Forward), the router finds the matching route, extracts its parameters, and shows the right view with the right data. Navigation in code then means \"change the URL\", and the router does the rest. UI5 uses hash-based routing on purpose: UI5 apps are deployed to an ABAP repository, to SAP BTP behind an HTML5 app router, or into the launchpad, and hash routing works in all three without server rewrite rules. In one sentence, routing gives the user deep links, bookmarks, and a working back button.",
+      "keyPoints": [
+        "An SPA loads one page and switches screens with JavaScript instead of loading new pages.",
+        "Routing keeps the URL in sync with the screen: bookmarks, links, reloads and Back/Forward work.",
+        "Hash-based routing (#/products/42) needs no server setup; SAPUI5 uses it. The History API (pushState) needs server support.",
+        "A router maps URL patterns to views and passes the URL parameters to them.",
+        "Hash routing works on ABAP, BTP (app router) and the launchpad without server rewrite rules."
+      ],
+      "examples": [
+        {
+          "title": "The idea of a router, in plain JavaScript",
+          "language": "javascript",
+          "code": "const routes = {\n  \"\": showHome,\n  \"products\": showProductList\n};\n\nfunction onHashChange() {\n  const hash = window.location.hash.replace(/^#\\/?/, \"\");\n  const [page, id] = hash.split(\"/\");\n  if (page === \"products\" && id) {\n    showProduct(id);           // a route with a parameter\n  } else if (routes[page]) {\n    routes[page]();\n  } else {\n    showNotFound();            // like UI5's \"bypassed\"\n  }\n}\n\nwindow.addEventListener(\"hashchange\", onHashChange);\nonHashChange(); // like router.initialize(): handle the hash the page was opened with"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "router-initialize",
+      "level": "basic",
+      "title": "What happens after initialize() is called on the router?",
+      "description": "The router is created by the component from the manifest's routing configuration, but it does nothing until initialize() is called, usually at the end of the Component's init: this.getRouter().initialize(). When initialize runs, the router first starts listening to hash changes through the HashChanger, so from now on every change of the hash is handled. Then it takes the current hash, the one the app was opened with (empty for the start page, or a bookmarked hash like #/products/42), and processes it right away, as if the user had just navigated there; with initialize(true) (ignoreInitialHash), this first hash is skipped. For the hash, the router goes through the routes in their defined order and takes the first one whose pattern matches. If none matches, it displays the bypassed target and fires bypassed. For the matching route, it extracts the arguments from the hash, fires the before... events, and displays the route's targets: it creates the target views (asynchronously, the first time; later they are reused from a cache) and places them into the configured container control and aggregation, with the configured transition. Finally, it fires the matched and patternMatched events of the route and the router's routeMatched and routePatternMatched events, so the controllers can bind their data. Calling stop() stops listening again. The order matters: the parent init (super.init()) creates the router from the manifest but does not start it, so initialize() must come after it. This is what makes deep links work: nothing is displayed for a bookmarked #/detail/HT-1000 until initialize() reads that hash. initialize(true) is used when the app must do something first (check authorization, load configuration) and then navigate itself. The component destroys the router automatically when the app closes; router.stop() (stop reacting, keep the instance) is used for example in a nested component that must not react to the parent's hash, and router.destroy() destroys the router and its views.",
+      "keyPoints": [
+        "initialize() starts listening to hash changes (HashChanger).",
+        "It immediately processes the current (initial) hash; initialize(true) ignores it.",
+        "The first route whose pattern matches is used; no match shows the bypassed target.",
+        "The route's target views are created (cached afterwards) and placed into controlId/controlAggregation, then the matched events fire.",
+        "Call it after super.init(); this is what makes deep links work.",
+        "initialize(true) when the app must check something first; stop() for nested components; the component destroys the router itself."
+      ],
+      "examples": [
+        {
+          "title": "Where initialize is called",
+          "language": "javascript",
+          "code": "// Component.js\ninit: function () {\n  UIComponent.prototype.init.apply(this, arguments); // creates the router from manifest.json\n  this.getRouter().initialize();                      // start routing: handle the current hash\n}"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

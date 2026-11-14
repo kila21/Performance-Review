@@ -1,0 +1,171 @@
+{
+  "topicId": "fe-tables",
+  "title": "FE: Tables features",
+  "questions": [
+    {
+      "id": "tables-config-basic",
+      "level": "elementary",
+      "title": "How are tables configured in Fiori elements: table type, header, multiple selection, and line item actions?",
+      "description": "Table type: the tableType setting chooses how the line items are rendered: ResponsiveTable (default, sap.m.Table, with pop-in on small screens), GridTable (sap.ui.table.Table, for many rows and columns), AnalyticalTable (for aggregated data from an analytical service; do not use it if the service is not an aggregate service), and TreeTable (hierarchies). It can be set for the list report and for each object page table section. Table header: the title of the table comes from UI.HeaderInfo/TypeNamePlural (like \"Sales Orders\"), shown with the item count; in the manifest, header sets a different text and headerVisible hides it. Multiple selection: by default users select one row; multiSelect: true lets them select several rows (with checkboxes), so actions and Delete can act on all of them. Line item actions: UI.DataFieldForAction records in UI.LineItem appear in the table toolbar and act on the selected rows (bound actions need a selection); with Inline=true, the action appears as a button in each row, acting on that row, and DataFieldForIntentBasedNavigation adds navigation buttons in the same way.",
+      "keyPoints": [
+        "tableType: ResponsiveTable (default), GridTable, AnalyticalTable (aggregate services only), TreeTable.",
+        "The header comes from UI.HeaderInfo/TypeNamePlural with the count; manifest header / headerVisible change it.",
+        "multiSelect: true allows selecting several rows.",
+        "Line item actions: DataFieldForAction in UI.LineItem (toolbar, or Inline=true per row)."
+      ],
+      "examples": [
+        {
+          "title": "Table settings in the list report",
+          "language": "json",
+          "code": "{\n  \"sap.ui.generic.app\": {\n    \"pages\": [\n      {\n        \"entitySet\": \"C_SalesOrder\",\n        \"component\": {\n          \"name\": \"sap.suite.ui.generic.template.ListReport\",\n          \"list\": true,\n          \"settings\": {\n            \"tableType\": \"GridTable\",\n            \"multiSelect\": true\n          }\n        }\n      }\n    ]\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "tables-criticality-progress",
+      "level": "elementary",
+      "title": "How do you highlight line items based on criticality, and add a progress indicator to a table?",
+      "description": "Highlighting line items: a table row can be marked with a colored highlight bar (at the start of the row) that shows its criticality, like red for problems and green for completed items. It is defined by annotating the UI.LineItem annotation itself with UI.Criticality, with a Path to a property that contains the criticality of the whole row (0 neutral, 1 negative/red, 2 critical/orange, 3 positive/green). The value is calculated by the back end per row. This is different from the Criticality property of a single DataField, which colors only that cell's value (for example a status shown as an ObjectStatus). Progress indicator: to show a value as a progress bar in a column, define a UI.DataPoint for the property with Visualization set to UI.VisualizationType/Progress, a TargetValue (the 100% value), and optionally a Criticality for its color; then add a UI.DataFieldForAnnotation to the UI.LineItem whose Target points to that data point (like @UI.DataPoint#Progress). The table then renders a progress indicator in each row, showing the value relative to the target.",
+      "keyPoints": [
+        "Row highlight: annotate UI.LineItem itself with UI.Criticality Path=\"RowCriticality\".",
+        "Criticality values: 0 neutral, 1 negative, 2 critical, 3 positive; a DataField's Criticality colors only one cell.",
+        "Progress: a UI.DataPoint with Visualization Progress and TargetValue (+ optional Criticality).",
+        "Add it to UI.LineItem with a UI.DataFieldForAnnotation targeting the data point."
+      ],
+      "examples": [
+        {
+          "title": "Row criticality and a progress column",
+          "language": "xml",
+          "code": "<Annotation Term=\"UI.LineItem\">\n  <Annotation Term=\"UI.Criticality\" Path=\"RowCriticality\" />\n  <Collection>\n    <Record Type=\"UI.DataField\">\n      <PropertyValue Property=\"Value\" Path=\"ProjectName\" />\n    </Record>\n    <Record Type=\"UI.DataFieldForAnnotation\">\n      <PropertyValue Property=\"Label\" String=\"Progress\" />\n      <PropertyValue Property=\"Target\" AnnotationPath=\"@UI.DataPoint#Progress\" />\n    </Record>\n  </Collection>\n</Annotation>\n<Annotation Term=\"UI.DataPoint\" Qualifier=\"Progress\">\n  <Record Type=\"UI.DataPointType\">\n    <PropertyValue Property=\"Value\" Path=\"CompletionPercent\" />\n    <PropertyValue Property=\"TargetValue\" Int=\"100\" />\n    <PropertyValue Property=\"Visualization\" EnumMember=\"UI.VisualizationType/Progress\" />\n  </Record>\n</Annotation>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "tables-op-lr-settings",
+      "level": "elementary",
+      "title": "What are the basic settings for object page tables (title, action buttons) and list report tables (defining line items)?",
+      "description": "List report tables: the columns are defined by the UI.LineItem annotation of the main entity type: an ordered collection of records, mostly UI.DataField (one property per column, with an optional Label, Criticality and importance), plus DataFieldForAction for actions, DataFieldWithIntentBasedNavigation or DataFieldWithUrl for links, and DataFieldForAnnotation for special content (contacts, data points, field groups, charts). A qualified line item (like UI.LineItem#Reduced) can be used by a specific view. Object page tables: a table in an object page section is defined by a ReferenceFacet whose Target points to the UI.LineItem of a navigation property, like to_Item/@UI.LineItem; its columns come from the item entity's line item annotation. The title of an object page table is the Label of that facet (the section or subsection title), and it is shown above the table with the item count. Action buttons in object page tables come from DataFieldForAction records in the item entity's UI.LineItem; they act on the selected items of that table, and generic Create and Delete buttons appear in edit mode (draft apps) when the service allows them. Table settings like tableType or multiSelect for a section are set in the object page's sections settings in the manifest.",
+      "keyPoints": [
+        "List report columns: UI.LineItem of the main entity type (DataField, actions, links, DataFieldForAnnotation).",
+        "Object page table: ReferenceFacet targeting navigation/@UI.LineItem; columns from the item entity's LineItem.",
+        "The object page table's title is the facet's Label, shown with the item count.",
+        "Table actions come from DataFieldForAction in the item LineItem; Create/Delete appear in edit mode."
+      ],
+      "examples": [
+        {
+          "title": "Object page section table with its own settings",
+          "language": "json",
+          "code": "{\n  \"entitySet\": \"C_SalesOrder\",\n  \"component\": {\n    \"name\": \"sap.suite.ui.generic.template.ObjectPage\",\n    \"settings\": {\n      \"sections\": {\n        \"to_Item::com.sap.vocabularies.UI.v1.LineItem\": {\n          \"navigationProperty\": \"to_Item\",\n          \"entitySet\": \"C_SalesOrderItem\",\n          \"tableType\": \"ResponsiveTable\",\n          \"multiSelect\": true\n        }\n      }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "tables-ext-before-rebind-columns",
+      "level": "elementary",
+      "title": "What are the extension points for tables: the onBeforeRebindTableExtension hook and adding columns to responsive tables?",
+      "description": "Controller extension and the before-rebind hook: a controller extension for the list report (sap.suite.ui.generic.template.ListReport.view.ListReport) or the object page (ObjectPage.view.Details) can implement onBeforeRebindTableExtension(event). It is called every time a table is about to load (or reload) its data, and the event's bindingParams parameter lets the app change the request: add filters (for example from a custom filter field), sorters, or parameters like expand or select, or custom URL parameters. It is the standard way to connect custom filters to the table. Adding columns to a responsive table: custom columns that cannot be described by annotations (like a column with a special control) are added through view extensions with two keys: ResponsiveTableColumnsExtension|<EntitySet> for the column header (a fragment with sap.m.Column controls) and ResponsiveTableCellsExtension|<EntitySet> for the cells (a fragment with the cell controls, in the same order), on the list report or object page view. On the object page, the key also includes the section, and in multiple-table mode the view's key. A column extension needs both parts, and the columns should get custom data (p13nData) so they work with personalization.",
+      "keyPoints": [
+        "onBeforeRebindTableExtension(event): change bindingParams (filters, sorters, parameters) before each data request.",
+        "Implemented in the list report or object page controller extension.",
+        "Responsive table columns: ResponsiveTableColumnsExtension|<EntitySet> (headers) + ResponsiveTableCellsExtension|<EntitySet> (cells).",
+        "On the object page, the key includes the section; give columns p13nData for personalization."
+      ],
+      "examples": [
+        {
+          "title": "Column and cell extensions on the list report",
+          "language": "json",
+          "code": "{\n  \"sap.ui5\": {\n    \"extends\": {\n      \"extensions\": {\n        \"sap.ui.viewExtensions\": {\n          \"sap.suite.ui.generic.template.ListReport.view.ListReport\": {\n            \"ResponsiveTableColumnsExtension|C_SalesOrder\": {\n              \"className\": \"sap.ui.core.Fragment\",\n              \"fragmentName\": \"my.app.ext.fragment.RiskColumn\",\n              \"type\": \"XML\"\n            },\n            \"ResponsiveTableCellsExtension|C_SalesOrder\": {\n              \"className\": \"sap.ui.core.Fragment\",\n              \"fragmentName\": \"my.app.ext.fragment.RiskCell\",\n              \"type\": \"XML\"\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "tables-sort-group-contact-multi",
+      "level": "basic",
+      "title": "How do you define the default sort order and groupings, add a contact quick view, and show multiple fields in one column?",
+      "description": "Default sort order and groupings: the initial sorting and grouping of a table are defined with a UI.PresentationVariant on the entity type: SortOrder lists the properties to sort by (with Descending true or false), GroupBy lists the properties to group by, and Visualizations references the UI.LineItem to use; users can still change sorting and grouping through personalization. Contact quick view: a column can show a person (like the sales representative) as a link that opens a contact quick view with their details. Define a Communication.Contact annotation (name, role, phone, e-mail) on the related entity, and add a UI.DataFieldForAnnotation to the table's UI.LineItem whose Target points to it, like to_Contact/@Communication.Contact. Multiple fields in one column: in a responsive table, several properties can be shown stacked in one column (like the product name and its ID). Define a UI.FieldGroup with those fields, and add a UI.DataFieldForAnnotation to UI.LineItem whose Target is that field group, with a Label for the column header. This keeps tables compact on small screens.",
+      "keyPoints": [
+        "UI.PresentationVariant: SortOrder (default sorting), GroupBy (grouping), Visualizations (the LineItem).",
+        "Contact quick view: Communication.Contact + a DataFieldForAnnotation targeting it.",
+        "Multiple fields in one column: a UI.FieldGroup + a DataFieldForAnnotation targeting it (responsive tables).",
+        "Users can still change sorting and grouping through personalization."
+      ],
+      "examples": [
+        {
+          "title": "Default sorting/grouping and a field group column",
+          "language": "xml",
+          "code": "<Annotation Term=\"UI.PresentationVariant\">\n  <Record Type=\"UI.PresentationVariantType\">\n    <PropertyValue Property=\"SortOrder\">\n      <Collection>\n        <Record Type=\"Common.SortOrderType\">\n          <PropertyValue Property=\"Property\" PropertyPath=\"CreatedAt\" />\n          <PropertyValue Property=\"Descending\" Bool=\"true\" />\n        </Record>\n      </Collection>\n    </PropertyValue>\n    <PropertyValue Property=\"GroupBy\">\n      <Collection>\n        <PropertyPath>Status</PropertyPath>\n      </Collection>\n    </PropertyValue>\n    <PropertyValue Property=\"Visualizations\">\n      <Collection>\n        <AnnotationPath>@UI.LineItem</AnnotationPath>\n      </Collection>\n    </PropertyValue>\n  </Record>\n</Annotation>\n<Annotation Term=\"UI.LineItem\">\n  <Collection>\n    <Record Type=\"UI.DataFieldForAnnotation\">\n      <PropertyValue Property=\"Label\" String=\"Product\" />\n      <PropertyValue Property=\"Target\" AnnotationPath=\"@UI.FieldGroup#ProductColumn\" />\n    </Record>\n    <Record Type=\"UI.DataFieldForAnnotation\">\n      <PropertyValue Property=\"Label\" String=\"Sales Contact\" />\n      <PropertyValue Property=\"Target\" AnnotationPath=\"to_Contact/@Communication.Contact\" />\n    </Record>\n  </Collection>\n</Annotation>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "tables-op-advanced",
+      "level": "basic",
+      "title": "Which object page table settings exist for segmented buttons, inline creation, condensed layout, copy/paste from Excel, and delete texts?",
+      "description": "Segmented buttons: a table in an object page section can offer predefined views of its items, like All, Open, and Delivered, as a segmented button in the table toolbar. Define UI.SelectionVariant annotations on the item entity, and add quickVariantSelection with its variants (key and annotationPath) in that section's table settings in the object page settings. Inline creation: with createMode: \"inline\" in the section's settings, pressing Create adds a new empty row directly in the table (in draft apps), instead of navigating to a subobject page, which is faster for simple items. Condensed layout: condensedTableLayout: true makes grid tables use the condensed density, showing more rows in the same space. Copy and paste: tables show a Copy button by default, and editable tables also support pasting data copied from a spreadsheet like Microsoft Excel or from another Fiori elements app: table-level paste creates new rows, and cell-level paste (in grid and responsive tables) updates the selected cells. Only simple data fields can be pasted (not links, images, multi-input fields, or field groups). Delete texts: the confirmation dialog for deleting table lines can be adapted, through the framework's i18n texts overridden by the app or a beforeDeleteExtension.",
+      "keyPoints": [
+        "Segmented buttons: UI.SelectionVariants + quickVariantSelection in the section's table settings.",
+        "createMode: \"inline\" adds new rows directly in the table; condensedTableLayout: true for denser grid tables.",
+        "Copy button by default; editable tables accept paste from Excel (table-level new rows, cell-level updates).",
+        "Only simple fields can be pasted; delete confirmation texts via i18n overrides or beforeDeleteExtension."
+      ],
+      "examples": [
+        {
+          "title": "Section table settings (object page)",
+          "language": "json",
+          "code": "{\n  \"entitySet\": \"C_SalesOrder\",\n  \"component\": {\n    \"name\": \"sap.suite.ui.generic.template.ObjectPage\",\n    \"settings\": {\n      \"sections\": {\n        \"to_Item::com.sap.vocabularies.UI.v1.LineItem\": {\n          \"navigationProperty\": \"to_Item\",\n          \"entitySet\": \"C_SalesOrderItem\",\n          \"createMode\": \"inline\",\n          \"tableType\": \"GridTable\",\n          \"condensedTableLayout\": true,\n          \"quickVariantSelection\": {\n            \"showCounts\": true,\n            \"variants\": {\n              \"0\": { \"key\": \"_open\", \"annotationPath\": \"com.sap.vocabularies.UI.v1.SelectionVariant#Open\" },\n              \"1\": { \"key\": \"_delivered\", \"annotationPath\": \"com.sap.vocabularies.UI.v1.SelectionVariant#Delivered\" }\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "tables-lr-advanced",
+      "level": "basic",
+      "title": "Which list report table settings exist for displaying images, displaying the editing status, and adapting the table content to the space?",
+      "description": "Displaying images: a column shows an image (like a product picture) when its property contains an image URL and is annotated with UI.IsImageUrl; the table renders a small image (in the list report, users can also enlarge it), and text from Common.Text can be used as its alternative text. Displaying the editing status: in draft-enabled apps, the editing status of each row (Draft, Locked by another user, Unsaved changes by another user) is shown automatically. In a responsive table, it appears in the key column (the first column with the semantic key), with a popover that tells who last changed the object and when; in grid, tree and analytical tables, it is shown in a separate column. Adapting the table content to the space: tables adjust to the available width automatically. In a responsive table, columns with lower UI.Importance move into the pop-in area or are hidden on small screens, while High importance columns stay visible; multiple fields can share one column; and column widths are calculated from the field types and lengths. Grid tables keep all columns and scroll horizontally, and their height adapts to the page. So the main tools for small screens are a good choice of table type and correct importance annotations.",
+      "keyPoints": [
+        "Images: annotate the URL property with UI.IsImageUrl; Common.Text gives alternative text.",
+        "Editing status: shown in the key column of responsive tables (with a details popover), or in a separate column in grid/tree/analytical tables.",
+        "Responsive tables adapt via UI.Importance (pop-in or hide less important columns) and calculated column widths.",
+        "Grid tables keep all columns and scroll horizontally."
+      ],
+      "examples": [
+        {
+          "title": "An image column",
+          "language": "xml",
+          "code": "<Annotations Target=\"PRODUCT_SRV.C_ProductType/ProductPictureURL\">\n  <Annotation Term=\"UI.IsImageUrl\" />\n</Annotations>\n<Annotations Target=\"PRODUCT_SRV.C_ProductType\">\n  <Annotation Term=\"UI.LineItem\">\n    <Collection>\n      <Record Type=\"UI.DataField\">\n        <PropertyValue Property=\"Value\" Path=\"ProductPictureURL\" />\n        <PropertyValue Property=\"Label\" String=\"Picture\" />\n      </Record>\n    </Collection>\n  </Annotation>\n</Annotations>"
+        }
+      ],
+      "assignment": null
+    },
+    {
+      "id": "tables-ext-navigation-columns",
+      "level": "basic",
+      "title": "Which table extension points let you replace the standard navigation, navigate to a different entity set, and add columns to grid, analytical, and tree tables?",
+      "description": "Replacing the standard navigation: by default, clicking a row navigates to the object page of that row. A controller extension can change this by implementing onListNavigationExtension(event) in the list report (or object page) controller extension: it receives the event and can navigate somewhere else, for example to another app through the navigation controller of the extension API (this.extensionAPI.getNavigationController().navigateExternal(outbound, parameters), where outbound is the name of an outbound defined in the manifest's sap.app/crossNavigation/outbounds); returning true tells Fiori elements that the navigation was handled, so the standard navigation is skipped. Internal navigation to an object page of a different entity set: a list report can navigate to an object page of another entity, for example from a list of items to the object page of the related header, by changing the navigation target in the manifest or by implementing the navigation in the extension and using navigateInternal of the navigation controller with the target context. Adding columns to other table types: like responsive tables, grid, analytical and tree tables get custom columns through view extensions, with the keys GridTableColumnsExtension|<EntitySet>, AnalyticalTableColumnsExtension|<EntitySet>, and TreeTableColumnsExtension|<EntitySet>. Here one fragment contains sap.ui.table.Column (or sap.ui.table.AnalyticalColumn) controls, each with its header label and cell template inside, so no separate cells extension is needed. On the object page, the key also contains the section's annotation path.",
+      "keyPoints": [
+        "onListNavigationExtension: custom row navigation; return true to skip the standard navigation.",
+        "The extension API's navigation controller offers navigateExternal and navigateInternal.",
+        "Navigation to an object page of another entity set: configure the target or use navigateInternal.",
+        "Grid / analytical / tree columns: GridTableColumnsExtension / AnalyticalTableColumnsExtension / TreeTableColumnsExtension|<EntitySet>, one fragment with column + template."
+      ],
+      "examples": [
+        {
+          "title": "Custom row navigation",
+          "language": "javascript",
+          "code": "sap.ui.define([], function () {\n  \"use strict\";\n  return {\n    // list report controller extension\n    onListNavigationExtension: function (event) {\n      const context = event.getSource().getBindingContext();\n      const customerId = context.getProperty(\"CustomerID\");\n      // \"CustomerDisplay\" is an outbound defined in sap.app/crossNavigation/outbounds\n      this.extensionAPI.getNavigationController().navigateExternal(\"CustomerDisplay\", {\n        CustomerID: customerId\n      });\n      return true; // the standard navigation is not performed\n    }\n  };\n});"
+        },
+        {
+          "title": "A grid table column fragment",
+          "language": "xml",
+          "code": "<core:FragmentDefinition xmlns=\"sap.m\" xmlns:core=\"sap.ui.core\" xmlns:table=\"sap.ui.table\">\n  <table:Column>\n    <Label text=\"Risk\" />\n    <table:template>\n      <ObjectStatus text=\"{RiskText}\" state=\"{RiskState}\" />\n    </table:template>\n  </table:Column>\n</core:FragmentDefinition>"
+        }
+      ],
+      "assignment": null
+    }
+  ]
+}

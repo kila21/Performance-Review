@@ -5,6 +5,22 @@ export function questionCountText(count: number, pattern: string): string {
   return pattern.replace("{0}", String(count));
 }
 
+/** Question level ("elementary" | "basic") -> i18n text; empty when the question has no level. */
+export function levelText(level: string, elementaryText: string, basicText: string): string {
+  if (level === "elementary") {
+    return elementaryText;
+  }
+  if (level === "basic") {
+    return basicText;
+  }
+  return "";
+}
+
+/** Question level -> ObjectStatus state. */
+export function levelState(level: string): string {
+  return level === "elementary" ? "Success" : "Information";
+}
+
 const LINE_HEIGHT_PX = 19;
 const PADDING_PX = 24;
 
