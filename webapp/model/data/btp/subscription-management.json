@@ -1,0 +1,54 @@
+{
+  "topicId": "subscription-management",
+  "title": "Subscription management",
+  "questions": [
+    {
+      "id": "subscription-mgmt-overview",
+      "level": "basic",
+      "title": "Give an overview of the subscription management service.",
+      "pending": true,
+      "description": "",
+      "keyPoints": [],
+      "examples": [],
+      "assignment": null,
+      "resources": [
+        {
+          "title": "BTP Kernel Services (SAP-internal)",
+          "url": "https://pages.github.tools.sap/kernelservices/"
+        }
+      ]
+    },
+    {
+      "id": "subscription-mgmt-benefits",
+      "level": "basic",
+      "title": "What are the benefits of the subscription management service?",
+      "pending": true,
+      "description": "",
+      "keyPoints": [],
+      "examples": [],
+      "assignment": null,
+      "resources": [
+        {
+          "title": "BTP Kernel Services (SAP-internal)",
+          "url": "https://pages.github.tools.sap/kernelservices/"
+        }
+      ]
+    },
+    {
+      "id": "subscription-mgmt-capabilities",
+      "level": "basic",
+      "title": "What are the capabilities of the subscription management service?",
+      "pending": true,
+      "description": "",
+      "keyPoints": [],
+      "examples": [],
+      "assignment": null,
+      "resources": [
+        {
+          "title": "BTP Kernel Services (SAP-internal)",
+          "url": "https://pages.github.tools.sap/kernelservices/"
+        }
+      ]
+    }
+  ]
+}

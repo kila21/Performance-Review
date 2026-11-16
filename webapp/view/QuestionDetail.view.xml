@@ -7,18 +7,43 @@
 >
   <!-- The question itself is the page title in the shell header; Previous / Next live in the shell footer. -->
   <VBox id="detailContent" class="prPage">
-    <HBox visible="{= !!${topic>level} }" class="prCard">
+    <HBox visible="{= !!${topic>level} || !!${topic>pending} }" class="prCard">
       <ObjectStatus
-        text="{parts: [{path: 'topic>level'}, {path: 'i18n>levelElementary'}, {path: 'i18n>levelBasic'}], formatter: '.formatter.levelText'}"
+        text="{parts: [{path: 'topic>level'}, {path: 'i18n>levelElementary'}, {path: 'i18n>levelBasic'}, {path: 'i18n>levelAdvanced'}], formatter: '.formatter.levelText'}"
         state="{path: 'topic>level', formatter: '.formatter.levelState'}"
         inverted="true"
+        visible="{= !!${topic>level} }"
+        class="sapUiSmallMarginEnd"
+      />
+      <ObjectStatus
+        text="{i18n>pendingLabel}"
+        icon="sap-icon://pending"
+        state="None"
+        inverted="true"
+        visible="{= !!${topic>pending} }"
       />
     </HBox>
+
+    <!-- Placeholder question: no verified public source yet, so only the internal resources are shown. -->
+    <VBox visible="{= !!${topic>pending} }">
+      <MessageStrip text="{i18n>pendingMessage}" type="Information" showIcon="true" class="prCard" />
+      <Panel
+        headerText="{i18n>questionResourcesLabel}"
+        class="prCard"
+        width="auto"
+        visible="{= !!${topic>resources} &amp;&amp; ${topic>resources}.length > 0 }"
+      >
+        <VBox class="sapUiSmallMargin" items="{path: 'topic>resources', templateShareable: false}">
+          <Link text="{topic>title}" href="{topic>url}" target="_blank" class="sapUiTinyMarginBottom" />
+        </VBox>
+      </Panel>
+    </VBox>
+
     <!-- Self-test mode: the answer stays hidden until the user asks for it. -->
     <Panel
       class="prCard"
       width="auto"
-      visible="{= ${appView>/selfTest} &amp;&amp; !${ui>/answerVisible} }"
+      visible="{= !${topic>pending} &amp;&amp; ${appView>/selfTest} &amp;&amp; !${ui>/answerVisible} }"
     >
       <VBox alignItems="Center" class="sapUiSmallMarginTopBottom">
         <Text text="{i18n>selfTestHint}" textAlign="Center" class="sapUiSmallMarginBottom" />
@@ -31,7 +56,7 @@
       </VBox>
     </Panel>
 
-    <VBox visible="{= !${appView>/selfTest} || ${ui>/answerVisible} }">
+    <VBox visible="{= !${topic>pending} &amp;&amp; (!${appView>/selfTest} || ${ui>/answerVisible}) }">
       <Panel headerText="{i18n>descriptionLabel}" class="prCard" width="auto">
         <FormattedText htmlText="{path: 'topic>description', formatter: '.formatter.proseHtml'}" class="prProse" />
       </Panel>
@@ -49,7 +74,12 @@
         </List>
       </Panel>
 
-      <Panel headerText="{i18n>examplesLabel}" class="prCard" width="auto">
+      <Panel
+        headerText="{i18n>examplesLabel}"
+        class="prCard"
+        width="auto"
+        visible="{= !!${topic>examples} &amp;&amp; ${topic>examples}.length > 0 }"
+      >
         <VBox items="{path: 'topic>examples', templateShareable: false}">
           <VBox class="prExample">
             <FormattedText
@@ -63,6 +93,18 @@
               height="{path: 'topic>code', formatter: '.formatter.codeEditorHeight'}"
             />
           </VBox>
+        </VBox>
+      </Panel>
+
+      <!-- The official pages the answer was written from. -->
+      <Panel
+        headerText="{i18n>sourcesLabel}"
+        class="prCard"
+        width="auto"
+        visible="{= !!${topic>sources} &amp;&amp; ${topic>sources}.length > 0 }"
+      >
+        <VBox class="sapUiSmallMargin" items="{path: 'topic>sources', templateShareable: false}">
+          <Link text="{topic>title}" href="{topic>url}" target="_blank" wrapping="true" class="sapUiTinyMarginBottom" />
         </VBox>
       </Panel>
 

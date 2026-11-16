@@ -1,0 +1,118 @@
+{
+  "topicId": "mta-advanced",
+  "title": "Advanced MTA deployment",
+  "questions": [
+    {
+      "id": "blue-green-deployment",
+      "level": "advanced",
+      "title": "What is blue-green deployment of an MTA, and how does it work?",
+      "description": "Blue-green deployment runs two identical production versions side by side, so you can update a Cloud Foundry multitarget application without downtime and with reduced risk; while the new version runs, you can test and validate it with productive data. It is supported only for Cloud Foundry applications, not for bound services (service instances and their configuration, workflow content, HTML5 repository content and so on): the live and idle applications are bound to the same service instances. Prerequisites are a previously deployed MTA with working productive apps and routes, and a new version that is compatible with the old one, including database tables and UAA configuration. SAP offers three variants. With the current blue-green deployment strategy, you run cf deploy <mtar> --strategy blue-green. First all MTA services are updated; then new applications are created with \"idle\" added to their names, with temporary routes, and the process pauses in a testing phase. You test the idle version on the temporary routes, then either abort with cf deploy -i <id> -a abort (no rollback is done; apps, routes and services stay as they are) or resume with cf deploy -i <id> -a resume, which maps the productive routes to the idle apps, deletes the temporary routes, restarts the idle apps with the productive route configuration and deletes the previously live apps. --skip-testing-phase skips the pause, and --backup-previous-version keeps a backup for a later rollback. During testing, double the usual instances run. The incremental blue-green strategy (--strategy incremental-blue-green) starts the new version on one instance, and after testing replaces old instances one by one, never exceeding N + 1 instances; it saves memory and cost but takes longer, and rolls back automatically if a new instance crashes. The legacy method, cf bg-deploy, calls the versions blue and green. Do not start with cf bg-deploy and continue with --strategy blue-green, or the other way around, because this can cause downtime.",
+      "keyPoints": [
+        "Two versions run side by side: zero downtime, testing with productive data, reduced risk.",
+        "Only for Cloud Foundry apps; live and idle apps share the same service instances.",
+        "cf deploy <mtar> --strategy blue-green: idle apps on temporary routes, then a testing pause.",
+        "Resume (cf deploy -i <id> -a resume) switches routes and deletes the old live apps; abort does no rollback.",
+        "Incremental blue-green: one instance at a time (max N + 1); cheaper but slower.",
+        "Legacy cf bg-deploy (blue/green); never mix legacy and new strategy in one deployment."
+      ],
+      "examples": [
+        {
+          "title": "Blue-green deployment commands",
+          "language": "sh",
+          "code": "# 1. deploy the new version as \"idle\" apps on temporary routes\ncf deploy my-app.mtar --strategy blue-green --backup-previous-version\n\n# 2. test the idle apps, then either\ncf deploy -i <operation-id> -a resume   # switch productive routes, delete old live apps\ncf deploy -i <operation-id> -a abort    # stop here (no rollback)\n\n# resource-saving variant\ncf deploy my-app.mtar --strategy incremental-blue-green"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Blue-Green Deployment of Multitarget Applications (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/772ab72204f04946b79ce2d962e64970.html"
+        },
+        {
+          "title": "Blue-Green Deployment Strategy (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/7c83810c31d842938cbc39c135a2d99f.html"
+        },
+        {
+          "title": "Incremental Blue-Green Deployment Strategy (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/2e4dfeded960446da4aa1c0b734fc81b.html"
+        },
+        {
+          "title": "Legacy Blue-Green Deployment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/764308c52e68488dac848bae93e9137b.html"
+        }
+      ]
+    },
+    {
+      "id": "cross-mta-dependencies",
+      "level": "advanced",
+      "title": "How do you configure cross-MTA dependencies?",
+      "description": "Besides dependencies inside one MTA, a module can depend on modules from other MTAs. For these cross-MTA dependencies, the provider MTA must declare the provided dependency as public, and the consumer MTA uses a resource of type configuration to read it. Since version 3.0 of the MTA specification, provided dependencies are no longer public by default, so public: true is required. In the provider MTA, a module's provides entry gets public: true and the properties to share. In the consumer MTA, a resource of type configuration filters the deployer's configuration registry with the parameters provider-nid (always mta for cross-MTA dependencies), provider-id in the format <mta-id>:<provides-dependency-name>, version (the provider MTA's version, which can be a range like \">=1.0.0\"), and target (the org and space where the provider is deployed; if omitted, the consumer's current org and space are used). The consuming module then requires that resource and reads the values with ~{...}. Visibility is controlled by the provider with the visibility parameter, a list of org and space entries; by default it is all spaces of the provider's org (org: ${org}, space: '*'), and apps in the same space always see each other. Space developers can extend the visibility themselves without an administrator. Only users in whitelisted spaces can read the configuration, and only Space Developers of the provider's space can change it. SAP warns not to use this for sensitive content such as credentials, because the data is stored unencrypted. If the configuration resource is set to active: false, no environment variable (or an empty list) is created.",
+      "keyPoints": [
+        "The provider MTA declares provides with public: true (required since MTA spec 3.0).",
+        "The consumer MTA declares a resource of type configuration.",
+        "Parameters: provider-nid: mta, provider-id: <mta-id>:<provides-name>, version, target (org/space).",
+        "The consumer module requires the resource and reads ~{property} values.",
+        "Provider-side visibility list; default = all spaces of the provider's org.",
+        "Don't store credentials this way: the data is unencrypted."
+      ],
+      "examples": [
+        {
+          "title": "Provider MTA",
+          "language": "yaml",
+          "code": "_schema-version: \"3.1\"\nID: com.sap.sample.mta.provider\nversion: 2.3.0\nmodules:\n  - name: provider\n    type: javascript.nodejs\n    provides:\n      - name: message-provider\n        public: true\n        properties:\n          message: \"Hello from ${app-name} in ${org}/${space}\""
+        },
+        {
+          "title": "Consumer MTA",
+          "language": "yaml",
+          "code": "_schema-version: \"3.1\"\nID: com.sap.sample.mta.consumer\nversion: 0.1.0\nmodules:\n  - name: consumer\n    type: java.tomee\n    requires:\n      - name: message-provider\n        properties:\n          message: ~{message}\nresources:\n  - name: message-provider\n    type: configuration\n    parameters:\n      provider-nid: mta\n      provider-id: com.sap.sample.mta.provider:message-provider\n      version: \">=1.0.0\"\n      target:\n        org: ${org}\n        space: ${space}"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Cross-MTA Dependencies (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/b8e1953a618e47e1bd3c3a60c213226e.html"
+        },
+        {
+          "title": "Resources (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/9e34487b1a8643fb9a93ae6c4894f015.html"
+        }
+      ]
+    },
+    {
+      "id": "docker-in-mta",
+      "level": "advanced",
+      "title": "How do you deploy Docker images as part of an MTA, and why is it useful?",
+      "description": "You can deploy your own or third-party Docker images in the Cloud Foundry environment by referencing them in an application module of the MTA. The module uses the docker parameter: image is the location of the image in the format <registry.domain><:port>/repo/image:<tag> (without a registry, the image is taken from Docker Hub), and username and password are only needed when the image repository requires them. In an mta.yaml used with the Cloud MTA Build Tool, set the build parameter no-source: true, because there is no source code to build. Why it is useful: this kind of deployment is faster, because the image is already built, so no staging is required, and all dependencies are statically included in the image. It is also a way to run something the usual buildpack approach can't deliver, when managing a whole Kubernetes cluster would be too much overhead. The trade-offs are important. MTA packages that reference Docker images are not self-contained: they depend on external repositories hosting the images, and for scale or restart operations the image is pulled again, so the registry must be highly available and reachable. A Docker image contains the operating system and libraries in one blob, so there is no separation of droplet and stack: you are responsible for watching security vulnerabilities and pushing patched images, and features a buildpack such as the SAP Java buildpack provides (for example XSUAA token validation, Dynatrace monitoring, dynamic logging, OS and JVM patches) must be implemented yourself. Docker apps run in Linux containers with user namespaces, should follow the 12-factor principles, and traffic is routed to the lowest-numbered port.",
+      "keyPoints": [
+        "Reference the image in a module with the docker parameter: image (+ optional username/password).",
+        "Without a registry in the image name, Docker Hub is used; mta.yaml needs build-parameters no-source: true.",
+        "Why: faster deployment (no staging), all dependencies inside the image, an option when buildpacks don't fit and Kubernetes is too heavy.",
+        "Trade-off: the MTA isn't self-contained; the registry must be highly available (pulled on scale/restart).",
+        "You patch the OS and libraries yourself and implement buildpack features (XSUAA, monitoring, logging)."
+      ],
+      "examples": [
+        {
+          "title": "A module that runs a Docker image",
+          "language": "yaml",
+          "code": "modules:\n  - name: foo\n    type: application\n    parameters:\n      docker:\n        image: cloudfoundry/test-app      # <registry.domain><:port>/repo/image:<tag>, default Docker Hub\n        username: <username>              # only if the registry requires it\n        password: <password>\n    build-parameters:                     # only required for mta.yaml\n      no-source: true"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Docker Images as Part of an MTA Deployment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/754d4800b69b478eaa2427338c5d47e5.html"
+        },
+        {
+          "title": "Deploy Docker Images in the Cloud Foundry Environment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/c190ad6eeb78428c91a2b66e5557f962.html"
+        },
+        {
+          "title": "Modules (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/177d34d45e3d4fd99f4eeeffc5814cf1.html"
+        }
+      ]
+    }
+  ]
+}

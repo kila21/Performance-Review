@@ -1,0 +1,161 @@
+{
+  "topicId": "mta-modules-resources",
+  "title": "Modules, resources & extension descriptors",
+  "questions": [
+    {
+      "id": "module-aspects",
+      "level": "basic",
+      "title": "What is an MTA module, and what are its main aspects (name, type, specific parameters)?",
+      "description": "The modules section of the deployment descriptor lists the deployable parts contained in the MTA archive. Two elements are mandatory. The name must be unique within the MTA. The type defines which deployment mechanism is used for the module; the module type defines the structure and development technology of the module. Examples of module types are nodejs (a Cloud Foundry app with the Node.js buildpack), java, java.tomcat (sap_java_buildpack_jakarta), application or custom (automatic buildpack detection; SAP strongly recommends setting the buildpack parameter), com.sap.xs.hdi (deploys SAP HANA HDI content and runs as a task, without a route), com.sap.portal.content (SAP Fiori launchpad content), com.sap.application.content (direct content deployment to backing services) and com.sap.html5.application.content. Each type comes with default parameter values, which you can modify. Optional module attributes include path (the file-system path relative to the MTA root, used during the build), description, properties (name-value pairs injected into the app's environment), parameters (reserved variables that affect the deployer's behavior, the module-specific parameters such as memory, instances, buildpack, disk-quota, health-check-type, no-route or docker), requires and provides (dependencies to resources and to other modules), deployed-after (a list of other modules of the same MTA that must be processed first), hooks (tasks executed in specific deployment phases) and, in mta.yaml, build-parameters (how the Cloud MTA Build Tool builds the module). Modules can also be deployed in parallel.",
+      "keyPoints": [
+        "Mandatory: name (unique in the MTA) and type (the deployment mechanism / technology).",
+        "Types include nodejs, java, java.tomcat, application, custom, com.sap.xs.hdi, com.sap.portal.content, com.sap.application.content.",
+        "Each type has default parameters; set buildpack explicitly for generic types.",
+        "Optional: path, description, properties, parameters, requires, provides, deployed-after, hooks, build-parameters.",
+        "Module-specific parameters: memory, instances, buildpack, disk-quota, health-check-type, no-route, docker, ..."
+      ],
+      "examples": [
+        {
+          "title": "A module with type, parameters and dependencies",
+          "language": "yaml",
+          "code": "modules:\n  - name: my-srv\n    type: nodejs\n    path: gen/srv\n    parameters:\n      memory: 256M\n      disk-quota: 512M\n      instances: 2\n    requires:\n      - name: my-hdi-container\n      - name: my-uaa\n    provides:\n      - name: srv-api\n        properties:\n          srv-url: ${default-url}\n    deployed-after:\n      - my-db-deployer"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Modules (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/177d34d45e3d4fd99f4eeeffc5814cf1.html"
+        },
+        {
+          "title": "Multitarget Applications in the Cloud Foundry Environment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/d04fc0e2ad894545aebfd7126384307c.html"
+        }
+      ]
+    },
+    {
+      "id": "module-hooks",
+      "level": "basic",
+      "title": "What are module hooks, and in which deployment phases can they run?",
+      "description": "Module hooks let you change the typical deployment process by executing tasks at a specific moment of a module's deployment, for example before or after the actual deployment steps. They are supported from major schema version 3 onwards; with an older schema version they are ignored. Currently, module hooks are only Cloud Foundry app tasks, so their timeout is the task execution timeout of the module. A hook has a name, a type (the only supported type is task), phases (when it runs) and parameters, which for a task must define a one-off task, for example a name and a command. The phases depend on the deployment strategy, and phases that don't match the current strategy are ignored. For a standard deployment, the phases are deploy.application.before-stop, deploy.application.after-stop and deploy.application.before-start. For a blue-green deployment, where live is the previously deployed version and idle the new one, there are phases such as blue-green.application.before-stop.idle, blue-green.application.before-stop.live, blue-green.application.after-stop.idle, blue-green.application.after-stop.live, blue-green.application.before-unmap-routes.live, blue-green.application.before-start.idle and blue-green.application.before-start.live. By default, a phase runs its task on the application named by its suffix, with one exception: blue-green.application.before-start.live runs on the idle application, because at that moment the idle app is being restarted with the live routes. You can override the target application per phase with the phases-config parameter (target-app: live or idle).",
+      "keyPoints": [
+        "Hooks run tasks at specific moments of a module's deployment; schema version 3+ only.",
+        "Only type task (a Cloud Foundry one-off task) is supported; the module's task timeout applies.",
+        "A hook has name, type, phases and parameters (the task definition).",
+        "Standard phases: deploy.application.before-stop / after-stop / before-start.",
+        "Blue-green phases use .live / .idle suffixes; before-start.live runs on the idle app by default.",
+        "phases-config overrides the target app (live or idle) per phase."
+      ],
+      "examples": [
+        {
+          "title": "A hook that runs before the application is stopped",
+          "language": "yaml",
+          "code": "_schema-version: \"3.3\"\nID: foo\nversion: 3.0.0\nmodules:\n  - name: foo\n    type: javascript.nodejs\n    hooks:\n      - name: hook\n        type: task\n        phases:\n          - blue-green.application.before-stop.live\n          - blue-green.application.before-stop.idle\n        parameters:\n          name: foo-task\n          command: 'sleep 5m'"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Module Hooks (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/b9245ba90aa14681a416065df8e8c593.html"
+        }
+      ]
+    },
+    {
+      "id": "build-parameters",
+      "level": "basic",
+      "title": "What are build parameters in mta.yaml, and how do you use them?",
+      "description": "Build parameters belong to the development descriptor (mta.yaml) and configure the Cloud MTA Build Tool (mbt), not the deployment. For each module, mbt performs a build with a default builder that is specific to the module type, for example the npm builder, and you can change this behavior in the build-parameters section of the module, or globally. With builder you choose a non-default builder, for example zip, maven, npm, grunt, fetcher or custom. A custom builder runs your own commands (for example npm install, then npm prune --production); an empty commands list means no build is done and the module's folder (or build-result) is packaged as is. The fetcher builder packages already available Maven artifacts by their coordinates. With requires inside build-parameters, you define the build order: the module is built only after the modules it requires, and with artifacts and target-path you can copy another module's build results into it; the order of modules in the file doesn't matter, but cyclic dependencies make the build fail. build-result points to the path of the build results to package (defaults depend on the builder, for example target/*.war for Maven), and ignore excludes files or subfolders from the package. At global level, build-parameters with before-all runs builders before any module is built; only timeout, commands (custom builder) and fetcher-opts are considered there. SAP's Docker documentation also uses the build parameter no-source: true for a module that has no source code to build.",
+      "keyPoints": [
+        "build-parameters configure the Cloud MTA Build Tool (mbt) in mta.yaml, per module or globally.",
+        "builder: choose a non-default builder (zip, maven, npm, grunt, fetcher, custom).",
+        "custom builder + commands; an empty commands list just packages the folder.",
+        "requires (+ artifacts, target-path) defines build order and reuse of build results; no cycles allowed.",
+        "build-result and ignore define what goes into the MTA archive.",
+        "Global before-all runs steps before all modules; no-source: true for modules without sources."
+      ],
+      "examples": [
+        {
+          "title": "Builder, build order and packaging",
+          "language": "yaml",
+          "code": "ID: myproject\n_schema-version: '3.1'\nversion: 0.0.1\n\nbuild-parameters:\n  before-all:\n    - builder: custom\n      commands:\n        - npm ci\n\nmodules:\n  - name: A\n    type: html5\n    path: pathtomoduleA\n    build-parameters:\n      builder: custom\n      commands:\n        - npm run build\n      build-result: dist\n      ignore: [\"*.map\"]\n      requires:\n        - name: B\n          artifacts: [\"*\"]\n          target-path: \"newfolder\"\n  - name: B\n    type: html5\n    path: pathtomoduleB"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Configuration - Cloud MTA Build Tool (SAP on GitHub)",
+          "url": "https://sap.github.io/cloud-mta-build-tool/configuration/"
+        },
+        {
+          "title": "Docker Images as Part of an MTA Deployment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/754d4800b69b478eaa2427338c5d47e5.html"
+        }
+      ]
+    },
+    {
+      "id": "resources",
+      "level": "basic",
+      "title": "What are MTA resources, which resource types exist, and which properties do they have?",
+      "description": "Modules may depend on resources: platform services that are managed by the deployer or only used by the applications, and configuration entries used by applications and services. In the resources section, only name is mandatory (unique in the MTA). The optional type is one of a reserved list of resource types and tells the deployer how to discover, allocate or provision the resource, for example a managed service such as a database. Generic resource types are org.cloudfoundry.managed-service (the deployer creates and manages a service instance; required parameters service and service-plan, optional service-name), org.cloudfoundry.existing-service (the service exists already; the deployer doesn't manage its lifecycle), org.cloudfoundry.existing-service-key (uses the credentials of an existing service key), org.cloudfoundry.user-provided-service (creates or updates a user-provided service with a config map, for example a URL and credentials), org.cloudfoundry.cloud-logging-service (exports the MTA's operation logs to SAP Cloud Logging) and configuration (for cross-MTA dependencies). There are also predefined types such as com.sap.xs.uaa, com.sap.xs.hdi-container or com.sap.xs.auditlog. Other optional attributes are description, properties (name-value pairs injected into the environment of the apps that require the resource), parameters (reserved variables for the deployer, such as service, service-plan, config or path), active (default true; false means the resource isn't processed, no service is created and no binding is made), processed-after (an order for resource processing, which is parallel by default) and optional (default false; true makes processing fail-safe, so a missing or failed resource only produces a warning).",
+      "keyPoints": [
+        "Resources: services or configuration that modules need; only name is mandatory.",
+        "type tells the deployer how to provision/discover the resource.",
+        "Generic types: managed-service, existing-service, existing-service-key, user-provided-service, cloud-logging-service, configuration.",
+        "Predefined types, for example com.sap.xs.uaa, com.sap.xs.hdi-container, com.sap.xs.auditlog.",
+        "Attributes: description, properties, parameters, active, processed-after, optional.",
+        "active: false skips the resource; optional: true makes it fail-safe (warning only)."
+      ],
+      "examples": [
+        {
+          "title": "Resource types",
+          "language": "yaml",
+          "code": "resources:\n  - name: my-postgre-service\n    type: org.cloudfoundry.managed-service\n    parameters:\n      service: postgresql\n      service-plan: v9.6-dev\n\n  - name: shared-destination\n    type: org.cloudfoundry.existing-service\n    parameters:\n      service-name: my-destination-instance\n\n  - name: legacy-backend\n    type: org.cloudfoundry.user-provided-service\n    parameters:\n      config:\n        url: https://backend.example.com\n\n  - name: log\n    type: com.sap.xs.auditlog\n    optional: true"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Resources (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/9e34487b1a8643fb9a93ae6c4894f015.html"
+        }
+      ]
+    },
+    {
+      "id": "extension-descriptor",
+      "level": "basic",
+      "title": "What is an MTA extension descriptor?",
+      "description": "An MTA extension descriptor is a YAML file, with the extension .mtaext, that complements the deployment descriptor with environment-specific or deployment-specific data, such as scaling configuration and credentials. It lets you deploy the same MTA archive with different configurations by adding or overwriting parameters and properties without modifying the original archive, and it is normally kept outside the archive. Its structure is similar to the deployment descriptor: it needs a _schema-version, its own ID, and extends, which names the ID of the descriptor it extends. You pass it at deploy time with cf deploy <mtar> -e prod.mtaext. Several extension descriptors can be chained (cf deploy <mtar> -e prod.mtaext,large.mtaext); they are applied in order, and each one has a higher priority than the descriptor it extends. The merge rules are: simple values such as Boolean, integer and string are overwritten directly; maps (objects), such as a service's config, are merged in depth, so only the given keys change; lists (arrays) are replaced completely, so to keep elements from the deployment descriptor you must list them again. A typical use is to keep a neutral mtad.yaml in the archive and use one .mtaext per landscape, for example more memory and instances in production. System-specific parameters for the deployment descriptor must also be provided in such an extension descriptor.",
+      "keyPoints": [
+        "A .mtaext file adds or overrides parameters and properties at deploy time, without changing the MTAR.",
+        "Needs _schema-version, its own ID and extends: <ID of the extended descriptor>.",
+        "Deploy with cf deploy <mtar> -e a.mtaext[,b.mtaext]; later descriptors have higher priority.",
+        "Simple values are overwritten, maps are merged in depth, lists are replaced completely.",
+        "Typical use: environment-specific values (scaling, credentials) per landscape."
+      ],
+      "examples": [
+        {
+          "title": "Deployment descriptor and a production extension",
+          "language": "yaml",
+          "code": "# mtad.yaml (inside the archive)\n_schema-version: '3.1'\nID: sample.app\nversion: 0.1.0\nmodules:\n  - name: my-app\n    type: application\n    parameters:\n      memory: 2GB\n\n# prod.mtaext (outside the archive)\n_schema-version: '3.1'\nID: sample.app.prod\nextends: sample.app\nmodules:\n  - name: my-app\n    parameters:\n      memory: 4GB      # overwritten\n      instances: 2     # added"
+        },
+        {
+          "title": "Deploying with one or more extension descriptors",
+          "language": "sh",
+          "code": "cf deploy sample.app.mtar -e prod.mtaext\ncf deploy sample.app.mtar -e prod.mtaext,large.mtaext"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Defining MTA Extension Descriptors (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/50df803465324d36851c79fd07e8972c.html"
+        },
+        {
+          "title": "Resources (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/9e34487b1a8643fb9a93ae6c4894f015.html"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "topicId": "event-mesh",
+  "title": "Event Mesh",
+  "questions": [
+    {
+      "id": "event-mesh-setup",
+      "level": "basic",
+      "title": "What is SAP Event Mesh, and what are its configuration steps?",
+      "description": "SAP Event Mesh allows applications to communicate through asynchronous events. Applications publish business events from SAP and non-SAP sources across hybrid landscapes, from the digital core to extension applications, and consume business events throughout SAP's event-driven ecosystem, for example in SAP Integration Suite and in selected inbound-enabled SAP backends. The decoupled communication gives reliable data transmission for extension and integration scenarios, and lets you build responsive applications that work independently and take part in event-driven business processes. Its plans are available in the Cloud Foundry environment. The tools are the SAP BTP cockpit and the Event Mesh business application, a web UI for managing messaging clients and event catalogs. Configuration steps: prerequisites are an enterprise account, a global account entitled to Event Mesh, a subaccount, a space with Cloud Foundry enabled, and the required authorizations. In the cockpit, open the subaccount, choose Entitlements > Configure Entitlements > Add Service Plans, select the Event Mesh service and its service plan, add it and save. Then create an Event Mesh service instance (with the default plan). Two product changes matter: the lite plan is being discontinued, and SAP recommends creating new instances with the default plan; and SAP now provides the Event Mesh capability in SAP Integration Suite, with a documented migration from the Event Mesh default plan (queues, queue configurations and messages) within a 60-day self-service migration phase, after which rollback isn't supported. If no default-plan instance exists, activating the capability in SAP Integration Suite provisions a fresh message broker.",
+      "keyPoints": [
+        "Based on the public SAP BTP service. SAP-internal Kernel Services may differ.",
+        "Asynchronous, event-based communication: publish and consume business events from SAP and non-SAP sources.",
+        "Tools: SAP BTP cockpit and the Event Mesh business application (message clients, event catalogs).",
+        "Setup: entitle the subaccount (Entitlements > Configure Entitlements > Add Service Plans), then create a service instance.",
+        "The lite plan is being discontinued; use the default plan.",
+        "SAP now offers the Event Mesh capability in SAP Integration Suite (60-day migration phase from the default plan)."
+      ],
+      "examples": [
+        {
+          "title": "Setup order",
+          "language": "text",
+          "code": "1. Global account entitled to Event Mesh\n2. Subaccount + Cloud Foundry space\n3. Cockpit: Entitlements > Configure Entitlements > Add Service Plans > Event Mesh (plan) > Save\n4. Create an Event Mesh service instance (default plan)\n5. Manage message clients, queues and event catalogs in the Event Mesh business application"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "What Is SAP Event Mesh? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/SAP_EM/bf82e6b26456494cbdd197057c09979f/df532e8735eb4322b00bfc7e42f84e8d.html"
+        },
+        {
+          "title": "Setting Up SAP Event Mesh in BTP Cockpit (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/SAP_EM/bf82e6b26456494cbdd197057c09979f/3ef34ffcbbe94d3e8fff0f9ea2d5911d.html"
+        },
+        {
+          "title": "Migrate from SAP Event Mesh Default Plan to Event Mesh in SAP Integration Suite: Overview (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/SAP_EM/75f1a2ddbfb74b6480f935d4a4c68d17/077c4760590a4e49aff9a79e5da29da6.html"
+        }
+      ]
+    },
+    {
+      "id": "event-mesh-concepts",
+      "level": "basic",
+      "title": "What are the main aspects of Event Mesh: event, producer, consumer, message and event catalog?",
+      "description": "SAP's glossary for Event Mesh defines the core terms. An event is a change in the state of data. A message is a communication of data about events. A producer is an application that publishes messages about events to Event Mesh, and a consumer is an application that consumes messages about events from Event Mesh. Between them sits the message broker, the messaging infrastructure that mediates the communication of event messages between producers and consumers (SAP's event-driven architecture overview calls it an event broker, middleware that uses various message exchange patterns). Further terms: a message client is a gateway that uses OAuth client-credentials authentication to validate all applications that publish or consume events; a topic is a means of classifying the information in an event message; a topic subscription is a set of strings used to attract the events published to a topic; a queue is an endpoint, configured with or without topic subscriptions, to which you publish messages and from which you consume them, since events are stored in queues on the broker; an endpoint is an object created on the broker to persist messages; a webhook subscription delivers messages from a queue to REST-based consumers; and a connection is the sum of all active contacts of consumers and producers with Event Mesh. For the event catalog: in SAP Event Mesh, the Event Mesh business application lets you manage messaging clients and event catalogs. SAP's Event Portal, a cloud-based event management tool for discovering, creating, designing, sharing, managing and governing the assets of your event-driven architecture, has a Catalog in which you search your organization's library of applications, events and other objects.",
+      "keyPoints": [
+        "Based on the public SAP BTP service. SAP-internal Kernel Services may differ.",
+        "Event: a change in state of data; message: a communication of data about events.",
+        "Producer publishes messages about events; consumer consumes them; the message broker mediates.",
+        "Message client: OAuth client-credentials gateway for publishing/consuming applications.",
+        "Topics, topic subscriptions and queues route and store messages; webhooks deliver to REST consumers.",
+        "Event catalogs are managed in the Event Mesh business application; the Event Portal Catalog searches applications and events."
+      ],
+      "examples": [
+        {
+          "title": "From producer to consumer",
+          "language": "text",
+          "code": "Producer application\n  publishes a message about an event to a topic\n        |\n  Message broker: a queue with a topic subscription for that topic stores the message\n        |\nConsumer application consumes from the queue, or receives it via a webhook subscription\n\n(publishing and consuming applications authenticate through a message client)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Glossary for Event Mesh (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/SAP_INTEGRATION_SUITE/a01a83f4826d486b9fc66d1df0de9da4/501ba2d2a629466898899d1e47f40bf9.html"
+        },
+        {
+          "title": "Understanding Event Driven Architecture (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/SAP_INTEGRATION_SUITE/a01a83f4826d486b9fc66d1df0de9da4/2604955420bd48dbb10d3c61527c5fb4.html"
+        },
+        {
+          "title": "What Is SAP Event Mesh? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/SAP_EM/bf82e6b26456494cbdd197057c09979f/df532e8735eb4322b00bfc7e42f84e8d.html"
+        },
+        {
+          "title": "Event Portal (SAP event mesh documentation)",
+          "url": "https://help.pubsub.em.services.cloud.sap/Cloud/Event-Portal/event-portal-lp.htm"
+        }
+      ]
+    }
+  ]
+}

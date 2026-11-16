@@ -1,0 +1,102 @@
+{
+  "topicId": "mta-basics",
+  "title": "MTA basics",
+  "questions": [
+    {
+      "id": "what-is-mta",
+      "level": "elementary",
+      "title": "What is a multitarget application (MTA)?",
+      "description": "A multitarget application (MTA) is essentially a single application that consists of multiple parts, created with various technologies and deployed to different runtimes, which share the same lifecycle. For example, a UI, a Node.js or Java service, database content and the services they need are developed, versioned, built and deployed together as one unit. MTA developers describe the intended outcome with the MTA model, which consists of modules, resources and the dependencies between them. The SAP Cloud Deployment service then validates the model, orchestrates the necessary actions and automates the deployment; the result is a set of Cloud Foundry applications, service instances and SAP-specific content. Two descriptors are involved. The development descriptor, mta.yaml, lists all modules, resources and properties of the application and their dependencies, and specifies what to build and how to build it. The deployment descriptor, mtad.yaml, specifies what to deploy and how, and is used by the SAP Cloud Deployment service; it is generated from mta.yaml during the build (or written manually). The build result is an MTA archive (MTAR), which contains the deployment descriptor, the module and resource binaries and configuration files, and follows the JAR file specification. You can create MTAs with SAP Business Application Studio, with the Cloud MTA Build Tool (mbt) followed by cf deploy, or manually. Deploying an MTA requires the Space Developer role, and the archive is limited to 4 GB (1 GB per module content).",
+      "keyPoints": [
+        "An MTA is one application made of several parts in different technologies, with one shared lifecycle.",
+        "The MTA model = modules + resources + their dependencies.",
+        "The SAP Cloud Deployment service validates, orchestrates and automates the deployment.",
+        "mta.yaml (development descriptor: what/how to build) vs mtad.yaml (deployment descriptor: what/how to deploy).",
+        "The MTA archive (MTAR) holds the deployment descriptor, binaries and configuration (JAR format).",
+        "Tools: SAP Business Application Studio, Cloud MTA Build Tool (mbt) + cf deploy; requires Space Developer; MTAR max 4 GB."
+      ],
+      "examples": [
+        {
+          "title": "Build and deploy an MTA",
+          "language": "sh",
+          "code": "mbt build                                   # mta.yaml -> mta_archives/my-app_1.0.0.mtar\ncf deploy mta_archives/my-app_1.0.0.mtar    # SAP Cloud Deployment service deploys modules and resources"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Multitarget Applications in the Cloud Foundry Environment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/d04fc0e2ad894545aebfd7126384307c.html"
+        },
+        {
+          "title": "Cloud MTA Build Tool (SAP on GitHub)",
+          "url": "https://sap.github.io/cloud-mta-build-tool/"
+        }
+      ]
+    },
+    {
+      "id": "mta-yaml-structure",
+      "level": "elementary",
+      "title": "What are the main components of the mta.yaml file (modules, resources, parameters, properties)?",
+      "description": "An MTA descriptor has a few global elements and then the parts that make up the application. The global elements are an ID and a version that uniquely identify the MTA (plus a _schema-version and optional information such as a description, the providing organization and a copyright notice). Modules are the deployable parts contained in the MTA, most commonly Cloud Foundry applications or content; a module is a self-contained application of a certain type that is developed, packaged and deployed. Resources are entities that are not part of the MTA but are required by the modules at runtime or deployment time, for example an external service such as a database or the XSUAA service. Dependencies connect them: provides lists the properties or parameters a module or resource offers to others, and requires lists the modules or resources a module needs to run. Parameters are reserved variables that belong to a module or resource (or to the top level or a dependency) and control the behavior of the MTA tooling, for example how much memory an application gets; they are referenced with the placeholder ${name}. Properties are key-value pairs that end up as environment variables of the Cloud Foundry application at runtime, and are referenced with ~{name}. The descriptor can also contain metadata for parameters and properties (for example optional: false or overwritable: true) and module hooks that run tasks at specific phases of the deployment. SAP has contributed a JSON schema for the descriptor to the public Schema Store, so many IDEs offer auto-completion and syntax checks.",
+      "keyPoints": [
+        "Global elements: _schema-version, ID and version (plus optional description, provider, copyright).",
+        "modules: the deployable parts (Cloud Foundry apps or content).",
+        "resources: things the modules need but don't contain (services, configuration).",
+        "Dependencies: provides / requires between modules and resources.",
+        "parameters: control the tooling (${name}); properties: runtime environment variables (~{name}).",
+        "Also: metadata for parameters/properties, module hooks; a schema exists in the public Schema Store."
+      ],
+      "examples": [
+        {
+          "title": "A minimal mta.yaml",
+          "language": "yaml",
+          "code": "_schema-version: \"3.3\"\nID: my-app\nversion: 1.0.0\n\nparameters:              # top-level parameters\n  enable-parallel-deployments: true\n\nmodules:\n  - name: my-srv\n    type: nodejs\n    path: srv\n    parameters:          # control the deployment (memory, buildpack, ...)\n      memory: 256M\n    properties:          # become environment variables of the app\n      GREETING: hello\n    requires:\n      - name: my-uaa\n    provides:\n      - name: srv-api\n        properties:\n          srv-url: ${default-url}\n\nresources:\n  - name: my-uaa\n    type: org.cloudfoundry.managed-service\n    parameters:\n      service: xsuaa\n      service-plan: application\n      path: ./xs-security.json"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Multitarget Application Structure (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/f443b9f5412c410688916a5b833fab40.html"
+        },
+        {
+          "title": "Multitarget Applications in the Cloud Foundry Environment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/d04fc0e2ad894545aebfd7126384307c.html"
+        },
+        {
+          "title": "Defining Multitarget Application Deployment Descriptors for Cloud Foundry (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/f48880b0295d4e9d859658244da84201.html"
+        }
+      ]
+    },
+    {
+      "id": "parameters-vs-properties",
+      "level": "elementary",
+      "title": "What is the difference between parameters and properties in an MTA descriptor?",
+      "description": "Parameters and properties are the two kinds of configurable values in an MTA descriptor. Parameters are reserved variables that control the behavior of the MTA tooling, that is, the Cloud MTA Build Tool and the SAP Cloud Deployment service; for example, the memory parameter of a module defines how much memory the Cloud Foundry application gets, and other parameters define how long staging may take. They can be declared at top level, module and module-hook level, resource level and dependency (provides/requires) level, and the same parameter may be interpreted differently depending on the level. Top-level parameters have global scope. Parameters are either Read-Only (also called System), whose values are set by the deployer and can only be referenced, for example ${org} or ${default-url}, or Write, whose default value can be overwritten. You reference any parameter with ${name}. Supported parameters use kebab-case (service-plan, health-check-type), while your own custom parameters can use any notation. Properties, in contrast, are values injected into your application at runtime: the SAP Cloud Deployment service sets each property key as an environment variable name and its value as the variable value of the Cloud Foundry application represented by the module. They can be declared at module, resource and dependency level, and are referenced with ~{name} when one module consumes a property provided by another module or resource. Properties are ignored when a module represents SAP content instead of a Cloud Foundry application. Both are declared at design time in mta.yaml or mtad.yaml, and environment-specific values are overridden at deploy time with an extension descriptor (.mtaext).",
+      "keyPoints": [
+        "Parameters control build/deploy behavior (consumed by MBT and the SAP Cloud Deployment service).",
+        "Properties become Cloud Foundry environment variables of the running app.",
+        "Placeholders: ${parameter} and ~{property}.",
+        "Parameters: top, module, hook, resource and dependency level; properties: module, resource and dependency level.",
+        "Read-Only (System) parameters can only be referenced (for example ${org}); Write parameters can be set.",
+        "Supported parameters use kebab-case; override per environment with a .mtaext file."
+      ],
+      "examples": [
+        {
+          "title": "A parameter, a property and both placeholders",
+          "language": "yaml",
+          "code": "modules:\n  - name: node-hello-world\n    type: javascript.nodejs\n    path: web/\n    parameters:\n      memory: 128M                 # parameter: how the deployer creates the app\n    properties:\n      ORG_NAME: ${org}              # property (env variable) filled from a read-only parameter\n      BACKEND_URL: ~{backend/url}   # property consumed from another module's provides\n    requires:\n      - name: backend"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Parameters and Properties (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/490c8f71e2b74bc0a59302cada66117c.html"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "topicId": "security-basics",
+  "title": "Authentication & identity basics",
+  "questions": [
+    {
+      "id": "authn-vs-authz",
+      "level": "elementary",
+      "title": "What is the difference between authentication and authorization?",
+      "description": "Authentication answers \"who are you?\": the user proves their identity. Authorization answers \"what are you allowed to do?\": the system decides which functions and data the authenticated user may access. SAP BTP separates the two clearly. Authentication: a user account corresponds to a particular user in an identity provider, and the user is always authenticated by an external identity provider (by default SAP ID service; SAP recommends a custom SAP Cloud Identity Services tenant, which can be connected to your corporate identity provider). SAP BTP itself does not store user credentials; through identity federation it reuses the identities of the identity provider. A trust relationship between the subaccount and the identity provider is a prerequisite for authentication. Authorization: application developers create and deploy authorization artifacts (scopes, attributes, role templates) for their application, and administrators use them to manage roles, build role collections and assign them to users or user groups, which controls the users' permissions. The SAP Authorization and Trust Management service (XSUAA) handles this part: after the identity provider has authenticated the user, XSUAA issues a JWT that contains the user's authorizations (scopes), and the application checks those scopes for each function. Note that the authorizations are stored in the user's session at logon, so changes to role collection assignments take effect only after the user logs out and on again.",
+      "keyPoints": [
+        "Authentication = verifying who the user is; authorization = deciding what the user may do.",
+        "On SAP BTP, users are always authenticated by an external identity provider (identity federation).",
+        "Trust between the subaccount and the identity provider is a prerequisite for authentication.",
+        "Authorization: developers define scopes/role templates; administrators build roles and role collections and assign them.",
+        "XSUAA issues a JWT with the user's scopes; apps check those scopes.",
+        "Role changes take effect after the user logs on again."
+      ],
+      "examples": [
+        {
+          "title": "The two steps in a request",
+          "language": "text",
+          "code": "1. Authentication: browser -> approuter -> identity provider (SAP ID service / IAS / corporate IdP)\n   \"Is this really alice?\"\n2. Authorization:  XSUAA issues a JWT for alice with scopes [my-app.Display]\n   approuter/app: \"Does alice have my-app.Edit for this action?\" -> 403 if not"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Security Administration: Managing Authentication and Authorization (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/1ff47b2d980e43a6b2ce294352333708.html"
+        },
+        {
+          "title": "Trust and Federation with Identity Providers (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/cb1bc8f1bd5c482e891063960d7acd78.html"
+        },
+        {
+          "title": "What Is the SAP Authorization and Trust Management Service? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/649961f8d4ad463daca33b3a20deba4c.html"
+        }
+      ]
+    },
+    {
+      "id": "what-is-uaa",
+      "level": "elementary",
+      "title": "What is UAA (the SAP Authorization and Trust Management service, XSUAA), and what is it used for?",
+      "description": "UAA stands for User Account and Authentication, the OAuth 2.0 server that Cloud Foundry uses. On SAP BTP, applications use the SAP Authorization and Trust Management service, technical name xsuaa (XSUAA). It lets you manage user authorizations and trust to identity providers; identity providers are the user base for applications, and SAP recommends an SAP Cloud Identity Services tenant, an SAP on-premise system or a custom corporate identity provider. User authorizations are managed as technical roles at application level, which can be aggregated into business-level role collections. The security of SAP BTP is based on OAuth 2.0, and XSUAA acts as the OAuth 2.0 authorization server: it administers and assigns application authorizations and issues JSON Web Tokens (JWTs). It is a typical reuse service: its service broker creates a service instance for each application (from the application's xs-security.json), and every app that enforces authorizations is bound to that instance, which provides the credentials (including the public key used to verify token signatures). Typical use cases are: user login for an application through the application router (authorization code grant), role-based access to applications (scopes checked by the approuter and the backend), technical access between services without a user (client credentials grant), calling other services on behalf of a user (JWT bearer token exchange), and multitenant applications (tenant mode shared with the application plan). It is available in the Cloud Foundry, Kyma and Neo environments. SAP notes that it is gradually being complemented by SAP Cloud Identity Services – Authorization Management, which is recommended for applications that need instance-based authorizations.",
+      "keyPoints": [
+        "UAA = User Account and Authentication; on SAP BTP apps use XSUAA (SAP Authorization and Trust Management service).",
+        "Manages user authorizations and trust to identity providers.",
+        "OAuth 2.0 authorization server that issues JWTs with the user's scopes.",
+        "Reuse service: one xsuaa instance per app (from xs-security.json); apps bind to it.",
+        "Use cases: user login, role-based access, technical (client credentials) access, token exchange, multitenancy.",
+        "SAP Cloud Identity Services – Authorization Management is recommended for instance-based authorizations."
+      ],
+      "examples": [
+        {
+          "title": "Creating and binding an xsuaa instance",
+          "language": "sh",
+          "code": "cf create-service xsuaa application my-xsuaa -c xs-security.json\ncf bind-service my-app my-xsuaa\ncf bind-service my-approuter my-xsuaa"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "What Is the SAP Authorization and Trust Management Service? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/649961f8d4ad463daca33b3a20deba4c.html"
+        },
+        {
+          "title": "Adding Authentication and Authorization (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/419ae2ef1ddd49dca9eb65af2d67c6ec.html"
+        },
+        {
+          "title": "SAP BTP, Cloud Foundry Environment XSUAA Explained (SAP Cloud SDK)",
+          "url": "https://sap.github.io/cloud-sdk/docs/java/guides/cloud-foundry-xsuaa-service"
+        },
+        {
+          "title": "Develop the Multitenant Application (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/ff540477f5404e3da2a8ce23dcee602a.html"
+        }
+      ]
+    },
+    {
+      "id": "what-is-idp",
+      "level": "elementary",
+      "title": "What is an identity provider (IdP)?",
+      "description": "An identity provider is the system that hosts a user base and authenticates its users; it supports the administration of digital user identities, authentication and authorizations in a centralized and decoupled manner. SAP BTP supports identity federation: linking and reusing the digital identities of a user base across loosely coupled systems. This frees the applications on SAP BTP, and the platform itself, from having to obtain and store user credentials and authenticate users; instead the user base is reused from identity providers. The identity provider and the SAP Authorization and Trust Management service have a trust relationship, and users must first authenticate against the configured identity provider. SAP Cloud Identity Services is a multitenancy-enabled identity provider for all SAP cloud applications, and optionally on-premise applications, providing authentication, single sign-on, authorizations, identity lifecycle management, on-premise integration and self-services such as self-registration or password reset. SAP ID service is SAP's own SAP Cloud Identity Services tenant: it is the default identity provider of SAP BTP, where you register to get initial access, and trust to it is preconfigured. SAP strongly recommends using your own custom SAP Cloud Identity Services tenant, optionally as a proxy to your corporate identity provider: you control your own user lifecycle and single sign-on strategy, and can enforce your own password and authentication policies such as multifactor authentication. For platform users, using SAP Cloud Identity Services is mandatory.",
+      "keyPoints": [
+        "An IdP hosts the user base and authenticates users.",
+        "Identity federation: SAP BTP reuses identities from IdPs instead of storing credentials.",
+        "IdP and XSUAA have a trust relationship; users authenticate against the trusted IdP.",
+        "SAP ID service = SAP's default IdP tenant, trust preconfigured.",
+        "SAP recommends your own SAP Cloud Identity Services tenant, optionally proxying a corporate IdP.",
+        "For platform users, SAP Cloud Identity Services is mandatory."
+      ],
+      "examples": [
+        {
+          "title": "Typical setup",
+          "language": "text",
+          "code": "Corporate IdP\n        ^ proxy\nSAP Cloud Identity Services tenant (your own)\n        ^ trust (OpenID Connect)\nSAP BTP subaccount (XSUAA) -> applications"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Trust and Federation with Identity Providers (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/cb1bc8f1bd5c482e891063960d7acd78.html"
+        },
+        {
+          "title": "What Is the SAP Authorization and Trust Management Service? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/649961f8d4ad463daca33b3a20deba4c.html"
+        }
+      ]
+    }
+  ]
+}

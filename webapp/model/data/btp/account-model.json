@@ -1,0 +1,201 @@
+{
+  "topicId": "account-model",
+  "title": "Account model",
+  "questions": [
+    {
+      "id": "global-account",
+      "level": "basic",
+      "title": "What is a global account, and what is it used for?",
+      "description": "A global account is the realization of a contract you or your company has made with SAP. It is the top level of the account model, and you use it to manage subaccounts, members, entitlements and quotas. Entitlements and quotas to use platform resources are received per global account, and the global account administrator then distributes them to subaccounts (optionally through directories) for actual consumption. Each global account uses a commercial model: consumption-based or subscription-based. Global accounts are region- and environment-independent: the global account itself is not located in a region; only the subaccounts inside it are. A global account is either of type enterprise (associated with an SAP customer or partner contract and its purchased entitlements) or trial (for personal exploration, not for production). Global accounts and subaccounts are completely independent of user accounts: users are managed separately and are added to accounts as members. A global account can group directories and subaccounts that an administrator makes available to users, and administrators can move entitlements and quotas between subaccounts of the same global account.",
+      "keyPoints": [
+        "The global account = your contract with SAP; the top of the account hierarchy.",
+        "Used to manage subaccounts, members, entitlements and quotas.",
+        "Entitlements and quotas are received per global account and distributed to subaccounts.",
+        "Region- and environment-independent (only subaccounts belong to a region).",
+        "Type enterprise or trial; commercial model consumption-based or subscription-based.",
+        "Accounts are independent of user accounts."
+      ],
+      "examples": [
+        {
+          "title": "Responsibilities at global account level",
+          "language": "text",
+          "code": "Global account (contract with SAP)\n  - holds the purchased entitlements and quotas\n  - creates directories and subaccounts\n  - manages global account members\n  - assigns entitlements/quotas to directories and subaccounts"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Account Model (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/8ed4a705efa0431b910056c0acdbf377.html"
+        },
+        {
+          "title": "Basic Platform Concepts (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/73beb06e127f4e47b849aa95344aabe1.html"
+        }
+      ]
+    },
+    {
+      "id": "subaccount",
+      "level": "basic",
+      "title": "What is a subaccount, and why does its region matter?",
+      "description": "In subaccounts you deploy applications, use services, and manage your subscriptions; you also use them to manage members, authorizations and entitlements. A global account can contain one or more subaccounts, and subaccounts in a global account are independent from each other. SAP stresses that this independence matters for security, member management, data management, data migration and integration when you plan your landscape and architecture. Each subaccount is associated with exactly one region, which is the physical location (data center) where its applications, data and services are hosted. The region is relevant when you deploy applications and when you access the cockpit through the corresponding cockpit URL. The region does not have to match your own location: you can be in the United States and run a subaccount in Europe. The entitlements and quotas purchased for the global account must be assigned to the individual subaccounts before they can be consumed. Environments are enabled at subaccount level: a multi-environment subaccount can host Cloud Foundry, Kyma and ABAP, so users, authorizations and entitlements are managed once per subaccount. A common pattern is to use separate subaccounts for development, testing and production.",
+      "keyPoints": [
+        "Subaccounts are where you deploy applications, use services and manage subscriptions.",
+        "They also manage members, authorizations and entitlements.",
+        "Subaccounts are independent from each other (security, members, data, integration).",
+        "Each subaccount belongs to exactly one region (data center); it does not have to match your location.",
+        "Entitlements and quotas must be assigned to a subaccount before use.",
+        "Typical setup: separate subaccounts for development, test and production."
+      ],
+      "examples": [
+        {
+          "title": "Subaccounts per stage and region",
+          "language": "text",
+          "code": "Global account\n├── Subaccount \"dev\"   region: Europe (Frankfurt)\n├── Subaccount \"test\"  region: Europe (Frankfurt)\n└── Subaccount \"prod\"  region: Europe (Frankfurt)\n\nEach subaccount: own members, authorizations, entitlements, environments."
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Account Model (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/8ed4a705efa0431b910056c0acdbf377.html"
+        },
+        {
+          "title": "Basic Platform Concepts (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/73beb06e127f4e47b849aa95344aabe1.html"
+        },
+        {
+          "title": "Environments (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/15547f7e7ecd47ee9fa052b0e18c7b0a.html"
+        }
+      ]
+    },
+    {
+      "id": "space",
+      "level": "basic",
+      "title": "What is a Cloud Foundry space, and how does it relate to the subaccount?",
+      "description": "When you enable the Cloud Foundry environment in a subaccount, the system automatically creates a Cloud Foundry org for it. The subaccount and the org have a 1:1 relationship and sit at the same navigation level in the cockpit, even though they may have different names. Inside that org you create spaces. Spaces let you further break down your account model and use services and functions in the Cloud Foundry environment: the subaccount is divided into one or more spaces, which is where application development, deployment and maintenance take place. All spaces of a subaccount share the subaccount's entitlements and quotas. By default, any space can consume all of them, so one space could use up the whole subaccount quota. To prevent that, you can create space quota plans and assign them to spaces; they limit how much each space can use, they do not enable anything. The Kyma environment has a different structure: a subaccount can have one or more Kyma clusters (1:n), and inside each cluster you use Kubernetes namespaces to organize workloads and control access, which plays a similar role to spaces.",
+      "keyPoints": [
+        "Enabling Cloud Foundry creates one CF org per subaccount (1:1).",
+        "Spaces are created inside the org; development, deployment and maintenance happen in spaces.",
+        "Spaces share the subaccount's entitlements and quotas; one space could use them all.",
+        "Space quota plans limit (not enable) how much each space can consume.",
+        "Kyma: one or more clusters per subaccount (1:n), organized with namespaces."
+      ],
+      "examples": [
+        {
+          "title": "Subaccount, org and spaces",
+          "language": "text",
+          "code": "Subaccount \"project-a\"  ── 1:1 ──  Cloud Foundry org\n                                    ├── space \"dev\"   (space quota plan: small)\n                                    └── space \"test\"  (space quota plan: medium)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Account Model (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/8ed4a705efa0431b910056c0acdbf377.html"
+        },
+        {
+          "title": "Entitlements and Quotas (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/00aa2c23479d42568b18882b1ca90d79.html"
+        },
+        {
+          "title": "Basic Platform Concepts (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/73beb06e127f4e47b849aa95344aabe1.html"
+        }
+      ]
+    },
+    {
+      "id": "directories",
+      "level": "basic",
+      "title": "What are directories, and what can you do with them?",
+      "description": "Directories let you organize and manage your subaccounts according to your technical and business needs. A directory can contain other directories and subaccounts, building a hierarchy. Using them is optional: you can still create subaccounts directly under the global account. The hierarchy can be up to 7 levels deep, where the top is always the global account and the bottom a subaccount, so there can be up to 5 levels of directories in between. Directories let you group and filter directories and subaccounts, and monitor usage and costs for contracts on the consumption-based model. Two features can optionally be enabled per directory. Manage Entitlements lets the global account administrator assign entitlements and a maximum quota to the directory, which its child subaccounts can then receive; the quota assigned to a directory is shown as used, like a reservation, even before any subaccount consumes it, and you can choose to auto-assign a set amount of quota to every subaccount created in or moved to that directory (not to those already in it). Manage Authorizations enables authorization management for the directory, for example letting certain users manage the directory's entitlements; it can only be used together with Manage Entitlements. You cannot consume a service at directory level; directories only group subaccounts. A typical use is one directory per department, each grouping the department's development, test and production subaccounts.",
+      "keyPoints": [
+        "Directories group subaccounts (and other directories) into a hierarchy; optional.",
+        "Max depth 7 levels: global account at the top, subaccount at the bottom, up to 5 directory levels between.",
+        "Group/filter, and monitor usage and costs for consumption-based contracts.",
+        "Optional features: Manage Entitlements (reserve quota, auto-assign to new subaccounts) and Manage Authorizations (requires Manage Entitlements).",
+        "Services cannot be consumed at directory level.",
+        "Example: one directory per department with dev/test/prod subaccounts."
+      ],
+      "examples": [
+        {
+          "title": "Directories per department",
+          "language": "text",
+          "code": "Global account\n├── Directory \"Sales\"\n│   ├── Subaccount sales-dev\n│   ├── Subaccount sales-test\n│   └── Subaccount sales-prod\n└── Directory \"HR\"   (Manage Entitlements on: reserved quota for HR subaccounts)\n    ├── Subaccount hr-dev\n    └── Subaccount hr-prod"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Account Model (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/8ed4a705efa0431b910056c0acdbf377.html"
+        },
+        {
+          "title": "Entitlements and Quotas (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/00aa2c23479d42568b18882b1ca90d79.html"
+        }
+      ]
+    },
+    {
+      "id": "entitlements",
+      "level": "basic",
+      "title": "What are services, service plans and entitlements?",
+      "description": "On SAP BTP, all external dependencies such as databases, messaging systems and file systems are services; multitenant applications and environments are considered services too. Each service has one or more service plans. A service plan represents the costs and benefits of a given variant of a service; for example, a database may be offered in several \"T-shirt sizes\", each a different plan. An entitlement is your right to provision and consume a resource; in other words, entitlements are the service plans that you are entitled to use. Which entitlements you have depends on the commercial model of the global account. In the consumption-based model, your organization buys an entitlement to all current and future services eligible under this model, and you can switch them on and off as needed. In the subscription-based model, you are authorized to use only the services you subscribed to; additional services require a contract change. Entitlements are purchased and managed at global account level and distributed to subaccounts (optionally through directories), which consume them. Some environments are themselves entitlements: before a subaccount admin can enable a quota-based environment such as Kyma, it must be assigned to the subaccount as an entitlement, while Cloud Foundry is available to all subaccounts by default and is therefore not shown as an entitlement.",
+      "keyPoints": [
+        "Services: all external dependencies (databases, messaging, file systems), plus multitenant apps and environments.",
+        "Service plan: a variant of a service with its own costs and benefits (\"T-shirt sizes\").",
+        "Entitlement: the right to provision and consume a resource = the service plans you may use.",
+        "Consumption-based: entitled to all eligible services; subscription-based: only subscribed services.",
+        "Managed at global account level, distributed to subaccounts.",
+        "Kyma must be assigned as an entitlement first; Cloud Foundry is available by default."
+      ],
+      "examples": [
+        {
+          "title": "Service, plans and entitlement",
+          "language": "text",
+          "code": "Service:  SAP HANA Cloud\n  plans:  different sizes/variants (each a service plan)\n\nEntitlement in subaccount \"dev\": SAP HANA Cloud, plan X\n  -> the subaccount may now create instances of plan X"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Entitlements and Quotas (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/00aa2c23479d42568b18882b1ca90d79.html"
+        }
+      ]
+    },
+    {
+      "id": "quota",
+      "level": "basic",
+      "title": "What is a quota, and how are quotas distributed?",
+      "description": "A quota is the numeric quantity of a service plan that you are entitled to consume in your global account and its subaccounts. At global account level, a plan's quota is either fixed or unlimited. A fixed quota is the upper limit for consuming the plan across the whole global account, typical for subscription-based global accounts. An unlimited quota has no upper limit, typical for most services in consumption-based global accounts; at the end of the month, the units used determine the charge. The global account administrator distributes quotas to subaccounts in one of two ways, depending on the plan. With a numeric assignment, the admin assigns the plan and a maximum quantity of units the subaccount may consume, which is useful for cost control; typically this relates to the number of instances that can be created. With a non-numeric assignment, the admin only grants access to the plan; this is typical for SaaS applications, where a subaccount either can subscribe or not, and usually there is no limit to the number of instances. Quotas can also be distributed to directories first (when Manage Entitlements is enabled), where they act as a reservation for the directory's subaccounts. When you remove quota from a directory or subaccount, it becomes available again at global account level, unless it was reserved for a directory, in which case it stays available only to that directory. Inside a Cloud Foundry subaccount, space quota plans can further limit how much each space may consume.",
+      "keyPoints": [
+        "Quota: the numeric quantity of a service plan you may consume.",
+        "Fixed quota (typical for subscription) vs unlimited quota (typical for consumption; charged by usage at month end).",
+        "Numeric assignment: a maximum number of units per subaccount (cost control).",
+        "Non-numeric assignment: access to the plan only (typical for SaaS subscriptions).",
+        "Directories can hold reserved quota for their subaccounts; freed quota returns to the global account or stays in the reserving directory.",
+        "Space quota plans limit consumption per Cloud Foundry space."
+      ],
+      "examples": [
+        {
+          "title": "Distributing quota",
+          "language": "text",
+          "code": "Global account: plan \"standard\" of service S, fixed quota 10\n├── Subaccount dev   numeric assignment: 2\n├── Subaccount test  numeric assignment: 3\n└── Directory prod   reserved: 5 (shown as used even before consumption)\n    └── Subaccount prod-eu  receives quota from the directory"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Entitlements and Quotas (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/00aa2c23479d42568b18882b1ca90d79.html"
+        },
+        {
+          "title": "Account Model (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/8ed4a705efa0431b910056c0acdbf377.html"
+        }
+      ]
+    }
+  ]
+}

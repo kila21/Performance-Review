@@ -1,0 +1,138 @@
+{
+  "topicId": "data-privacy",
+  "title": "Data Privacy Integration",
+  "questions": [
+    {
+      "id": "data-privacy-purpose",
+      "level": "basic",
+      "title": "What are the purpose and mission of the Data Privacy Integration service?",
+      "description": "The SAP Data Privacy Integration (DPI) service offers unified data privacy capabilities for applications on SAP BTP. It is a reuse service: applications integrate with it instead of each building their own data protection and privacy functions. Its three main capabilities are: Information reporting, which generates reports that show the personal data stored about a data subject, with export and the ability to trigger correction and deletion of the data; DPI queries the integrated applications over REST in real time to serve these requests, so its performance depends on the number and the performance of the subscribed applications. Retention management, which maintains rules and triggers the deletion of data that has reached the end of its purpose. Business context management, which defines the business context (the purpose, in data privacy terms) for storing or processing business data, and assigns or maps business contexts and purposes to the business systems that distribute business data. Data Privacy Integration NextGen is the successor and latest offering of the service. It covers information reporting (report, export, deletion and correction of a data subject's personal data), retention management (data controllers, business purposes, business rules, orchestration of blocking of data subjects, archiving of business data, and destruction of archived data), consent management, and multitenancy support for tenant-aware applications. SAP points out that DPI supports adherence to data privacy laws, but compliance with the legal obligations remains the customer's own responsibility.",
+      "keyPoints": [
+        "Based on the public SAP BTP service. SAP-internal Kernel Services may differ.",
+        "Unified data privacy capabilities for SAP BTP applications (a reuse service).",
+        "Information reporting: report, export, correct and delete a data subject's personal data (real-time REST queries).",
+        "Retention management: rules, deletion at end of purpose; NextGen adds blocking, archiving and destruction orchestration.",
+        "Business context management: purposes mapped to the systems that distribute business data.",
+        "NextGen is the successor (adds consent management, multitenancy); compliance remains the customer's responsibility."
+      ],
+      "examples": [
+        {
+          "title": "Capabilities",
+          "language": "text",
+          "code": "Information Reporting      -> \"What do we store about this person?\" (report, export, correct, delete)\nRetention Management       -> \"How long may we keep it?\" (rules, end of purpose, blocking, deletion)\nBusiness Context Mgmt      -> \"Why do we process it?\" (purposes / business contexts)\nConsent Management (NextGen) -> \"Did the person agree?\""
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "What is Data Privacy Integration? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/c829f95e3a3a43ddb958782fb3bf61e2/a360cc35b40946139300990c4cdacad8.html"
+        },
+        {
+          "title": "Capabilities - Data Privacy Integration (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/c829f95e3a3a43ddb958782fb3bf61e2/a64a116b895a4a5986d3f1a0032e4516.html"
+        },
+        {
+          "title": "Data Privacy Integration NextGen (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/3916a64ef0594fa0b50b47708f4a5c41/451363e319a044f3a081e565e0753869.html"
+        }
+      ]
+    },
+    {
+      "id": "data-privacy-configuration",
+      "level": "basic",
+      "title": "What are the configuration steps for Data Privacy Integration?",
+      "description": "Configuration happens in SAP Fiori applications, mostly by the data protection and privacy (DPP) specialist and the data protection officer (DPO). Business context: the Business Context Manager provides the design-time apps Configure Data Controllers, Configure Data Controller Groups, Configure Business Contexts, and Mapping Business Context to Consumers. 1. Configure the data controller: in the Configure Data Controller app, the DPP specialist enters the data controllers, the legal entities responsible for the personal data; a data controller must exist before it can be added to a business context. 2. Configure the business context: in Configure Business Context, the DPP specialist creates, edits, activates or deletes business contexts. Before that, at least one entry must exist for legal grounds, business subprocess, data controller group and data subject role (from the application onboarding). 3. Map business contexts to the consuming applications. Retention and deletion: in the Manage Business Purposes app, the DPO sets reference dates for legal grounds (mandatory for residence and retention rules), creates a business purpose and assigns an application group, data subject role and legal entity, defines residence and retention rules based on the legal ground, and activates the purpose. An active purpose cannot be deleted, and editing it sets it to inactive. In the Configure Data Subject Deletion app, the DPP specialist schedules checks to find data subjects that can be deleted for a combination of application group and data subject role, and sends the deletion requests to the applications. Consent (NextGen): a set of configuration apps prepares consent purposes and forms; SAP recommends completing them in this order: source information, data controllers, applications, jurisdictions, master data source, data subject ID types, languages, third parties, outbound channel types.",
+      "keyPoints": [
+        "Based on the public SAP BTP service. SAP-internal Kernel Services may differ.",
+        "Business Context Manager apps: data controllers, data controller groups, business contexts, mapping to consumers.",
+        "Order: data controller -> business context (needs legal grounds, subprocess, controller group, data subject role) -> mapping.",
+        "Manage Business Purposes (DPO): reference dates, purpose, residence and retention rules, activate.",
+        "Configure Data Subject Deletion (DPP specialist): find deletable data subjects, send deletion requests.",
+        "NextGen consent configuration apps, completed in SAP's recommended order."
+      ],
+      "examples": [
+        {
+          "title": "Configuration order",
+          "language": "text",
+          "code": "1. Configure Data Controller        (DPP specialist)\n2. Configure Data Controller Group\n3. Configure Business Context       (legal grounds, subprocess, controller group, data subject role)\n4. Mapping Business Context to Consumers\n5. Manage Business Purposes         (DPO: residence + retention rules, activate)\n6. Configure Data Subject Deletion  (schedule checks, send deletion requests)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Configuration Application (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/c829f95e3a3a43ddb958782fb3bf61e2/f3c9c2371eff4803ab6bc77136ad199d.html"
+        },
+        {
+          "title": "Configure Data Controller (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/c829f95e3a3a43ddb958782fb3bf61e2/70fde84639c54746b742ca1c9606d32b.html"
+        },
+        {
+          "title": "Configure Business Context (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/c829f95e3a3a43ddb958782fb3bf61e2/89d532c9731b4e88adb0c35f456c00b1.html"
+        },
+        {
+          "title": "Manage Business Purposes (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/c829f95e3a3a43ddb958782fb3bf61e2/cfc00ffdf5ad4fc5b0d2bec0db78c3d1.html"
+        },
+        {
+          "title": "Delete Data Subject Information (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/c829f95e3a3a43ddb958782fb3bf61e2/26a311721cd2456da006faf7f1814950.html"
+        },
+        {
+          "title": "Consent Configuration - Data Privacy Integration NextGen (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/c829f95e3a3a43ddb958782fb3bf61e2/62944c9a10fb4c9197d0373c80c49d38.html"
+        }
+      ]
+    },
+    {
+      "id": "data-privacy-entities",
+      "level": "basic",
+      "title": "Describe the main entities: data subject, purpose, data controller, processing foundation and consent.",
+      "description": "DPI refers to the general SAP glossary for data protection and privacy for its terms. Data subject: an identified or identifiable natural person, that is, someone who can be identified directly or indirectly, for example by a name, an identification number, location data, an online identifier, or factors specific to their physical, physiological, genetic, mental, economic, cultural or social identity; personal data is any information relating to such a person. Purpose: the information that specifies the reason and the goal for processing a specific set of personal data; as a rule, the purpose references the relevant legal basis for the processing. A business purpose is the legal, contractual or otherwise justified reason for processing personal data to complete an end-to-end business process, and it is defined by the data controller. In DPI, the business context is the purpose in data privacy terms: it enables the legitimate processing of personal data and lets applications tag business data with it at a granular level. Data controller: the legal entity, a company or a person, responsible for ensuring that a data subject's personal data is stored and processed according to all applicable data protection regulations; it is configured in the Configure Data Controller app and assigned to business contexts. Processing foundation: SAP's public documentation has no entity with this exact name. The closest documented concept is the legal ground (legal basis) that a purpose references and on which residence and retention rules are defined in Manage Business Purposes; treat this item with care. Consent: the action of the data subject confirming that the use of their personal data is allowed for a given purpose; a consent functionality stores a consent record for a specific purpose and shows whether the data subject has granted, withdrawn or denied consent. DPI NextGen manages consents with consent purposes, consent forms and consent texts. Related terms: end of purpose (when processing is no longer needed for the primary purpose, after which data is blocked), residence period and retention period.",
+      "keyPoints": [
+        "Based on the public SAP BTP service. SAP-internal Kernel Services may differ.",
+        "Data subject: an identified or identifiable natural person.",
+        "Purpose: the reason and goal for processing personal data, referencing the legal basis; in DPI = business context.",
+        "Data controller: the legal entity responsible for lawful storage and processing of the personal data.",
+        "\"Processing foundation\": no public SAP definition; closest is the legal ground a purpose references.",
+        "Consent: the data subject's permission for a purpose (granted, withdrawn or denied)."
+      ],
+      "examples": [
+        {
+          "title": "How the entities relate",
+          "language": "text",
+          "code": "Data controller (legal entity, for example \"ACME Inc.\")\n  defines -> Purpose / business context \"Order processing\" (legal ground: contract)\n               applies to -> Data subject role \"Customer\"\n               rules      -> residence + retention period, end of purpose -> blocking -> deletion\nData subject \"Jane Doe\" -> Consent for purpose \"Newsletter\": granted / withdrawn / denied"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Glossary for Data Protection and Privacy (SAP BTP, SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/a57e0ab085404ef483a8c99e50cbf91e.html"
+        },
+        {
+          "title": "Terms and Definitions (Data Privacy Integration, SAP Help Portal)",
+          "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/c829f95e3a3a43ddb958782fb3bf61e2/f0080255e153429d9bdadb39d85d9a93.html"
+        },
+        {
+          "title": "Configure Data Controller (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/c829f95e3a3a43ddb958782fb3bf61e2/70fde84639c54746b742ca1c9606d32b.html"
+        },
+        {
+          "title": "Configure Business Context (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/c829f95e3a3a43ddb958782fb3bf61e2/89d532c9731b4e88adb0c35f456c00b1.html"
+        },
+        {
+          "title": "Manage Business Purposes (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/c829f95e3a3a43ddb958782fb3bf61e2/cfc00ffdf5ad4fc5b0d2bec0db78c3d1.html"
+        },
+        {
+          "title": "Consent Management - Data Privacy Integration NextGen (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/c829f95e3a3a43ddb958782fb3bf61e2/a2dcb7fe9e1d477b9f6b7a5db3179b20.html"
+        }
+      ]
+    }
+  ]
+}

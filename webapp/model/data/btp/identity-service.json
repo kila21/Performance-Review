@@ -1,0 +1,110 @@
+{
+  "topicId": "identity-service",
+  "title": "Identity service (SAP Cloud Identity Services)",
+  "questions": [
+    {
+      "id": "identity-purpose",
+      "level": "basic",
+      "title": "What are the purpose and mission of the Identity service (SAP Cloud Identity Services)?",
+      "description": "SAP Cloud Identity Services are a group of SAP BTP services that integrate identity and access management between systems. Their goal is a seamless single sign-on experience across systems while keeping system and data access secure. The group includes Identity Authentication, Identity Provisioning, Identity Directory and Authorization Management, and is available for the Cloud Foundry, Kyma and Neo environments. Identity Authentication provides controlled cloud-based access to business processes, applications and data: all SAP cloud applications can offer the same authentication mechanisms, including strong authentication with configurable multi-factor enforcement; it offers a central SSO endpoint for all SAP cloud applications with pre-configured or semi-automated trust; and it gives users a common identity, unified user management and a security token service for system-to-system communication. Identity Provisioning handles the identity lifecycle: provisioning and deprovisioning of identities and authorizations, for faster user onboarding and offboarding, synchronizing users and groups between SAP and non-SAP cloud and on-premise systems. Identity Directory is the persistence layer, the central store for users and groups, with a SCIM 2.0 REST API and custom schemas; it generates the Global User ID, the unique user identifier across the landscape. Authorization Management lets you define authorization policies, restricted by user or business object attributes, for SAP BTP applications with instance-based authorizations. Further features are authentication methods such as form, SPNEGO, social or two-factor authentication, SSO with OpenID Connect or SAML 2.0, delegating authentication to a third-party or on-premise identity provider (as default or based on conditions such as email domain or user group), and risk-based authentication.",
+      "keyPoints": [
+        "Based on the public SAP BTP service. SAP-internal Kernel Services may differ.",
+        "Mission: integrated identity and access management with seamless, secure single sign-on across systems.",
+        "Identity Authentication: authentication methods, MFA, central SSO endpoint (OpenID Connect, SAML 2.0).",
+        "Identity Provisioning: user and group lifecycle across SAP and non-SAP systems.",
+        "Identity Directory: central user/group store, SCIM 2.0 API, Global User ID.",
+        "Authorization Management: policy-based, instance-level authorizations for SAP BTP apps."
+      ],
+      "examples": [
+        {
+          "title": "The parts of SAP Cloud Identity Services",
+          "language": "text",
+          "code": "Identity Authentication   -> who you are (login, MFA, SSO, delegation to a corporate IdP)\nIdentity Provisioning     -> getting users and groups into the systems\nIdentity Directory        -> where users and groups are stored (SCIM 2.0, Global User ID)\nAuthorization Management  -> what you may do (policies)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "What Are Cloud Identity Services? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/IDENTITY_AUTHENTICATION/6d6d63354d1242d185ab4830fc04feb1/27882717f44b445fa287936c6f43dc1f.html"
+        }
+      ]
+    },
+    {
+      "id": "identity-configuration",
+      "level": "basic",
+      "title": "What are the configuration steps for SAP Cloud Identity Services?",
+      "description": "To use SAP Cloud Identity Services you must obtain a tenant, which is delivered as part of a bundle with an SAP cloud solution or through a self-service request in the SAP BTP cockpit. The initial setup, according to SAP's quickstart, is: 1. View assigned tenants and administrators: check whether a tenant is already assigned to your customer ID; if one exists and you are an administrator, reuse it. 2. Get your tenant: as a customer you are entitled to one productive and one test tenant, and you may request an additional one; trial tenants are open to everyone. 3. Activate your account: you receive an email with instructions to activate your account for the administration console, the central, Fiori-based point for configuring authentication and provisioning. 4. Access the admin console: after you sign in, you are the initial administrator, listed under Users & Authorizations > Administrators. 5. Manage administrators: view your predefined authorizations, add new administrators and define authorization policies for them. 6. Enable two-factor authentication for access to the administration console, which SAP recommends. 7. Optionally connect corporate identity providers, so that authentication is delegated to them. Then connect it to SAP BTP: in the subaccount, establish trust with the tenant through Security > Trust Configuration > Establish Trust (OpenID Connect), which automatically creates an application for the subaccount in the tenant, and map the users' groups to role collections. The tenant must be associated with the customer IDs of the global account.",
+      "keyPoints": [
+        "Based on the public SAP BTP service. SAP-internal Kernel Services may differ.",
+        "Get a tenant: bundled with an SAP cloud solution or self-service in the cockpit (one productive + one test per customer).",
+        "Activate the account and open the administration console (you become the initial administrator).",
+        "Manage administrators and enable two-factor authentication for the console.",
+        "Optionally connect corporate identity providers (delegated authentication).",
+        "Connect to SAP BTP: Establish Trust (OIDC) in the subaccount, then map groups to role collections."
+      ],
+      "examples": [
+        {
+          "title": "Quickstart",
+          "language": "text",
+          "code": "1. View assigned tenants and admins\n2. Get your tenant (productive / test)\n3. Activate your account (email)\n4. Access the admin console (Users & Authorizations > Administrators)\n5. Manage administrators\n6. Enable two-factor authentication\n7. Connect corporate identity providers (optional)\n8. SAP BTP subaccount: Security > Trust Configuration > Establish Trust"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Initial Setup (SAP Cloud Identity Services, SAP Help Portal)",
+          "url": "https://help.sap.com/docs/IDENTITY_AUTHENTICATION/6d6d63354d1242d185ab4830fc04feb1/31af7da133874e199a7df1d42905241b.html"
+        },
+        {
+          "title": "What Are Cloud Identity Services? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/IDENTITY_AUTHENTICATION/6d6d63354d1242d185ab4830fc04feb1/27882717f44b445fa287936c6f43dc1f.html"
+        },
+        {
+          "title": "Establish Trust and Federation Between SAP Authorization and Trust Management Service and SAP Cloud Identity Services (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/161f8f0cfac64c4fa2d973bc5f08a894.html"
+        }
+      ]
+    },
+    {
+      "id": "identity-use-case",
+      "level": "basic",
+      "title": "Give an example use case for SAP Cloud Identity Services.",
+      "description": "SAP groups the scenarios by user engagement: business-to-employee (employees), business-to-business (partners) and business-to-consumer (consumers), plus authorization management, identity directory and identity provisioning scenarios. A typical business-to-employee example on SAP BTP: a company runs several SAP cloud applications and custom BTP applications, and wants employees to log on once with their corporate account. The company gets its own SAP Cloud Identity Services tenant and configures its corporate identity provider there, delegating authentication to it (as default, or based on conditions such as the email domain or user group). In the SAP BTP subaccount, it establishes OpenID Connect trust to the tenant, which SAP recommends over using the default SAP ID service. Identity Authentication now offers the employees a central SSO endpoint: they log on once and are signed in to all connected applications. The company enforces its own policies, for example two-factor authentication based on IP ranges or user groups (risk-based authentication), while the corporate identity provider remains the source of truth for users. Identity Provisioning can synchronize users and groups into the connected systems, and in the subaccount the groups the identity provider sends are mapped to role collections, so a new employee gets the right authorizations as soon as they are added to the right group. For business-to-consumer scenarios, the same service offers self-registration, social login and password reset for external users.",
+      "keyPoints": [
+        "Based on the public SAP BTP service. SAP-internal Kernel Services may differ.",
+        "Scenario types: business-to-employee, business-to-business, business-to-consumer.",
+        "Example (B2E): own IAS tenant proxies the corporate IdP; SAP BTP trusts IAS via OpenID Connect.",
+        "Employees get SSO through the central IAS endpoint across SAP cloud and BTP apps.",
+        "Company policies: MFA, risk-based authentication; groups mapped to role collections.",
+        "B2C: self-registration, social login and password reset for external users."
+      ],
+      "examples": [
+        {
+          "title": "Employee SSO with a corporate identity provider",
+          "language": "text",
+          "code": "Employee browser\n   -> SAP BTP app (approuter)\n   -> Identity Authentication tenant (central SSO, MFA rules)\n   -> delegates to the corporate IdP (conditional, for example by email domain)\n   <- token with groups -> role collections in the subaccount -> app access"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Scenarios (SAP Cloud Identity Services, SAP Help Portal)",
+          "url": "https://help.sap.com/docs/IDENTITY_AUTHENTICATION/6d6d63354d1242d185ab4830fc04feb1/fb9898deed834302ace22e0c2297c631.html"
+        },
+        {
+          "title": "What Are Cloud Identity Services? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/IDENTITY_AUTHENTICATION/6d6d63354d1242d185ab4830fc04feb1/27882717f44b445fa287936c6f43dc1f.html"
+        },
+        {
+          "title": "Trust and Federation with Identity Providers (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/cb1bc8f1bd5c482e891063960d7acd78.html"
+        },
+        {
+          "title": "Map Role Collections to User Groups (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/51acfc82c0c54db59de0a528f343902c.html"
+        }
+      ]
+    }
+  ]
+}

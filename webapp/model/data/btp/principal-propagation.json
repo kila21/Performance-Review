@@ -1,0 +1,74 @@
+{
+  "topicId": "principal-propagation",
+  "title": "Principal propagation",
+  "questions": [
+    {
+      "id": "pp-cloud-to-on-premise",
+      "level": "advanced",
+      "title": "How does principal propagation work from the cloud to on-premise, and how do you configure it?",
+      "description": "Principal propagation (also known as user propagation) means forwarding the identity of a cloud user to an on-premise system, so the user is logged on in the backend under their own identity without a manual logon. With the Connectivity service, your cloud application connects to on-premise systems through the Cloud Connector and forwards the user's identity. The JSON Web Token (JWT) representing the cloud user is forwarded to the Cloud Connector, which verifies it and propagates the identity via either an X.509 certificate or Kerberos. It only works if the on-premise system is exposed to the cloud via the Cloud Connector, and it can be configured for HTTP or RFC communication. The flow has five steps. 1. A user logs on to the cloud application; the identity is established by an identity provider (the subaccount's default IdP or another trusted IdP). 2. The application propagates the user to the Connectivity service with a user exchange token (or a designated secondary header); optionally it uses the Destination service to externalize the connection configuration, with a destination of authentication type PrincipalPropagation and ProxyType OnPremise. For RFC with the SAP Java buildpack, JCo does this step for you. 3. The Connectivity service forwards the JWT to the Cloud Connector. 4. The Cloud Connector verifies the JWT, extracts the attributes, and uses its security token service (STS) component to issue a new token, for example an X.509 certificate, with the same or similar attributes to assert the identity to the backend; the Cloud Connector and the cloud application share the same trust settings. 5. The Cloud Connector sends the new token to the backend. The configuration is split between roles: the operator configures principal propagation in the Cloud Connector (trust to the cloud side and the certificate or Kerberos setup), and the developer configures the HTTP use case (principal propagation via user exchange token with the Connectivity service) or the RFC use case. For the backend, the Cloud Connector's user authentication for principal propagation requires explicitly configured trust to the cloud entities whose user tokens are accepted.",
+      "keyPoints": [
+        "Principal (user) propagation: the cloud user's identity is forwarded to the on-premise backend (SSO).",
+        "The user's JWT goes via the Connectivity service to the Cloud Connector.",
+        "The Cloud Connector verifies it and its STS issues an X.509 certificate (or uses Kerberos) for the backend.",
+        "Only for systems exposed through the Cloud Connector; HTTP or RFC.",
+        "Destination: Authentication=PrincipalPropagation, ProxyType=OnPremise (optional but typical).",
+        "Operator: configure principal propagation and trust in the Cloud Connector; developer: user exchange token (HTTP) or RFC setup."
+      ],
+      "examples": [
+        {
+          "title": "The five steps",
+          "language": "text",
+          "code": "1. User logs on (IdP)                     -> cloud app has the user's JWT\n2. App -> Connectivity service             (user exchange token; destination Authentication=PrincipalPropagation)\n3. Connectivity service -> Cloud Connector (forwards the JWT)\n4. Cloud Connector verifies the JWT; STS issues e.g. an X.509 certificate for the user\n5. Cloud Connector -> backend              (backend logs the user on with that certificate)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Cloud to On-Premise (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/70b8ef33812e486d8b745a0b47fd093e.html"
+        },
+        {
+          "title": "Principal Propagation SSO Authentication for HTTP (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/73194cc419894433994c5f0444b4c6a1.html"
+        },
+        {
+          "title": "Authenticating Users against On-Premises Systems (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/b643fbecb14e4c89ab3c03b21200cb08.html"
+        }
+      ]
+    },
+    {
+      "id": "pp-cloud-to-cloud",
+      "level": "advanced",
+      "title": "How does principal propagation work from the cloud to another cloud system, and how do you configure it?",
+      "description": "For remote systems on the Internet, the Destination service forwards the identity of a cloud user with a destination of authentication type OAuth2SAMLBearerAssertion. This enables single sign-on and lets the cloud application consume OAuth-protected APIs of the target system on behalf of the user. The flow has four steps. 1. A user logs on to the cloud application; the identity is established by an identity provider (the subaccount's default IdP or another trusted IdP). 2. When the application retrieves the OAuth SAML bearer destination, the user is made available to the Destination service by means of a user exchange JWT. The service wraps the user identity in a SAML assertion, signs it with the subaccount's private key, and sends it to the token service configured in the destination. 3. The OAuth token service accepts the SAML assertion and returns an OAuth access token; the Destination service returns both the destination and the access token to the application. 4. The application uses the destination properties and the access token to consume the remote API. For this to work, the systems must trust each other: the operator manages the trust (SAP documents a separate procedure for setting up trust between systems for SAML bearer assertion flows), and the operator and/or developer configures user propagation via the SAML 2.0 bearer assertion flow in the Destination service, with properties such as tokenServiceURL, audience, clientKey and the token service credentials. SAP documents concrete use cases: from the Cloud Foundry environment to SAP S/4HANA Cloud, to SAP SuccessFactors, between Cloud Foundry applications, and from Cloud Foundry to the Neo environment.",
+      "keyPoints": [
+        "Cloud to cloud uses destinations with Authentication=OAuth2SAMLBearerAssertion.",
+        "The Destination service gets the user via a user exchange JWT.",
+        "It builds a SAML assertion, signs it with the subaccount's private key, and sends it to the target's token service.",
+        "The token service returns an OAuth access token; the app calls the remote API with it.",
+        "Prerequisite: trust between the target system and the subaccount, set up by the operator.",
+        "Documented targets: SAP S/4HANA Cloud, SAP SuccessFactors, other Cloud Foundry apps, Neo."
+      ],
+      "examples": [
+        {
+          "title": "The four steps",
+          "language": "text",
+          "code": "1. User logs on (IdP)\n2. App asks the Destination service for the OAuth2SAMLBearerAssertion destination (user exchange JWT)\n   -> Destination service: SAML assertion for the user, signed with the subaccount's private key\n   -> sent to tokenServiceURL of the target system\n3. Target token service -> OAuth access token -> Destination service -> app (destination + token)\n4. App calls the target API with \"Authorization: Bearer <access token>\""
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Cloud to Cloud (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/65b11d4ed333450ebebb8a2e25e805b7.html"
+        },
+        {
+          "title": "OAuth SAML Bearer Assertion Authentication (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/c69ea6aacd714ad2ae8ceb5fc3ceea56.html"
+        }
+      ]
+    }
+  ]
+}

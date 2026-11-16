@@ -1,0 +1,150 @@
+{
+  "topicId": "btp-basics",
+  "title": "BTP & environments",
+  "questions": [
+    {
+      "id": "what-is-btp",
+      "level": "elementary",
+      "title": "What is SAP Business Technology Platform (SAP BTP), and what is its purpose?",
+      "description": "SAP BTP is SAP's cloud platform. SAP describes its purpose in three parts: to turn data into business value, to compose end-to-end business processes, and to build and extend SAP applications quickly. It is built on a multi-cloud foundation: its services and solutions run on several cloud infrastructure providers (SAP itself, and the IaaS partners Amazon Web Services, Microsoft Azure, Google Cloud and Alibaba Cloud), it supports different runtimes such as Cloud Foundry, ABAP and Kyma, it is available in many regions, and it supports a broad choice of programming languages. Everything you use on the platform is offered as solutions and services: services enable, facilitate or accelerate the development of business applications and other platform services, and the complete list is published in the SAP Discovery Center. The central point of entry is the SAP BTP cockpit, where you access your accounts and applications and manage everything associated with them. A company works in BTP through its account structure (global account, directories, subaccounts), where it receives entitlements to services and deploys and runs its applications. SAP BTP also distinguishes two types of global accounts: a trial account, free and open to everyone, for personal exploration and not for production, and an enterprise account, which is associated with one SAP customer or partner and contains their purchased entitlements.",
+      "keyPoints": [
+        "Purpose (SAP's words): turn data into business value, compose end-to-end business processes, build and extend SAP applications quickly.",
+        "Multi-cloud foundation: SAP and IaaS partners (AWS, Azure, Google Cloud, Alibaba Cloud), multiple runtimes (Cloud Foundry, ABAP, Kyma), many regions and languages.",
+        "Everything is offered as solutions and services; the full catalog is in the SAP Discovery Center.",
+        "The SAP BTP cockpit is the central entry point for accounts and applications.",
+        "Global account types: trial (free, not for production) and enterprise (a customer's or partner's purchased entitlements)."
+      ],
+      "examples": [
+        {
+          "title": "Where the parts of SAP BTP sit",
+          "language": "text",
+          "code": "SAP BTP cockpit (entry point)\n└── Global account  (your contract with SAP; enterprise or trial)\n    └── Directories (optional)\n        └── Subaccount  (one region; environments are enabled here)\n            ├── Cloud Foundry / Kyma / ABAP environment instances\n            ├── Service instances and subscriptions\n            └── Members, authorizations, entitlements"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Basic Platform Concepts (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/73beb06e127f4e47b849aa95344aabe1.html"
+        }
+      ]
+    },
+    {
+      "id": "paas",
+      "level": "elementary",
+      "title": "What does platform as a service (PaaS) mean, and how does SAP BTP deliver it?",
+      "description": "Platform as a service means that the provider offers a ready platform with application development services and capabilities, so you can build, extend and integrate business applications in the cloud without running the underlying platform yourself; SAP uses exactly these words when it describes the Neo environment as an enterprise platform-as-a-service. In SAP BTP, SAP states it directly: the environments constitute the actual platform-as-a-service offering of SAP BTP, which allows for the development and administration of business applications. The layers are split: the regions are provided either by SAP or by IaaS partners (Amazon Web Services, Microsoft Azure, Google Cloud, Alibaba Cloud), and the third-party providers operate the infrastructure layer, while SAP operates the platform layer and Cloud Foundry. On top of this, all external dependencies an application needs, such as databases, messaging systems and file systems, are consumed as services, each with one or more service plans (for example different \"T-shirt sizes\" of a database). Environments are anchored at subaccount level: to use one, you enable it in a subaccount (in the cockpit, through the Service Marketplace, or with the btp CLI), which creates an environment instance. A multi-environment subaccount can host several environments, so users, authorizations and entitlements are managed once per subaccount.",
+      "keyPoints": [
+        "PaaS: a ready platform with development services and capabilities to build, extend and integrate business apps in the cloud.",
+        "SAP: \"Environments constitute the actual platform-as-a-service offering of SAP BTP.\"",
+        "IaaS partners operate the infrastructure layer; SAP operates the platform layer and Cloud Foundry.",
+        "Databases, messaging, file systems and so on are consumed as services with service plans.",
+        "Environments are enabled per subaccount (cockpit, Service Marketplace or btp CLI), creating an environment instance."
+      ],
+      "examples": [
+        {
+          "title": "Enabling an environment in a subaccount with the btp CLI",
+          "language": "sh",
+          "code": "# creates an environment instance (for example Cloud Foundry or Kyma) in the current subaccount\nbtp create accounts/environment-instance"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Basic Platform Concepts (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/73beb06e127f4e47b849aa95344aabe1.html"
+        },
+        {
+          "title": "Environments (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/15547f7e7ecd47ee9fa052b0e18c7b0a.html"
+        },
+        {
+          "title": "Neo Environment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/0f79436cf43a4785bb5b7ee9dac0c76a.html"
+        }
+      ]
+    },
+    {
+      "id": "environments",
+      "level": "elementary",
+      "title": "Which environments does SAP BTP offer (Cloud Foundry, Neo, ABAP, Kyma), and what is each one used for?",
+      "description": "SAP BTP provides four environments, each with its own tools, technologies and runtimes. The Cloud Foundry environment lets you create polyglot cloud applications; it contains the Cloud Foundry runtime, based on the open-source platform managed by the Cloud Foundry Foundation, and supports multiple runtimes, programming languages, libraries and services, with many buildpacks (including community and self-developed ones). Use it to develop new business applications and business services. The Kyma environment is a fully managed, cloud-native Kubernetes application runtime based on the open-source project Kyma. Every Kyma environment consists of one or more Kubernetes clusters (based on project Gardener) in the provider and region you choose, plus the Kyma modules you select. Use it for containerized microservices, full-stack applications, and serverless Functions that react to events or API calls from connected SAP systems; it supports CAP, the SAP Cloud SDK, the application router and the HTML5 deployer out of the box. The ABAP environment lets you create extensions for ABAP-based products such as SAP S/4HANA Cloud, develop new cloud applications, and transform existing ABAP custom code or extensions to the cloud. It is based on the latest ABAP platform cloud release, supports the ABAP RESTful Application Programming Model with SAP Fiori and CDS, and each ABAP system has its own dedicated SAP HANA database. The Neo environment lets you develop HTML5, Java and SAP HANA XS applications, with SAPUI5 for the UI. SAP has announced that the Neo environment will sunset on December 31, 2028 (subject to customer or partner contracts), and it documents a migration path from Neo to the multi-cloud foundation. Neo is also not part of multi-environment subaccounts.",
+      "keyPoints": [
+        "Cloud Foundry: polyglot apps and business services on open-source Cloud Foundry, with many buildpacks.",
+        "Kyma: managed Kubernetes (Gardener clusters + Kyma modules); microservices, full-stack apps, serverless Functions triggered by events.",
+        "ABAP: extensions for ABAP products like SAP S/4HANA Cloud, new cloud apps, moving custom ABAP code to the cloud (RAP, Fiori, CDS).",
+        "Neo: HTML5, Java and SAP HANA XS applications; sunsets on December 31, 2028; migrate to the multi-cloud foundation.",
+        "Cloud Foundry, Kyma and ABAP are the multi-cloud environments; Neo is not part of multi-environment subaccounts."
+      ],
+      "examples": [
+        {
+          "title": "Choosing an environment",
+          "language": "text",
+          "code": "New business app or service, any language   -> Cloud Foundry\nContainers, microservices, event-driven Functions -> Kyma\nExtending SAP S/4HANA Cloud in ABAP (RAP)    -> ABAP environment\nExisting Neo application                      -> plan migration to the multi-cloud foundation (Neo sunsets 2028-12-31)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Basic Platform Concepts (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/73beb06e127f4e47b849aa95344aabe1.html"
+        },
+        {
+          "title": "Cloud Foundry Environment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/9c7092c7b7ae4d49bc8ae35fdd0e0b18.html"
+        },
+        {
+          "title": "Kyma Environment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/468c2f3c3ca24c2c8497ef9f83154c44.html"
+        },
+        {
+          "title": "ABAP Environment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/11d62652aa2b4600a0fa136de0789648.html"
+        },
+        {
+          "title": "Neo Environment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/0f79436cf43a4785bb5b7ee9dac0c76a.html"
+        },
+        {
+          "title": "Environments (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/15547f7e7ecd47ee9fa052b0e18c7b0a.html"
+        }
+      ]
+    },
+    {
+      "id": "canary-account",
+      "level": "elementary",
+      "title": "What is a Canary account, and what is it used for?",
+      "description": "SAP's public documentation has no dedicated page that defines the Canary landscape, so this answer only uses what SAP product documentation says about it. Canary is a separate SAP BTP landscape that SAP documentation refers to as a test environment, as opposed to the live (productive) landscape. A Canary account is an account on that landscape. For example, the SAP Document Translation documentation lists \"the test environment on the Canary landscape\": if you have an account on the Canary landscape you can simply enable the service there, otherwise the team sets up a test account on Canary for your project. Canary has its own regions, for example \"Europe (Frankfurt) - Canary\" with the Cloud Foundry regions cf-eu10-canary and cf-eu11-canary, in which some applications are offered. Behaviour on Canary can differ from the live landscape: the Joule documentation notes that an API request timeout can be configured in the BTP canary landscape only, while in the live landscape a default timeout of 15 seconds applies. Based on these mentions, a Canary account is used to test applications and services in a separate, non-productive landscape before using them in the live landscape. Because there is no central public definition, check the documentation of the specific service you plan to use for its Canary availability.",
+      "keyPoints": [
+        "No dedicated public SAP page defines Canary; this answer is based on product documentation that mentions it.",
+        "Canary is a separate SAP BTP landscape, described as a test environment, distinct from the live landscape.",
+        "A Canary account is an account on that landscape, used for testing (for example, test accounts set up for projects).",
+        "It has its own regions, for example Europe (Frankfurt) - Canary: cf-eu10-canary, cf-eu11-canary.",
+        "Settings and behaviour can differ from the live landscape (for example, configurable API timeouts in Joule)."
+      ],
+      "examples": [
+        {
+          "title": "Canary regions named in SAP documentation",
+          "language": "text",
+          "code": "Europe (Frankfurt) - Canary\n  cf-eu10-canary\n  cf-eu11-canary\n\nLive (productive) example for comparison:\n  Europe (Frankfurt)  cf-eu10"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "How to access the Document Translation service for your project (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/help/b6a9b57adb9a49eebab50176a282ece1/180aa55c95c7437ba8faa0122281982c.html"
+        },
+        {
+          "title": "SAP Advanced Solution Bundling: Onboarding (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/SAP_ADVANCED_SOLUTION_BUNDLING/d71a6be02b0e43bfb7f07b838f50f393/22baba2cd32d457bbf31821aca9b4092.html"
+        },
+        {
+          "title": "Joule: Configure API Request Timeout (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/JOULE/ba88d1ec6a1b442098863d577c19b0c0/012b6ade4f1949938db099b433781437.html"
+        }
+      ]
+    }
+  ]
+}

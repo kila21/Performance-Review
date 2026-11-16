@@ -1,0 +1,150 @@
+{
+  "topicId": "connectivity-basics",
+  "title": "Connectivity & destinations",
+  "questions": [
+    {
+      "id": "remote-data-sources",
+      "level": "elementary",
+      "title": "How do you connect remote data sources to SAP BTP applications (Internet connectivity vs cloud to on-premise)?",
+      "description": "SAP BTP Connectivity offers a set of services and software components that let SAP cloud applications securely access remote services that run on the Internet or on-premise. It allows subaccount-specific configuration of application connections via destinations, connections to on-premise systems using the Cloud Connector, and a secure tunnel from your on-premise network to SAP BTP applications, while you keep full control and auditability of what is exposed to the cloud. Its components are the Destination service, the Connectivity service, the Cloud Connector, and, for Kubernetes and the Kyma environment, the Connectivity Proxy and the Transparent Proxy. For Internet connectivity, the application uses the Destination service to connect to the remote service: the destination holds the URL, the authentication and other details, and the proxy type is Internet (the default), meaning the application connects to an external REST or SOAP service on the Internet. For cloud to on-premise connectivity, the application additionally uses the Connectivity service, and the Cloud Connector, installed in your local network, routes the requests to and from SAP BTP; the destination's proxy type is OnPremise. A third proxy type, PrivateLink, lets selected SAP BTP services establish a private connection with selected services in your own IaaS provider accounts. For inbound connections from outside to SAP BTP, you can use Cloud Connector service channels or the API endpoints of your region. The on-premise scenarios also apply to virtual private cloud (VPC) environments.",
+      "keyPoints": [
+        "SAP BTP Connectivity: secure access from cloud apps to Internet and on-premise services.",
+        "Components: Destination service, Connectivity service, Cloud Connector (+ Connectivity Proxy, Transparent Proxy for Kubernetes).",
+        "Internet: Destination service only, proxy type Internet (default).",
+        "On-premise: Destination + Connectivity service + Cloud Connector, proxy type OnPremise.",
+        "PrivateLink: private connection to services in your own IaaS accounts.",
+        "Inbound: Cloud Connector service channels or region API endpoints."
+      ],
+      "examples": [
+        {
+          "title": "Two destinations, two proxy types",
+          "language": "text",
+          "code": "Name=WeatherAPI        Type=HTTP  ProxyType=Internet   URL=https://api.example.com\nName=S4OnPrem          Type=HTTP  ProxyType=OnPremise  URL=http://<host exposed in the Cloud Connector>:<port>\n                                    (requires the Connectivity service + Cloud Connector)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "What is SAP BTP Connectivity? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/e54cc8fbbb571014beb5caaf6aa31280.html"
+        },
+        {
+          "title": "HTTP Destinations (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/42a0e6b966924f2e902090bdf435e1b2.html"
+        },
+        {
+          "title": "Destination Service (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/8ff5483fef564eae9f34fe092d1bddcd.html"
+        }
+      ]
+    },
+    {
+      "id": "on-premise-scenario",
+      "level": "elementary",
+      "title": "Describe a typical scenario for connecting your on-premise network to SAP BTP.",
+      "description": "SAP describes the typical scenario like this. Your company owns a global account on SAP BTP with one or more subaccounts. Using SAP BTP, you subscribe to or deploy your own applications in those subaccounts. To connect these applications with your on-premise network, the Cloud Connector administrator installs the Cloud Connector in the local network and sets up a secure tunnel to your company's subaccount on SAP BTP. The platform ensures that the tunnel can only be used by applications assigned to your subaccount; applications of other (sub)accounts cannot access it. The tunnel is encrypted with transport layer security (TLS), which guarantees connection privacy. The Cloud Connector runs as an on-premise agent in a secured network and acts as a reverse invoke proxy: the connection is opened from inside your network, so you don't need to open the on-premise firewall for external access from SAP BTP to internal systems. You also decide exactly which backend systems and resources are exposed (access control), instead of exposing the entire internal landscape. The basic setup steps are: install the Cloud Connector; set up the connection between Cloud Connector, backend system and your subaccount (initial configuration and adding the subaccount); allow your cloud application to access a backend system on the intranet (configure access control); and connect the application, in Cloud Foundry by consuming the Connectivity service (with a destination of proxy type OnPremise), or for Kubernetes and Kyma workloads through the Connectivity Proxy.",
+      "keyPoints": [
+        "Global account + subaccounts; your apps are deployed or subscribed there.",
+        "The Cloud Connector admin installs the Cloud Connector on-premise and opens a TLS-encrypted tunnel to the subaccount.",
+        "Only applications of that subaccount can use the tunnel.",
+        "Reverse invoke proxy: no inbound firewall openings; only explicitly exposed systems are reachable.",
+        "Steps: install, initial configuration + add subaccount, access control, consume the Connectivity service (or Connectivity Proxy)."
+      ],
+      "examples": [
+        {
+          "title": "The path of a request",
+          "language": "text",
+          "code": "Cloud app (subaccount) --destination (ProxyType=OnPremise)--> Connectivity service\n        --> TLS tunnel (opened from inside by the Cloud Connector)\n        --> Cloud Connector (access control: only explicitly exposed systems and resources)\n        --> on-premise backend (for example SAP S/4HANA via HTTP or RFC)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "What is SAP BTP Connectivity? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/e54cc8fbbb571014beb5caaf6aa31280.html"
+        },
+        {
+          "title": "Cloud Connector (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/e6c7616abb5710148cfcf3e75d96d596.html"
+        }
+      ]
+    },
+    {
+      "id": "destination-service",
+      "level": "elementary",
+      "title": "What is the Destination service, and which service plans does it have?",
+      "description": "The Destination service lets you find the information that is required to access a remote service or system from your cloud application. A destination stores the routing and authentication details, as well as custom scenario-specific parameters, and the service performs the authentication flows based on the configured details. For connections to an on-premise system, you use the Destination service together with the Connectivity service; for connections to any other web application, you can use it without the Connectivity service. For Kubernetes environments, it is used with the Transparent Proxy (and the Connectivity Proxy for on-premise). Each subaccount is limited to 1,000 entities per configuration type (destination, certificate, fragment). To consume the service, you need a service instance and a service binding or service key, which provide the credentials. The Destination service is publicly visible and cross-consumable from several environments (Cloud Foundry, Kyma, Kubernetes and others through SAP Service Manager), and it provides the service plan lite to all those environments. You can pass a configuration JSON when creating or updating an instance, for example to create destinations with the instance, with policies such as existing_destinations_policy (update, fail or ignore) to handle duplicates. Bindings use a client secret by default; X.509 bindings are supported too. Destinations themselves can be maintained in the destinations editor of the SAP BTP cockpit or through the Destination service REST API.",
+      "keyPoints": [
+        "Stores what is needed to call a remote system: URL, routing, authentication, custom properties.",
+        "Performs the authentication flows (for example OAuth token retrieval) based on the configuration.",
+        "Internet targets: Destination service alone; on-premise: together with the Connectivity service.",
+        "Service plan: lite, available in all environments; consumed via instance + binding/service key.",
+        "Config JSON on instance creation, with policies such as existing_destinations_policy.",
+        "Limit: 1,000 destinations (and certificates, fragments) per subaccount."
+      ],
+      "examples": [
+        {
+          "title": "Creating and binding a Destination service instance",
+          "language": "sh",
+          "code": "cf create-service destination lite my-destination\ncf bind-service my-app my-destination"
+        },
+        {
+          "title": "As an MTA resource",
+          "language": "yaml",
+          "code": "resources:\n  - name: my-destination\n    type: org.cloudfoundry.managed-service\n    parameters:\n      service: destination\n      service-plan: lite"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Destination Service (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/8ff5483fef564eae9f34fe092d1bddcd.html"
+        },
+        {
+          "title": "Create and Bind a Destination Service Instance (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/9fdad3cad92e4b63b73d5772014b380e.html"
+        }
+      ]
+    },
+    {
+      "id": "destination-levels",
+      "level": "elementary",
+      "title": "What are destination levels, and how do destinations work in a multitenant application?",
+      "description": "Destination configurations (destinations, certificates and so on) can be managed on three levels at the same time, so the same destination can exist on more than one level; the higher the level, the broader its visibility. Subaccount level: visible to any application using any Destination service instance in the subaccount; this is the common level. Service instance level: visible to applications using that specific Destination service instance, in the context of the provider subaccount (where the instance was provisioned); each instance has its own level. Subscription level: visible to applications using that specific instance in the context of a subscribed (consumer) subaccount; each combination of service instance and subscriber subaccount is a unique level. In a multitenant application, the tenant is determined by the context of the token used to call the Destination service. When the application looks up a destination at runtime with the Find API, the lookup order depends on the subaccount: for a provider subaccount, the service first checks the service instance level and then the subaccount level; for a consumer subaccount, it first checks the subscription level and then the subaccount level. With the Consume API, the level must be specified explicitly. If a provider wants a destination that is used and visible only by one subscriber, it creates a subscription-level destination: it fetches a token from the subscriber's token URL (https://{subscriber subdomain}.authentication.{region host}/oauth/token) with the client credentials of the Destination service instance, and then creates or reads the destination with the REST API. Consumers can also manage their own destinations on their subaccount level, which are then shared with the provider application.",
+      "keyPoints": [
+        "Three levels: subaccount, service instance, subscription (one level per instance and subscriber).",
+        "Higher level = broader visibility; one destination can exist on several levels.",
+        "The tenant is taken from the token used to call the Destination service.",
+        "Find API lookup: provider -> instance level, then subaccount; consumer -> subscription level, then subaccount.",
+        "Subscription-level destinations: token from the subscriber's token URL with the instance credentials.",
+        "Consumer subaccount-level destinations are shared with the provider app."
+      ],
+      "examples": [
+        {
+          "title": "Lookup order",
+          "language": "text",
+          "code": "Token of provider subaccount:  service instance level -> subaccount level\nToken of consumer subaccount:  subscription level      -> subaccount level\n\nSubscriber token URL:\nPOST https://{subscriber subdomain}.authentication.{region host}/oauth/token"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Multitenancy in the Destination Service (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/4e07f250fe5d441cab09f69e22909198.html"
+        },
+        {
+          "title": "Multitenancy in SAP BTP Connectivity (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/9c0bdd0efc8640739c9d2fa5cfe56cbd.html"
+        },
+        {
+          "title": "Accessing and Managing Destination Service Configurations on Subscription Level (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/e23c8deb86954639ac2d30b05dbc69c2.html"
+        },
+        {
+          "title": "HTTP Destinations (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/42a0e6b966924f2e902090bdf435e1b2.html"
+        }
+      ]
+    }
+  ]
+}

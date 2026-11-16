@@ -1,0 +1,245 @@
+{
+  "topicId": "multitenancy",
+  "title": "Multitenancy",
+  "questions": [
+    {
+      "id": "what-is-multitenancy",
+      "level": "advanced",
+      "title": "What is multitenancy on SAP BTP, and what are its benefits?",
+      "description": "SAP BTP provides a multitenant functionality that lets application providers own, deploy and operate tenant-aware applications for multiple consumers, with reduced costs. Instead of deploying one copy per customer, a single application is deployed once and shared by many consumers (tenants) at the same time. With tenant-aware applications you can separate data securely for each tenant, save resources by sharing them among tenants, and update applications efficiently in a single step: the provider upgrades the application for all consumers at once instead of updating each one individually. Consumers cannot see each other's data; the multitenant application maintains data separation between tenants. Each consumer accesses the application through a dedicated, consumer-specific URL, and can configure certain application features. At runtime, the application environment identifies each consumer by its unique tenant ID, and the application distinguishes requests from different consumer tenants based on that tenant ID, which is what ensures data isolation. In the Cloud Foundry environment, the tenant-aware approuter application and the xsuaa service (with the application plan) authenticate the business users of the application at runtime. Like any application on SAP BTP, multitenant applications consume platform resources, and the costs of these resources, including those caused by consumers, are billed to the provider.",
+      "keyPoints": [
+        "One tenant-aware application, deployed once by the provider, used by many consumers (tenants).",
+        "Benefits: secure data separation per tenant, shared resources, updates in a single step.",
+        "Each consumer has a dedicated URL and cannot see other consumers' data.",
+        "The tenant ID identifies the consumer on every request and drives data isolation.",
+        "Cloud Foundry: tenant-aware approuter + xsuaa (application plan) authenticate business users.",
+        "Resource costs (including consumer usage) are billed to the provider."
+      ],
+      "examples": [
+        {
+          "title": "One app, many tenants",
+          "language": "text",
+          "code": "Provider global account\n├── Provider subaccount   -> multitenant app deployed once (approuter + app + xsuaa)\n├── Consumer subaccount A -> subscribed, URL https://tenant-a-<app>.<domain>\n└── Consumer subaccount B -> subscribed, URL https://tenant-b-<app>.<domain>\n\nRequest -> tenant ID (A or B) -> only that tenant's data"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Developing Multitenant Applications in the Cloud Foundry Environment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/5e8a2b74e4f2442b8257c850ed912f48.html"
+        }
+      ]
+    },
+    {
+      "id": "provider-consumer",
+      "level": "advanced",
+      "title": "What are the provider and the consumer in a multitenant application, and what is each responsible for?",
+      "description": "The multitenancy concept involves two roles. The application provider is an SAP global account owner that uses SAP BTP to own, build, run and offer custom-developed applications to its consumers; this can be an independent software vendor, a software company, or an internal IT department. The application consumer is a consumer of the provider, such as a department or organizational unit, whose users use the multitenant application. In SAP BTP, multitenancy is implemented with subaccounts. The provider deploys the multitenant application to one subaccount only, the provider (hosting) subaccount, and registers it with the SaaS Provisioning service. For each consumer, a dedicated subaccount is created in the provider's global account, and the consumer subscribes to the application from that subaccount. A subscription means there is a direct relationship between the provider and the consumer's tenant: the provider authorizes the consumer tenant to use the application. The provider is responsible for creating and managing the tenant subaccounts, setting up the necessary role access authorizations, and subscribing each tenant to the application; typically, consumers of an application from a non-SAP owner (such as an IT department) do not own or have access to their tenant subaccount. SAP's architecture guidance also distinguishes consumer from tenant: a consumer can consume several SaaS applications, while a tenant is the specific instance of one SaaS application for one consumer; per subaccount there is one tenant per SaaS application.",
+      "keyPoints": [
+        "Provider: owns the global account; builds, deploys (to one provider subaccount), runs and offers the app.",
+        "Consumer: a department/organization whose users use the app, through its own consumer subaccount.",
+        "Each consumer gets a dedicated subaccount in the provider's global account and subscribes from there.",
+        "Provider responsibilities: create/manage tenant subaccounts, set up role authorizations, subscribe tenants.",
+        "Subscription = direct relationship; the provider authorizes the consumer tenant.",
+        "Consumer vs tenant: a tenant is one consumer's instance of one SaaS application."
+      ],
+      "examples": [
+        {
+          "title": "Who does what",
+          "language": "text",
+          "code": "Provider                                    Consumer\n--------                                    --------\nDevelops and deploys the app (provider SA)  Subscribes from its consumer subaccount\nRegisters it with saas-registry             Gets a dedicated URL for its users\nCreates consumer subaccounts                Uses the app with its own data\nSets up roles, subscribes tenants\nPays for the consumed resources"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Developing Multitenant Applications in the Cloud Foundry Environment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/5e8a2b74e4f2442b8257c850ed912f48.html"
+        },
+        {
+          "title": "Providing Multitenant Applications to Consumers in the Cloud Foundry Environment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/7a013f1d89f34a0084ea3d9a8bb2adbd.html"
+        },
+        {
+          "title": "Tenant Model and Data Separation on SAP BTP (SAP Architecture Center, archived)",
+          "url": "https://architecture.learning.sap.com/docs/ref-arch/a5c409"
+        }
+      ]
+    },
+    {
+      "id": "data-separation",
+      "level": "advanced",
+      "title": "Which methods exist to achieve database / persistence multitenancy?",
+      "description": "Data separation is a key aspect of multitenant applications: each tenant's data and configuration must be kept apart for privacy, security and compliance. SAP's Architecture Center describes three main approaches (note that SAP has since marked this page as archived, so treat it as reference, not current guidance). With a column discriminator, a single set of tables is used for all consumers, and each table has an extra column holding the tenant ID; every create, read, update and delete operation must filter by tenant ID (for example a WHERE clause on it). It is cheap and easy to set up, but needs filtering logic in all queries, can add performance overhead, has a higher risk of exposing data, and may not satisfy data protection laws. With database separation, each tenant has its own dedicated database instance and the application uses a separate connection per tenant: data is physically separated, secure and compliant with better performance, but costs more and is more complex to run. With schema separation, each tenant has its own schema in a shared database instance: data is logically separated but stored in the same instance, balancing cost and security, at the price of managing schema creation and deletion. SAP recommends schema separation for its flexibility and cost-effectiveness; on SAP HANA Cloud it is implemented with HDI containers, which isolate tenants with schema-level access permissions, so identical objects can be deployed into many containers in the same database. CAP applies this pattern in its multitenancy support (@sap/cds-mtxs): when a tenant subscribes, the MTX sidecar creates a new persistent tenant database per tenant (an HDI container on SAP HANA), keeping tenant data isolated. Tenant onboarding activities such as creating a tenant's database schema are done in the subscription callback of the SaaS Provisioning service.",
+      "keyPoints": [
+        "Column discriminator: shared tables + tenant ID column; cheap, but every query must filter by tenant (higher risk).",
+        "Database separation: one database instance per tenant; most isolated, most expensive.",
+        "Schema separation: one schema per tenant in a shared instance; SAP's recommendation.",
+        "SAP HANA Cloud implements schema separation with HDI containers.",
+        "CAP (@sap/cds-mtxs) creates a separate tenant database/HDI container on subscription.",
+        "The SAP Architecture Center page with these approaches is archived; use it as reference only."
+      ],
+      "examples": [
+        {
+          "title": "Column discriminator: every statement filters by tenant",
+          "language": "sql",
+          "code": "-- one table for all tenants\nSELECT * FROM ORDERS WHERE TENANT_ID = :tenantId AND STATUS = 'OPEN';\nINSERT INTO ORDERS (TENANT_ID, ID, STATUS) VALUES (:tenantId, 42, 'OPEN');"
+        },
+        {
+          "title": "CAP: subscribing tenants creates separate tenant databases",
+          "language": "sh",
+          "code": "cds watch mtx/sidecar                        # terminal 1: MTX sidecar\ncds watch --with-mtx                         # terminal 2: app server\ncds subscribe t1 --to http://localhost:4005  # terminal 3: tenant t1 gets its own database\ncds subscribe t2 --to http://localhost:4005"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Tenant Model and Data Separation on SAP BTP (SAP Architecture Center, archived)",
+          "url": "https://architecture.learning.sap.com/docs/ref-arch/a5c409"
+        },
+        {
+          "title": "Deploy Multitenant SaaS Applications (CAP documentation)",
+          "url": "https://cap.cloud.sap/docs/guides/multitenancy/"
+        },
+        {
+          "title": "Develop the Multitenant Application (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/ff540477f5404e3da2a8ce23dcee602a.html"
+        }
+      ]
+    },
+    {
+      "id": "subscription-setup",
+      "level": "advanced",
+      "title": "How do you set up a subscription for a multitenant application?",
+      "description": "SAP documents the workflow in six steps. First, develop the multitenant application, including the subscription callbacks. Its security descriptor (xs-security.json) must define the provider tenant as shared with \"tenant-mode\": \"shared\", and must grant the SaaS Provisioning service (saas-registry) access to call the callbacks, typically with a Callback scope whose grant-as-authority-to-apps contains $XSAPPNAME(application,sap-provisioning,tenant-onboarding). Create an xsuaa service instance with plan application from that file. Second, deploy the application to a Cloud Foundry space in the provider subaccount. Third, configure the tenant-aware approuter, which authenticates business users at runtime. Fourth, bind the application and the approuter to the xsuaa service instance, which acts as the OAuth 2.0 client of the application. Fifth, register the application with the SaaS Provisioning service by creating a saas-registry instance (plan application) with a configuration JSON: the xsappname from the security descriptor, the callback URLs (onSubscription, and getDependencies if needed), and optional settings such as displayName, description, category and appPlans. This registration is a one-time procedure per multitenant application, and it makes the application available for subscription. Sixth, provide it to consumers: create a subaccount for each consumer in the provider's global account, subscribe each consumer subaccount to the application (through the cockpit, the btp CLI, or the SaaS Provisioning REST APIs), and then set up application roles and assign users through role collections. Afterwards, the provider can view and manage all subscriptions in the SAP BTP subscription management dashboard.",
+      "keyPoints": [
+        "xs-security.json: \"tenant-mode\": \"shared\" + Callback scope granted to saas-registry; xsuaa plan application.",
+        "Deploy the app to the provider subaccount; configure the tenant-aware approuter.",
+        "Bind app and approuter to the xsuaa instance (the app's OAuth 2.0 client).",
+        "Register once with saas-registry (plan application): xsappname, onSubscription/getDependencies URLs, display data.",
+        "Per consumer: create a subaccount, subscribe it (cockpit, btp CLI or REST API), assign role collections.",
+        "Manage subscriptions afterwards in the subscription management dashboard."
+      ],
+      "examples": [
+        {
+          "title": "Security descriptor for a multitenant app",
+          "language": "json",
+          "code": "{\n  \"xsappname\": \"saas-app\",\n  \"tenant-mode\": \"shared\",\n  \"scopes\": [\n    {\n      \"name\": \"$XSAPPNAME.Callback\",\n      \"description\": \"With this scope set, the callbacks for subscribe, unsubscribe and getDependencies can be called.\",\n      \"grant-as-authority-to-apps\": [\"$XSAPPNAME(application,sap-provisioning,tenant-onboarding)\"]\n    }\n  ]\n}"
+        },
+        {
+          "title": "Creating the xsuaa and saas-registry instances",
+          "language": "sh",
+          "code": "cf create-service xsuaa application xsuaa-application -c xs-security.json\ncf create-service saas-registry application saas-registry-app -c config.json"
+        },
+        {
+          "title": "config.json for the SaaS Provisioning service",
+          "language": "json",
+          "code": "{\n  \"xsappname\": \"saas-app\",\n  \"appUrls\": {\n    \"getDependencies\": \"https://saas-app.cfapps.eu10.hana.ondemand.com/callback/v1.0/dependencies\",\n    \"onSubscription\": \"https://saas-app.cfapps.eu10.hana.ondemand.com/callback/v1.0/tenants/{tenantId}\"\n  },\n  \"displayName\": \"Hello World\",\n  \"description\": \"My multitenant biz app\",\n  \"category\": \"Test\"\n}"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Developing Multitenant Applications in the Cloud Foundry Environment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/5e8a2b74e4f2442b8257c850ed912f48.html"
+        },
+        {
+          "title": "Develop the Multitenant Application (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/ff540477f5404e3da2a8ce23dcee602a.html"
+        },
+        {
+          "title": "Bind the Multitenant Application and Application Router to the xsuaa Service Instance (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/f56d74d0d1ac4397a8a5a19ad4d441dd.html"
+        },
+        {
+          "title": "Register the Multitenant Application to the SAP SaaS Provisioning Service (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/3971151ba22e4faa9b245943feecea54.html"
+        },
+        {
+          "title": "Providing Multitenant Applications to Consumers in the Cloud Foundry Environment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/7a013f1d89f34a0084ea3d9a8bb2adbd.html"
+        }
+      ]
+    },
+    {
+      "id": "tenant-onboarding",
+      "level": "advanced",
+      "title": "How is a tenant onboarded when it subscribes (subscription callbacks)?",
+      "description": "Tenant onboarding happens through callbacks that the SaaS Provisioning service (saas-registry) calls in your application. To perform internal onboarding activities, such as creating a database schema for the tenant, you implement the subscription callback and use the information in the subscription event; optionally you also implement getDependencies. When a consumer tenant creates or revokes a subscription, the service makes two calls. First it calls getDependencies (GET), which returns the reuse services your application depends on: status 200 and a JSON array with the xsappname (or appName and appId) of each dependency, encoded as UTF-8, UTF-16 or UTF-32. Then it calls the onSubscription URL, which must end with /{tenantId}; the placeholder is replaced with the subscribing tenant. A PUT means a new tenant subscribes: the callback must return 200 and, in the body, the tenant's access URL, which contains the tenant's subdomain and is generated based on the approuter configuration (for example https://subscriber_subdomain-approuter_saas_app.cfapps.eu10.hana.ondemand.com; the first URL segment must not exceed 63 characters). A DELETE means the tenant revoked its subscription and may no longer use the app. The payload of both carries subscriptionAppId, subscriptionAppName, subscribedTenantId, subscribedSubdomain, globalAccountGUID and subscribedLicenseType. For long-running onboarding, the registration can set onSubscriptionAsync: true, which makes callbackTimeoutMillis mandatory; if the callback doesn't finish in time, the subscription status changes to FAILED. The callback URLs must be callable through a consumer-independent URL, for example a dedicated route that matches the approuter's TENANT_HOST_PATTERN. Programming guidelines for tenant-aware apps also apply: shared in-memory data such as Java static fields is visible to all tenants, and users must not be able to run custom code or access the file system, since that could expose other tenants' data.",
+      "keyPoints": [
+        "Onboarding work (for example creating a tenant schema) is done in the saas-registry subscription callback.",
+        "getDependencies (GET): returns the reuse services' xsappname list (200, UTF-8/16/32 JSON).",
+        "onSubscription must end with /{tenantId}: PUT = subscribe (return 200 + tenant URL), DELETE = unsubscribe.",
+        "Payload: subscriptionAppId, subscriptionAppName, subscribedTenantId, subscribedSubdomain, globalAccountGUID, subscribedLicenseType.",
+        "Async onboarding: onSubscriptionAsync: true + callbackTimeoutMillis (else FAILED).",
+        "Never share in-memory data or allow custom code/file system access across tenants."
+      ],
+      "examples": [
+        {
+          "title": "Subscription callback payload (PUT and DELETE)",
+          "language": "json",
+          "code": "{\n  \"subscriptionAppId\": \"...\",\n  \"subscriptionAppName\": \"...\",\n  \"subscribedTenantId\": \"...\",\n  \"subscribedSubdomain\": \"...\",\n  \"globalAccountGUID\": \"...\",\n  \"subscribedLicenseType\": \"...\"\n}"
+        },
+        {
+          "title": "Responses",
+          "language": "text",
+          "code": "PUT  /callback/v1.0/tenants/{tenantId}\n  -> 200, body: https://subscriber_subdomain-approuter_saas_app.cfapps.eu10.hana.ondemand.com\n\nDELETE /callback/v1.0/tenants/{tenantId}\n  -> tenant offboarded\n\nGET  /callback/v1.0/dependencies\n  -> 200, body: [ { \"xsappname\": \"<xsappname of a reuse service>\" } ]"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Develop the Multitenant Application (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/ff540477f5404e3da2a8ce23dcee602a.html"
+        },
+        {
+          "title": "Register the Multitenant Application to the SAP SaaS Provisioning Service (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/3971151ba22e4faa9b245943feecea54.html"
+        },
+        {
+          "title": "Saas Provisioning Service (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/cbc379ef476e460c87934d0e496b7850.html"
+        }
+      ]
+    },
+    {
+      "id": "saas-provisioning-service",
+      "level": "advanced",
+      "title": "What is the SaaS Provisioning service (saas-registry), and what does it provide?",
+      "description": "The SAP Software-as-a-Service Provisioning service, technical name saas-registry, allows application providers to register multitenant applications and services in the Cloud Foundry environment of SAP BTP. Registration is a one-time procedure per multitenant application: you create a saas-registry instance with plan application in the space where the application is deployed (with the cf CLI, in the cockpit, or as a managed-service resource in the mta.yaml), passing a configuration with the xsappname from the security descriptor, the callback URLs getDependencies (optional, only if the app has dependencies) and onSubscription (ending with /{tenantId}), and optional settings: displayName, description and category for the tile in the cockpit, appPlans (plans such as staging or development variants, visible only in subaccounts of the provider global account, with allowedTargetPlans for switching), onSubscriptionAsync and callbackTimeoutMillis, and allowContextUpdates. After registration, the application appears for subscription in consumer subaccounts, and the service manages the subscription lifecycle. SAP's architecture guidance summarizes its features as subscription management (subscribe and unsubscribe tenants), registration details, subscription information (current subscriptions, tenant IDs, dependencies), dependency management (updating the services an app depends on) and job information (status of subscribe, unsubscribe and update operations). On top of these APIs, the SAP BTP subscription management dashboard gives providers a UI to view all subscriptions with their state and tenant ID, view each subscription's dependencies, perform operations such as updating dependencies, and see detailed errors; access requires the Subscription Management Dashboard Administrator or Viewer role.",
+      "keyPoints": [
+        "saas-registry registers multitenant apps/services in Cloud Foundry; one-time per application (plan application).",
+        "Config: xsappname, appUrls.onSubscription (/{tenantId}), appUrls.getDependencies (optional), display data, appPlans.",
+        "Optional: onSubscriptionAsync + callbackTimeoutMillis, allowContextUpdates.",
+        "Manages the subscription lifecycle: subscribe/unsubscribe, subscription info, dependency updates, job status.",
+        "Subscription management dashboard: UI over the SaaS Provisioning APIs (Administrator / Viewer roles)."
+      ],
+      "examples": [
+        {
+          "title": "saas-registry as an MTA resource",
+          "language": "yaml",
+          "code": "resources:\n  - name: saas-registry\n    type: org.cloudfoundry.managed-service\n    parameters:\n      service: saas-registry\n      service-plan: application\n      service-name: saas-registry\n      config:\n        xsappname: ${appname}\n        appName: ${appname}\n        appUrls:\n          getDependencies: https://cis${route-prefix}.${app-domain}/callback/v1.0/dependencies\n          onSubscription: https://cis${route-prefix}.${app-domain}/callback/v1.0/tenants/{tenantId}\n        displayName: ${saas-display-name}\n        description: ${saas-description}"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Register the Multitenant Application to the SAP SaaS Provisioning Service (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/3971151ba22e4faa9b245943feecea54.html"
+        },
+        {
+          "title": "Saas Provisioning Service (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/cbc379ef476e460c87934d0e496b7850.html"
+        },
+        {
+          "title": "Using the SAP BTP Subscription Management Dashboard (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/434be695f9e946ccb4c28911dd1e16d0.html"
+        },
+        {
+          "title": "Tenant Model and Data Separation on SAP BTP (SAP Architecture Center, archived)",
+          "url": "https://architecture.learning.sap.com/docs/ref-arch/a5c409"
+        }
+      ]
+    }
+  ]
+}

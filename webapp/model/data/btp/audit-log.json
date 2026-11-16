@@ -1,0 +1,98 @@
+{
+  "topicId": "audit-log",
+  "title": "Audit Log service",
+  "questions": [
+    {
+      "id": "audit-log-what-config",
+      "level": "basic",
+      "title": "What does the Audit Log service do, and what are its configuration steps?",
+      "description": "The SAP Audit Log service records audit-relevant events. SAP applications and services write audit logs for your account automatically, and with the Audit Log Write API for Customers your own applications can write audit logs too. Audit logs belong to four categories: security events (audit.security-events), configuration changes (audit.configuration), read access to sensitive personal data (audit.data-access) and changes to personal data (audit.data-modification). You read them in the SAP Audit Log Viewer service (in the cockpit, for the global account in the header of the Account Explorer, and for a subaccount on its Overview page), which shows up to 500 records per request, lets you filter by time frame and category, and download them; or programmatically with the Audit Log Retrieval API. Configuration steps for writing your own logs: 1. Enable the service and entitle the subaccount to the Audit Log service, premium edition plan (plan premium of service auditlog), at subaccount or global account level. 2. Create a service instance of plan premium; it uses mTLS with X.509 certificates, so you specify a unique xsappname per subaccount and the X.509 parameters (credential type x509, grant type client_credentials). 3. Create a service key or service binding, specifying the validity of the X.509 certificates (for example 30 days); the credentials expire and must be rotated. 4. Use the certificate and key from the binding to get a JWT from the certurl with the client credentials grant, and call the Write API with it. Retention: there is no free retention period for customer-written audit data; with the premium plan the default retention is 90 days, configurable through a support ticket (component BC-CP-CF-SEC-AUDITLG), and storage is charged per GB. Deleting the service instance doesn't delete already stored data and doesn't stop storage charging; deleting the subaccount removes it.",
+      "keyPoints": [
+        "Based on the public SAP BTP service. SAP-internal Kernel Services may differ.",
+        "Records audit-relevant events in four categories: security events, configuration, data access, data modification.",
+        "Read logs in the SAP Audit Log Viewer (cockpit) or with the Audit Log Retrieval API.",
+        "Writing own logs: entitlement for Audit Log service, premium edition (auditlog / premium).",
+        "Instance with mTLS (X.509, unique xsappname), then a service key/binding with certificate validity.",
+        "Default retention 90 days for customer data (no free retention), configurable via support ticket; charged per GB."
+      ],
+      "examples": [
+        {
+          "title": "Creating the premium instance and a service key",
+          "language": "sh",
+          "code": "cf create-service auditlog premium my-auditlog -c '{\n  \"xs-security\": {\n    \"xsappname\": \"<unique name>\",\n    \"oauth2-configuration\": {\n      \"credential-types\": [\"x509\"],\n      \"grant-types\": [\"client_credentials\"]\n    }\n  }\n}'\n\ncf create-service-key my-auditlog my-auditlog-key -c '{\n  \"xsuaa\": {\n    \"credential-type\": \"x509\",\n    \"x509\": { \"key-length\": 2048, \"validity\": 30, \"validity-type\": \"DAYS\" }\n  }\n}'"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Audit Log Write API for Customers (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/64e99bb5291940489bd2277ee027d82e.html"
+        },
+        {
+          "title": "SAP Audit Log Viewer service for the Cloud Foundry Environment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/e3baa5f1a0c64c44aac8ab3ea3d1b500.html"
+        },
+        {
+          "title": "Retention of Audit Data written from Customer's BTP Applications (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/9cf4217c7a8042968694a345b4b95708.html"
+        }
+      ]
+    },
+    {
+      "id": "audit-log-write-custom",
+      "level": "basic",
+      "title": "How do you write custom audit logs?",
+      "description": "With the Audit Log Write API for Customers. First obtain a token: from the service key or binding of the premium instance, take clientid, certurl, certificate and key, save the certificate and key as .pem files, and send POST <certurl>/oauth/token?grant_type=client_credentials&client_id=<clientid> using the client certificates (mTLS). Then send the audit log message with Authorization: Bearer <token> and Content-Type: application/json to the endpoint for its category on the service URL from the binding: /audit-log/oauth2/v2/security-events, /configuration-changes, /data-accesses or /data-modifications. A message has fields you fill in and fields the framework fills in. You fill in: uuid (unique ID of the message), time (when the auditable event happened), user (the logged-in user performing the action; \"$USER\" lets the server extract it from the JWT), tenant (the owner of the message, equal to the zone ID of the owning subaccount; \"$PROVIDER\" is used in SAP's examples), data_subject (the owner of the personal data, for data access and modification), object (where the personal data or configuration is located), attributes (the changed attributes with new and old values: only new for an added value, new and old for a change, only old for a deletion), attachment (attachments with personal data that were opened), ip and data (only for security events) and success. The framework fills in service_instance_id, platform, org_guid, space_guid, app_guid and category. Mandatory fields differ: security events need uuid, user, time, data and tenant; configuration changes need object_id, uuid, user, tenant, time and attributes; data modifications and data accesses need object_id, user, tenant, time and attributes. A successful write returns 201; other codes include 400 (invalid message), 401 (missing or invalid Authorization header), 413 (message larger than 10 KB), 429 (tenant rate limit) and 503 (global rate limit).",
+      "keyPoints": [
+        "Based on the public SAP BTP service. SAP-internal Kernel Services may differ.",
+        "Token: POST <certurl>/oauth/token with grant_type=client_credentials using the binding's X.509 certificate and key.",
+        "Endpoints: /audit-log/oauth2/v2/security-events, configuration-changes, data-accesses, data-modifications.",
+        "You fill: uuid, time, user (\"$USER\"), tenant, data_subject, object, attributes, attachment, ip/data, success.",
+        "The framework fills: service_instance_id, platform, org/space/app GUIDs, category.",
+        "201 = created; 413 = message over 10 KB; 429/503 = rate limits."
+      ],
+      "examples": [
+        {
+          "title": "Writing a security event",
+          "language": "sh",
+          "code": "curl --location --request POST 'https://api.auditlog.cf.<region host>:6081/audit-log/oauth2/v2/security-events' \\\n--header 'Content-Type: application/json; charset=UTF-8' \\\n--header 'Authorization: Bearer <token>' \\\n--data-raw '{\n  \"uuid\": \"<unique id>\",\n  \"user\": \"$USER\",\n  \"time\": \"2023-06-30T00:00:00.000Z\",\n  \"ip\": \"127.0.0.1\",\n  \"data\": \"Demo security event message.\",\n  \"tenant\": \"$PROVIDER\"\n}'"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Audit Log Write API for Customers (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/64e99bb5291940489bd2277ee027d82e.html"
+        }
+      ]
+    },
+    {
+      "id": "audit-log-retrieval-api",
+      "level": "basic",
+      "title": "How do you use the Audit Log Retrieval API?",
+      "description": "The Audit Log Retrieval API lets you retrieve the audit logs of your SAP BTP Cloud Foundry subaccount as a collection of JSON entities. It is protected by OAuth. You need the Space Developer role in the space. Setup: log on with the cf CLI, create a service instance of auditlog-management with plan default (SAP strongly recommends mTLS: pass xs-security parameters with a unique xsappname, credential type x509 and grant type client_credentials), and create a service key with the X.509 settings. SAP recommends re-creating the auditlog-management bindings and service keys at least every 90 days. With the credentials from the service key you get an OAuth token and call GET <url>/auditlog/v2/auditlogrecords. Query parameters: time_from and time_to in UTC in the format YYYY-MM-DDTHH:MM:SS (without them, the last 30 days are returned); category to filter by event type, for example category=audit.data-access, or several separated by commas (not available for custom retention periods and sovereign cloud, where it returns 501); and handle for paging. Large results are split into chunks (server-side paging): the response contains a handle in an HTTP header, and you pass handle=<value> alone in the next request to read the next chunk, because the handle already encodes the time range. Logs are not immediately available after they are written. Requests are rate-limited per auth token and tenant, for example 8 requests per second (burst 40) on CF-EU10, CF-EU20, CF-US10 and CF-US30, and 4 per second (burst 20) on other regions such as CF-EU11; exceeding the limit returns HTTP 429.",
+      "keyPoints": [
+        "Based on the public SAP BTP service. SAP-internal Kernel Services may differ.",
+        "Retrieves a subaccount's audit logs as JSON; OAuth-protected; requires Space Developer.",
+        "Service auditlog-management, plan default, preferably with mTLS (X.509); rotate keys at least every 90 days.",
+        "GET <url>/auditlog/v2/auditlogrecords with time_from/time_to (UTC; default last 30 days) and category.",
+        "Paging: pass the returned handle alone to get the next chunk.",
+        "Rate limits per token/tenant (for example 8 req/s on CF-EU10); 429 when exceeded."
+      ],
+      "examples": [
+        {
+          "title": "Instance, key and queries",
+          "language": "sh",
+          "code": "cf create-service auditlog-management default my-auditlog-mgmt -c '{\n  \"xs-security\": {\n    \"xsappname\": \"<unique name>\",\n    \"oauth2-configuration\": { \"credential-types\": [\"x509\"], \"grant-types\": [\"client_credentials\"] }\n  }\n}'\ncf create-service-key my-auditlog-mgmt my-key -c '{\"xsuaa\": {\"credential-type\": \"x509\", \"x509\": {\"key-length\": 2048, \"validity\": 1, \"validity-type\": \"DAYS\"}}}'\n\n# last 30 days\nGET <url>/auditlog/v2/auditlogrecords\n# a time range and categories\nGET <url>/auditlog/v2/auditlogrecords?time_from=2018-05-11T10:42:00&time_to=2018-05-12T10:42:00&category=audit.data-access,audit.configuration\n# next chunk\nGET <url>/auditlog/v2/auditlogrecords?handle=<handle from the previous response>"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Audit Log Retrieval API Usage for Subaccounts in the Cloud Foundry Environment (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/30ece35bac024ca69de8b16bff79c413.html"
+        }
+      ]
+    }
+  ]
+}

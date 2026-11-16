@@ -1,0 +1,134 @@
+{
+  "topicId": "connectivity-protocols-cc",
+  "title": "Protocols & Cloud Connector",
+  "questions": [
+    {
+      "id": "protocols",
+      "level": "basic",
+      "title": "Which protocols and scenarios do the connectivity services support (HTTP(S), RFC, TCP)?",
+      "description": "HTTP(S) is the main scenario. An HTTP destination connects an application to a REST or SOAP service, either on the Internet (proxy type Internet), on-premise through the Cloud Connector (OnPremise), or privately to your IaaS account (PrivateLink). Many authentication types are supported, from basic authentication to principal propagation and OAuth flows, and custom headers and query parameters can be added as URL.headers.<key> and URL.queries.<key> properties. RFC (Remote Function Call) lets an application call a remote-enabled function module in an on-premise or cloud ABAP server. It uses the SAP Java Connector (JCo) API, built into the SAP Java buildpack (version 1.8.0 or later, with the Tomcat or TomEE runtime), together with an RFC destination (Type=RFC, jco.client.* logon and target host properties, jco.destination.* properties such as proxy_type and pooling). For on-premise ABAP systems, the Cloud Connector must expose the remote-enabled function modules. Restrictions: no JCoServer (server-side RFC), and logon only with user/password or principal propagation. TCP: SAP BTP Connectivity provides a SOCKS5 proxy (RFC 1928) to access on-premise systems via TCP-based protocols. Host and port come from the Connectivity service binding (onpremise_proxy_host and onpremise_socks5_proxy_port), and authentication to the proxy is mandatory, with a JWT obtained with the Connectivity service's client_id and client_secret (authentication method 0x80) and, optionally, the Cloud Connector location ID. A TCP destination has Name, Type=TCP, Address (host:port, optionally tcp://) and ProxyType. The SOCKS5 proxy cannot be used as a general-purpose proxy, and UDP is not supported. In short: HTTP(S) for web services, RFC for ABAP function modules, and TCP for other TCP-based protocols to on-premise systems.",
+      "keyPoints": [
+        "HTTP(S): REST/SOAP services; proxy types Internet, OnPremise, PrivateLink; many auth types.",
+        "RFC: call remote-enabled ABAP function modules with JCo (SAP Java buildpack); RFC destinations with jco.* properties.",
+        "RFC restrictions: no JCoServer; logon with user/password or principal propagation.",
+        "TCP: SOCKS5 proxy from the Connectivity service (onpremise_proxy_host, onpremise_socks5_proxy_port), JWT authentication.",
+        "TCP destinations: Type=TCP, Address host:port; no general-purpose proxy, no UDP.",
+        "On-premise access for all three goes through the Cloud Connector."
+      ],
+      "examples": [
+        {
+          "title": "An RFC destination",
+          "language": "ini",
+          "code": "Name=SalesSystem\nType=RFC\njco.client.client=000\njco.client.lang=EN\njco.client.user=consultant\njco.client.passwd=<password>\njco.client.ashost=sales-system.cloud\njco.client.sysnr=42\njco.destination.proxy_type=OnPremise\njco.destination.pool_capacity=5\njco.destination.peak_limit=10"
+        },
+        {
+          "title": "A TCP destination",
+          "language": "ini",
+          "code": "Name=OnPremDb\nType=TCP\nAddress=tcp://<host exposed in the Cloud Connector>:<port>\nProxyType=OnPremise"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "HTTP Destinations (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/42a0e6b966924f2e902090bdf435e1b2.html"
+        },
+        {
+          "title": "Invoking ABAP Function Modules via RFC (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/fa4adc9bd40e45dbac573fd616695446.html"
+        },
+        {
+          "title": "RFC Destinations (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/238d027c154541f597201a0002713c86.html"
+        },
+        {
+          "title": "Using the TCP Protocol for Cloud Applications (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/cd1583775afa43f0bb9ec69d9dbcc880.html"
+        },
+        {
+          "title": "TCP Destinations (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/f6d753f031a7482dac7a60bad815e07c.html"
+        },
+        {
+          "title": "Cloud Connector (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/e6c7616abb5710148cfcf3e75d96d596.html"
+        }
+      ]
+    },
+    {
+      "id": "what-is-cloud-connector",
+      "level": "basic",
+      "title": "What is the Cloud Connector, and what are its advantages?",
+      "description": "The Cloud Connector serves as the link between SAP BTP applications and on-premise systems. It runs as an on-premise agent in a secured network and acts as a reverse invoke proxy between the on-premise network and SAP BTP. It combines an easy setup with a clear configuration of the systems that are exposed to SAP BTP, so you can use existing on-premise assets without exposing the entire internal landscape. It gives fine-grained control over which on-premise systems and resources can be accessed by cloud applications, and which cloud applications may use the Cloud Connector. For business-critical scenarios, it recovers broken connections automatically, provides audit logging of inbound traffic and configuration changes, and can run in a high-availability setup (master and shadow instance). Compared with opening firewall ports and using reverse proxies in the DMZ, SAP lists these advantages: no need to configure the on-premise firewall to allow external access from SAP BTP to internal systems (for allowed outbound connections, no changes are needed); support for HTTP and additional protocols, such as RFC for native access to ABAP systems; connecting on-premise databases or BI tools to SAP HANA databases in the cloud; secure propagation of cloud users' identities to on-premise systems; easy installation and configuration with low TCO; and standard SAP support. One Cloud Connector installation can serve several subaccounts, and several Cloud Connectors connected to the same subaccount are distinguished by a location ID.",
+      "keyPoints": [
+        "The link between SAP BTP apps and on-premise systems: an on-premise agent and reverse invoke proxy.",
+        "Exposes only explicitly configured systems/resources, never the whole landscape.",
+        "No inbound firewall openings needed; the tunnel is opened from inside.",
+        "Supports HTTP, RFC and more; identity propagation to on-premise systems.",
+        "Enterprise features: automatic reconnect, audit logging, high availability (master/shadow).",
+        "One installation can serve several subaccounts; location IDs distinguish several Cloud Connectors."
+      ],
+      "examples": [
+        {
+          "title": "Basic scenario steps",
+          "language": "text",
+          "code": "1. Install the Cloud Connector\n2. Initial configuration + add your subaccount\n3. Configure access control (which backend systems/resources are exposed)\n4. Consume the Connectivity service from the app (Cloud Foundry) or use the Connectivity Proxy (Kubernetes/Kyma)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Cloud Connector (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/e6c7616abb5710148cfcf3e75d96d596.html"
+        },
+        {
+          "title": "Adding and Managing Subaccounts (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/f16df12fab9f4fe1b8a4122f0fd54b6e.html"
+        },
+        {
+          "title": "Using the TCP Protocol for Cloud Applications (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/cd1583775afa43f0bb9ec69d9dbcc880.html"
+        }
+      ]
+    },
+    {
+      "id": "cloud-connector-configuration",
+      "level": "basic",
+      "title": "What are the basic configuration tasks of the Cloud Connector (initial configuration, subaccounts, user authentication, monitoring)?",
+      "description": "Initial configuration: after installing and starting the Cloud Connector, open its administration UI in a browser at https://<host>:<port> (default port 8443; localhost if installed on your machine) and log on with the initial user Administrator / manage; the browser may warn about the default self-signed UI certificate. On first logon you must change the password, then choose master (a single instance or the main instance of a high-availability setup) or shadow installation, and optionally add a description that is also shown in the SAP BTP cockpit. The SAP BTP user you use for the setup needs a role collection containing the Cloud Connector Administrator role (for example Subaccount Administrator, Cloud Connector Administrator, or Connectivity and Destination Administrator); after the connection is established, this user is no longer needed. Managing subaccounts: one Cloud Connector can connect several subaccounts concurrently with different configurations; SAP recommends keeping productive subaccounts on their own Cloud Connector. With Add Subaccount you optionally enter an HTTPS proxy, choose manual configuration or file-based configuration (an authentication data file downloaded from the subaccount), and decide whether the subaccount is managed (only the Administrator role may change it). For manual configuration you enter the region, the subaccount ID (not its name), and the logon data, and optionally a location ID. Authenticating users against on-premise systems: the Cloud Connector supports basic authentication (the backend accepts basic authentication with service users; nothing to configure in the Cloud Connector), principal propagation and technical user propagation (both require explicitly configuring trust to the cloud entities whose tokens are accepted), and for HTTP also a logon with the Cloud Connector system certificate. The destination of the cloud application decides which type is used. Monitoring: if the administration UI opens, the process is running; it runs as a Windows service (sc query \"SAP Cloud Connector\") or Linux daemon (service scc_daemon status). The Subaccount Dashboard shows the connection state, the SAP BTP cockpit shows the connected Cloud Connectors under Connectivity > Cloud Connectors, and the administration UI offers hardware metrics, a performance monitor, subaccount-specific monitoring and monitoring APIs.",
+      "keyPoints": [
+        "Initial: https://<host>:8443, logon Administrator / manage, change the password, choose master or shadow.",
+        "The setup user needs the Cloud Connector Administrator role (via a role collection) in the subaccount.",
+        "Subaccounts: several per Cloud Connector; manual or file-based configuration; managed or not; region + subaccount ID.",
+        "User authentication: basic, principal propagation, technical user propagation (trust needed), system certificate (HTTP).",
+        "Monitoring: admin UI, Windows service / Linux daemon, Subaccount Dashboard, cockpit Connectivity > Cloud Connectors, APIs."
+      ],
+      "examples": [
+        {
+          "title": "Checking whether the Cloud Connector runs",
+          "language": "sh",
+          "code": "# Windows\nsc query \"SAP Cloud Connector\"\n\n# Linux\nservice scc_daemon status\n\n# Administration UI\nhttps://localhost:8443"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Initial Configuration (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/db9170a7d97610148537d5a84bf79ba2.html"
+        },
+        {
+          "title": "Adding and Managing Subaccounts (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/f16df12fab9f4fe1b8a4122f0fd54b6e.html"
+        },
+        {
+          "title": "Authenticating Users against On-Premises Systems (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/b643fbecb14e4c89ab3c03b21200cb08.html"
+        },
+        {
+          "title": "Monitoring (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/6d9c937dd35344bca3eb61ebf34a5c1d.html"
+        }
+      ]
+    }
+  ]
+}

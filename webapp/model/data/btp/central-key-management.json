@@ -1,0 +1,70 @@
+{
+  "topicId": "central-key-management",
+  "title": "Central Key Management Service",
+  "questions": [
+    {
+      "id": "ckms-responsibility",
+      "level": "basic",
+      "title": "What is the Central Key Management Service responsible for?",
+      "pending": true,
+      "description": "",
+      "keyPoints": [],
+      "examples": [],
+      "assignment": null,
+      "resources": [
+        {
+          "title": "BTP Kernel Services (SAP-internal)",
+          "url": "https://pages.github.tools.sap/kernelservices/"
+        }
+      ]
+    },
+    {
+      "id": "ckms-saas",
+      "level": "basic",
+      "title": "Describe the SaaS scenario of the Central Key Management Service.",
+      "pending": true,
+      "description": "",
+      "keyPoints": [],
+      "examples": [],
+      "assignment": null,
+      "resources": [
+        {
+          "title": "BTP Kernel Services (SAP-internal)",
+          "url": "https://pages.github.tools.sap/kernelservices/"
+        }
+      ]
+    },
+    {
+      "id": "ckms-paas",
+      "level": "basic",
+      "title": "Describe the PaaS scenario of the Central Key Management Service.",
+      "pending": true,
+      "description": "",
+      "keyPoints": [],
+      "examples": [],
+      "assignment": null,
+      "resources": [
+        {
+          "title": "BTP Kernel Services (SAP-internal)",
+          "url": "https://pages.github.tools.sap/kernelservices/"
+        }
+      ]
+    },
+    {
+      "id": "ckms-how-to-use",
+      "level": "basic",
+      "title": "Describe a basic how-to-use scenario of the Central Key Management Service.",
+      "pending": true,
+      "description": "",
+      "keyPoints": [],
+      "examples": [],
+      "assignment": null,
+      "resources": [
+        {
+          "title": "BTP Kernel Services (SAP-internal)",
+          "url": "https://pages.github.tools.sap/kernelservices/"
+        }
+      ]
+    }
+  ]
+}

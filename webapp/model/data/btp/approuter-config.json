@@ -1,0 +1,223 @@
+{
+  "topicId": "approuter-config",
+  "title": "Approuter configuration & sessions",
+  "questions": [
+    {
+      "id": "welcomefile-authmethod-logout",
+      "level": "basic",
+      "title": "How do you configure welcomeFile, authenticationMethod and logout in xs-app.json?",
+      "description": "The routing configuration of the application router lives in xs-app.json. welcomeFile is an optional string: the web page served by default when the HTTP request does not include a specific path, for example index.html. authenticationMethod is an optional string that defines how user requests are authenticated: route (the default) means the authentication type is defined in the routes configuration, per route; none disables authentication for all routes, and with none the logon with the User Account and Authentication service (UAA) is disabled. logout defines a central logout endpoint for the application. Its value is an object: logoutEndpoint (mandatory) is the path used to log out from the application router; logoutPage (optional) is the URL path of the page shown after logout; logoutMethod is POST or GET (default GET); csrfProtection can only be set when logoutMethod is POST, and defaults to true then; backChannelLogoutEndpoint is the path for Identity Authentication back-channel logout. SAP recommends using POST with CSRF protection for security reasons. A GET or POST request to the logout endpoint triggers a client-initiated central logout, which deletes the user session and calls the logout paths of all backend services that are configured in the destinations and services properties. If an HTML5 application in the HTML5 Application Repository doesn't define its own logout settings, it inherits them from the central xs-app.json of the approuter; the managed approuter uses POST as its logout method.",
+      "keyPoints": [
+        "welcomeFile: the default page when no path is given (for example index.html).",
+        "authenticationMethod: route (default, per-route authentication) or none (no authentication, UAA logon disabled).",
+        "logout.logoutEndpoint (mandatory) + logoutPage, logoutMethod (GET default / POST), csrfProtection, backChannelLogoutEndpoint.",
+        "SAP recommends POST + CSRF protection for logout.",
+        "Central logout deletes the session and calls the backends' logout paths (destinations/services).",
+        "HTML5 apps inherit logout settings from the central xs-app.json."
+      ],
+      "examples": [
+        {
+          "title": "welcomeFile, authenticationMethod and logout",
+          "language": "json",
+          "code": "{\n  \"welcomeFile\": \"index.html\",\n  \"authenticationMethod\": \"route\",\n  \"logout\": {\n    \"logoutEndpoint\": \"/my/logout\",\n    \"logoutPage\": \"/logout-page.html\",\n    \"logoutMethod\": \"POST\",\n    \"csrfProtection\": true\n  }\n}"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Routing Configuration File (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/c103fb414988447ead2023f768096dcc.html"
+        },
+        {
+          "title": "welcomeFile (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/f1d9ff40a6594bd296435082d663abab.html"
+        },
+        {
+          "title": "authenticationMethod (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/ff58bb02c16f4a0482e0acafa346e01b.html"
+        },
+        {
+          "title": "logout (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/2296b4da7758446a847bd2f65caf8660.html"
+        }
+      ]
+    },
+    {
+      "id": "destinations-services-config",
+      "level": "basic",
+      "title": "What do the destinations and services sections of xs-app.json do?",
+      "description": "Both sections add static options to backends that are defined elsewhere. The destinations section extends the destination configuration from the deployment manifest (the destinations environment variable) with static properties, mainly a logout path: logoutPath is the logout endpoint of that destination, called when a central logout is triggered or a session is deleted because of a timeout, and the request contains additional headers, including the JWT; logoutMethod is the HTTP method for that call (POST, PUT, GET; default POST). The destination's name must match the name used in the destinations environment variable, and routes refer to it with their destination property. The services section does the same for services bound to the approuter (in VCAP_SERVICES), for example business services: endpoint is the name of the attribute in VCAP_SERVICES that contains the URL of the service, and logoutPath and logoutMethod work like for destinations. Routes refer to a service with their service property (and optionally endpoint). In a route, exactly one of destination, service or localDir must be defined: destination forwards to a backend URL, service forwards to a bound service (such as html5-apps-repo-rt for the HTML5 Application Repository or sap-approuter-userapi for the user API), and localDir serves static files from the approuter's working directory.",
+      "keyPoints": [
+        "destinations section: extends destinations from the environment with logoutPath and logoutMethod (default POST).",
+        "The logoutPath is called on central logout or session timeout, with the JWT in the headers.",
+        "services section: options for bound services: endpoint (VCAP_SERVICES attribute with the URL), logoutPath, logoutMethod.",
+        "Routes use destination, service (+ endpoint) or localDir; exactly one of them per route.",
+        "Example services: html5-apps-repo-rt (HTML5 Application Repository), sap-approuter-userapi."
+      ],
+      "examples": [
+        {
+          "title": "destinations and services in xs-app.json",
+          "language": "json",
+          "code": "{\n  \"routes\": [\n    { \"source\": \"^/backend/(.*)$\", \"target\": \"$1\", \"destination\": \"node-backend\" },\n    { \"source\": \"^/country/(.*)$\", \"target\": \"$1\", \"service\": \"com.sap.appbasic.country\", \"endpoint\": \"countryservice\" }\n  ],\n  \"destinations\": {\n    \"node-backend\": { \"logoutPath\": \"/ui5logout\", \"logoutMethod\": \"GET\" }\n  },\n  \"services\": {\n    \"com.sap.appbasic.country\": {\n      \"endpoint\": \"countryservice\",\n      \"logoutPath\": \"/countrieslogout\",\n      \"logoutMethod\": \"GET\"\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "destinations (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/6b303d048d33471db0d041b064b7644c.html"
+        },
+        {
+          "title": "services (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/92741fa5b21647b9912dc5de698ca5bf.html"
+        },
+        {
+          "title": "Routing Configuration File (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/c103fb414988447ead2023f768096dcc.html"
+        },
+        {
+          "title": "@sap/approuter README (npm package, via jsDelivr)",
+          "url": "https://cdn.jsdelivr.net/npm/@sap/approuter/README.md"
+        }
+      ]
+    },
+    {
+      "id": "websockets-errorpage",
+      "level": "basic",
+      "title": "How do you configure websockets and errorPage in the application router?",
+      "description": "The application router can forward web-socket communication, but it must be enabled in the configuration with \"websockets\": { \"enabled\": true }. If the backend requires authentication, the upgrade request must contain a valid session cookie. The approuter supports the destination schemata ws, wss, http and https. When the approuter is integrated with the HTML5 Application Repository, the websockets property must be added to the xs-app.json of the deployed HTML5 application, because the approuter reads the configuration of that application from the repository. A restriction: a web-socket ping is not forwarded to the backend. For allowed origins of web-socket requests, the environment variable WS_ALLOWED_ORIGINS lists the server or domain origins the approuter uses to verify requests. Errors that originate in the application router show the HTTP status code of the error; with the errorPage property you can show a custom error page instead. errorPage is an array of objects, each with status (a number or an array of numbers) and either file (a file path relative to the approuter's working directory, whose content is shown) or path (a URL path relative to the HTML application root, to which the user is redirected). If the error page is stored in the HTML5 Application Repository, define a route without authentication to it, so the redirect doesn't fail. errorPage only affects errors generated by the application router itself, not errors returned by backends.",
+      "keyPoints": [
+        "websockets: { \"enabled\": true } is required to forward web-socket traffic.",
+        "Authenticated backends need a valid session cookie on the upgrade request; schemata ws, wss, http, https.",
+        "With the HTML5 Application Repository, put websockets in the HTML5 app's xs-app.json; pings are not forwarded.",
+        "errorPage: array of { status, file } (show a file) or { status, path } (redirect).",
+        "Error pages in the HTML5 repository need a route with authenticationType none.",
+        "errorPage applies only to errors generated by the approuter."
+      ],
+      "examples": [
+        {
+          "title": "websockets and errorPage",
+          "language": "json",
+          "code": "{\n  \"websockets\": { \"enabled\": true },\n  \"errorPage\": [\n    { \"status\": [400, 401, 402], \"file\": \"./custom-err-40x.html\" },\n    { \"status\": 501, \"file\": \"./http_resources/custom-err-501.html\" },\n    { \"status\": 403, \"path\": \"/forbidden.html\" }\n  ],\n  \"routes\": [\n    { \"source\": \"^/forbidden.html$\", \"service\": \"html5-apps-repo-rt\", \"authenticationType\": \"none\" }\n  ]\n}"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "websockets (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/44bc1e76f4264456b47530b7907042f9.html"
+        },
+        {
+          "title": "errorPage (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/0377013b58f34650b9b811eede1321d9.html"
+        },
+        {
+          "title": "Environment Variables (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/ba527058dc4d423a9e0a69ecc67f4593.html"
+        }
+      ]
+    },
+    {
+      "id": "cors",
+      "level": "basic",
+      "title": "How do you configure CORS in the application router?",
+      "description": "Cross-origin resource sharing (CORS) lets web pages from other domains (protocol and port) make HTTP requests to your application domain; normally the browser would refuse such requests. The application router supports CORS through the CORS environment variable, which can be set, for example, in the manifest.yml (or mta.yaml) of the approuter. The README also mentions a cors property in xs-app.json. The configuration is an array of objects. uriPattern (mandatory) is a regular expression for the source routes the configuration applies to; surround it with ^ and $ to match the complete path. allowedOrigin (mandatory) is a list of objects with host, and optionally protocol and port (default \"*\"), that are allowed; matching is case-sensitive, and the default [{\"host\": \"*\"}] allows any origin. allowedMethods lists the HTTP methods allowed (upper-case; the default is GET, POST, HEAD, OPTIONS). allowedHeaders lists the allowed request headers (the default includes Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method and Access-Control-Request-Headers). maxAge is how long, in seconds, a preflight request may be cached (default 1800). exposeHeaders lists the response headers that may be exposed. allowedCredentials says whether the resource supports user credentials (default true). Because the default origin allows everything, always restrict allowedOrigin to the hosts that really need access.",
+      "keyPoints": [
+        "CORS lets pages from other origins call your application domain.",
+        "Configured with the CORS environment variable of the approuter (an array of objects).",
+        "Mandatory: uriPattern (regex, use ^...$) and allowedOrigin (host, protocol, port).",
+        "Optional: allowedMethods, allowedHeaders, maxAge (default 1800 s), exposeHeaders, allowedCredentials (default true).",
+        "The default origin [{\"host\": \"*\"}] allows any origin, so restrict it."
+      ],
+      "examples": [
+        {
+          "title": "CORS environment variable",
+          "language": "yaml",
+          "code": "- name: approuter\n  memory: 100M\n  path: web\n  env:\n    CORS: >\n      [\n        {\n          \"uriPattern\": \"^/route1$\",\n          \"allowedOrigin\": [ { \"host\": \"host.example.com\", \"protocol\": \"https\", \"port\": 345 } ],\n          \"allowedMethods\": [\"GET\"],\n          \"allowedHeaders\": [\"Authorization\", \"Content-Type\"],\n          \"exposeHeaders\": [\"customHeader1\"],\n          \"maxAge\": 3600,\n          \"allowedCredentials\": true\n        }\n      ]"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Environment Variables (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/ba527058dc4d423a9e0a69ecc67f4593.html"
+        },
+        {
+          "title": "@sap/approuter README (npm package, via jsDelivr)",
+          "url": "https://cdn.jsdelivr.net/npm/@sap/approuter/README.md"
+        }
+      ]
+    },
+    {
+      "id": "session-handling",
+      "level": "basic",
+      "title": "How does session handling work in the application router?",
+      "description": "The application router establishes a session with the client (browser) using a session cookie. It intercepts all session cookies sent by backend services and stores them in its own session; backend session cookies are not sent to the client, to prevent cookie collisions. On later requests, the approuter sends the cookies back to the respective backend so it can keep its own session. Non-session cookies from backends are forwarded to the client. Because cookies are stored per destination URL, you must not use several destinations with the same URL in one user session. The session contains the CSRF token, the OAuth token (the user's JWT fetched from UAA, forwarded to backends in the Authorization header but never given to the client), the user's OAuth scopes (used to check each route's scope), the backend session cookies, and the OAuth tokens exchanged for business services. The approuter refreshes the JWT automatically before it expires while the session is valid, by default 5 minutes before expiry (environment variable JWT_REFRESH; 0 disables it). If there is no session (it timed out or was never created) and the request matches a non-public route, the approuter redirects to the authentication service (UAA or IAS); after login, the callback creates a new session. For AJAX requests (X-Requested-With: XMLHttpRequest) or non-GET requests without a session, it returns 401 Unauthorized so the client can handle it. A session that stays inactive times out, by default after 15 minutes: set the SESSION_TIMEOUT environment variable (recommended) or sessionTimeout in the approuter's central xs-app.json (not in an HTML5 app's xs-app.json). A timeout triggers a central logout: the session is deleted and the backends' logout paths are called.",
+      "keyPoints": [
+        "The browser gets one approuter session cookie; backend session cookies stay inside the approuter session.",
+        "Session content: CSRF token, user JWT (never sent to the client), scopes, backend cookies, business service tokens.",
+        "The JWT is refreshed automatically before expiry (JWT_REFRESH, default 5 minutes).",
+        "No session + protected route: redirect to UAA/IAS; AJAX or non-GET: 401.",
+        "Timeout default 15 minutes: SESSION_TIMEOUT (recommended) or sessionTimeout in the central xs-app.json.",
+        "A timeout triggers a central logout (session deleted, backend logout paths called)."
+      ],
+      "examples": [
+        {
+          "title": "Session timeout configuration",
+          "language": "yaml",
+          "code": "# recommended: environment variable of the approuter (minutes)\nenv:\n  SESSION_TIMEOUT: 40\n  JWT_REFRESH: 5\n\n# alternative, only in the approuter's central xs-app.json:\n# { \"sessionTimeout\": 40 }"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "@sap/approuter README (npm package, via jsDelivr)",
+          "url": "https://cdn.jsdelivr.net/npm/@sap/approuter/README.md"
+        },
+        {
+          "title": "sessionTimeout (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/9d24198eed554793b7eb279657f17971.html"
+        },
+        {
+          "title": "Application Routes and Destinations (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/3cc788ebc00e40a091505c6b3fa485e7.html"
+        },
+        {
+          "title": "Environment Variables (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/ba527058dc4d423a9e0a69ecc67f4593.html"
+        }
+      ]
+    },
+    {
+      "id": "session-backup",
+      "level": "basic",
+      "title": "How do you make a backup of user sessions (external session management)?",
+      "description": "By default, sessions live in the memory of the approuter instance that created them. The application router supports backing up user sessions in an external session store, which enables session recovery: if the approuter instance holding a session crashes, another instance can continue handling the running user session. To enable it, bind a service instance of a fast persistence store such as Redis to the approuter. The approuter then backs up the in-memory session information into that store, and if a later request's session is not found in memory, it tries to rebuild it from the external store. Sessions are stored encrypted and compressed; for capacity planning, assume about 50 KB per session. You configure it with the EXT_SESSION_MGT environment variable, a JSON value with three mandatory properties: instanceName (the name of the storage service instance), storageType (for example redis; without a custom driver only redis is allowed), and sessionSecret (a shared secret for the encryption: generate a unique string of at least 64 characters). Currently the approuter supports only a Redis store out of the box, but you can plug in your own storage driver: implement a store class with methods such as clear, destroy, get, length, ttl, set, exists and resetTimer, export a getStore function, and set externalStoreFilePath in EXT_SESSION_MGT to the path of that file.",
+      "keyPoints": [
+        "External session management backs up sessions so another approuter instance can take over after a crash.",
+        "Bind a fast persistence store (Redis) to the approuter.",
+        "Sessions are stored encrypted and compressed (about 50 KB per session).",
+        "EXT_SESSION_MGT: instanceName, storageType (redis), sessionSecret (64+ characters).",
+        "Custom drivers: implement the store interface and set externalStoreFilePath."
+      ],
+      "examples": [
+        {
+          "title": "EXT_SESSION_MGT",
+          "language": "yaml",
+          "code": "env:\n  EXT_SESSION_MGT: >\n    {\n      \"instanceName\": \"approuter-redis\",\n      \"storageType\": \"redis\",\n      \"sessionSecret\": \"<a unique string of at least 64 characters>\"\n    }\nservices:\n  - approuter-redis"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "External Session Management (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/d4a75d6e970844cb94fcdd1d0747b568.html"
+        },
+        {
+          "title": "Environment Variables (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/ba527058dc4d423a9e0a69ecc67f4593.html"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "topicId": "approuter-advanced",
+  "title": "Business services & SaaS",
+  "questions": [
+    {
+      "id": "business-service-integration",
+      "level": "advanced",
+      "title": "How do you integrate the application router with a business service?",
+      "description": "Business services are a flavor of reuse services. An SAP business service exposes, in its binding information (the credentials block in VCAP_SERVICES), a set of attributes that let the application router serve the business service's UI and/or data. To use it, you bind the business service instance to the approuter. The binding contains sap.cloud.service (mandatory: the service name referenced from xs-app.json routes, and the URL prefix for its UI), optionally sap.cloud.service.alias (a short, unique alias for a friendlier URL prefix), endpoints (one or more named endpoints with a url and an optional timeout, default 30000 ms, used to access the service's data), html5-apps-repo.app_host_id (the HTML5 Application Repository instances that hold the service's UI), saasregistryenabled (if set, the approuter returns this service's xsappname in the SaaS Registry getDependencies callback), and grant_type. The data can be served with two grant types: user_token (the default), where the approuter exchanges the user's login JWT for a business service token and calls the endpoint with it, and client_credentials, where the approuter generates a client-credentials token. With Identity Authentication, forwardiastoken also forwards the IAS token in the x-ias-token header, forwardiasauthentication forwards the IAS token instead of an exchanged XSUAA token, and IASDependencyName enables an IAS token exchange. The business service provides this information through the onBind hook of its service broker. For the UI, it must be stored in the HTML5 Application Repository and, to be used from an approuter in another space, be defined as public. In xs-app.json, a route then points to the service with service (the sap.cloud.service name) and endpoint, and the services section can add a logoutPath.",
+      "keyPoints": [
+        "Business services are reuse services whose binding (VCAP_SERVICES) tells the approuter how to serve their UI and data.",
+        "Binding attributes: sap.cloud.service (mandatory), alias, endpoints, html5-apps-repo.app_host_id, saasregistryenabled, grant_type.",
+        "grant_type user_token (default, token exchange) or client_credentials.",
+        "IAS options: forwardiastoken, forwardiasauthentication, IASDependencyName.",
+        "UI must be in the HTML5 Application Repository (public for other spaces).",
+        "Routes use service + endpoint; the service broker provides the data via its onBind hook."
+      ],
+      "examples": [
+        {
+          "title": "Business service credentials in VCAP_SERVICES",
+          "language": "json",
+          "code": "\"country\": [\n  {\n    \"credentials\": {\n      \"sap.cloud.service\": \"com.sap.appbasic.country\",\n      \"sap.cloud.service.alias\": \"country\",\n      \"endpoints\": {\n        \"countryservice\": { \"url\": \"https://icf-countriesapp-test-service.cfapps.sap.hana.ondemand.com/odata/v2/countryservice\" },\n        \"countryconfig\":  { \"url\": \"https://icf-countriesapp-test-service.cfapps.sap.hana.ondemand.com/rest/v1/countryconfig\", \"timeout\": 120000 }\n      },\n      \"html5-apps-repo\": { \"app_host_id\": \"1bd7c044-6cf4-4c5a-b904-2d3f44cd5569\" },\n      \"saasregistryenabled\": true,\n      \"grant_type\": \"user_token\"\n    }\n  }\n]"
+        },
+        {
+          "title": "A route to the business service's data",
+          "language": "json",
+          "code": "{\n  \"routes\": [\n    { \"source\": \"^/countries/(.*)$\", \"target\": \"$1\", \"service\": \"com.sap.appbasic.country\", \"endpoint\": \"countryservice\" }\n  ]\n}"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Integration with Business Services (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/f6337cd6065a42b59579c069256072ec.html"
+        },
+        {
+          "title": "services (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/92741fa5b21647b9912dc5de698ca5bf.html"
+        }
+      ]
+    },
+    {
+      "id": "approuter-saas",
+      "level": "advanced",
+      "title": "How do you expose the application router for SaaS subscription (multitenancy)?",
+      "description": "Each multitenant application deploys its own application router, which handles the requests of all tenants. The approuter determines the tenant from the URL and forwards the authentication request to that tenant's UAA identity zone. This requires a shared UAA service (xsuaa with tenant-mode shared) and an approuter version greater than 2.3.1. The tenant is found with the TENANT_HOST_PATTERN environment variable: a regular expression with a capturing group that is matched against the request host, and the value of the first capturing group is used as the tenant subdomain. For example, with routes tenant1.<domain> and tenant2.<domain>, the pattern ^(.*).<domain> extracts tenant1 or tenant2. SAP's SaaS Provisioning documentation shows typical values: during development ^(.*)-abap-saas-app.cfapps.eu10.hana.ondemand.com, and in production ^(.*).mydomain.com. The README lists the steps to expose the approuter for SaaS subscription. First, configure multi-tenant access by maintaining TENANT_HOST_PATTERN. Second, make sure the SaaS Registry service is available in your space's marketplace. Third, grant the provisioning service the right to invoke the application's callbacks: in the approuter's xs-security.json, a Callback scope with grant-as-authority-to-apps $XSAPPNAME(application,sap-provisioning,tenant-onboarding). Then register the application by creating and binding a saas-registry instance with xsappname, the onSubscription callback (ending with /{tenantId}) and optionally getDependencies; the approuter can provide a default getDependencies implementation at /callback/v1.0/dependencies, which returns the business services bound with saasregistryenabled. The callback URLs must be reachable through a consumer-independent route that matches the TENANT_HOST_PATTERN, such as cis.mydomain.com. When a tenant subscribes or unsubscribes, it is subscribed or unsubscribed in the application's XSUAA instance and in the reuse services it depends on, and the onboarding and offboarding callbacks are triggered.",
+      "keyPoints": [
+        "One approuter per multitenant app serves all tenants; it needs a shared UAA and version > 2.3.1.",
+        "TENANT_HOST_PATTERN: regex whose first capturing group is the tenant subdomain (for example ^(.*).mydomain.com).",
+        "Make saas-registry available, and grant the Callback scope to $XSAPPNAME(application,sap-provisioning,tenant-onboarding).",
+        "Register with saas-registry: xsappname, onSubscription (/{tenantId}), optional getDependencies.",
+        "The approuter offers a default getDependencies at /callback/v1.0/dependencies.",
+        "Callbacks need a consumer-independent route; subscription also onboards the tenant in XSUAA and reuse services."
+      ],
+      "examples": [
+        {
+          "title": "Approuter environment and xs-security.json scope",
+          "language": "yaml",
+          "code": "# approuter module (mta.yaml)\nproperties:\n  TENANT_HOST_PATTERN: \"^(.*).mydomain.com\"   # tenant1.mydomain.com -> tenant1\n\n# route for the SaaS callbacks: cis.mydomain.com"
+        },
+        {
+          "title": "Callback scope in xs-security.json",
+          "language": "json",
+          "code": "{\n  \"name\": \"$XSAPPNAME.Callback\",\n  \"description\": \"With this scope set, the callbacks for tenant onboarding, offboarding and getDependencies can be called.\",\n  \"grant-as-authority-to-apps\": [\"$XSAPPNAME(application,sap-provisioning,tenant-onboarding)\"]\n}"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Multitenancy (Application Router, SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/5310fc31caad4707be9126377e144627.html"
+        },
+        {
+          "title": "@sap/approuter README (npm package, via jsDelivr)",
+          "url": "https://cdn.jsdelivr.net/npm/@sap/approuter/README.md"
+        },
+        {
+          "title": "Saas Provisioning Service (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/cbc379ef476e460c87934d0e496b7850.html"
+        },
+        {
+          "title": "Integration with Business Services (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/f6337cd6065a42b59579c069256072ec.html"
+        }
+      ]
+    }
+  ]
+}

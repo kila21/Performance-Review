@@ -1,0 +1,62 @@
+{
+  "topicId": "dwc",
+  "title": "Deploy With Confidence",
+  "questions": [
+    {
+      "id": "dwc-concepts",
+      "level": "basic",
+      "title": "Describe the DwC concepts: continuous delivery, single trunk development, dynamic routing (deployment vector), feature-driven development, release feature toggles, and stages, vector promotion, action and tenant.",
+      "pending": true,
+      "description": "",
+      "keyPoints": [],
+      "examples": [],
+      "assignment": null,
+      "resources": [
+        {
+          "title": "DwC documentation: Concepts (SAP-internal)",
+          "url": "https://pages.github.tools.sap/deploy-with-confidence/solar-system/documentation/concepts"
+        },
+        {
+          "title": "Deploy With Confidence (SAP-internal)",
+          "url": "https://pages.github.tools.sap/deploy-with-confidence/solar-system/"
+        }
+      ]
+    },
+    {
+      "id": "dwc-configuration",
+      "level": "basic",
+      "title": "Describe the DwC configuration steps: landscape configuration, project configuration, and configuration of regional components.",
+      "pending": true,
+      "description": "",
+      "keyPoints": [],
+      "examples": [],
+      "assignment": null,
+      "resources": [
+        {
+          "title": "DwC documentation: Landscape configuration (SAP-internal)",
+          "url": "https://pages.github.tools.sap/deploy-with-confidence/solar-system/documentation/configuration/landscape-configuration"
+        },
+        {
+          "title": "Deploy With Confidence (SAP-internal)",
+          "url": "https://pages.github.tools.sap/deploy-with-confidence/solar-system/"
+        }
+      ]
+    },
+    {
+      "id": "dwc-components",
+      "level": "basic",
+      "title": "Describe the DwC components: Jupiter, Themisto, Amalthea, Metis, Autonoe, Carpo, Megaclite, Launchpad, Himalia and Voyager.",
+      "pending": true,
+      "description": "",
+      "keyPoints": [],
+      "examples": [],
+      "assignment": null,
+      "resources": [
+        {
+          "title": "Deploy With Confidence (SAP-internal)",
+          "url": "https://pages.github.tools.sap/deploy-with-confidence/solar-system/"
+        }
+      ]
+    }
+  ]
+}

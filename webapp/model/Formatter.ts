@@ -5,20 +5,26 @@ export function questionCountText(count: number, pattern: string): string {
   return pattern.replace("{0}", String(count));
 }
 
-/** Question level ("elementary" | "basic") -> i18n text; empty when the question has no level. */
-export function levelText(level: string, elementaryText: string, basicText: string): string {
+/** Question level ("elementary" | "basic" | "advanced") -> i18n text; empty when the question has no level. */
+export function levelText(level: string, elementaryText: string, basicText: string, advancedText: string): string {
   if (level === "elementary") {
     return elementaryText;
   }
   if (level === "basic") {
     return basicText;
   }
+  if (level === "advanced") {
+    return advancedText;
+  }
   return "";
 }
 
 /** Question level -> ObjectStatus state. */
 export function levelState(level: string): string {
-  return level === "elementary" ? "Success" : "Information";
+  if (level === "elementary") {
+    return "Success";
+  }
+  return level === "advanced" ? "Warning" : "Information";
 }
 
 const LINE_HEIGHT_PX = 19;

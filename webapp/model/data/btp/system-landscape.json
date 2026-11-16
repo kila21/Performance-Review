@@ -1,0 +1,74 @@
+{
+  "topicId": "system-landscape",
+  "title": "System landscape information",
+  "questions": [
+    {
+      "id": "system-landscape-purpose",
+      "level": "basic",
+      "title": "What are the purpose and mission of system landscape information on SAP BTP (Unified Customer Landscape)?",
+      "description": "On SAP BTP, system landscape information is provided by Unified Customer Landscape, a service that offers customer landscape management capabilities. Its frontend is the System Landscape page in the SAP BTP cockpit, and the dedicated SAP S/4HANA Cloud Extensibility and SAP SuccessFactors Extensibility services are also part of its capabilities. Its mission is to give you one place that knows your SAP systems and how they work together. Customer landscape discovery: the System Landscape page gives a visual overview of the SAP systems associated with the global account or a subaccount. Systems appear in the Systems list in three ways: auto-discovered (any SAP system of a supported type associated with the same customer ID as your global account is added automatically), added through a subscription in a subaccount, or manually added by the global account administrator. Integration and extensibility: Unified Customer Landscape helps you integrate and extend SAP S/4HANA Cloud, SAP Ariba, SAP SuccessFactors and other SAP systems in one experience. You can include several systems in a formation, a logical grouping of SAP systems that follows a business scenario, which simplifies the connectivity setup and gives a unified view of all components needed for an integration or extension scenario. There are three formation types: for business scenarios, for integrating with a specific SAP BTP service, and for extensibility. This content does not apply to the China (Shanghai) and Government Cloud (US) regions.",
+      "keyPoints": [
+        "Based on the public SAP BTP service. SAP-internal Kernel Services may differ.",
+        "Unified Customer Landscape: customer landscape management; UI = System Landscape page in the cockpit.",
+        "Discovery: systems are auto-discovered (same customer ID), added via subscriptions, or added manually.",
+        "Integration and extensibility for SAP S/4HANA Cloud, SAP Ariba, SAP SuccessFactors and more.",
+        "Formations group systems by business scenario to simplify connectivity setup.",
+        "Formation types: business scenarios, integration with an SAP BTP service, extensibility."
+      ],
+      "examples": [
+        {
+          "title": "What the System Landscape page shows",
+          "language": "text",
+          "code": "System Landscape\n├── Systems     SAP S/4HANA Cloud (auto-discovered, Registered)\n│               SAP SuccessFactors (manually added, Registered)\n└── Formations  \"Extend S/4HANA with Kyma\" (type: extensibility) -> Ready"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Maintaining Unified Customer Landscape (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/a8b1e2666e734fd2bfbca44b671585c4.html"
+        },
+        {
+          "title": "Automating Integrations Using Formations (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/68b04fa73aa740cb96ed380a85a4761a.html"
+        }
+      ]
+    },
+    {
+      "id": "system-landscape-configuration",
+      "level": "basic",
+      "title": "What are the configuration steps for system landscape information?",
+      "description": "You need to be a global account administrator or a system landscape administrator of the global account. 1. Check the Systems list: in the cockpit, go to the global account and choose System Landscape > Systems. Systems associated with your customer ID are discovered automatically, so check first whether your system is already listed; if a system is missing, it may be associated with a different customer ID, and you add it manually. 2. Add and register systems: choose Add System and complete the wizard. For SAP SuccessFactors, SAP S/4HANA Cloud, SAP Marketing Cloud and SAP Customer Experience systems, adding is only the first step: the registration uses a registration token, which pairs the system with the global account. You get the token in the cockpit and use it to configure the integration on the system side; the system shows the status Registered once the registration is complete there (or Error while Registering, in which case you delete and register it again). Up to 1,000 unused tokens per system type can exist per global account. Other system types are registered directly, without a token and without a status. Registered systems cannot be migrated between global accounts. 3. Create a formation: choose System Landscape > Formations > Create Formation, enter a unique name (up to 128 characters) and the formation type, which defines the use case, then include one or more registered systems valid for that type and finish. The formation's status is Ready when all systems are included, Draft if some are missing (include them and choose Finalize Formation), Action Required if, for example, a Kyma environment instance or SAP Business Application Studio subscription must still be created, Synchronizing while the systems are synchronized in the background, or Error (use Resynchronize). Note that data entered when registering a system or creating a formation is encrypted at rest, but not with a customer-managed key.",
+      "keyPoints": [
+        "Based on the public SAP BTP service. SAP-internal Kernel Services may differ.",
+        "Role: global account administrator or system landscape administrator.",
+        "System Landscape > Systems: check auto-discovered systems, otherwise Add System.",
+        "SuccessFactors, S/4HANA Cloud, Marketing Cloud, CX: register with a token on the system side -> Registered.",
+        "System Landscape > Formations > Create Formation: name, type, include systems.",
+        "Formation statuses: Ready, Draft, Action Required, Synchronizing, Error."
+      ],
+      "examples": [
+        {
+          "title": "Registering an SAP S/4HANA Cloud system",
+          "language": "text",
+          "code": "1. Global account > System Landscape > Systems > Add System (type SAP S/4HANA Cloud)\n2. Get the registration token in the cockpit\n3. Use the token on the SAP S/4HANA Cloud side to complete the integration\n4. Status changes to \"Registered\"\n5. System Landscape > Formations > Create Formation -> include the system"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Adding, Registering and Deregistering Systems (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/2ffdaff0f1454acdb046876045321c91.html"
+        },
+        {
+          "title": "Automating Integrations Using Formations (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/68b04fa73aa740cb96ed380a85a4761a.html"
+        },
+        {
+          "title": "Maintaining Unified Customer Landscape (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/a8b1e2666e734fd2bfbca44b671585c4.html"
+        }
+      ]
+    }
+  ]
+}

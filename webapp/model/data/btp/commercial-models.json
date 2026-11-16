@@ -1,0 +1,98 @@
+{
+  "topicId": "commercial-models",
+  "title": "Commercial models",
+  "questions": [
+    {
+      "id": "commercial-models-overview",
+      "level": "elementary",
+      "title": "Which commercial (pricing) models does SAP BTP offer for enterprise accounts?",
+      "description": "SAP BTP offers two commercial models for enterprise accounts. In the consumption-based commercial model, your organization receives access to all current and future services that are eligible for this model, and you have complete flexibility to turn services on and off and to switch between services as your business requires, throughout the duration of the contract. It comes in three flavors: SAP BTP Enterprise Agreement (SAP BTPEA), Cloud Platform Enterprise Agreement (CPEA), and Pay-As-You-Go. In the subscription-based commercial model, your organization subscribes only to the services it plans to use, and then uses them at a fixed cost, irrespective of consumption. You can use both commercial models, either in separate global accounts or in the same global account, but you cannot mix more than one flavor of the consumption-based model (for example BTPEA and Pay-As-You-Go) in the same global account. For service availability, prices and estimators, SAP points to its SAP BTP pricing pages on sap.com, and the SAP Discovery Center service catalog shows, per data center, which services are available and which licensing model each service plan is compatible with. Note that trial accounts are a separate global account type and are not part of these commercial models.",
+      "keyPoints": [
+        "Two models for enterprise accounts: consumption-based and subscription-based.",
+        "Consumption-based: access to all eligible current and future services; turn services on and off freely.",
+        "Consumption flavors: SAP BTPEA, CPEA and Pay-As-You-Go.",
+        "Subscription-based: only the subscribed services, at a fixed cost regardless of consumption.",
+        "Both models can be combined (even in one global account), but not two consumption flavors in the same global account.",
+        "SAP Discovery Center shows service availability per data center and licensing compatibility per plan."
+      ],
+      "examples": [
+        {
+          "title": "The models at a glance",
+          "language": "text",
+          "code": "Enterprise account\n├── Consumption-based\n│   ├── SAP BTPEA     (prepaid cloud credits, annual commitment)\n│   ├── CPEA          (prepaid cloud credits, annual commitment)\n│   └── Pay-As-You-Go (no upfront payment, billed monthly in arrears)\n└── Subscription-based (fixed price and period for the subscribed services)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Commercial Models (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/263d40009a5a4237a62e8f5c05ee641e.html"
+        },
+        {
+          "title": "Basic Platform Concepts (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/73beb06e127f4e47b849aa95344aabe1.html"
+        }
+      ]
+    },
+    {
+      "id": "consumption-flavors",
+      "level": "elementary",
+      "title": "What are the differences between SAP BTPEA, CPEA and Pay-As-You-Go in the consumption-based model?",
+      "description": "All three are flavors of the consumption-based commercial model, so they share the idea that you can turn services on and off and switch between them; they differ in commitment and billing. With SAP BTPEA (SAP BTP Enterprise Agreement), your organization makes a prepaid investment in cloud credits for the contract duration, with an annual commitment to consume SAP BTP services. You receive a monthly balance statement with the usage and cost of each service, and the monthly cost is deducted from your cloud credits. There is a minimum investment entry and volume-based discounts are available; you are billed annually in advance, overages are billed in arrears at list price, and you can top up credits at any time to prevent overages. BTPEA gets access to new services added to the consumption-based catalog. CPEA (Cloud Platform Enterprise Agreement) works the same way (prepaid credits, annual commitment, monthly statement, billed annually in advance), with certain restrictions. SAP's onboarding tutorial explains the relationship: BTPEA is the new license introduced as of April 2024, CPEA continues for existing CPEA accounts, and the list of services available under CPEA has been frozen, so all new offerings are added to BTPEA. Pay-As-You-Go gives the same access to all services available in BTPEA, but with zero commitment: nothing upfront, no minimum usage and no annual commitment. You pay only for what you use, are billed monthly in arrears, and service charges are non-discountable. It suits use cases that are not yet well defined, such as a proof of concept in a productive environment, and a transition to CPEA is available if you have no other CPEA-based global accounts. In consumption-based global accounts, every subaccount automatically gets a default Cloud Foundry runtime memory quota of 200 GB for the standard plan, and you are billed for the runtime memory actually consumed.",
+      "keyPoints": [
+        "BTPEA: prepaid cloud credits, annual commitment, minimum investment, volume discounts, billed annually in advance; new services are added here.",
+        "CPEA: same credit mechanics, certain restrictions; for existing CPEA accounts; its service list is frozen.",
+        "BTPEA was introduced in April 2024 as the new consumption license.",
+        "Pay-As-You-Go: no upfront payment, no minimum, billed monthly in arrears, no discounts; good for undefined use cases or a PoC.",
+        "Overages under BTPEA/CPEA are billed in arrears at list price; credits can be topped up.",
+        "Consumption-based subaccounts get a default 200 GB Cloud Foundry runtime memory quota (standard plan)."
+      ],
+      "examples": [
+        {
+          "title": "Comparing the three flavors",
+          "language": "text",
+          "code": "                 SAP BTPEA          CPEA               Pay-As-You-Go\nUpfront payment  yes (credits)      yes (credits)      no\nCommitment       annual             annual             none\nBilling          annually, advance  annually, advance  monthly, in arrears\nDiscounts        volume-based       volume-based       none\nNew services     added              list frozen        same access as BTPEA"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "What Is the Consumption-Based Commercial Model? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/7047eb4a15a84ac7be3c8612179e6d1f.html"
+        },
+        {
+          "title": "Get Started with SAP BTP Enterprise Accounts (SAP Developer Center)",
+          "url": "https://developers.sap.com/tutorials/btp-ea-onboard-01-intro"
+        }
+      ]
+    },
+    {
+      "id": "subscription-model",
+      "level": "elementary",
+      "title": "How does the subscription-based commercial model work?",
+      "description": "In the subscription-based commercial model, your organization receives a fixed price and a fixed period, typically 1 to 3 years, for access to the SAP BTP services it subscribed to. You are entitled to use only the subscribed services; to access additional services, at extra cost, you modify the contract through your sales representative or account executive. You pay a fixed cost regardless of how much you consume, you pay in advance when the contract period starts, and you can renew at the end of the period. Some services are subscribed based on a user metric or a resource metric; for example, a portal service can be based on the number of site visits or on users, and a resource-based metric is more common with a large number of users, such as suppliers accessing a portal. Because it is not always possible to predict resource needs upfront for a multi-year period, you can increase the original order if usage grows. The subscription model also gives access to bundles or packages of related services and apps, which are usually more cost-effective than subscribing to individual services. An existing consumption-based contract can be changed to a subscription license, but not all services eligible for the consumption-based model are compatible with the subscription-based model. Available services and pricing for subscriptions are listed in the SAP Store.",
+      "keyPoints": [
+        "Fixed price and fixed period (typically 1 to 3 years) for the subscribed services only.",
+        "Paid in advance at the start of the contract, regardless of consumption; renewable at the end.",
+        "Additional services require a contract change (extra cost).",
+        "Metrics can be user-based or resource-based; orders can be increased if usage grows.",
+        "Bundles/packages of related services are usually more cost-effective.",
+        "Consumption contracts can be converted to subscription, but not every consumption service is subscription-compatible."
+      ],
+      "examples": [
+        {
+          "title": "When the subscription model fits",
+          "language": "text",
+          "code": "Known, stable set of services for several years -> subscription (fixed cost, paid in advance)\nNeed to try or switch services frequently        -> consumption-based (BTPEA / Pay-As-You-Go)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "What Is the Subscription-Based Commercial Model? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/239b6e045e7e48f58b61655b02748d45.html"
+        }
+      ]
+    }
+  ]
+}

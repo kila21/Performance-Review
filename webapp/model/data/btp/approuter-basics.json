@@ -1,0 +1,128 @@
+{
+  "topicId": "approuter-basics",
+  "title": "Approuter basics",
+  "questions": [
+    {
+      "id": "what-is-approuter",
+      "level": "elementary",
+      "title": "What is the application router (approuter), and what are its main capabilities?",
+      "description": "The application router is the single point of entry for an application running in the Cloud Foundry environment on SAP BTP. When a business application consists of several apps (microservices), the approuter gives it one entry point and dispatches each request to the right backend. Its main tasks, as SAP lists them, are: act as the main user entry point to the application, serve static content, serve routes and destinations, rewrite URLs, forward requests (reverse proxy) to other microservices while propagating user information, handle authentication, and manage the HTML5 application and browser sessions. The rules that decide which request goes to which destination are called routes, and there can be several routes for every destination. If the backends require authentication, the approuter authenticates the user (with XSUAA or the Identity Authentication service) and forwards the user's JWT to them. It does not manage server caching; caching (with e-tags) must be set in the backend server. An important security note from the README: the approuter does not hide the backend microservices. They remain directly reachable, so every backend must protect its endpoints by validating the JWT and checking scopes. The approuter is available as the npm library @sap/approuter and as a container image on Docker Hub (sapse/approuter), and SAP also offers a managed application router.",
+      "keyPoints": [
+        "The single point of entry for an application in the Cloud Foundry environment.",
+        "Serves static content, routes and destinations, rewrites URLs, proxies requests to microservices.",
+        "Authenticates users (XSUAA or IAS) and propagates user information (JWT) to backends.",
+        "Manages the user/browser session; does not do server caching.",
+        "Backends stay directly reachable: they must validate the JWT and check scopes themselves.",
+        "Available as npm @sap/approuter, as a Docker image, or as SAP's managed approuter."
+      ],
+      "examples": [
+        {
+          "title": "package.json of a standalone approuter (no JavaScript code needed, only configuration)",
+          "language": "json",
+          "code": "{\n  \"name\": \"hello-world-approuter\",\n  \"dependencies\": {\n    \"@sap/approuter\": \"<your approuter version>\"\n  },\n  \"scripts\": {\n    \"start\": \"node node_modules/@sap/approuter/approuter.js\"\n  }\n}"
+        },
+        {
+          "title": "xs-app.json: static UI and a backend route",
+          "language": "json",
+          "code": "{\n  \"welcomeFile\": \"index.html\",\n  \"authenticationMethod\": \"route\",\n  \"routes\": [\n    { \"source\": \"^/api/(.*)$\", \"target\": \"$1\", \"destination\": \"backend\", \"authenticationType\": \"xsuaa\" },\n    { \"source\": \"^/(.*)$\", \"target\": \"$1\", \"localDir\": \"resources\", \"authenticationType\": \"xsuaa\" }\n  ]\n}"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Application Router (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/01c5f9ba7d6847aaaf069d153b981b51.html"
+        },
+        {
+          "title": "Application Routes and Destinations (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/3cc788ebc00e40a091505c6b3fa485e7.html"
+        },
+        {
+          "title": "@sap/approuter README (npm package, via jsDelivr)",
+          "url": "https://cdn.jsdelivr.net/npm/@sap/approuter/README.md"
+        }
+      ]
+    },
+    {
+      "id": "managed-vs-standalone",
+      "level": "elementary",
+      "title": "What is the difference between the managed and the standalone application router?",
+      "description": "SAP does not publish a side-by-side comparison, but its documentation describes both clearly. The managed application router lets you access and run HTML5 applications in the cloud without maintaining your own runtime infrastructure. It is the HTML5 applications runtime capability provided by SAP Build Work Zone (standard edition), SAP Build Work Zone (advanced edition) and SAP Cloud Portal, so to use it you must be subscribed to one of these services. You deploy your HTML5 applications (typically to the HTML5 Application Repository), and SAP runs, scales and updates the router for you. A standalone application router is one you set up and run yourself as an application in your Cloud Foundry space, using the @sap/approuter npm package or the sapse/approuter Docker image. You then own its configuration (xs-app.json, environment variables such as destinations, TENANT_HOST_PATTERN or EXT_SESSION_MGT), its bindings (XSUAA or IAS, destination, HTML5 Application Repository), its scaling and its updates. SAP's recommendation is explicit: run your own application router only in advanced cases, for example when application router extensibility is required. Some defaults also differ: for example, the logout method of the managed application router is POST, so HTML5 apps that don't define a logout method use POST with it.",
+      "keyPoints": [
+        "Managed: SAP-run HTML5 runtime from SAP Build Work Zone (standard/advanced) or SAP Cloud Portal; requires a subscription.",
+        "Managed: no own runtime infrastructure to maintain.",
+        "Standalone: your own app based on @sap/approuter (npm) or the sapse/approuter Docker image.",
+        "Standalone: you own configuration, bindings, scaling and updates.",
+        "SAP recommends your own approuter only for advanced cases, such as extensibility.",
+        "Defaults can differ (for example, the managed approuter's logout method is POST)."
+      ],
+      "examples": [
+        {
+          "title": "Choosing",
+          "language": "text",
+          "code": "HTML5 apps shown in SAP Build Work Zone / Cloud Portal, standard behavior -> managed approuter\nCustom extensions, own middleware, special multitenancy or session setup   -> standalone approuter (@sap/approuter)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Managed Application Router (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/589a2395df2d481393acb1ba2f17eeef.html"
+        },
+        {
+          "title": "Application Router (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/01c5f9ba7d6847aaaf069d153b981b51.html"
+        },
+        {
+          "title": "logout (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/2296b4da7758446a847bd2f65caf8660.html"
+        }
+      ]
+    },
+    {
+      "id": "configure-auth-destinations",
+      "level": "elementary",
+      "title": "How do you configure authorization and destinations in the application router?",
+      "description": "Destinations define the backend connectivity: in its simplest form, a destination is a URL to which requests are forwarded, and there has to be a destination for every app (microservice) of the business application. They can be provided in the destinations environment variable of the approuter (typically in manifest.yml or the mta.yaml), where name and url are mandatory and forwardAuthToken: true forwards the user's JWT, or by the Destination service, after binding a Destination service instance to the approuter. With the Destination service, only HTTP destinations are supported, all authentication types are supported, and the proxy type can be Internet, PrivateLink or OnPremise (which requires a binding to the Connectivity service). Don't use several destinations with the same URL in one user session, because the approuter stores backend session cookies per destination URL. Routes in xs-app.json then refer to a destination by name: a route has a source (a regular expression matched against the request URL), an optional target (how the path is rewritten), and exactly one of destination, service or localDir. For authentication, authenticationMethod at the top of xs-app.json is route (the default: each route defines its authentication) or none (disables authentication for all routes and the UAA logon). Each route can set authenticationType: xsuaa, ias, basic or none. For authorization, a route's scope property lists the scopes a user needs to access the target, for example $XSAPPNAME.viewer; the approuter checks the user's scopes, which it keeps in the session, before forwarding. The approuter needs a binding to an XSUAA (or IAS) instance, and backends must still validate the JWT themselves.",
+      "keyPoints": [
+        "A destination = backend URL; one destination per microservice.",
+        "Define destinations in the destinations env variable (name, url, forwardAuthToken) or via a bound Destination service.",
+        "Routes: source (regex), target, and exactly one of destination / service / localDir.",
+        "authenticationMethod: route (default) or none; per route authenticationType: xsuaa, ias, basic, none.",
+        "Authorization: a route's scope lists the required scopes (for example $XSAPPNAME.viewer).",
+        "Don't use multiple destinations with the same URL in one session."
+      ],
+      "examples": [
+        {
+          "title": "Destinations environment variable (manifest.yml)",
+          "language": "yaml",
+          "code": "applications:\n- name: approuter\n  memory: 100M\n  path: web\n  env:\n    destinations: >\n      [\n        { \"name\": \"backend\", \"url\": \"https://backend.cfapps.eu10.hana.ondemand.com\", \"forwardAuthToken\": true }\n      ]\n  services:\n    - node-uaa"
+        },
+        {
+          "title": "A protected route with scopes",
+          "language": "json",
+          "code": "{\n  \"authenticationMethod\": \"route\",\n  \"routes\": [\n    {\n      \"source\": \"/employeeData/(.*)\",\n      \"target\": \"/services/employeeService/$1\",\n      \"destination\": \"backend\",\n      \"authenticationType\": \"xsuaa\",\n      \"scope\": [\"$XSAPPNAME.viewer\", \"$XSAPPNAME.writer\"],\n      \"csrfProtection\": true\n    }\n  ]\n}"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Application Routes and Destinations (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/3cc788ebc00e40a091505c6b3fa485e7.html"
+        },
+        {
+          "title": "Routing Configuration File (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/c103fb414988447ead2023f768096dcc.html"
+        },
+        {
+          "title": "authenticationMethod (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/ff58bb02c16f4a0482e0acafa346e01b.html"
+        },
+        {
+          "title": "@sap/approuter README (npm package, via jsDelivr)",
+          "url": "https://cdn.jsdelivr.net/npm/@sap/approuter/README.md"
+        }
+      ]
+    }
+  ]
+}

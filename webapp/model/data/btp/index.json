@@ -1,0 +1,867 @@
+{
+  "id": "btp",
+  "title": "SAP BTP",
+  "groups": [
+    {
+      "id": "platform",
+      "title": "Platform fundamentals",
+      "topics": [
+        {
+          "id": "btp-basics",
+          "title": "BTP & environments",
+          "file": "btp-basics.json",
+          "questionCount": 4,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "Basic Platform Concepts (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/73beb06e127f4e47b849aa95344aabe1.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Environments (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/15547f7e7ecd47ee9fa052b0e18c7b0a.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Neo Environment (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/0f79436cf43a4785bb5b7ee9dac0c76a.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Cloud Foundry Environment (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/9c7092c7b7ae4d49bc8ae35fdd0e0b18.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Kyma Environment (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/468c2f3c3ca24c2c8497ef9f83154c44.html"
+            }
+          ]
+        },
+        {
+          "id": "commercial-models",
+          "title": "Commercial models",
+          "file": "commercial-models.json",
+          "questionCount": 3,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "Commercial Models (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/263d40009a5a4237a62e8f5c05ee641e.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Basic Platform Concepts (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/73beb06e127f4e47b849aa95344aabe1.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "What Is the Consumption-Based Commercial Model? (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/7047eb4a15a84ac7be3c8612179e6d1f.html"
+            },
+            {
+              "type": "Tutorial",
+              "title": "Get Started with SAP BTP Enterprise Accounts (SAP Developer Center)",
+              "url": "https://developers.sap.com/tutorials/btp-ea-onboard-01-intro"
+            },
+            {
+              "type": "Documentation",
+              "title": "What Is the Subscription-Based Commercial Model? (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/239b6e045e7e48f58b61655b02748d45.html"
+            }
+          ]
+        },
+        {
+          "id": "account-model",
+          "title": "Account model",
+          "file": "account-model.json",
+          "questionCount": 6,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "Account Model (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/8ed4a705efa0431b910056c0acdbf377.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Basic Platform Concepts (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/73beb06e127f4e47b849aa95344aabe1.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Environments (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/15547f7e7ecd47ee9fa052b0e18c7b0a.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Entitlements and Quotas (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/00aa2c23479d42568b18882b1ca90d79.html"
+            }
+          ]
+        },
+        {
+          "id": "multitenancy",
+          "title": "Multitenancy",
+          "file": "multitenancy.json",
+          "questionCount": 6,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "Developing Multitenant Applications in the Cloud Foundry Environment (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/5e8a2b74e4f2442b8257c850ed912f48.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Providing Multitenant Applications to Consumers in the Cloud Foundry Environment (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/7a013f1d89f34a0084ea3d9a8bb2adbd.html"
+            },
+            {
+              "type": "Architecture Center",
+              "title": "Tenant Model and Data Separation on SAP BTP (SAP Architecture Center, archived)",
+              "url": "https://architecture.learning.sap.com/docs/ref-arch/a5c409"
+            },
+            {
+              "type": "Documentation",
+              "title": "Deploy Multitenant SaaS Applications (CAP documentation)",
+              "url": "https://cap.cloud.sap/docs/guides/multitenancy/"
+            },
+            {
+              "type": "Documentation",
+              "title": "Develop the Multitenant Application (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/ff540477f5404e3da2a8ce23dcee602a.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mta",
+      "title": "Multitarget applications",
+      "topics": [
+        {
+          "id": "mta-basics",
+          "title": "MTA basics",
+          "file": "mta-basics.json",
+          "questionCount": 3,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "Multitarget Applications in the Cloud Foundry Environment (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/d04fc0e2ad894545aebfd7126384307c.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Cloud MTA Build Tool (SAP on GitHub)",
+              "url": "https://sap.github.io/cloud-mta-build-tool/"
+            },
+            {
+              "type": "Documentation",
+              "title": "Multitarget Application Structure (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/f443b9f5412c410688916a5b833fab40.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Defining Multitarget Application Deployment Descriptors for Cloud Foundry (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/f48880b0295d4e9d859658244da84201.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Parameters and Properties (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/490c8f71e2b74bc0a59302cada66117c.html"
+            }
+          ]
+        },
+        {
+          "id": "mta-modules-resources",
+          "title": "Modules, resources & extension descriptors",
+          "file": "mta-modules-resources.json",
+          "questionCount": 5,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "Modules (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/177d34d45e3d4fd99f4eeeffc5814cf1.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Multitarget Applications in the Cloud Foundry Environment (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/d04fc0e2ad894545aebfd7126384307c.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Module Hooks (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/b9245ba90aa14681a416065df8e8c593.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Configuration - Cloud MTA Build Tool (SAP on GitHub)",
+              "url": "https://sap.github.io/cloud-mta-build-tool/configuration/"
+            },
+            {
+              "type": "Documentation",
+              "title": "Docker Images as Part of an MTA Deployment (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/754d4800b69b478eaa2427338c5d47e5.html"
+            }
+          ]
+        },
+        {
+          "id": "mta-advanced",
+          "title": "Advanced MTA deployment",
+          "file": "mta-advanced.json",
+          "questionCount": 3,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "Blue-Green Deployment of Multitarget Applications (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/772ab72204f04946b79ce2d962e64970.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Blue-Green Deployment Strategy (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/7c83810c31d842938cbc39c135a2d99f.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Incremental Blue-Green Deployment Strategy (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/2e4dfeded960446da4aa1c0b734fc81b.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Legacy Blue-Green Deployment (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/764308c52e68488dac848bae93e9137b.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Cross-MTA Dependencies (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/b8e1953a618e47e1bd3c3a60c213226e.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "approuter",
+      "title": "Application Router",
+      "topics": [
+        {
+          "id": "approuter-basics",
+          "title": "Approuter basics",
+          "file": "approuter-basics.json",
+          "questionCount": 3,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "Application Router (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/01c5f9ba7d6847aaaf069d153b981b51.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Application Routes and Destinations (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/3cc788ebc00e40a091505c6b3fa485e7.html"
+            },
+            {
+              "type": "Package README",
+              "title": "@sap/approuter README (npm package, via jsDelivr)",
+              "url": "https://cdn.jsdelivr.net/npm/@sap/approuter/README.md"
+            },
+            {
+              "type": "Documentation",
+              "title": "Managed Application Router (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/589a2395df2d481393acb1ba2f17eeef.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "logout (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/2296b4da7758446a847bd2f65caf8660.html"
+            }
+          ]
+        },
+        {
+          "id": "approuter-config",
+          "title": "Approuter configuration & sessions",
+          "file": "approuter-config.json",
+          "questionCount": 6,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "Routing Configuration File (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/c103fb414988447ead2023f768096dcc.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "welcomeFile (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/f1d9ff40a6594bd296435082d663abab.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "authenticationMethod (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/ff58bb02c16f4a0482e0acafa346e01b.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "logout (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/2296b4da7758446a847bd2f65caf8660.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "destinations (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/6b303d048d33471db0d041b064b7644c.html"
+            }
+          ]
+        },
+        {
+          "id": "approuter-advanced",
+          "title": "Business services & SaaS",
+          "file": "approuter-advanced.json",
+          "questionCount": 2,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "Integration with Business Services (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/f6337cd6065a42b59579c069256072ec.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "services (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/92741fa5b21647b9912dc5de698ca5bf.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Multitenancy (Application Router, SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/5310fc31caad4707be9126377e144627.html"
+            },
+            {
+              "type": "Package README",
+              "title": "@sap/approuter README (npm package, via jsDelivr)",
+              "url": "https://cdn.jsdelivr.net/npm/@sap/approuter/README.md"
+            },
+            {
+              "type": "Documentation",
+              "title": "Saas Provisioning Service (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/cbc379ef476e460c87934d0e496b7850.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "security",
+      "title": "Authorization & authentication",
+      "topics": [
+        {
+          "id": "security-basics",
+          "title": "Authentication & identity basics",
+          "file": "security-basics.json",
+          "questionCount": 3,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "Security Administration: Managing Authentication and Authorization (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/1ff47b2d980e43a6b2ce294352333708.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Trust and Federation with Identity Providers (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/cb1bc8f1bd5c482e891063960d7acd78.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "What Is the SAP Authorization and Trust Management Service? (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/649961f8d4ad463daca33b3a20deba4c.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Adding Authentication and Authorization (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/419ae2ef1ddd49dca9eb65af2d67c6ec.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "SAP BTP, Cloud Foundry Environment XSUAA Explained (SAP Cloud SDK)",
+              "url": "https://sap.github.io/cloud-sdk/docs/java/guides/cloud-foundry-xsuaa-service"
+            }
+          ]
+        },
+        {
+          "id": "security-descriptor-roles",
+          "title": "Security descriptor, roles & JWT",
+          "file": "security-descriptor-roles.json",
+          "questionCount": 5,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "Application Security Descriptor Configuration Syntax (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/517895a9612241259d6941dbf9ad81cb.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Adding Authentication and Authorization (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/419ae2ef1ddd49dca9eb65af2d67c6ec.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Authorization Entities (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/5d8ed75b5c72432cb0e4d846f411e0cd.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Roles and Role Collections (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/14a877c6e2f14832999df500ffa6e05e.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Building Roles and Role Collections for Applications (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/eaa6a26291914b348e875a00b6beb729.html"
+            }
+          ]
+        },
+        {
+          "id": "security-advanced",
+          "title": "XSUAA in depth, trust & token flows",
+          "file": "security-advanced.json",
+          "questionCount": 5,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "What Is the SAP Authorization and Trust Management Service? (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/649961f8d4ad463daca33b3a20deba4c.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Application Security Descriptor Configuration Syntax (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/517895a9612241259d6941dbf9ad81cb.html"
+            },
+            {
+              "type": "Package README",
+              "title": "@sap/xssec README (npm package, via jsDelivr)",
+              "url": "https://cdn.jsdelivr.net/npm/@sap/xssec/README.md"
+            },
+            {
+              "type": "Documentation",
+              "title": "Authorization Entities (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/5d8ed75b5c72432cb0e4d846f411e0cd.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Adding Authentication and Authorization (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/419ae2ef1ddd49dca9eb65af2d67c6ec.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "connectivity",
+      "title": "Connectivity",
+      "topics": [
+        {
+          "id": "connectivity-basics",
+          "title": "Connectivity & destinations",
+          "file": "connectivity-basics.json",
+          "questionCount": 4,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "What is SAP BTP Connectivity? (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/e54cc8fbbb571014beb5caaf6aa31280.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "HTTP Destinations (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/42a0e6b966924f2e902090bdf435e1b2.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Destination Service (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/8ff5483fef564eae9f34fe092d1bddcd.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Cloud Connector (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/e6c7616abb5710148cfcf3e75d96d596.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Create and Bind a Destination Service Instance (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/9fdad3cad92e4b63b73d5772014b380e.html"
+            }
+          ]
+        },
+        {
+          "id": "connectivity-protocols-cc",
+          "title": "Protocols & Cloud Connector",
+          "file": "connectivity-protocols-cc.json",
+          "questionCount": 3,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "HTTP Destinations (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/42a0e6b966924f2e902090bdf435e1b2.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Invoking ABAP Function Modules via RFC (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/fa4adc9bd40e45dbac573fd616695446.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "RFC Destinations (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/238d027c154541f597201a0002713c86.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Using the TCP Protocol for Cloud Applications (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/cd1583775afa43f0bb9ec69d9dbcc880.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "TCP Destinations (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/f6d753f031a7482dac7a60bad815e07c.html"
+            }
+          ]
+        },
+        {
+          "id": "destination-auth-types",
+          "title": "HTTP destination authentication types",
+          "file": "destination-auth-types.json",
+          "questionCount": 2,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "HTTP Destinations (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/42a0e6b966924f2e902090bdf435e1b2.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "No Authentication (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/699f0d10fdaf41a8b92367036a7ed1ff.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Basic Authentication (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/4af3980f96fc467a8f0edad2c7f23f2f.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Client Certificate Authentication (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/4e13a04147314e8e9e54321f25d93fdc.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Server Certificate Authentication (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/e75d7f15b808428e87ae70f494da0b42.html"
+            }
+          ]
+        },
+        {
+          "id": "principal-propagation",
+          "title": "Principal propagation",
+          "file": "principal-propagation.json",
+          "questionCount": 2,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "Cloud to On-Premise (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/70b8ef33812e486d8b745a0b47fd093e.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Principal Propagation SSO Authentication for HTTP (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/73194cc419894433994c5f0444b4c6a1.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Authenticating Users against On-Premises Systems (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/b643fbecb14e4c89ab3c03b21200cb08.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Cloud to Cloud (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/65b11d4ed333450ebebb8a2e25e805b7.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "OAuth SAML Bearer Assertion Authentication (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/c69ea6aacd714ad2ae8ceb5fc3ceea56.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kernel-services",
+      "title": "SAP Kernel Services",
+      "topics": [
+        {
+          "id": "audit-log",
+          "title": "Audit Log service",
+          "file": "audit-log.json",
+          "questionCount": 3,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "Audit Log Write API for Customers (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/64e99bb5291940489bd2277ee027d82e.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "SAP Audit Log Viewer service for the Cloud Foundry Environment (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/e3baa5f1a0c64c44aac8ab3ea3d1b500.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Retention of Audit Data written from Customer's BTP Applications (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/9cf4217c7a8042968694a345b4b95708.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Audit Log Retrieval API Usage for Subaccounts in the Cloud Foundry Environment (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/30ece35bac024ca69de8b16bff79c413.html"
+            }
+          ]
+        },
+        {
+          "id": "event-mesh",
+          "title": "Event Mesh",
+          "file": "event-mesh.json",
+          "questionCount": 2,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "What Is SAP Event Mesh? (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/SAP_EM/bf82e6b26456494cbdd197057c09979f/df532e8735eb4322b00bfc7e42f84e8d.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Setting Up SAP Event Mesh in BTP Cockpit (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/SAP_EM/bf82e6b26456494cbdd197057c09979f/3ef34ffcbbe94d3e8fff0f9ea2d5911d.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Migrate from SAP Event Mesh Default Plan to Event Mesh in SAP Integration Suite: Overview (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/SAP_EM/75f1a2ddbfb74b6480f935d4a4c68d17/077c4760590a4e49aff9a79e5da29da6.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Glossary for Event Mesh (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/SAP_INTEGRATION_SUITE/a01a83f4826d486b9fc66d1df0de9da4/501ba2d2a629466898899d1e47f40bf9.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Understanding Event Driven Architecture (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/SAP_INTEGRATION_SUITE/a01a83f4826d486b9fc66d1df0de9da4/2604955420bd48dbb10d3c61527c5fb4.html"
+            }
+          ]
+        },
+        {
+          "id": "central-key-management",
+          "title": "Central Key Management Service",
+          "file": "central-key-management.json",
+          "questionCount": 4,
+          "resources": [
+            {
+              "type": "SAP-internal",
+              "title": "BTP Kernel Services (SAP-internal)",
+              "url": "https://pages.github.tools.sap/kernelservices/"
+            }
+          ]
+        },
+        {
+          "id": "master-data-integration",
+          "title": "Master Data Integration",
+          "file": "master-data-integration.json",
+          "questionCount": 2,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "What Is Master Data Integration? (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/SAP_MASTER_DATA_INTEGRATION/c7713d6177ad479d9ea00958db9f2f81/dab76d5506a44c8e85f314fc3be30e13.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Integration Models (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/SAP_MASTER_DATA_INTEGRATION/c7713d6177ad479d9ea00958db9f2f81/8882bf982aca461d89b15afe19483edb.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Integrating with SAP Master Data Governance (MDG) (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/SAP_MASTER_DATA_INTEGRATION/c7713d6177ad479d9ea00958db9f2f81/a9ef55b0339f4a88bc461edd5b78d75e.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Creating Tenants (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/SAP_MASTER_DATA_INTEGRATION/c7713d6177ad479d9ea00958db9f2f81/6e3b768903744f04a98915c3a3ab2223.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Connecting Applications via Service Instances (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/SAP_MASTER_DATA_INTEGRATION/c7713d6177ad479d9ea00958db9f2f81/e01bb46b7e09427aa37ac2da40198cf2.html"
+            }
+          ]
+        },
+        {
+          "id": "subscription-management",
+          "title": "Subscription management",
+          "file": "subscription-management.json",
+          "questionCount": 3,
+          "resources": [
+            {
+              "type": "SAP-internal",
+              "title": "BTP Kernel Services (SAP-internal)",
+              "url": "https://pages.github.tools.sap/kernelservices/"
+            }
+          ]
+        },
+        {
+          "id": "identity-service",
+          "title": "Identity service (SAP Cloud Identity Services)",
+          "file": "identity-service.json",
+          "questionCount": 3,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "What Are Cloud Identity Services? (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/IDENTITY_AUTHENTICATION/6d6d63354d1242d185ab4830fc04feb1/27882717f44b445fa287936c6f43dc1f.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Initial Setup (SAP Cloud Identity Services, SAP Help Portal)",
+              "url": "https://help.sap.com/docs/IDENTITY_AUTHENTICATION/6d6d63354d1242d185ab4830fc04feb1/31af7da133874e199a7df1d42905241b.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Establish Trust and Federation Between SAP Authorization and Trust Management Service and SAP Cloud Identity Services (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/161f8f0cfac64c4fa2d973bc5f08a894.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Scenarios (SAP Cloud Identity Services, SAP Help Portal)",
+              "url": "https://help.sap.com/docs/IDENTITY_AUTHENTICATION/6d6d63354d1242d185ab4830fc04feb1/fb9898deed834302ace22e0c2297c631.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Trust and Federation with Identity Providers (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/cb1bc8f1bd5c482e891063960d7acd78.html"
+            }
+          ]
+        },
+        {
+          "id": "system-landscape",
+          "title": "System landscape information",
+          "file": "system-landscape.json",
+          "questionCount": 2,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "Maintaining Unified Customer Landscape (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/a8b1e2666e734fd2bfbca44b671585c4.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Automating Integrations Using Formations (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/68b04fa73aa740cb96ed380a85a4761a.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Adding, Registering and Deregistering Systems (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/2ffdaff0f1454acdb046876045321c91.html"
+            }
+          ]
+        },
+        {
+          "id": "task-center",
+          "title": "SAP Task Center",
+          "file": "task-center.json",
+          "questionCount": 2,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "What Is SAP Task Center? (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/TASK_CENTER/08cbda59b4954e93abb2ec85f1db399d/9693186f1fe54cbe801085d6bdfe8287.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Using the SAP Task Center API (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/TASK_CENTER/08cbda59b4954e93abb2ec85f1db399d/b66e0cdd6e8a4ca08efd8a29b0a20b24.html"
+            }
+          ]
+        },
+        {
+          "id": "data-privacy",
+          "title": "Data Privacy Integration",
+          "file": "data-privacy.json",
+          "questionCount": 3,
+          "resources": [
+            {
+              "type": "Documentation",
+              "title": "What is Data Privacy Integration? (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/c829f95e3a3a43ddb958782fb3bf61e2/a360cc35b40946139300990c4cdacad8.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Capabilities - Data Privacy Integration (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/c829f95e3a3a43ddb958782fb3bf61e2/a64a116b895a4a5986d3f1a0032e4516.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Data Privacy Integration NextGen (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/3916a64ef0594fa0b50b47708f4a5c41/451363e319a044f3a081e565e0753869.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Configuration Application (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/c829f95e3a3a43ddb958782fb3bf61e2/f3c9c2371eff4803ab6bc77136ad199d.html"
+            },
+            {
+              "type": "Documentation",
+              "title": "Configure Data Controller (SAP Help Portal)",
+              "url": "https://help.sap.com/docs/DATA_PRIVACY_INTEGRATION/c829f95e3a3a43ddb958782fb3bf61e2/70fde84639c54746b742ca1c9606d32b.html"
+            }
+          ]
+        },
+        {
+          "id": "service-discovery",
+          "title": "Service Discovery and Management",
+          "file": "service-discovery.json",
+          "questionCount": 2,
+          "resources": [
+            {
+              "type": "SAP-internal",
+              "title": "BTP Kernel Services (SAP-internal)",
+              "url": "https://pages.github.tools.sap/kernelservices/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dwc-group",
+      "title": "Deploy With Confidence",
+      "topics": [
+        {
+          "id": "dwc",
+          "title": "Deploy With Confidence",
+          "file": "dwc.json",
+          "questionCount": 3,
+          "resources": [
+            {
+              "type": "SAP-internal",
+              "title": "DwC documentation: Concepts (SAP-internal)",
+              "url": "https://pages.github.tools.sap/deploy-with-confidence/solar-system/documentation/concepts"
+            },
+            {
+              "type": "SAP-internal",
+              "title": "Deploy With Confidence (SAP-internal)",
+              "url": "https://pages.github.tools.sap/deploy-with-confidence/solar-system/"
+            },
+            {
+              "type": "SAP-internal",
+              "title": "DwC documentation: Landscape configuration (SAP-internal)",
+              "url": "https://pages.github.tools.sap/deploy-with-confidence/solar-system/documentation/configuration/landscape-configuration"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

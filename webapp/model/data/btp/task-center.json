@@ -1,0 +1,62 @@
+{
+  "topicId": "task-center",
+  "title": "SAP Task Center",
+  "questions": [
+    {
+      "id": "task-center-purpose",
+      "level": "basic",
+      "title": "What are the purpose and mission of the SAP Task Center service?",
+      "description": "The SAP Task Center service integrates SAP and non-SAP applications to provide a single entry point for end users to access all their assigned tasks. Its mission is a unified inbox: tasks from multiple SAP solutions are gathered in one list and can be processed in one click, which shortens the completion time of business-critical tasks. Business users process all their tasks from the connected systems without switching between, and logging on to, separate inboxes. End users access the tasks through the SAP Task Center web app, the Joule Work app and SAP Start. The main capabilities are task federation, in which tasks are federated from various provider applications via a unified REST interface and stored in a task cache for resilience and instantaneous access, and task processing, in which users see all tasks assigned to them in the SAP Task Center web app, search, sort and filter them, review the details and perform actions, or navigate to the native task application for full details and all actions. The service runs in the SAP BTP Cloud Foundry environment and integrates several SAP BTP services and components for centralized task management across the landscape.",
+      "keyPoints": [
+        "Based on the public SAP BTP service. SAP-internal Kernel Services may differ.",
+        "A single entry point (unified inbox) for all tasks a user has in SAP and non-SAP applications.",
+        "Accessed through the SAP Task Center web app, the Joule Work app and SAP Start.",
+        "Task federation via a unified REST interface, with a task cache for resilience.",
+        "Task processing: search, sort, filter, act, or jump to the native application.",
+        "Runs in the SAP BTP Cloud Foundry environment."
+      ],
+      "examples": [
+        {
+          "title": "One inbox instead of many",
+          "language": "text",
+          "code": "SAP provider app 1     ─┐\nSAP provider app 2     ─┼─> SAP Task Center (task cache) ─> web app / Joule Work / SAP Start\nNon-SAP provider app   ─┘"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "What Is SAP Task Center? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/TASK_CENTER/08cbda59b4954e93abb2ec85f1db399d/9693186f1fe54cbe801085d6bdfe8287.html"
+        }
+      ]
+    },
+    {
+      "id": "task-center-rest-api",
+      "level": "basic",
+      "title": "How do you use the SAP Task Center REST API?",
+      "description": "The SAP Task Center API is a set of REST methods to list and work with user tasks and task definitions, to monitor connector configurations, and to export service data: task consumption, monitoring connector status, and data export. Its documentation is published on the SAP Business Accelerator Hub (api.sap.com) in the SAP Task Center package, as the SAP Task Center API (TaskCenterAPIForCloudFoundry); the base URL comes from the service configuration parameters of your SAP Task Center service. The API is protected with OAuth 2.0: it uses client credentials, and the authorization code and SAML 2.0 bearer assertion flows are supported. For applications bound to the SAP Task Center service, the application router handles user-centric authentication transparently: it manages the current user's tokens for the backend services in the user session and redirects to the UAA logon form when there is no session. Otherwise, you create an OAuth client, obtain an access token and call the API methods with it. When applications need to propagate principals or have technical communication arrangements, the API can also be consumed directly through SAP Cloud Identity Services – Identity Authentication. Calls are subject to rate limits, for example on requests per second; when they are exceeded, the API returns HTTP 429 (Too many requests) and the client should reduce its calls.",
+      "keyPoints": [
+        "Based on the public SAP BTP service. SAP-internal Kernel Services may differ.",
+        "REST methods for task consumption, connector status monitoring and data export.",
+        "Documented on api.sap.com in the SAP Task Center package (SAP Task Center API).",
+        "OAuth 2.0: client credentials; authorization code and SAML 2.0 bearer assertion supported.",
+        "The approuter handles user tokens for bound apps; otherwise get a token with an OAuth client.",
+        "Rate limits return HTTP 429."
+      ],
+      "examples": [
+        {
+          "title": "Calling the API",
+          "language": "text",
+          "code": "1. Get the base URL from the service configuration parameters (service key of SAP Task Center)\n2. POST <token url>/oauth/token  (OAuth client, for example grant_type=client_credentials)\n3. Call the SAP Task Center API with \"Authorization: Bearer <access token>\"\n   (task consumption, connector status, data export; see api.sap.com > SAP Task Center)\n4. On HTTP 429: reduce the call rate"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Using the SAP Task Center API (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/TASK_CENTER/08cbda59b4954e93abb2ec85f1db399d/b66e0cdd6e8a4ca08efd8a29b0a20b24.html"
+        }
+      ]
+    }
+  ]
+}

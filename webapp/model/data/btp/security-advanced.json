@@ -1,0 +1,211 @@
+{
+  "topicId": "security-advanced",
+  "title": "XSUAA in depth, trust & token flows",
+  "questions": [
+    {
+      "id": "uaa-vs-xsuaa",
+      "level": "advanced",
+      "title": "What is the difference between UAA and XSUAA?",
+      "description": "UAA (User Account and Authentication) is the OAuth 2.0 server of the open-source Cloud Foundry platform. SAP explains that the Cloud Foundry environment uses a standard implementation of OAuth 2.0 to protect its platform resources: orgs, spaces, and the platform operations on them. For business web applications running on SAP BTP, SAP reuses the OAuth 2.0 specification with a proprietary implementation: the SAP Authorization and Trust Management service, technical name xsuaa (XSUAA). XSUAA changes the responsibilities of the OAuth 2.0 entities: the OAuth 2.0 client, represented by the application, holds all the authorizations, and after authentication a set or subset of them is assigned to the user. XSUAA adds the application authorization model on top of plain OAuth: applications define scopes, attributes and role templates in xs-security.json, administrators build roles and role collections from them in the SAP BTP cockpit and assign them to users or IdP user groups, and the issued JWTs carry the resulting scopes and attributes (for example xs.user.attributes). It also manages trust to identity providers per subaccount (SAP ID service, SAP Cloud Identity Services, corporate identity providers), and it is consumed as a reuse service: its service broker creates an xsuaa service instance for each application, with plans such as application, and supports tenant modes for multitenant applications. XSUAA still supports the Cloud Foundry UAA token grant types (authorization code, client credentials, SAML 2.0 bearer) and refresh tokens. SAP's @sap/xssec library reflects the distinction with separate service classes: UaaService, XsuaaService and IdentityService.",
+      "keyPoints": [
+        "UAA: Cloud Foundry's standard OAuth 2.0 implementation, protecting platform resources (orgs, spaces, operations).",
+        "XSUAA: SAP's proprietary OAuth 2.0 implementation protecting business applications on SAP BTP.",
+        "In XSUAA, the application (OAuth client) holds the authorizations and assigns a subset to the user.",
+        "XSUAA adds xs-security.json (scopes, attributes, role templates), roles and role collections.",
+        "XSUAA manages trust to identity providers and is a reuse service (one instance per app, tenant modes).",
+        "Same grant types as UAA: authorization code, client credentials, SAML 2.0 bearer, refresh tokens."
+      ],
+      "examples": [
+        {
+          "title": "Who protects what",
+          "language": "text",
+          "code": "Cloud Foundry UAA -> platform resources: orgs, spaces, cf push, cf create-service, ...\nXSUAA (xsuaa)     -> your business application: scopes, role templates, roles, role collections"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "What Is the SAP Authorization and Trust Management Service? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/649961f8d4ad463daca33b3a20deba4c.html"
+        },
+        {
+          "title": "Application Security Descriptor Configuration Syntax (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/517895a9612241259d6941dbf9ad81cb.html"
+        },
+        {
+          "title": "@sap/xssec README (npm package, via jsDelivr)",
+          "url": "https://cdn.jsdelivr.net/npm/@sap/xssec/README.md"
+        }
+      ]
+    },
+    {
+      "id": "who-creates-what",
+      "level": "advanced",
+      "title": "Who creates scopes, role templates, roles and role collections, and in what order?",
+      "description": "SAP splits the work between developers and administrators. Developers create the authorization information at design time and deploy it with the application: they define the scopes (the functional authorizations, such as Display or Edit), the attributes and the role templates (which reference scopes and attributes) in the xs-security.json security descriptor, and create the xsuaa service instance from it during deployment. Optionally, they can also deliver role collections with predefined roles in the same file, for immediate use during onboarding. Administrators then complete the setup in the SAP BTP cockpit (or with the btp CLI, the REST API or Terraform): they use the deployed role templates to build roles with the required attribute values (role templates with only local scopes, or with default values, produce default roles automatically), aggregate the roles into role collections, and assign the role collections to business users or user groups. So the order is: 1. scopes, 2. role templates (both by the developer, in xs-security.json, deployed with the app), 3. roles, 4. role collections, then the assignment to users or groups (all by the administrator). Each step depends on the previous one: a role is an instance of a role template, a role template references scopes, and a role collection references roles. After the assignment, users must log on again, because authorizations are stored in the session at logon.",
+      "keyPoints": [
+        "Developer (design time, xs-security.json): scopes, attributes, role templates; deployed with the app.",
+        "Developer (optional): predefined role collections in xs-security.json.",
+        "Administrator (cockpit, btp CLI, API, Terraform): roles from role templates, role collections, assignments.",
+        "Order: scopes -> role templates -> roles -> role collections -> users / user groups.",
+        "Default roles are created automatically when no attribute values are needed.",
+        "Users must log on again for new assignments to take effect."
+      ],
+      "examples": [
+        {
+          "title": "The chain",
+          "language": "text",
+          "code": "Developer (xs-security.json)          Administrator (cockpit)\n----------------------------          -----------------------\n1. scope $XSAPPNAME.Edit       ->     3. role \"Editor UK\" (Country = UK)\n2. role template \"Editor\"      ->     4. role collection \"UK Editors\"\n                                       5. assign to users / user groups"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Authorization Entities (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/5d8ed75b5c72432cb0e4d846f411e0cd.html"
+        },
+        {
+          "title": "Adding Authentication and Authorization (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/419ae2ef1ddd49dca9eb65af2d67c6ec.html"
+        },
+        {
+          "title": "Security Administration: Managing Authentication and Authorization (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/1ff47b2d980e43a6b2ce294352333708.html"
+        },
+        {
+          "title": "Application Security Descriptor Configuration Syntax (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/517895a9612241259d6941dbf9ad81cb.html"
+        }
+      ]
+    },
+    {
+      "id": "custom-idp-group-mapping",
+      "level": "advanced",
+      "title": "How do you configure a custom identity provider (IAS trust) and map user groups to role collections?",
+      "description": "SAP recommends using your own SAP Cloud Identity Services (Identity Authentication, IAS) tenant as the identity provider, or as a proxy to your corporate identity provider. Trust between the subaccount (XSUAA) and the IAS tenant is established with OpenID Connect, which avoids uploading and downloading SAML metadata. Prerequisites: subaccount administrator permissions, an SAP Cloud Identity Services tenant, and that tenant associated with the customer IDs of the global account. In the cockpit, go to the subaccount, choose Security > Trust Configuration > Establish Trust, choose the tenant, optionally change name, description and origin key (max 36 characters), choose the domain, keep Available for User Logon on and provide a link text, keep Create Shadow Users on User Logon on (otherwise logons fail if the shadow user doesn't exist), and finish. IAS then automatically creates an application named \"SAP BTP subaccount <name>\". Only one IAS tenant per subaccount can be trusted this way, and if the OIDC issuer changes, use Refresh in the trust configuration. Afterwards you can deactivate or hide the default identity provider. To map groups: configure the identity provider so that it sends the user's group memberships in the groups attribute (the attribute called Groups), create the role collections, and assign the user groups to role collections for that trust configuration (in the role collection, add the user group with the identity provider). Each value of the groups attribute is mapped to a role collection, so adding a user to a group in the IdP automatically gives them the authorizations of the mapped role collections. Role collections can also be mapped to other user attributes.",
+      "keyPoints": [
+        "Use your own SAP Cloud Identity Services tenant (optionally proxying the corporate IdP).",
+        "Trust via OpenID Connect: Security > Trust Configuration > Establish Trust (no SAML metadata exchange).",
+        "Keep Create Shadow Users on User Logon switched on; IAS creates an application \"SAP BTP subaccount <name>\".",
+        "One IAS tenant per subaccount with this method; Refresh if the OIDC issuer changes.",
+        "The IdP sends group memberships in the groups attribute; map user groups to role collections.",
+        "New group members get the mapped authorizations automatically."
+      ],
+      "examples": [
+        {
+          "title": "Group mapping",
+          "language": "text",
+          "code": "IdP token for alice:   groups = [\"uk-managers\", \"employees\"]\n\nTrust configuration \"my-ias\" (https://<tenant_id>.accounts.ondemand.com)\n  user group \"uk-managers\" -> role collection \"UK Managers\"\n  user group \"employees\"   -> role collection \"Employee\"\n\n=> alice gets the roles of both role collections"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Establish Trust and Federation Between SAP Authorization and Trust Management Service and SAP Cloud Identity Services (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/161f8f0cfac64c4fa2d973bc5f08a894.html"
+        },
+        {
+          "title": "Map Role Collections to User Groups (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/51acfc82c0c54db59de0a528f343902c.html"
+        },
+        {
+          "title": "Trust and Federation with Identity Providers (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/cb1bc8f1bd5c482e891063960d7acd78.html"
+        },
+        {
+          "title": "Roles and Role Collections (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/14a877c6e2f14832999df500ffa6e05e.html"
+        }
+      ]
+    },
+    {
+      "id": "client-credentials-grant",
+      "level": "advanced",
+      "title": "How do you get a JWT from XSUAA with the client credentials grant?",
+      "description": "The client credentials grant is used when an application needs to access a service without an active user session, with technical credentials; the token is requested on behalf of the service binding itself, not on behalf of a user. SAP's Cloud SDK guide gives the example of reading a list of destinations, which doesn't need a user token. First read the credentials of the binding: in the VCAP_SERVICES environment variable of your application, take url, clientid and clientsecret from the credentials of the relevant service (for example xsuaa or destination). Then send POST https://<url>/oauth/token with the headers Accept: application/json and Content-Type: application/x-www-form-urlencoded and the form parameters client_id, client_secret and grant_type=client_credentials. The response is JSON with access_token (the JWT), token_type bearer, expires_in, scope and jti. In Node.js, @sap/xssec does this for you: xsuaaService.fetchClientCredentialsToken() returns the response, and the cached variant getClientCredentialsToken() reuses a token while it is still valid for at least 5 minutes; options include scope, tenant (a subdomain) or zid (a zone ID) to fetch a token for another tenant. The scopes in such a token are authorities: an application can grant scopes to another application for client-credentials scenarios with grant-as-authority-to-apps in its xs-security.json. SAP's best practices for tokens recommend caching tokens, to avoid running into the rate limits of the SAP Authorization and Trust Management service, and retrying failed token requests (by default up to three times, with backoff) instead of always getting a new token. The SaaS Provisioning service uses exactly this flow to get an application access token for its APIs (POST <url>/oauth/token with the credentials of the saas-registry binding).",
+      "keyPoints": [
+        "For technical access without a user session; the token represents the service binding.",
+        "Take url, clientid, clientsecret from VCAP_SERVICES.",
+        "POST <url>/oauth/token with client_id, client_secret, grant_type=client_credentials (form-urlencoded).",
+        "Response: access_token (JWT), token_type, expires_in, scope.",
+        "@sap/xssec: fetchClientCredentialsToken() or cached getClientCredentialsToken() (options scope, tenant, zid).",
+        "Scopes in it are authorities (grant-as-authority-to-apps); cache tokens and retry failed requests (rate limits)."
+      ],
+      "examples": [
+        {
+          "title": "Client credentials request",
+          "language": "sh",
+          "code": "curl -X POST \"https://<xsuaa.url>/oauth/token\" \\\n  -H \"Accept: application/json\" \\\n  -H \"Content-Type: application/x-www-form-urlencoded\" \\\n  -d \"client_id=<clientid>&client_secret=<clientsecret>&grant_type=client_credentials\""
+        },
+        {
+          "title": "With @sap/xssec",
+          "language": "javascript",
+          "code": "const { XsuaaService } = require(\"@sap/xssec\");\nconst xsuaaService = new XsuaaService(credentials);\n\nconst accessTokenJwt = (await xsuaaService.fetchClientCredentialsToken()).access_token;\n// cached: returns the same token while it is valid for >= 5 more minutes\nconst cached = await xsuaaService.getClientCredentialsToken({ zid: \"zone1\" });"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "SAP BTP, Cloud Foundry Environment XSUAA Explained (SAP Cloud SDK)",
+          "url": "https://sap.github.io/cloud-sdk/docs/java/guides/cloud-foundry-xsuaa-service"
+        },
+        {
+          "title": "@sap/xssec README (npm package, via jsDelivr)",
+          "url": "https://cdn.jsdelivr.net/npm/@sap/xssec/README.md"
+        },
+        {
+          "title": "Getting an Application Access Token (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/6391b5dfe4704c6c8b71a32126828e9c.html"
+        },
+        {
+          "title": "Best Practices When Handling Access Tokens (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/8d39ef36427f489aa50c8e4e12c336d0.html"
+        },
+        {
+          "title": "Application Security Descriptor Configuration Syntax (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/517895a9612241259d6941dbf9ad81cb.html"
+        }
+      ]
+    },
+    {
+      "id": "authorization-code-grant",
+      "level": "advanced",
+      "title": "How do you get a JWT from XSUAA with the authorization code grant?",
+      "description": "The authorization code grant is the user login flow: it starts without an access token, in the browser, and produces a personal access token for the logged-on user. SAP's Cloud SDK guide (which notes that XSUAA is developed independently and points to the official XSUAA docs if something seems outdated) describes it in two steps. Step 1, get an authorization code via a single sign-on login form: call GET https://<xsuaa.url>/oauth/authorize with the query parameters client_id=<xsuaa.clientid>, redirect_uri=<application route> and response_type=code (optionally scope and login_hint; scope=uaa.user helps if the next request answers Unauthorized). The user logs in, and the response is a 302 redirect whose Location header is <application route>?code=<code>. Step 2, exchange the code for a token: POST https://<xsuaa.url>/oauth/token with Accept: application/json, Content-Type: application/x-www-form-urlencoded and the parameters client_id, client_secret, redirect_uri, code and grant_type=authorization_code. The response contains access_token, token_type bearer, id_token, refresh_token, expires_in, scope and jti. The refresh_token can later be exchanged for a new access token with grant_type=refresh_token. In practice you rarely implement this yourself: the application router performs this flow when an unauthenticated user opens a protected route (redirect to the authentication service, then the login callback creates the session), keeps the tokens in the session, and refreshes the JWT before it expires. The redirect URIs that XSUAA accepts can be configured in xs-security.json under oauth2-configuration.redirect-uris. XSUAA supports this grant type as one of the Cloud Foundry UAA grant types.",
+      "keyPoints": [
+        "The user login flow: browser login -> authorization code -> access token.",
+        "Step 1: GET <xsuaa.url>/oauth/authorize?client_id=...&redirect_uri=...&response_type=code.",
+        "The redirect returns <application route>?code=<code>.",
+        "Step 2: POST <xsuaa.url>/oauth/token with client_id, client_secret, redirect_uri, code, grant_type=authorization_code.",
+        "Response: access_token, id_token, refresh_token, expires_in, scope; refresh with grant_type=refresh_token.",
+        "The approuter does all of this for you; redirect URIs are set in oauth2-configuration.redirect-uris."
+      ],
+      "examples": [
+        {
+          "title": "Authorization code flow",
+          "language": "text",
+          "code": "1) Browser:\nGET https://<xsuaa.url>/oauth/authorize?client_id=<clientid>&redirect_uri=<app route>&response_type=code\n   -> login form -> 302 Location: <app route>?code=<code>\n\n2) Server:\nPOST https://<xsuaa.url>/oauth/token\nAccept: application/json\nContent-Type: application/x-www-form-urlencoded\n\nclient_id=<clientid>&client_secret=<clientsecret>&redirect_uri=<app route>&code=<code>&grant_type=authorization_code\n\n-> { \"access_token\": \"...\", \"token_type\": \"bearer\", \"id_token\": \"...\", \"refresh_token\": \"...\", \"expires_in\": ..., \"scope\": \"...\" }"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "SAP BTP, Cloud Foundry Environment XSUAA Explained (SAP Cloud SDK)",
+          "url": "https://sap.github.io/cloud-sdk/docs/java/guides/cloud-foundry-xsuaa-service"
+        },
+        {
+          "title": "What Is the SAP Authorization and Trust Management Service? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/649961f8d4ad463daca33b3a20deba4c.html"
+        },
+        {
+          "title": "@sap/approuter README (npm package, via jsDelivr)",
+          "url": "https://cdn.jsdelivr.net/npm/@sap/approuter/README.md"
+        },
+        {
+          "title": "Application Security Descriptor Configuration Syntax (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/517895a9612241259d6941dbf9ad81cb.html"
+        }
+      ]
+    }
+  ]
+}

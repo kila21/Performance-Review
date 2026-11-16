@@ -1,0 +1,118 @@
+{
+  "topicId": "destination-auth-types",
+  "title": "HTTP destination authentication types",
+  "questions": [
+    {
+      "id": "technical-auth-types",
+      "level": "basic",
+      "title": "Which HTTP destination authentication types work without user propagation, and when do you use each (no authentication, basic, client certificate, server certificate, OAuth client credentials, OAuth password, OAuth with X.509)?",
+      "description": "Every HTTP destination has Name, Type=HTTP, URL, ProxyType (Internet, OnPremise or PrivateLink) and an Authentication property. These types authenticate the application (or a technical user), not the logged-on business user. NoAuthentication: for a service on the Internet, an on-premise system or a Private Link endpoint that needs no authentication; with OnPremise you can also set CloudConnectorLocationId to choose among several Cloud Connectors. BasicAuthentication: the target requires basic authentication, with the User and Password properties; SAP warns never to use your own personal credentials, always a technical user. ClientCertificateAuthentication: the application authenticates with a client certificate over HTTPS (in the cockpit it appears only for https:// URLs); the key store can be managed by the Destination service or provided by the client (KeyStore.Source). Server certificate authentication is not an Authentication value but the validation of the server certificate for all HTTPS destinations with proxy type Internet or PrivateLink: TrustStoreLocation and TrustStorePassword define a JKS trust store with trusted certificate authorities, appended to the default JDK trust store (used alone if none is set); TrustAll=TRUE skips the check and is meant only for tests; HostnameVerifier is Strict or BrowserCompatible. OAuth2ClientCredentials: the client credentials are used to request an access token from an OAuth authorization server, for technical access without a user; the token is cached and renewed automatically shortly before it expires. OAuth2Password: the client credentials plus a user name and password are used to request a token from the token service, retrieved automatically by the Destination service's find-destination endpoint. OAuth with X.509 client certificates: instead of a client secret, a client certificate (mutual TLS) authenticates against the authorization server; you link a certificate configuration via tokenService.KeyStoreLocation; this is supported only for ProxyType=Internet.",
+      "keyPoints": [
+        "Common properties: Name, Type=HTTP, URL, ProxyType, Authentication.",
+        "NoAuthentication: targets without authentication (CloudConnectorLocationId for on-premise).",
+        "BasicAuthentication: User/Password of a technical user, never personal credentials.",
+        "ClientCertificateAuthentication: client certificate over HTTPS; key store in the Destination service or client-provided.",
+        "Server certificate validation: TrustStoreLocation/TrustStorePassword for Internet/PrivateLink HTTPS; TrustAll only for tests.",
+        "OAuth2ClientCredentials (technical token, cached/renewed), OAuth2Password (client + user credentials), OAuth with X.509 (mTLS, Internet only)."
+      ],
+      "examples": [
+        {
+          "title": "Basic and OAuth client credentials destinations",
+          "language": "ini",
+          "code": "Name=LegacyBackend\nType=HTTP\nURL=https://legacy.example.com/api\nProxyType=Internet\nAuthentication=BasicAuthentication\nUser=<technical user>\nPassword=<password>\n\nName=PartnerApi\nType=HTTP\nURL=https://partner.example.com/api\nProxyType=Internet\nAuthentication=OAuth2ClientCredentials\nclientId=<client id>\nclientSecret=<client secret>\ntokenServiceURL=https://partner.example.com/oauth/token"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "HTTP Destinations (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/42a0e6b966924f2e902090bdf435e1b2.html"
+        },
+        {
+          "title": "No Authentication (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/699f0d10fdaf41a8b92367036a7ed1ff.html"
+        },
+        {
+          "title": "Basic Authentication (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/4af3980f96fc467a8f0edad2c7f23f2f.html"
+        },
+        {
+          "title": "Client Certificate Authentication (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/4e13a04147314e8e9e54321f25d93fdc.html"
+        },
+        {
+          "title": "Server Certificate Authentication (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/e75d7f15b808428e87ae70f494da0b42.html"
+        },
+        {
+          "title": "OAuth Client Credentials Authentication (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/4e1d742a3d45472d83b411e141729795.html"
+        },
+        {
+          "title": "OAuth Password Authentication (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/452357cdd82a4c0ba6095b36c0057526.html"
+        },
+        {
+          "title": "OAuth with X.509 Client Certificates (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/2c162aaa9e464480b2307879d1b865f5.html"
+        }
+      ]
+    },
+    {
+      "id": "user-propagation-auth-types",
+      "level": "basic",
+      "title": "Which HTTP destination authentication types propagate the user, and when do you use each (principal propagation, OAuth SAML bearer assertion, OAuth user token exchange, OAuth JWT bearer, SAML assertion, SAP assertion SSO)?",
+      "description": "These types pass the identity of the logged-on business user to the target system, enabling single sign-on, and the Destination service automates most of the token handling. PrincipalPropagation: forwards the identity of the cloud user to the Cloud Connector and from there to the target on-premise system, so the user's identity is provided without a manual logon. It applies only to on-premise connectivity: ProxyType must be OnPremise, and the URL is the virtual URL of the protected on-premise application. OAuth2SAMLBearerAssertion: calls an OAuth-protected remote system or API and propagates a user ID; the Destination service constructs and sends the SAML assertion to the token service (tokenServiceURL, with a {tenant} placeholder for the Common URL type) and retrieves and caches the token. Proxy type Internet or OnPremise; important properties include audience, clientKey and tokenServiceUser. It is also the type used for cloud-to-cloud principal propagation. OAuth2UserTokenExchange: when a logged-on user's application calls another application and must pass the user context, the user token is handed to the authorization server and exchanged for another access token that contains the user and tenant context and the scopes needed for the target; the Destination service performs these steps automatically. OAuth2JWTBearer: similar, the initial user token is passed to the OAuth server as input to get an access token for calling another application with the user context, again done automatically by the Destination service. SAMLAssertion: the Destination service generates a SAML 2.0 assertion and returns it to the application (instead of exchanging it for an OAuth token); for SAP on-premise systems, it is supported as of SAP S/4HANA (on-premise) 2020. SAPAssertionSSO exists only in the Neo environment and is deprecated: it generated an SAP assertion ticket for the logged-on user (user IDs must be identical on both sides), and SAP recommends principal propagation instead. The current guide also lists newer types such as OAuth refresh token, OAuth authorization code, OAuth technical user propagation and OAuth token exchange authentication.",
+      "keyPoints": [
+        "PrincipalPropagation: user identity via the Cloud Connector to on-premise systems; OnPremise only; virtual URL.",
+        "OAuth2SAMLBearerAssertion: Destination service builds the SAML assertion and gets an OAuth token; also used cloud-to-cloud.",
+        "OAuth2UserTokenExchange: exchanges the user token for a token for the target app (user + tenant context, scopes).",
+        "OAuth2JWTBearer: user token as input to the OAuth server to call another app with the user context.",
+        "SAMLAssertion: returns a generated SAML 2.0 assertion (SAP S/4HANA on-premise 2020+).",
+        "SAPAssertionSSO: Neo-only and deprecated; use principal propagation instead."
+      ],
+      "examples": [
+        {
+          "title": "Principal propagation and SAML bearer destinations",
+          "language": "ini",
+          "code": "Name=S4OnPremSSO\nType=HTTP\nURL=http://<virtual host>:<virtual port>\nProxyType=OnPremise\nAuthentication=PrincipalPropagation\n\nName=CloudSystemSSO\nType=HTTP\nURL=https://<cloud system>/odata\nProxyType=Internet\nAuthentication=OAuth2SAMLBearerAssertion\naudience=<audience of the target>\nclientKey=<client key>\ntokenServiceURL=https://<cloud system>/oauth/token\ntokenServiceUser=<user>\ntokenServicePassword=<password>"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "HTTP Destinations (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/42a0e6b966924f2e902090bdf435e1b2.html"
+        },
+        {
+          "title": "Principal Propagation SSO Authentication for HTTP (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/73194cc419894433994c5f0444b4c6a1.html"
+        },
+        {
+          "title": "OAuth SAML Bearer Assertion Authentication (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/c69ea6aacd714ad2ae8ceb5fc3ceea56.html"
+        },
+        {
+          "title": "OAuth User Token Exchange Authentication (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/e3c333f9de6245fca326993f2397c13a.html"
+        },
+        {
+          "title": "OAuth JWT Bearer Authentication (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/283cd2d1c72147a18c69daf681650f07.html"
+        },
+        {
+          "title": "SAML Assertion Authentication (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/d81e1683bd434823abf3ceefc4ff157f.html"
+        },
+        {
+          "title": "SAP Assertion SSO Authentication (Neo environment, SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/b865ed651e414196b39f8922db2122c7/754bb467759c420489525333ae3ef15b.html"
+        },
+        {
+          "title": "Cloud to Cloud (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/CP_CONNECTIVITY/cca91383641e40ffbe03bdc78f00f681/65b11d4ed333450ebebb8a2e25e805b7.html"
+        }
+      ]
+    }
+  ]
+}

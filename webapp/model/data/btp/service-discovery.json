@@ -1,0 +1,38 @@
+{
+  "topicId": "service-discovery",
+  "title": "Service Discovery and Management",
+  "questions": [
+    {
+      "id": "service-discovery-purpose",
+      "level": "basic",
+      "title": "What are the purpose and mission of Service Discovery and Management?",
+      "pending": true,
+      "description": "",
+      "keyPoints": [],
+      "examples": [],
+      "assignment": null,
+      "resources": [
+        {
+          "title": "BTP Kernel Services (SAP-internal)",
+          "url": "https://pages.github.tools.sap/kernelservices/"
+        }
+      ]
+    },
+    {
+      "id": "service-discovery-key-functions",
+      "level": "basic",
+      "title": "What are the key functions of Service Discovery and Management?",
+      "pending": true,
+      "description": "",
+      "keyPoints": [],
+      "examples": [],
+      "assignment": null,
+      "resources": [
+        {
+          "title": "BTP Kernel Services (SAP-internal)",
+          "url": "https://pages.github.tools.sap/kernelservices/"
+        }
+      ]
+    }
+  ]
+}

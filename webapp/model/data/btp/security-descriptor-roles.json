@@ -1,0 +1,215 @@
+{
+  "topicId": "security-descriptor-roles",
+  "title": "Security descriptor, roles & JWT",
+  "questions": [
+    {
+      "id": "xs-security-json",
+      "level": "basic",
+      "title": "How do you set up the application security descriptor (xs-security.json): scopes and role templates?",
+      "description": "The application security descriptor, xs-security.json, defines the application-based security artifacts that are the building blocks for authorizations; you use it to create the application's xsuaa service instance. xsappname is the name of the application the security description applies to (letters, digits, -, _, /, \\, max 100 characters). tenant-mode defines how the tenants' OAuth clients get their secrets: dedicated (default, a separate secret per subaccount), shared (the same secret in all subaccounts, used by the application plan for multitenancy) or external. scopes is an array of scopes, each with a name and description, describing the authorizations the application needs to execute functions such as viewing, editing or deleting. Local (application-specific) scopes must be prefixed with $XSAPPNAME, which is replaced at runtime with the application name, for example $XSAPPNAME.Display; they are checked by the application's approuter or programmatically in the application. Scopes can be granted to other applications with granted-apps (user scenarios) or grant-as-authority-to-apps (client-credentials scenarios), and foreign scopes are referenced as $XSAPPNAME(<service_plan>,<xsappname>).<scope>. attributes define user-specific values (name, description, valueType string, int or date) that restrict data access, for example Country or CostCenter. role-templates describe one or more roles: each has a name, description, scope-references (the scopes the role contains), optional attribute-references (with optional default-values) and default-role-name; role templates with defaults for all attribute references create default roles at deployment. Optionally, role-collections defines role collections with predefined roles that administrators can assign during initial setup (referencing role templates via role-template-references), and oauth2-configuration sets options such as token-validity and redirect-uris.",
+      "keyPoints": [
+        "xs-security.json defines the app's security artifacts and is used to create its xsuaa instance.",
+        "xsappname: the application name; tenant-mode: dedicated (default), shared (multitenant), external.",
+        "scopes: functional authorizations, prefixed $XSAPPNAME (for example $XSAPPNAME.Display).",
+        "attributes: user-specific values (Country, CostCenter) with a valueType.",
+        "role-templates: name, scope-references, attribute-references, default-role-name.",
+        "Optional: role-collections (predefined), granted-apps / grant-as-authority-to-apps, oauth2-configuration."
+      ],
+      "examples": [
+        {
+          "title": "xs-security.json",
+          "language": "json",
+          "code": "{\n  \"xsappname\": \"node-hello-world\",\n  \"tenant-mode\": \"dedicated\",\n  \"scopes\": [\n    { \"name\": \"$XSAPPNAME.Display\", \"description\": \"display\" },\n    { \"name\": \"$XSAPPNAME.Edit\", \"description\": \"edit\" }\n  ],\n  \"attributes\": [\n    { \"name\": \"Country\", \"description\": \"Country\", \"valueType\": \"string\" }\n  ],\n  \"role-templates\": [\n    {\n      \"name\": \"Viewer\",\n      \"description\": \"View all books\",\n      \"default-role-name\": \"Viewer: Authorized to Read All Books\",\n      \"scope-references\": [\"$XSAPPNAME.Display\"],\n      \"attribute-references\": [ { \"name\": \"Country\", \"default-values\": [\"USA\", \"Germany\"] } ]\n    },\n    {\n      \"name\": \"Editor\",\n      \"description\": \"Edit books\",\n      \"scope-references\": [\"$XSAPPNAME.Edit\"]\n    }\n  ],\n  \"role-collections\": [\n    { \"name\": \"UserViewerRC\", \"description\": \"User Viewer Role Collection\", \"role-template-references\": [\"$XSAPPNAME.Viewer\"] }\n  ]\n}"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Application Security Descriptor Configuration Syntax (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/517895a9612241259d6941dbf9ad81cb.html"
+        },
+        {
+          "title": "Adding Authentication and Authorization (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/419ae2ef1ddd49dca9eb65af2d67c6ec.html"
+        },
+        {
+          "title": "Authorization Entities (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/5d8ed75b5c72432cb0e4d846f411e0cd.html"
+        }
+      ]
+    },
+    {
+      "id": "role",
+      "level": "basic",
+      "title": "What is a role, and how do you create it?",
+      "description": "A role is an instance of a role template: you build a role based on a role template and assign the role to a role collection. Role templates refer to scopes and attributes and contain the authorizations for activities such as viewing, editing or deleting data; the user roles are derived from the role templates defined in the xs-security.json of applications that were registered as OAuth 2.0 clients at the User Account and Authentication service during deployment. If a role template contains only application-specific local scopes, it can be instantiated without the administrator doing anything: a default role is created at deployment. The same happens when the role template provides default values for each attribute reference. If a role template contains attributes that are subject to customization, the administrator must create different versions of the role and fill in the attribute values, for example one role where Country equals UK and another where Country equals USA; otherwise the roles have empty attributes. Attribute values can be static (stored in the role), taken from the identity provider (dynamically referenced from the access token, such as a group), or unrestricted. Administrators create and delete roles, based on an application's role templates, in the SAP BTP cockpit, with the btp CLI, the REST API of the SAP Authorization and Trust Management service, or the Terraform provider. In the cockpit you can display the roles, scopes, attributes and role templates of an application.",
+      "keyPoints": [
+        "A role is an instance of a role template; roles are added to role collections.",
+        "Role templates (from xs-security.json) contain scopes and attribute references.",
+        "Default roles are created automatically for templates with only local scopes or with default attribute values.",
+        "Templates with customizable attributes need administrator-created roles with values (for example Country = UK).",
+        "Attribute values: static, from the IdP token, or unrestricted.",
+        "Created by administrators in the cockpit, btp CLI, REST API or Terraform."
+      ],
+      "examples": [
+        {
+          "title": "One role template, two roles",
+          "language": "text",
+          "code": "Role template \"Viewer\" (scope $XSAPPNAME.Display, attribute Country)\n├── Role \"Viewer UK\"   Country = UK\n└── Role \"Viewer USA\"  Country = USA"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Authorization Entities (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/5d8ed75b5c72432cb0e4d846f411e0cd.html"
+        },
+        {
+          "title": "Roles and Role Collections (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/14a877c6e2f14832999df500ffa6e05e.html"
+        },
+        {
+          "title": "Building Roles and Role Collections for Applications (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/eaa6a26291914b348e875a00b6beb729.html"
+        },
+        {
+          "title": "Application Security Descriptor Configuration Syntax (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/517895a9612241259d6941dbf9ad81cb.html"
+        },
+        {
+          "title": "Security Administration: Managing Authentication and Authorization (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/1ff47b2d980e43a6b2ce294352333708.html"
+        }
+      ]
+    },
+    {
+      "id": "role-collection",
+      "level": "basic",
+      "title": "What is a role collection, and how do you create it?",
+      "description": "A role collection is a business-level group of one or more roles, which is what you actually assign to users. Roles are assigned to role collections, and role collections are assigned to users, or to user groups if an identity provider provides the users; technical roles at application level are aggregated into business-level role collections for large-scale scenarios. A role collection can contain roles from different applications, and as a reusable element it contains all authorizations a user group needs. To create one in the SAP BTP cockpit: go to the global account or subaccount, choose Security > Role Collections, then Create (or Copy, to start from an existing one; the copy includes all roles but not the users or user groups), enter a name and description and save. Afterwards, add or remove roles, and assign users or user groups: in the Users section choose Edit and enter the user ID, the identity provider (trust configuration) and the e-mail address. You can also map role collections to user groups or other attributes of a custom identity provider, so that users get the authorizations automatically through their group membership. Developers can also deliver role collections with predefined roles in the role-collections section of xs-security.json, which administrators can assign during the initial setup. Remember that authorizations are stored in the user's session at logon, so new assignments take effect after the user logs on again.",
+      "keyPoints": [
+        "A role collection groups one or more roles; it is what gets assigned to users or user groups.",
+        "Can contain roles from several applications.",
+        "Create in the cockpit: Security > Role Collections > Create (or Copy; copies don't include users).",
+        "Then add roles and assign users (user ID, identity provider, e-mail) or user groups.",
+        "Can be mapped to IdP user groups; developers can predefine collections in xs-security.json.",
+        "Assignment changes take effect after the next logon."
+      ],
+      "examples": [
+        {
+          "title": "From roles to users",
+          "language": "text",
+          "code": "Role \"Viewer UK\" (app A) ─┐\nRole \"Approver\"  (app B) ─┴─> Role collection \"UK Managers\"\n                                   ├── user alice@example.com (IdP: my-ias)\n                                   └── user group \"uk-managers\" (mapped from the IdP)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Roles and Role Collections (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/14a877c6e2f14832999df500ffa6e05e.html"
+        },
+        {
+          "title": "Define a Role Collection (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/4b20383efab341f181becf0a947a5498.html"
+        },
+        {
+          "title": "Assign Users to Role Collections (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/c5766765bda74ad59fe656977c8fa4d6.html"
+        },
+        {
+          "title": "Map Role Collections to User Groups (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/51acfc82c0c54db59de0a528f343902c.html"
+        },
+        {
+          "title": "What Is the SAP Authorization and Trust Management Service? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/649961f8d4ad463daca33b3a20deba4c.html"
+        }
+      ]
+    },
+    {
+      "id": "scopes-in-code",
+      "level": "basic",
+      "title": "How do you use the defined scopes and attributes in code?",
+      "description": "Scopes are checked in two places: by the application router for each route, and programmatically in the backend. In the approuter, a route's scope property lists the scopes a user needs to access the target path, for example \"scope\": [\"$XSAPPNAME.Display\"]. Because the backend microservices stay directly reachable, they must validate the JWT and check scopes themselves. In Node.js, SAP's @sap/xssec library does this: createSecurityContext(xsuaaService, { req }) validates the token of the request (an invalid token raises a ValidationError, usually answered with 401) and returns a security context. On an XsuaaSecurityContext, checkLocalScope(\"Display\") checks whether the token contains <xsappname>.Display, where the xsappname comes from the credentials of the bound xsuaa instance, while checkScope expects the full scope name including the xsappname prefix; if the check fails, answer with 403. The context's token gives access to claims, for example token.givenName, token.scopes, and token.xsUserAttributes (the xs.user.attributes claim with the user's attribute values, such as Country). @sap/xssec also offers a passport strategy (XssecPassportStrategy), where the context is available as req.authInfo. In CAP, authorization is declarative: @requires: 'Viewer' restricts a service, entity or action to a role, and @restrict defines fine-grained grants with instance filters, for example based on user attributes ($user.country). In handlers, req.user.is('admin') checks a role and req.user.attr gives the user's attributes. The command cds add xsuaa creates the XSUAA configuration file xs-security.json and adds the service and required dependencies to the project.",
+      "keyPoints": [
+        "Approuter: route scope property, for example [\"$XSAPPNAME.Display\"].",
+        "Backends must validate the JWT and check scopes too (they are directly reachable).",
+        "@sap/xssec: createSecurityContext(...), then checkLocalScope(\"Display\") (adds the xsappname prefix) or checkScope(fullName).",
+        "Claims via the context's token: givenName, scopes, xsUserAttributes (xs.user.attributes).",
+        "CAP: @requires / @restrict in the model; req.user.is('role'), req.user.attr in handlers.",
+        "Invalid token -> 401; missing scope -> 403."
+      ],
+      "examples": [
+        {
+          "title": "Express middleware with @sap/xssec",
+          "language": "javascript",
+          "code": "const { createSecurityContext, XsuaaService, SECURITY_CONTEXT, errors: { ValidationError } } = require(\"@sap/xssec\");\n\nconst authService = new XsuaaService(credentials); // xsuaa credentials, for example via @sap/xsenv\n\napp.use(async (req, res, next) => {\n  try {\n    req[SECURITY_CONTEXT] = await createSecurityContext(authService, { req });\n    next();\n  } catch (e) {\n    res.sendStatus(e instanceof ValidationError ? 401 : 500);\n  }\n});\n\napp.get(\"/books\", (req, res) => {\n  const ctx = req[SECURITY_CONTEXT];\n  if (!ctx.checkLocalScope(\"Display\")) {\n    return res.sendStatus(403);\n  }\n  const country = ctx.token.xsUserAttributes?.Country;\n  res.send(`Hello ${ctx.token.givenName}, country: ${country}`);\n});"
+        },
+        {
+          "title": "CAP: declarative and programmatic checks",
+          "language": "javascript",
+          "code": "// in CDS:\n// service CatalogService @(requires: 'Viewer') { ... }\n// entity Orders @(restrict: [{ grant: 'READ', to: 'Auditor', where: 'country = $user.country' }]) { ... }\n\n// in a handler:\nsrv.before(\"DELETE\", \"Books\", (req) => {\n  req.user.is(\"admin\") || req.reject(403);\n});"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "@sap/xssec README (npm package, via jsDelivr)",
+          "url": "https://cdn.jsdelivr.net/npm/@sap/xssec/README.md"
+        },
+        {
+          "title": "CAP-level Authorization (CAP documentation)",
+          "url": "https://cap.cloud.sap/docs/guides/security/authorization"
+        },
+        {
+          "title": "Authentication (CAP Node.js documentation)",
+          "url": "https://cap.cloud.sap/docs/node.js/authentication"
+        },
+        {
+          "title": "Routing Configuration File (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/c103fb414988447ead2023f768096dcc.html"
+        },
+        {
+          "title": "@sap/approuter README (npm package, via jsDelivr)",
+          "url": "https://cdn.jsdelivr.net/npm/@sap/approuter/README.md"
+        }
+      ]
+    },
+    {
+      "id": "jwt-structure",
+      "level": "basic",
+      "title": "What is a JWT, and what is its structure?",
+      "description": "A JSON Web Token (JWT), defined in RFC 7519, is an open standard that defines a compact token format for transmitting information between parties as a JSON object. The information can be verified and trusted because it is digitally signed, either with a secret (HMAC algorithm) or with a public/private key pair using RSA. A JWT has three parts: a header, a payload with the claims, and the digital signature. The header and payload are base64-encoded JSON objects, which libraries such as @sap/xssec decode; the payload contains the claims, such as issuer, subject, expiration time and consumer-defined information. On SAP BTP, the JWT issued by XSUAA is signed with the private key of the authorization server. The application router and each microservice have a trust relationship with it: when they are bound to the xsuaa instance, the service broker writes credentials into their VCAP_SERVICES environment variable, which include the public key used to verify the signature; @sap/xssec verifies tokens against the public keys from the authorization server's JWKS (JSON Web Key Set). Typical claims of an XSUAA token, as exposed by @sap/xssec, are the issuer, subject, audiences, client ID (azp), grant type, given and family name, email, origin (the identity provider), the expiration (exp) and optional not-before (nbf) times, scope (the user's scopes, prefixed with the xsappname), zid (the zone ID, which identifies the tenant), ext_attr (for example the subaccount ID and service instance ID), and xs.user.attributes (the user's attribute values). The approuter keeps the JWT in the user session, forwards it to backends in the Authorization header, never gives it to the browser, and refreshes it before it expires.",
+      "keyPoints": [
+        "JWT (RFC 7519): a compact, digitally signed JSON token format (HMAC or RSA).",
+        "Structure: header + payload (claims) + signature; header and payload are base64-encoded JSON.",
+        "XSUAA signs tokens with its private key; apps verify them with the public key from their binding (VCAP_SERVICES / JWKS).",
+        "Common claims: iss, sub, aud, azp, exp, nbf, origin, given/family name, email.",
+        "SAP-specific claims: scope (xsappname-prefixed), zid (tenant zone), ext_attr, xs.user.attributes.",
+        "The approuter keeps the JWT in the session and forwards it in the Authorization header."
+      ],
+      "examples": [
+        {
+          "title": "The parts of a JWT (decoded, simplified)",
+          "language": "text",
+          "code": "header:    { \"alg\": \"<signing algorithm>\", ... }\npayload:   {\n             \"iss\": \"<authorization server>\",\n             \"sub\": \"<user id>\",\n             \"aud\": [\"<audience>\"],\n             \"exp\": 1700000000,\n             \"zid\": \"<zone id / tenant>\",\n             \"origin\": \"<identity provider>\",\n             \"scope\": [\"node-hello-world.Display\"],\n             \"xs.user.attributes\": { \"Country\": [\"USA\"] }\n           }\nsignature: signed with the XSUAA private key, verified with its public key"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "What Is the SAP Authorization and Trust Management Service? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/649961f8d4ad463daca33b3a20deba4c.html"
+        },
+        {
+          "title": "@sap/xssec README (npm package, via jsDelivr)",
+          "url": "https://cdn.jsdelivr.net/npm/@sap/xssec/README.md"
+        },
+        {
+          "title": "@sap/approuter README (npm package, via jsDelivr)",
+          "url": "https://cdn.jsdelivr.net/npm/@sap/approuter/README.md"
+        }
+      ]
+    }
+  ]
+}

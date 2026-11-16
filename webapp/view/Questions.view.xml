@@ -28,10 +28,18 @@
               </HBox>
               <HBox alignItems="Center" class="prNoShrink">
               <ObjectStatus
-                text="{parts: [{path: 'topic>level'}, {path: 'i18n>levelElementary'}, {path: 'i18n>levelBasic'}], formatter: '.formatter.levelText'}"
+                text="{parts: [{path: 'topic>level'}, {path: 'i18n>levelElementary'}, {path: 'i18n>levelBasic'}, {path: 'i18n>levelAdvanced'}], formatter: '.formatter.levelText'}"
                 state="{path: 'topic>level', formatter: '.formatter.levelState'}"
                 inverted="true"
                 visible="{= !!${topic>level} }"
+                class="sapUiSmallMarginBegin"
+              />
+              <ObjectStatus
+                text="{i18n>pendingLabel}"
+                icon="sap-icon://pending"
+                state="None"
+                inverted="true"
+                visible="{= !!${topic>pending} }"
                 class="sapUiSmallMarginBegin"
               />
               <ObjectStatus

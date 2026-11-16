@@ -1,0 +1,82 @@
+{
+  "topicId": "master-data-integration",
+  "title": "Master Data Integration",
+  "questions": [
+    {
+      "id": "mdi-motivation",
+      "level": "basic",
+      "title": "What is the Master Data Integration service, and what is the motivation behind it?",
+      "description": "SAP Master Data Integration (MDI) is a multitenant cloud service in the Intelligent Enterprise that acts as a central master data hub. The motivation is consistency: when many applications each keep their own master data (business partners, cost centers, products and so on), their views drift apart. With MDI, applications synchronize their local master data databases with the master data database of the central hub, and in a typical setup there is exactly one MDI tenant per landscape, which helps ensure that all applications in that landscape arrive at a consistent view of master data. MDI focuses exclusively on the integration aspect, achieved by replicating master data records: applications do an initial load of master data and afterwards stay in sync with MDI's database. Administrators control which data is synchronized with which applications, monitor the replication, and comply with data protection and privacy regulations. MDI doesn't support arbitrary objects, only specific master data objects that follow the SAP One Domain Model (ODM), the common language between applications, for example sap.odm.businesspartner.BusinessPartner, sap.odm.finance.accounting.ProfitCenter or sap.odm.assetmanagement.Equipment. Master data processes such as consolidation, data quality control and central governance are out of MDI's scope; they can be implemented with SAP Master Data Governance, cloud edition, which integrates with MDI. Non-SAP and SAP on-premise applications can be integrated through the Cloud Integration capability of SAP Integration Suite, which has special support for MDI.",
+      "keyPoints": [
+        "Based on the public SAP BTP service. SAP-internal Kernel Services may differ.",
+        "A multitenant central master data hub; applications sync their local master data with it.",
+        "Typically one MDI tenant per landscape, so all applications share a consistent view of master data.",
+        "Only integration (replication: initial load, then stay in sync), with controlled distribution and monitoring.",
+        "Works with SAP One Domain Model objects (for example sap.odm.businesspartner.BusinessPartner).",
+        "Governance, consolidation and data quality: SAP Master Data Governance; non-SAP systems via SAP Integration Suite."
+      ],
+      "examples": [
+        {
+          "title": "Hub instead of point-to-point",
+          "language": "text",
+          "code": "Without MDI:  App A <-> App B <-> App C <-> App A   (point-to-point, diverging copies)\n\nWith MDI:          App A\n                     |\n   App B  ---  MDI tenant (one per landscape)  ---  App C\n                     |\n            SAP Master Data Governance (governance, on top)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "What Is Master Data Integration? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/SAP_MASTER_DATA_INTEGRATION/c7713d6177ad479d9ea00958db9f2f81/dab76d5506a44c8e85f314fc3be30e13.html"
+        },
+        {
+          "title": "Integration Models (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/SAP_MASTER_DATA_INTEGRATION/c7713d6177ad479d9ea00958db9f2f81/8882bf982aca461d89b15afe19483edb.html"
+        },
+        {
+          "title": "Integrating with SAP Master Data Governance (MDG) (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/SAP_MASTER_DATA_INTEGRATION/c7713d6177ad479d9ea00958db9f2f81/a9ef55b0339f4a88bc461edd5b78d75e.html"
+        }
+      ]
+    },
+    {
+      "id": "mdi-integration",
+      "level": "basic",
+      "title": "How do you integrate with the MDI service to support an aligned data exchange across SAP applications?",
+      "description": "1. Create an MDI tenant. You need an SAP BTP global enterprise account (trial accounts and free tier aren't supported). Create a subaccount in a region where MDI is available, and subscribe to SAP Master Data Integration Tenant in it. Each subaccount can have only one MDI tenant, and a tenant isolates its data and configuration from other tenants. If you don't subscribe, a tenant is created automatically with the first service instance, but SAP recommends subscribing first for explicit control of the tenant lifecycle. SAP's best practices: one MDI tenant per landscape (for example separate tenants for development, test and production, to avoid unintended data sharing), and a subaccount used exclusively for the MDI tenant. 2. Connect each application. For every application you connect, create its own dedicated service instance of Master Data Integration in the subaccount; sharing one instance between applications is not supported. Choose the plan: sap-integration for SAP-branded cloud applications (for example SAP S/4HANA Cloud or SAP SuccessFactors Employee Central), or s4hana-onpremise for SAP S/4HANA systems (only visible in BTPEA, CPEA or Pay-As-You-Go accounts). Examples of applications that integrate this way include SAP S/4HANA Cloud (public and private edition), SAP S/4HANA on-premise, SAP Master Data Governance cloud edition, SAP Ariba, SAP Customer Experience, SAP Fieldglass and SAP Subscription Billing. 3. Define distribution models. Distribution models contain the distribution-relevant settings in a central place, maintained in the Business Data Orchestration UI and replicated to the clients when activated, instead of heterogeneous point-to-point logic. A model has a name, a description, the object type and its version (from the SAP One Domain Model), the provider and consumer (SAP recommends connecting one provider with one consumer; MDI is always one partner), and filters: object selection filters decide which records are replicated to a downstream client, and data scope filters decide which parts of the records are replicated.",
+      "keyPoints": [
+        "Based on the public SAP BTP service. SAP-internal Kernel Services may differ.",
+        "Tenant: enterprise global account, a dedicated subaccount, subscribe to SAP Master Data Integration Tenant (one per subaccount).",
+        "Best practice: one MDI tenant per landscape (dev, test, prod).",
+        "Per application: its own Master Data Integration service instance (plans sap-integration or s4hana-onpremise).",
+        "Distribution models in Business Data Orchestration: object type/version, provider, consumer, filters.",
+        "Object selection filters (which records) and data scope filters (which parts)."
+      ],
+      "examples": [
+        {
+          "title": "Setup checklist",
+          "language": "text",
+          "code": "Subaccount \"mdi-prod\" (only for MDI)\n  - subscription: SAP Master Data Integration Tenant\n  - service instance \"mdi-s4\"  plan s4hana-onpremise  -> SAP S/4HANA\n  - service instance \"mdi-sf\"  plan sap-integration    -> SAP SuccessFactors Employee Central\nBusiness Data Orchestration:\n  distribution model: sap.odm.businesspartner.BusinessPartner, provider S/4HANA -> consumer, filters"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Creating Tenants (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/SAP_MASTER_DATA_INTEGRATION/c7713d6177ad479d9ea00958db9f2f81/6e3b768903744f04a98915c3a3ab2223.html"
+        },
+        {
+          "title": "Connecting Applications via Service Instances (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/SAP_MASTER_DATA_INTEGRATION/c7713d6177ad479d9ea00958db9f2f81/e01bb46b7e09427aa37ac2da40198cf2.html"
+        },
+        {
+          "title": "Distribution Models (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/SAP_MASTER_DATA_INTEGRATION/c7713d6177ad479d9ea00958db9f2f81/9254f0e3dd77420b90f573a7fcbc88e2.html"
+        },
+        {
+          "title": "What Is Master Data Integration? (SAP Help Portal)",
+          "url": "https://help.sap.com/docs/SAP_MASTER_DATA_INTEGRATION/c7713d6177ad479d9ea00958db9f2f81/dab76d5506a44c8e85f314fc3be30e13.html"
+        }
+      ]
+    }
+  ]
+}

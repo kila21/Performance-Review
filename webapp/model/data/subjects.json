@@ -1,4 +1,5 @@
 [
   { "id": "javascript", "title": "JavaScript" },
-  { "id": "sapui5", "title": "SAPUI5" }
+  { "id": "sapui5", "title": "SAPUI5" },
+  { "id": "btp", "title": "SAP BTP" }
 ]
