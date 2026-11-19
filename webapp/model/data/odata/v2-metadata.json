@@ -1,0 +1,96 @@
+{
+  "topicId": "v2-metadata",
+  "title": "Metadata & glossary",
+  "questions": [
+    {
+      "id": "service-metadata-document",
+      "level": "elementary",
+      "title": "What is the Service Metadata Document in OData V2, and what is its purpose?",
+      "description": "The Service Metadata Document (metadata document) describes the data model exposed by an OData service: the structure and organization of all the resources it exposes as HTTP endpoints. It describes that model in terms of the Entity Data Model (EDM), written in the XML language CSDL (Conceptual Schema Definition Language) and packed in the EDMX format. Its purpose is to let clients discover the shape of a service: the structure of its resources, the known links between resources and the Service Operations it exposes. By convention it is located at the $metadata address relative to the service root, and a client gets it with a plain HTTP GET. Since only an XML serialization of EDM schemas exists in V2, no content-type negotiation is supported for this resource. OData adds its own CSDL annotations in the OData metadata namespace, for example DataServiceVersion (the version of the annotations used) and IsDefaultEntityContainer.",
+      "keyPoints": [
+        "Describes the data model (structure and organization of all resources) of the service.",
+        "Written in CSDL (EDM in XML), packaged as EDMX.",
+        "Lets clients discover entity types, links between resources and Service Operations.",
+        "Address: <service root>/$metadata, fetched with GET; XML only in V2, no format negotiation.",
+        "OData-specific CSDL annotations (DataServiceVersion, IsDefaultEntityContainer, HasStream, MimeType, HttpMethod) live in the OData metadata namespace."
+      ],
+      "examples": [
+        {
+          "title": "Abbreviated metadata document of the odata.org demo service",
+          "language": "xml",
+          "code": "GET https://services.odata.org/OData/OData.svc/$metadata\n\n<edmx:Edmx Version=\"1.0\" xmlns:edmx=\"http://schemas.microsoft.com/ado/2007/06/edmx\">\n  <edmx:DataServices m:DataServiceVersion=\"2.0\"\n      xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\">\n    <Schema Namespace=\"ODataDemo\" xmlns=\"http://schemas.microsoft.com/ado/2008/09/edm\">\n      <EntityType Name=\"Product\"> ... </EntityType>      <!-- structure of entries -->\n      <ComplexType Name=\"Address\"> ... </ComplexType>    <!-- keyless structured type -->\n      <Association Name=\"Product_Category\"> ... </Association>\n      <EntityContainer Name=\"DemoService\" m:IsDefaultEntityContainer=\"true\">\n        <EntitySet Name=\"Products\" EntityType=\"ODataDemo.Product\" />\n        <AssociationSet Name=\"Products_Category\" Association=\"ODataDemo.Product_Category\"> ... </AssociationSet>\n        <FunctionImport Name=\"GetProductsByRating\" EntitySet=\"Products\"\n                        ReturnType=\"Collection(ODataDemo.Product)\" m:HttpMethod=\"GET\"> ... </FunctionImport>\n      </EntityContainer>\n    </Schema>\n  </edmx:DataServices>\n</edmx:Edmx>"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        },
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        }
+      ]
+    },
+    {
+      "id": "odata-glossary",
+      "level": "elementary",
+      "title": "Explain the core OData V2 glossary terms: Collection, Feed, Entry, Property, Link and Resource.",
+      "description": "OData reuses AtomPub terminology. A Resource is a network-accessible data object or service identified by an IRI. A Collection is a Resource that contains a set of Member Resources; in OData it is represented as an Atom Feed or as an array of JSON objects, and Feed is the name of that representation. An Entry is a member of a Collection, represented as an Atom Entry Document or a JSON object. Property is the generic term for a declared or dynamic property of an Entry: a Declared Property is statically declared on an Entity or Complex Type, while a Dynamic Property is an extra nullable property an Entry of an open type may carry, without a representation in the metadata document. A Link describes an association between two Entries (one direction of it), and a Navigation Property is the property of an Entry that represents such a Link to related Entries. A Media Resource is a member of a Collection with a non-Atom/JSON representation (typically a BLOB), described by a Media Link Entry. Finally, the Service Document lists the Collections of a service, while the Service Metadata Document describes its data model.",
+      "keyPoints": [
+        "Resource: anything addressable by an IRI.",
+        "Collection = set of Entries; its Atom/JSON representation is a Feed.",
+        "Entry = one member of a Collection (a structured record).",
+        "Property: declared (in metadata) or dynamic (extra, only on open types).",
+        "Link = association between Entries; Navigation Property = the property that represents it.",
+        "Media Resource (BLOB) + Media Link Entry (its structured description).",
+        "Service Document lists Collections; Service Metadata Document describes the model."
+      ],
+      "examples": [
+        {
+          "title": "Terms mapped to URIs of the demo service",
+          "language": "text",
+          "code": "https://services.odata.org/OData/OData.svc/             -> Service Document\nhttps://services.odata.org/OData/OData.svc/$metadata    -> Service Metadata Document\nhttps://services.odata.org/OData/OData.svc/Products     -> Collection (Feed of Product Entries)\nhttps://services.odata.org/OData/OData.svc/Products(1)  -> Entry\n.../Products(1)/Name                                    -> Property of an Entry\n.../Products(1)/Category                                -> follows a Link (Navigation Property)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Terminology (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/terminology/"
+        },
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        }
+      ]
+    },
+    {
+      "id": "structured-vs-primitive",
+      "level": "elementary",
+      "title": "What are the two kinds of types in OData, structured and primitive, and how do they differ?",
+      "description": "OData data is built from two kinds of types. Structured types are composed of named, typed properties: entity types (structured records with a key, such as Customer or Product) and complex types (structured types with a list of properties but no key, which can therefore only exist as a property of a containing entity or as a temporary value). Primitive types are the scalar types of the EDM type system, such as Edm.String, Edm.Int32, Edm.Boolean or Edm.DateTime; each has a defined literal form for use in URIs and HTTP headers, and its own representation in Atom and JSON payloads. Every entry is a structured record with a key that has a list of properties of primitive or complex types, so properties are either primitive values or nested structured values.",
+      "keyPoints": [
+        "Structured: entity types (with key) and complex types (no key).",
+        "Primitive: scalar Edm.* types (Edm.String, Edm.Int32, Edm.Boolean, ...).",
+        "A property's type is either primitive or complex.",
+        "Primitive types have a fixed literal form in URIs and a defined format in Atom/JSON payloads."
+      ],
+      "examples": [
+        {
+          "title": "One entity type using both kinds",
+          "language": "xml",
+          "code": "<EntityType Name=\"Supplier\">                  <!-- structured: entity type (has a key) -->\n  <Key><PropertyRef Name=\"ID\" /></Key>\n  <Property Name=\"ID\"      Type=\"Edm.Int32\" Nullable=\"false\" />   <!-- primitive -->\n  <Property Name=\"Name\"    Type=\"Edm.String\" />                   <!-- primitive -->\n  <Property Name=\"Address\" Type=\"ODataDemo.Address\" />            <!-- structured: complex type -->\n</EntityType>"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        }
+      ]
+    }
+  ]
+}

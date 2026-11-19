@@ -1,0 +1,122 @@
+{
+  "topicId": "v4-annotations",
+  "title": "Vocabularies & annotations",
+  "questions": [
+    {
+      "id": "v4-annotations-with-model",
+      "level": "basic",
+      "title": "How are annotations supplied along with the OData V4 data model?",
+      "description": "Annotations add information to the model beyond its structure, for example that a property is read-only, or how to label and display it in a UI. An applied annotation consists of a term (the namespace-qualified name of what is being said), a target (the model or instance element it applies to) and a value. Metadata annotations are written in CSDL: either nested inside the model element they annotate, or in an edm:Annotations element whose Target attribute points to the element, which lets annotations live in a different schema or document than the model. Referenced annotation documents can be pulled in with edmx:Reference and edmx:IncludeAnnotations. Instance annotations are applied to a particular instance in a payload, and override a metadata annotation with the same term. A set of related terms in one namespace is a vocabulary; OASIS publishes Core, Capabilities and Measures, and SAP publishes its own vocabularies (such as UI and Common) in the SAP/odata-vocabularies repository on GitHub. A service should not require clients to understand annotations, and clients should ignore unknown terms.",
+      "keyPoints": [
+        "Annotation = term + target + value.",
+        "Inline in the annotated element, or in <Annotations Target=\"...\"> (also in separate documents).",
+        "edmx:IncludeAnnotations includes annotations from referenced documents.",
+        "Instance annotations in payloads override metadata annotations.",
+        "Vocabulary = set of terms; OASIS (Core, Capabilities, Measures) and SAP (UI, Common, ...)."
+      ],
+      "examples": [
+        {
+          "title": "Inline and external annotations",
+          "language": "xml",
+          "code": "<!-- nested inside the annotated element -->\n<Property Name=\"AmountInTransactionCurrency\" Type=\"Edm.Decimal\">\n  <Annotation Term=\"Measures.ISOCurrency\" Path=\"Currency\" />\n</Property>\n\n<!-- external targeting, possibly in another schema or file -->\n<Annotations Target=\"MySchema.MyEntityType/MyProperty\">\n  <Annotation Term=\"Core.Description\" String=\"Shown as tooltip\" />\n</Annotations>"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "SAP OData Vocabularies (SAP on GitHub)",
+          "url": "https://github.com/SAP/odata-vocabularies"
+        }
+      ]
+    },
+    {
+      "id": "v4-term",
+      "level": "basic",
+      "title": "What is a Term in OData V4, and what are a specialized term and term applicability?",
+      "description": "A term is a named metadata extension: it allows annotating a CSDL element or an OData resource representation with additional data. It is declared with edm:Term, which must have a Name and a Type (a type in scope or a collection of one), and may have a DefaultValue that applies when an annotation gives no value. A term may specialize another term by naming it in BaseTerm; when a specialized term is applied, the base term must also be applied with the same qualifier, up the chain. Applicability is expressed with AppliesTo, a whitespace-separated list of symbolic values such as Property, EntityType, EntitySet or Term that say which model elements the term is meant for. Without AppliesTo the term is unrestricted, and clients should be prepared for any term on any element.",
+      "keyPoints": [
+        "edm:Term: Name + Type (required), DefaultValue optional.",
+        "Specialized term: BaseTerm=\"...\"; the base term must be applied too, with the same qualifier.",
+        "Applicability: AppliesTo=\"Property Term ...\" (symbolic model element names).",
+        "No AppliesTo = may be applied anywhere."
+      ],
+      "examples": [
+        {
+          "title": "A term restricted to properties and terms",
+          "language": "xml",
+          "code": "<Term Name=\"IsURL\" Type=\"Core.Tag\" Nullable=\"false\" DefaultValue=\"true\"\n      AppliesTo=\"Property Term\">\n  <Annotation Term=\"Core.Description\">\n    <String>Properties and terms annotated with this term MUST contain a valid URL</String>\n  </Annotation>\n  <Annotation Term=\"Core.RequiresType\" String=\"Edm.String\" />\n</Term>"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        }
+      ]
+    },
+    {
+      "id": "v4-annotation-qualifier-target",
+      "level": "basic",
+      "title": "What is an Annotation in OData V4, and what are its Qualifier and Target?",
+      "description": "An annotation applies a term to a model element and defines how to calculate the value; it is written as edm:Annotation with a required Term attribute, and its value is a constant expression or a dynamic expression, most often a path to a property. The Qualifier lets the same term be applied several times to the same element, for example a different display name for tablet devices; it is a simple identifier, and the combination of target, term and qualifier identifies an annotation uniquely. The Target is the model element the term is applied to. It can be given indirectly, by nesting the annotation inside the element, or directly, with a target path on an edm:Annotations element such as MySchema.MyEntityType/MyProperty or MySchema.MyEntityContainer/MyEntitySet. Direct targeting lets annotations be defined in a different schema than the element they annotate.",
+      "keyPoints": [
+        "edm:Annotation Term=\"...\" with a constant or dynamic expression as value.",
+        "Qualifier: apply the same term more than once (Qualifier=\"Tablet\").",
+        "Target + term + qualifier identify an annotation uniquely.",
+        "Target: by nesting, or a target path on <Annotations Target=\"...\">."
+      ],
+      "examples": [
+        {
+          "title": "Qualified annotation and target paths",
+          "language": "xml",
+          "code": "<Annotation Term=\"org.example.display.DisplayName\" Path=\"FirstName\" Qualifier=\"Tablet\" />\n\nTarget path examples:\nMySchema.MyEntityType\nMySchema.MyEntityType/MyProperty\nMySchema.MyEntityContainer/MyEntitySet\nMySchema.MyEntityContainer/MySingleton/MyComplexProperty/MyNavigationProperty"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        }
+      ]
+    },
+    {
+      "id": "v4-constant-expressions",
+      "level": "basic",
+      "title": "Which constant expressions can be used as annotation values in OData V4?",
+      "description": "Constant expressions assign a fixed value to an applied term. CSDL defines one per primitive kind: Binary (edm:Binary, base64url), Boolean (edm:Bool), Date (edm:Date), DateTimeOffset (edm:DateTimeOffset), Decimal (edm:Decimal), Duration (edm:Duration), Enumeration Member (edm:EnumMember, the qualified name of a member), Floating-Point Number (edm:Float), Guid (edm:Guid), Integer (edm:Int), String (edm:String) and Time of Day (edm:TimeOfDay). Each can be written in attribute notation, as in Bool=\"true\" on the annotation, or in element notation, as a child element such as <Bool>true</Bool>. The value must follow the literal rules of its type.",
+      "keyPoints": [
+        "Binary, Bool, Date, DateTimeOffset, Decimal, Duration.",
+        "EnumMember, Float, Guid, Int, String, TimeOfDay.",
+        "Attribute notation (Bool=\"true\") or element notation (<Bool>true</Bool>)."
+      ],
+      "examples": [
+        {
+          "title": "The same constant in both notations",
+          "language": "xml",
+          "code": "<Annotation Term=\"org.example.display.ReadOnly\" Bool=\"true\" />\n\n<Annotation Term=\"org.example.display.ReadOnly\">\n  <Bool>true</Bool>\n</Annotation>\n\n<Annotation Term=\"org.example.display.Thumbnail\" Binary=\"T0RhdGE\" />\n<Annotation Term=\"Measures.ISOCurrency\" String=\"USD\" />"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        }
+      ]
+    }
+  ]
+}

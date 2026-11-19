@@ -1,0 +1,65 @@
+{
+  "topicId": "v2-function-imports",
+  "title": "Service operations",
+  "questions": [
+    {
+      "id": "invoke-service-operation",
+      "level": "elementary",
+      "title": "How do you invoke a service operation (function import) in OData V2?",
+      "description": "Service operations expose custom behavior that does not fit the uniform create, read, update and delete interface. A client invokes one by sending an HTTP GET or POST request to its URI; the metadata states the method to use in the HttpMethod attribute of the Function Import. Parameters are simple scalar values of EDM primitive types and are passed in the query string, using the parameter name without a $ prefix and the value in OData literal form, for example GetProductsByRating?rating=4. Servers should allow invocation through GET only when the operation has no side effects. If the operation returns a collection of entries, the service author can enable query composition, so the operation URI can be treated as the starting collection for further URI conventions, such as additional query options.",
+      "keyPoints": [
+        "GET or POST to the operation URI; the method comes from m:HttpMethod.",
+        "Parameters: primitive values in the query string, no $ prefix.",
+        "GET only for operations without side effects.",
+        "Operations returning entries may allow query composition."
+      ],
+      "examples": [
+        {
+          "title": "Calling a function import",
+          "language": "text",
+          "code": "GET /odata/odata.svc/GetProductsByRating?rating=4 HTTP/1.1\nHost: services.odata.org\nDataServiceVersion: 1.0\nMaxDataServiceVersion: 2.0\n\nHTTP/1.1 200 OK\nContent-Type: application/atom+xml;charset=utf-8\n\n<feed ...> ...the matching Product entries... </feed>"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        },
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        }
+      ]
+    },
+    {
+      "id": "service-operation-return-types",
+      "level": "elementary",
+      "title": "What can a service operation return, and how is it described in the metadata?",
+      "description": "A service operation is a function whose semantics are defined by the service author. It accepts primitive input parameters and can be defined to return a single primitive value, a single complex type, a collection of primitives, a collection of complex types, a single entry, a collection of entries, or nothing (void). In the metadata document it is described by a Function Import, which names the operation, lists its parameters, declares its return type and, when it returns entries, the entity set they belong to. For example, ProductsByColor takes a string parameter color and returns Products, while ProductColors takes no parameters and returns a collection of strings.",
+      "keyPoints": [
+        "Returns: primitive(s), complex value(s), an entry, a collection of entries, or void.",
+        "Described in $metadata by a Function Import (name, parameters, ReturnType, EntitySet).",
+        "ProductsByColor(color) returns entries; ProductColors returns strings."
+      ],
+      "examples": [
+        {
+          "title": "Two function imports",
+          "language": "xml",
+          "code": "<FunctionImport Name=\"ProductsByColor\" EntitySet=\"Products\"\n                ReturnType=\"Collection(ODataDemo.Product)\" m:HttpMethod=\"GET\">\n  <Parameter Name=\"color\" Type=\"Edm.String\" Mode=\"In\" />\n</FunctionImport>\n\n<FunctionImport Name=\"ProductColors\" ReturnType=\"Collection(Edm.String)\" m:HttpMethod=\"GET\" />"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        }
+      ]
+    }
+  ]
+}

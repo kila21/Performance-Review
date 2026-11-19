@@ -1,0 +1,122 @@
+{
+  "topicId": "v2-edm",
+  "title": "Entity Data Model",
+  "questions": [
+    {
+      "id": "entity-type-entity-key",
+      "level": "elementary",
+      "title": "What are an Entity Type, an Entity and an Entity Key in the OData V2 EDM?",
+      "description": "The central concepts of the Entity Data Model are entities and associations. An Entity Type (for example Customer or Employee) defines a structured record: a list of named and typed properties plus a key. An Entity is an instance of an Entity Type; in the protocol each Entry of a feed is described by an Entity Type, and entity types may be part of a type hierarchy. The Entity Key is formed from a subset of the properties of the Entity Type (for example CustomerId or OrderId). It is the fundamental concept for uniquely identifying instances of an Entity Type and for allowing those instances to take part in relationships. In URIs the key appears as the key predicate in parentheses, for example Products(1).",
+      "keyPoints": [
+        "Entity Type = structured type with named, typed properties and a key.",
+        "Entity = one instance of an Entity Type (an Entry in a feed).",
+        "Entity Key = subset of the type's properties that uniquely identifies an instance.",
+        "The key makes instances addressable (Products(1)) and lets them take part in relationships."
+      ],
+      "examples": [
+        {
+          "title": "Entity Type with its key, and one entity",
+          "language": "xml",
+          "code": "<EntityType Name=\"Product\">\n  <Key>\n    <PropertyRef Name=\"ID\" />                       <!-- the Entity Key -->\n  </Key>\n  <Property Name=\"ID\" Type=\"Edm.Int32\" Nullable=\"false\" />\n  <Property Name=\"Name\" Type=\"Edm.String\" />\n  <Property Name=\"Price\" Type=\"Edm.Decimal\" Precision=\"10\" Scale=\"2\" />\n  <Property Name=\"ReleaseDate\" Type=\"Edm.DateTime\" />\n  <NavigationProperty Name=\"Category\" Relationship=\"ODataDemo.Product_Category\"\n                      FromRole=\"Product\" ToRole=\"Category\" />\n</EntityType>\n\nEntity (one instance of the type), addressed by its key:\nGET /OData/OData.svc/Products(1)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        },
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        }
+      ]
+    },
+    {
+      "id": "entity-set-association",
+      "level": "elementary",
+      "title": "What are an Entity Set, an Association, an Association Set and a Navigation Property?",
+      "description": "Entities are grouped in Entity Sets; for example Customers is a set of Customer instances, and the feeds of a service correspond to its entity sets. Associations define the relationship between two or more Entity Types, for example Employee WorksFor Department, including the multiplicity of each end. Instances of associations are grouped in Association Sets, which tie the association to concrete entity sets. Navigation Properties are special properties on Entity Types that are bound to a specific association and are used to refer to the associated entities. A navigation property is not a structural part of the entry; it represents a Link, and following it gives either a single related entry or a feed of related entries, for example Categories(1)/Products.",
+      "keyPoints": [
+        "Entity Set = named group of entities of one type; it is what a top-level feed exposes.",
+        "Association = relationship between entity types, with a multiplicity on each end.",
+        "Association Set = groups association instances and binds the ends to entity sets.",
+        "Navigation Property = property bound to an association; it represents a Link, not data."
+      ],
+      "examples": [
+        {
+          "title": "Association, association set and navigation property",
+          "language": "xml",
+          "code": "<!-- Association: the relationship between two entity types -->\n<Association Name=\"Product_Category\">\n  <End Role=\"Product\"  Type=\"ODataDemo.Product\"  Multiplicity=\"*\" />\n  <End Role=\"Category\" Type=\"ODataDemo.Category\" Multiplicity=\"0..1\" />\n</Association>\n\n<!-- In the EntityContainer: entity sets and the association set that groups association instances -->\n<EntitySet Name=\"Products\"   EntityType=\"ODataDemo.Product\" />\n<EntitySet Name=\"Categories\" EntityType=\"ODataDemo.Category\" />\n<AssociationSet Name=\"Products_Category\" Association=\"ODataDemo.Product_Category\">\n  <End Role=\"Product\"  EntitySet=\"Products\" />\n  <End Role=\"Category\" EntitySet=\"Categories\" />\n</AssociationSet>\n\n<!-- On the entity type: the navigation property bound to that association -->\n<NavigationProperty Name=\"Category\" Relationship=\"ODataDemo.Product_Category\"\n                    FromRole=\"Product\" ToRole=\"Category\" />"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        },
+        {
+          "title": "OData Version 2.0: Terminology (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/terminology/"
+        }
+      ]
+    },
+    {
+      "id": "function-import",
+      "level": "elementary",
+      "title": "What is a Function Import in OData V2 metadata?",
+      "description": "A Function Import is how the metadata document describes a Service Operation. Service Operations are simple, service-specific functions that accept input parameters and return entries or complex or primitive values; their semantics are defined by the author of the function. In the metadata, the Function Import declares the operation's name, its parameters (primitive types only), its return type and, for entries, the entity set they belong to. The OData annotation HttpMethod on the Function Import states which HTTP method must be used to invoke it. A Service Operation can return a single primitive, a single complex type, a collection of primitives, a collection of complex types, a single Entry, a Collection of Entries, or nothing (void).",
+      "keyPoints": [
+        "Function Import = metadata description of a Service Operation (custom function).",
+        "Declares name, primitive input parameters, return type and, for entries, the entity set.",
+        "m:HttpMethod tells the client which HTTP method to use (GET or POST).",
+        "Possible results: primitive(s), complex value(s), an entry, a collection of entries, or void."
+      ],
+      "examples": [
+        {
+          "title": "Function Import and its call",
+          "language": "xml",
+          "code": "<FunctionImport Name=\"GetProductsByRating\" EntitySet=\"Products\"\n                ReturnType=\"Collection(ODataDemo.Product)\" m:HttpMethod=\"GET\">\n  <Parameter Name=\"rating\" Type=\"Edm.Int32\" Mode=\"In\" />\n</FunctionImport>\n\nInvocation:\nGET /OData/OData.svc/GetProductsByRating?rating=5"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        },
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        }
+      ]
+    },
+    {
+      "id": "complex-type-entity-container",
+      "level": "basic",
+      "title": "What are a Complex Type and an Entity Container in OData V2?",
+      "description": "A Complex Type is a structured type that, like an entity type, consists of a list of properties, but it has no key. It can therefore only exist as a property of a containing entity or as a temporary value (for example a return value of a service operation), and it cannot be addressed on its own. A typical example is an Address with Street and City used by a Supplier entity. The Entity Container groups all instance containers: the Entity Sets and Association Sets (and the Function Imports) of a service. A CSDL document may include several entity containers; the OData annotation IsDefaultEntityContainer marks the default one, and entity sets in the default container do not need to be container-qualified when they are addressed in URIs.",
+      "keyPoints": [
+        "Complex Type = structured type without a key; lives only inside an entity or as a temporary value.",
+        "Example: Address (Street, City) used as a property type of Supplier.",
+        "Entity Container = groups Entity Sets, Association Sets and Function Imports.",
+        "m:IsDefaultEntityContainer=\"true\" marks the default container; its sets need no container prefix in URIs."
+      ],
+      "examples": [
+        {
+          "title": "A complex type used by an entity type, and the container",
+          "language": "xml",
+          "code": "<ComplexType Name=\"Address\">                 <!-- no <Key>: cannot exist on its own -->\n  <Property Name=\"Street\" Type=\"Edm.String\" />\n  <Property Name=\"City\"   Type=\"Edm.String\" />\n</ComplexType>\n\n<EntityType Name=\"Supplier\">\n  <Key><PropertyRef Name=\"ID\" /></Key>\n  <Property Name=\"ID\"      Type=\"Edm.Int32\" Nullable=\"false\" />\n  <Property Name=\"Address\" Type=\"ODataDemo.Address\" Nullable=\"false\" />\n</EntityType>\n\n<EntityContainer Name=\"DemoService\" m:IsDefaultEntityContainer=\"true\">\n  <EntitySet Name=\"Suppliers\" EntityType=\"ODataDemo.Supplier\" />\n  ...\n</EntityContainer>"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        }
+      ]
+    }
+  ]
+}

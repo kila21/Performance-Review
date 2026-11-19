@@ -1,0 +1,89 @@
+{
+  "topicId": "v2-reading",
+  "title": "Reading data",
+  "questions": [
+    {
+      "id": "retrieve-collections",
+      "level": "elementary",
+      "title": "How do you retrieve a collection (feed) from an OData V2 service, and how do you choose the format?",
+      "description": "A client retrieves a feed, an entry or the service document by sending an HTTP GET request to its URI, and the server returns it in the response body. The format is chosen with standard HTTP content negotiation: Accept: application/json asks for JSON, while application/atom+xml (feeds and entries) together with application/xml asks for Atom. Without an Accept header the server should default to Atom, and if it cannot produce a requested format it should fail with 406 Not Acceptable. Where headers cannot be controlled, the $format query option overrides Accept. The request can be refined with query options such as $filter, $orderby and $select. When a collection is too large for one response, the server can return a partial list together with a next link, for example ...Customers?$skiptoken='ERNSH'; the client follows it to get the next page, and should be prepared for missing or repeated entries, because data stability across pages is not guaranteed.",
+      "keyPoints": [
+        "GET on the collection URI, for example GET /OData/OData.svc/Products.",
+        "Format via Accept (application/json or application/atom+xml) or $format.",
+        "No Accept header: Atom by default; unsupported format: 406 Not Acceptable.",
+        "Large collections: partial list plus a next link ($skiptoken) to follow.",
+        "Refine with $filter, $orderby, $select, $expand, ..."
+      ],
+      "examples": [
+        {
+          "title": "Requesting a feed as JSON",
+          "language": "text",
+          "code": "GET /OData/OData.svc/Products?$filter=Rating gt 2&$orderby=Price&$select=Rating,Price HTTP/1.1\nHost: services.odata.org\nAccept: application/json\nDataServiceVersion: 1.0\nMaxDataServiceVersion: 2.0\n\nHTTP/1.1 200 OK\nContent-Type: application/json;charset=utf-8\nDataServiceVersion: 1.0;\n\n{ \"d\" : ... }"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        }
+      ]
+    },
+    {
+      "id": "retrieve-property-metadata",
+      "level": "elementary",
+      "title": "How do you retrieve an individual property and the metadata document?",
+      "description": "Servers may support retrieving individual properties of an entry. With the OData URL conventions, the property's address is the entry URI followed by the property name, for example Products(1)/Description. The client sends a GET to that URI and uses content negotiation for the format; because a single property is not a whole Atom entry, Atom clients should ask for application/xml and expect a plain XML element such as <Description>Low fat milk</Description>. The metadata document is conventionally located at /$metadata relative to the service root and is retrieved with a GET request. In V2 only an XML serialization of the EDM schema exists, so no content-type negotiation is supported for it; other HTTP aspects such as caching and character set encoding still apply.",
+      "keyPoints": [
+        "Property: GET <entry URI>/<PropertyName>, for example Products(1)/Description.",
+        "Atom clients use Accept: application/xml for a single property.",
+        "Metadata: GET <service root>/$metadata.",
+        "V2 metadata is XML only; no format negotiation."
+      ],
+      "examples": [
+        {
+          "title": "Property and metadata requests",
+          "language": "text",
+          "code": "GET /OData/OData.svc/Products(1)/Description HTTP/1.1\nHost: services.odata.org\nAccept: application/xml\n\nHTTP/1.1 200 OK\nContent-Type: application/xml;charset=utf-8\n\n<Description xmlns=\"http://schemas.microsoft.com/ado/2007/08/dataservices\">Low fat milk</Description>\n\nGET /OData/OData.svc/$metadata HTTP/1.1\nHost: services.odata.org"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        }
+      ]
+    },
+    {
+      "id": "retrieve-raw-value",
+      "level": "basic",
+      "title": "How do you retrieve the raw value of an individual property?",
+      "description": "To get a property's value without any OData wrapping, append $value to the property URI, for example Products(1)/Description/$value, and send a GET. The service returns the value in the media type it considers the raw format for that property, for example text/plain for a string. Raw values usually have a fixed content type and negotiation is not supported, although a server may add it; clients that do not know the expected content type should send Accept: */* or no Accept header. Raw values are useful when the property holds a document or image that should be consumed as is. The same address can also be used with PUT to replace the property value in its native form.",
+      "keyPoints": [
+        "GET <property URI>/$value returns the raw value.",
+        "Content type is the property's raw format (for example text/plain).",
+        "Usually no content negotiation; send Accept: */* or no Accept header.",
+        "PUT on the same /$value URI updates the value in its native form."
+      ],
+      "examples": [
+        {
+          "title": "Raw value request",
+          "language": "text",
+          "code": "GET /OData/OData.svc/Products(1)/Description/$value HTTP/1.1\nHost: services.odata.org\n\nHTTP/1.1 200 OK\nContent-Type: text/plain;charset=utf-8\n\nLow fat milk"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        },
+        {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        }
+      ]
+    }
+  ]
+}

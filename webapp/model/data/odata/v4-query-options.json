@@ -1,0 +1,118 @@
+{
+  "topicId": "v4-query-options",
+  "title": "V4 query options",
+  "questions": [
+    {
+      "id": "v4-search",
+      "level": "basic",
+      "title": "What does the $search system query option do in OData V4?",
+      "description": "$search requests the items of a collection that match a free-text search expression. It can be applied to a collection of entity, complex or primitive typed instances, and applied to the $all resource it searches all entities of the service. A search expression is made of terms (single words), phrases in double quotes and parenthesized groups, combined with the case-sensitive keywords NOT, AND and OR, evaluated in that order; two expressions separated only by a space mean AND. What counts as a match is decided by the service. If $search and $filter are both used, only items matching both are returned.",
+      "keyPoints": [
+        "Free-text search over a collection; on ~/$all over the whole service.",
+        "Terms, \"phrases\", (groups); keywords NOT, AND, OR (case-sensitive).",
+        "A space between terms means AND.",
+        "Combined with $filter: items must match both."
+      ],
+      "examples": [
+        {
+          "title": "Search requests",
+          "language": "text",
+          "code": "GET http://host/service/Products?$search=blue OR green\nGET http://host/service/Products?$search=\"dark blue\" NOT cotton"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        }
+      ]
+    },
+    {
+      "id": "v4-compute",
+      "level": "basic",
+      "title": "What does $compute do in OData V4.01?",
+      "description": "$compute lets a client define computed properties that can then be used in $select, $filter or $orderby. Its value is a comma-separated list of compute instructions, each a common expression followed by the keyword as and the name of the new dynamic property, which must differ from the names of existing properties. The expression is interpreted relative to the entity or complex type of the addressed resources. Computed properties should appear as dynamic properties in the result, and must appear if $select names them or uses *. A typical case is a line total, Price times Quantity, that the client wants to filter and sort by without the service having to model it.",
+      "keyPoints": [
+        "$compute=<expression> as <Name>, comma-separated.",
+        "The computed name can be used in $select, $filter and $orderby.",
+        "Returned as a dynamic property.",
+        "Added in OData 4.01."
+      ],
+      "examples": [
+        {
+          "title": "Filter and sort by a computed total",
+          "language": "text",
+          "code": "GET http://host/service/Orders(10)/Items\n    ?$select=Product/Description,Total\n    &$filter=Total gt 100\n    &$orderby=Total\n    &$compute=Product/Price mul Quantity as Total"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
+        }
+      ]
+    },
+    {
+      "id": "v4-index-schemaversion",
+      "level": "basic",
+      "title": "What are the $index and $schemaversion system query options in OData V4.01?",
+      "description": "$index allows a positional insert into an ordered collection that is annotated with the Core.PositionalInsert term. Its value is the zero-based position where the new item is inserted; items at or after that position move up by one, and a negative value counts from the end, so -1 inserts at the end. $schemaversion lets a client state the version of the schema a request is made against. It matters for services that version their metadata with the Core.SchemaVersion annotation instead of publishing a breaking change under a new service root: such services must process the request according to the requested schema version. The value is a version returned earlier in Core.SchemaVersion, or * for the current version.",
+      "keyPoints": [
+        "$index=n: insert at zero-based position n; -1 = at the end (needs Core.PositionalInsert).",
+        "$schemaversion: process the request against a specific schema version.",
+        "Used with services that version metadata via Core.SchemaVersion.",
+        "$schemaversion=* means the current version."
+      ],
+      "examples": [
+        {
+          "title": "Positional insert and versioned request",
+          "language": "text",
+          "code": "POST http://host/service/Customers('ALFKI')/EmailAddresses?$index=1   insert at the 2nd position\nGET  http://host/service/$metadata?$schemaversion=*                  current schema version\nGET  http://host/service/Products?$schemaversion=2                   request against schema version 2"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
+        }
+      ]
+    },
+    {
+      "id": "v4-lambda-operators",
+      "level": "basic",
+      "title": "What are the lambda operators any and all, and how do you filter parent entities by their children?",
+      "description": "OData V4 defines two lambda operators that evaluate a Boolean expression on a collection, and both are written after a navigation path that identifies the collection. Their argument is a lambda variable name, a colon and a Boolean expression that uses the variable to refer to members of the collection. any returns true if the expression is true for at least one member, so it is always false for an empty collection; used without an argument, it simply tests whether the collection is non-empty. all returns true if the expression is true for every member, so it is always true for an empty collection, and it requires an argument. This is how you filter parent entities by their children: Orders?$filter=Items/any(d:d/Quantity gt 100) returns orders that have at least one item with a quantity above 100, while Items/all(...) returns orders whose items all match.",
+      "keyPoints": [
+        "Syntax: NavPath/any(v:expression) and NavPath/all(v:expression).",
+        "any: at least one child matches (false for empty); any() = has children.",
+        "all: every child matches (true for empty); argument required.",
+        "Use them in $filter to select parents by properties of their children."
+      ],
+      "examples": [
+        {
+          "title": "Filtering orders by their items",
+          "language": "text",
+          "code": "GET http://host/service/Orders?$filter=Items/any(d:d/Quantity gt 100)\nGET http://host/service/Orders?$filter=Items/all(d:d/Quantity gt 100)\nGET http://host/service/Customers?$filter=Orders/any(o:o/ShippingAddress ne Address)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
+        }
+      ]
+    }
+  ]
+}

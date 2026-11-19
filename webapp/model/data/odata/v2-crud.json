@@ -1,0 +1,146 @@
+{
+  "topicId": "v2-crud",
+  "title": "CRUD operations",
+  "questions": [
+    {
+      "id": "crud-overview-create",
+      "level": "elementary",
+      "title": "How do the CRUD operations map to HTTP in OData V2, and how do you create a new entry?",
+      "description": "OData has a fixed set of uniform operations, retrieve, create, update and delete, which map to the HTTP methods GET, POST, PUT/MERGE and DELETE; each acts on a resource identified by a URI. To create an entry, the client sends a POST to the URI of the collection where the entry should be created, with the new entry in the request body; it sets Content-Type for the body and Accept for the response format. The server creates the resource, assigns default values to optional properties that were not sent, and answers 201 Created with the final state of the entry in the body and a Location header containing the URL of the new entry. The new entry may contain links to existing entries, and posting to a navigation URL such as Categories(10)/Products creates the product and links it to that category automatically. Several related new entries can also be created in one POST as a tree of inline entries (deep insert).",
+      "keyPoints": [
+        "Retrieve = GET, Create = POST, Update = PUT/MERGE, Delete = DELETE.",
+        "Create: POST to the collection URI with the entry in the body.",
+        "Success: 201 Created, entry in the body, Location header with its URL.",
+        "POST to Categories(10)/Products creates the product and links it to the category.",
+        "Deep insert: one POST with inline related entries."
+      ],
+      "examples": [
+        {
+          "title": "Creating a Category entry in JSON",
+          "language": "text",
+          "code": "POST /OData/OData.svc/Categories HTTP/1.1\nHost: services.odata.org\nContent-Type: application/json\nAccept: application/json\n\n{ \"ID\": 10, \"Name\": \"Clothing\" }\n\nHTTP/1.1 201 Created\nLocation: https://services.odata.org/OData/OData.svc/Categories(10)\nContent-Type: application/json;charset=utf-8\n\n{ \"d\" : { \"__metadata\": { \"uri\": \".../Categories(10)\", ... }, \"ID\": 10, \"Name\": \"Clothing\", ... } }"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        },
+        {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        }
+      ]
+    },
+    {
+      "id": "read-entries",
+      "level": "elementary",
+      "title": "How do you read a single entry, and which status codes indicate errors?",
+      "description": "Reading an entity is a GET request to its URI, typically the collection name with a key predicate, for example Products(1); the server returns the entry in the requested format with 200 OK. Error conditions are exposed as HTTP responses with 4xx and 5xx status codes, and clients should be prepared to handle them in all requests. Common examples are 404 Not Found for a URI the server does not define, 400 for a general error in the request and 500 for a server-side error while processing it. Besides the status code, servers should include a response body with details about the error, in the Atom or JSON error format, but without exposing sensitive information to untrusted clients.",
+      "keyPoints": [
+        "Read one entry: GET Collection(key), for example GET /Products(1).",
+        "Errors use HTTP status codes: 4xx client, 5xx server.",
+        "Typical: 404 Not Found, 400 Bad Request, 500 Internal Server Error.",
+        "Error responses carry a body with details in the Atom or JSON error format."
+      ],
+      "examples": [
+        {
+          "title": "Reading one entry",
+          "language": "text",
+          "code": "GET /OData/OData.svc/Products(1) HTTP/1.1\nHost: services.odata.org\nAccept: application/json\n\nHTTP/1.1 200 OK\nContent-Type: application/json;charset=utf-8\n\n{ \"d\" : { \"__metadata\": { ... }, \"ID\": 1, \"Name\": \"Milk\", ... } }"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        }
+      ]
+    },
+    {
+      "id": "update-put-merge",
+      "level": "elementary",
+      "title": "How do you update an entry in OData V2, and what is the difference between PUT and MERGE?",
+      "description": "To update an entry, the client sends a request to the entry's URI with the new data in the body. PUT replaces the existing entry: every property takes the value from the request body or is reset to its default value if it is not mentioned. For an incremental update, OData V2 defines the custom HTTP method MERGE, which changes only the properties sent in the body and leaves everything else as it is. On success the server answers 204 No Content, with no response body. Links of an entry are not treated as part of its structured data, so servers apply merge semantics to links for both PUT and MERGE. MERGE existed because PATCH was not yet part of HTTP; OData V4 uses PATCH instead and dropped MERGE.",
+      "keyPoints": [
+        "PUT = full replace; unspecified properties are reset to defaults.",
+        "MERGE = partial update; only the sent properties change.",
+        "Success: 204 No Content.",
+        "Links are merged for both PUT and MERGE.",
+        "V4 replaces MERGE with PATCH."
+      ],
+      "examples": [
+        {
+          "title": "Partial update with MERGE",
+          "language": "text",
+          "code": "MERGE /OData/OData.svc/Products(1) HTTP/1.1\nHost: services.odata.org\nContent-Type: application/json\n\n{ \"Price\": \"3.5\", \"Rating\": 5 }\n\nHTTP/1.1 204 No Content"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        }
+      ]
+    },
+    {
+      "id": "update-individual-property",
+      "level": "elementary",
+      "title": "How do you update a single property of an entry?",
+      "description": "An individual property can be updated through the same address used to read it. The client sends a PUT to the property URI, for example Products(1)/Rating, with the value in an OData format, or a PUT to the raw value URI, Products(1)/Rating/$value, with the value in its native form (for example text/plain). The raw form is natural for content such as an image or an HTML document that can be replaced without encoding it. The server updates the property and returns 204 No Content, or 200 OK with the updated property. MERGE is not defined for individual properties, because properties are atomic; servers should reject it with 405 Method Not Allowed.",
+      "keyPoints": [
+        "PUT <entry>/<Property> with the value in an OData format.",
+        "Or PUT <entry>/<Property>/$value with the raw value.",
+        "Success: 204 No Content (or 200 OK with the property).",
+        "MERGE on a property is not allowed: 405 Method Not Allowed."
+      ],
+      "examples": [
+        {
+          "title": "Updating only the rating",
+          "language": "text",
+          "code": "PUT /OData/OData.svc/Products(1)/Rating/$value HTTP/1.1\nHost: services.odata.org\nContent-Type: text/plain\n\n5\n\nHTTP/1.1 204 No Content"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        }
+      ]
+    },
+    {
+      "id": "delete-entry",
+      "level": "elementary",
+      "title": "How do you delete an entry, and what happens to related entries?",
+      "description": "An entry is deleted with an HTTP DELETE request to a URI that points at the entry, for example DELETE /Products(1). According to the OData V2 operations specification, a successful delete should return 200 OK with no response body. If the entry has dependent entries, such as entries linked to it, the server decides what happens: it may cascade the delete, reject it because dependents exist, or leave the links dangling; this depends on the server, its storage model and the application. Deleting a media link entry also deletes its media resource.",
+      "keyPoints": [
+        "DELETE on the entry URI.",
+        "Success: 200 OK with no body (per the V2 spec).",
+        "Dependent entries: cascade, fail, or dangling links, depending on the server.",
+        "Deleting a media link entry also deletes the media resource."
+      ],
+      "examples": [
+        {
+          "title": "Deleting an entry",
+          "language": "text",
+          "code": "DELETE /OData/OData.svc/Products(1) HTTP/1.1\nHost: services.odata.org"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        }
+      ]
+    }
+  ]
+}

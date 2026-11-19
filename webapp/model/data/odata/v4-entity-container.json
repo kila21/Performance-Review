@@ -1,0 +1,131 @@
+{
+  "topicId": "v4-entity-container",
+  "title": "Entity container",
+  "questions": [
+    {
+      "id": "v4-entity-container-extends",
+      "level": "basic",
+      "title": "What does the entity container contain in OData V4, and what does extending an entity container mean?",
+      "description": "Each OData V4 metadata document must define exactly one entity container. It defines the resources the service exposes: entity sets, singletons, function imports and action imports, whose names must be unique within the container. Unlike V2, there is only one container per service and its name does not appear in URLs, so IsDefaultEntityContainer and association sets are gone. A container may extend another entity container in scope with the Extends attribute: all children of the base container are added to the extending one. An extending container may redefine an entity set or singleton of the base only with an entity type derived from the original type; action and function imports cannot be redefined. Services should not create cycles by extending containers.",
+      "keyPoints": [
+        "Exactly one entity container per metadata document.",
+        "Contains entity sets, singletons, function imports, action imports.",
+        "Extends=\"Some.Schema.Base\" adds all children of the base container.",
+        "Redefined sets/singletons must use a derived entity type; imports cannot be redefined."
+      ],
+      "examples": [
+        {
+          "title": "Extending a container",
+          "language": "xml",
+          "code": "<EntityContainer Name=\"Extending\" Extends=\"Some.Other.Schema.Base\">\n  <!-- contains its own children plus all children of Base -->\n</EntityContainer>"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        }
+      ]
+    },
+    {
+      "id": "v4-entityset-singleton",
+      "level": "basic",
+      "title": "What is the difference between an EntitySet and a Singleton in OData V4?",
+      "description": "An entity set is a named, top-level collection-valued resource that gives access to instances of an entity type, for example Products. It must specify an entity type that has a key, and it may contain instances of that type or of types derived from it; simple models often have one entity set per entity type, others expose several sets of the same type. With IncludeInServiceDocument an entity set can be hidden from the service document. A singleton is a named, top-level single-valued resource: one entity that is addressed directly by its name from the service root, without knowing a key and without needing an entity set. Before V4 such an entity had to be modeled as a one-element entity set. A singleton is declared with Name and Type, and like an entity set it can contain navigation property bindings.",
+      "keyPoints": [
+        "EntitySet = top-level collection of entities of one type (keyed).",
+        "Singleton = top-level single entity, addressed by name, no key needed.",
+        "Both can have NavigationPropertyBinding children.",
+        "IncludeInServiceDocument=\"false\" hides an entity set from the service document."
+      ],
+      "examples": [
+        {
+          "title": "Entity set and singleton",
+          "language": "text",
+          "code": "<EntitySet Name=\"Products\" EntityType=\"self.Product\" />\n<Singleton Name=\"MainSupplier\" Type=\"self.Supplier\" />\n\nGET http://host/service/Products(1)\nGET http://host/service/MainSupplier"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        }
+      ]
+    },
+    {
+      "id": "v4-navigation-property-binding",
+      "level": "basic",
+      "title": "What is a navigation property binding in OData V4, and what are its path and binding target?",
+      "description": "A navigation property binding tells clients in advance which entity set or singleton contains the entities reached through a navigation property from a given entity set or singleton. It is the lightweight, unidirectional replacement for V2 association sets, and it is optional; if it is missing, clients must assume the target can vary per related entity. The binding has two parts. Path names the navigation property of the set's entity type; it can also reach a navigation property through type casts, complex properties or containment navigation properties, for example Products/Supplier. Target is the binding target: a simple identifier that resolves to an entity set or singleton in the same container, or a target path to one in another container in scope, such as SomeModel.SomeContainer/SomeSet. The same path must not appear in more than one binding.",
+      "keyPoints": [
+        "Says which entity set/singleton the related entities live in.",
+        "Replaces V2 association sets; unidirectional and optional.",
+        "Path: navigation property (possibly through casts, complex or containment properties).",
+        "Target: entity set/singleton name, or a target path into another container."
+      ],
+      "examples": [
+        {
+          "title": "Bindings with a simple and a qualified target",
+          "language": "xml",
+          "code": "<EntitySet Name=\"Categories\" EntityType=\"self.Category\">\n  <NavigationPropertyBinding Path=\"Products\" Target=\"Products\" />\n</EntitySet>\n\n<EntitySet Name=\"Categories\" EntityType=\"self.Category\">\n  <NavigationPropertyBinding Path=\"Products\" Target=\"SomeModel.SomeContainer/SomeSet\" />\n</EntitySet>"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        }
+      ]
+    },
+    {
+      "id": "v4-action-function-import",
+      "level": "basic",
+      "title": "What are action imports and function imports in OData V4?",
+      "description": "In OData V4, actions and functions are declared at the schema level. Functions are operations without side effects that can be composed further, for example used in $filter; actions may have side effects such as data modification and cannot be composed. Unbound actions and functions can be called from the service root only if they are imported into the entity container. An action import (edm:ActionImport, with Name and Action) exposes an unbound action as a top-level resource; action imports are never included in the service document. A function import (edm:FunctionImport, with Name and Function) exposes an unbound function; all unbound overloads of that function can be invoked. Both may name the entity set that contains returned entities via EntitySet, and a function import of a parameterless function can be listed in the service document with IncludeInServiceDocument=\"true\" (the default is false).",
+      "keyPoints": [
+        "Functions: no side effects, composable. Actions: side effects allowed, not composable.",
+        "ActionImport (Name, Action): exposes an unbound action; never in the service document.",
+        "FunctionImport (Name, Function): exposes an unbound function and all its unbound overloads.",
+        "EntitySet attribute: where returned entities live.",
+        "IncludeInServiceDocument on parameterless function imports (default false)."
+      ],
+      "examples": [
+        {
+          "title": "A complete V4 entity container",
+          "language": "xml",
+          "code": "<EntityContainer Name=\"DemoService\">\n  <EntitySet Name=\"Products\" EntityType=\"self.Product\">\n    <NavigationPropertyBinding Path=\"Category\" Target=\"Categories\" />\n    <NavigationPropertyBinding Path=\"Supplier\" Target=\"Suppliers\" />\n  </EntitySet>\n  <EntitySet Name=\"Categories\" EntityType=\"self.Category\">\n    <NavigationPropertyBinding Path=\"Products\" Target=\"Products\" />\n  </EntitySet>\n  <EntitySet Name=\"Suppliers\" EntityType=\"self.Supplier\">\n    <NavigationPropertyBinding Path=\"Products\" Target=\"Products\" />\n  </EntitySet>\n  <Singleton Name=\"MainSupplier\" Type=\"self.Supplier\" />\n  <ActionImport Name=\"LeaveRequestApproval\" Action=\"self.Approval\" />\n  <FunctionImport Name=\"ProductsByRating\" Function=\"self.ProductsByRating\"\n                  EntitySet=\"Products\" />\n</EntityContainer>"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        }
+      ]
+    }
+  ]
+}

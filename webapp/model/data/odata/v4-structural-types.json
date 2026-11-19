@@ -1,0 +1,62 @@
+{
+  "topicId": "v4-structural-types",
+  "title": "Structural types & type definitions",
+  "questions": [
+    {
+      "id": "v4-structural-property-types",
+      "level": "basic",
+      "title": "Which types can a structural property have in OData V4?",
+      "description": "Entity types and complex types are structured types, made of structural properties and navigation properties. A structural property must have a unique name and a type, and that type is one of four kinds: a primitive type (such as Edm.String or Edm.Decimal), a complex type (a keyless structured type such as Address), an enumeration type (a named set of members with underlying integer values, written by member name), or a collection of one of these. A collection-valued property is declared with the Collection(...) syntax, for example Type=\"Collection(Edm.String)\", and facets such as MaxLength then apply to the items of the collection.",
+      "keyPoints": [
+        "Structural property type = primitive, complex, enumeration, or a collection of these.",
+        "Collection syntax: Type=\"Collection(Edm.String)\".",
+        "Facets on a collection apply to its items.",
+        "Navigation properties are separate: they point to entity types."
+      ],
+      "examples": [
+        {
+          "title": "All four kinds of structural property",
+          "language": "xml",
+          "code": "<EnumType Name=\"Color\">\n  <Member Name=\"Red\" />\n  <Member Name=\"Green\" />\n</EnumType>\n\n<EntityType Name=\"Product\">\n  <Key><PropertyRef Name=\"ID\" /></Key>\n  <Property Name=\"ID\"         Type=\"Edm.Int32\" Nullable=\"false\" />   <!-- primitive -->\n  <Property Name=\"Dimensions\" Type=\"self.Dimensions\" />              <!-- complex -->\n  <Property Name=\"Color\"      Type=\"self.Color\" />                   <!-- enumeration -->\n  <Property Name=\"Units\"      Type=\"Collection(Edm.String)\" />       <!-- collection -->\n</EntityType>"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        }
+      ]
+    },
+    {
+      "id": "v4-type-definition",
+      "level": "basic",
+      "title": "What is a type definition in OData V4, and what is its underlying primitive type?",
+      "description": "A type definition gives a new name to a primitive type and can fix some of its facets, following the \"don't repeat yourself\" idea: define the type once and use it wherever it applies. It is declared with edm:TypeDefinition, which must have a Name and an UnderlyingType. The underlying type must be a primitive type and cannot itself be another type definition. The type definition may fix facets of the underlying type (MaxLength, Unicode, Precision, Scale or SRID), and those facets cannot be specified again where it is used. Type definitions can be used wherever a primitive type is used, and can carry annotations, for example a unit of measure, that apply to every property using them. In responses, the type definition appears in place of the primitive type.",
+      "keyPoints": [
+        "Type definition = named specialization of a primitive type.",
+        "Required: Name and UnderlyingType (a primitive type, not another type definition).",
+        "May fix facets: MaxLength, Unicode, Precision, Scale, SRID.",
+        "Usable wherever a primitive type is; annotations travel with it."
+      ],
+      "examples": [
+        {
+          "title": "Type definitions with units",
+          "language": "xml",
+          "code": "<TypeDefinition Name=\"Length\" UnderlyingType=\"Edm.Int32\">\n  <Annotation Term=\"Org.OData.Measures.V1.Unit\" String=\"Centimeters\" />\n</TypeDefinition>\n<TypeDefinition Name=\"Weight\" UnderlyingType=\"Edm.Int32\">\n  <Annotation Term=\"Org.OData.Measures.V1.Unit\" String=\"Kilograms\" />\n</TypeDefinition>\n\n<ComplexType Name=\"Size\">\n  <Property Name=\"Height\" Type=\"self.Length\" />\n  <Property Name=\"Weight\" Type=\"self.Weight\" />\n</ComplexType>"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        }
+      ]
+    }
+  ]
+}

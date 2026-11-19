@@ -1,0 +1,145 @@
+{
+  "topicId": "v2-resource-path",
+  "title": "Resource path",
+  "questions": [
+    {
+      "id": "collection-key-predicate",
+      "level": "elementary",
+      "title": "How do you address a Collection and a single Entry in an OData V2 resource path (Collection, KeyPredicate)?",
+      "description": "To address entries you start with a Collection: the name of an entity set, or of a service operation that returns a collection of entries. Following it with a KeyPredicate selects a single entry. The KeyPredicate is written in parentheses: if the entry has a single key property, it may contain only the key value, as in Categories(1); if the key consists of two or more properties, the values must be given as comma-separated name=value pairs. The canonical URI of an entry is the service root plus one segment made of the collection name and the key predicate, for example Products(1), even though the same entry might also be reachable through a longer path such as Categories(1)/Products(1). A collection may also be followed by /$count to address the number of its entries.",
+      "keyPoints": [
+        "Collection = entity set name (or a service operation returning entries).",
+        "KeyPredicate = key value(s) in parentheses: Categories(1).",
+        "Composite key: name=value pairs separated by commas.",
+        "Canonical entry URI: serviceRoot/Collection(key).",
+        "Collection/$count addresses the number of entries."
+      ],
+      "examples": [
+        {
+          "title": "Addressing collections and entries",
+          "language": "text",
+          "code": "GET /OData/OData.svc/Categories          all Categories (entity set \"Categories\")\nGET /OData/OData.svc/Categories(1)       the Category with key 1\nGET /OData/OData.svc/Products/$count     number of Products\n\nComposite key (two key properties):\nGET /Service.svc/OrderItems(OrderID=10248,ItemNo=1)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        }
+      ]
+    },
+    {
+      "id": "navigation-segments",
+      "level": "elementary",
+      "title": "How do NavPropSingle and NavPropCollection segments work in a resource path?",
+      "description": "After a key predicate you can follow navigation properties to related entries. A NavPropSingle segment is the name of a navigation property of the entry from the prior segment that has a \"to 1\" relationship, so it identifies a single entry, for example Products(1)/Supplier. A NavPropCollection segment is the same, but the navigation property has a \"to many\" relationship, so it identifies a collection of entries, for example Categories(1)/Products. Because a NavPropCollection yields a collection, it can again be followed by a key predicate or by /$count, and segments can be chained, as in Categories(1)/Products(1)/Supplier. Each segment is described in the metadata by the navigation property of the same name on the corresponding entity type.",
+      "keyPoints": [
+        "NavPropSingle: \"to 1\" navigation property; result is one entry.",
+        "NavPropCollection: \"to many\" navigation property; result is a collection.",
+        "A collection result can take a key predicate or /$count next.",
+        "Segments chain: Categories(1)/Products(1)/Supplier."
+      ],
+      "examples": [
+        {
+          "title": "Navigation in the demo service",
+          "language": "text",
+          "code": "GET /OData/OData.svc/Categories(1)/Products            Products of Category 1 (NavPropCollection)\nGET /OData/OData.svc/Categories(1)/Products/$count     how many of them\nGET /OData/OData.svc/Categories(1)/Products(1)/Supplier  the Supplier of that Product (NavPropSingle)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        }
+      ]
+    },
+    {
+      "id": "complex-property-segments",
+      "level": "elementary",
+      "title": "How do you address a property, a complex-type property and a raw value in a resource path?",
+      "description": "To address a property, you append the property name to the path of the entry. A Property segment is the name of a declared or dynamic property of the entry or complex type from the prior segment, for example Categories(1)/Name. If the property is of a complex type, a ComplexType segment addresses the whole structured value, for example Suppliers(1)/Address, and a further Property segment addresses one field inside it, for example .../Supplier/Address/City. Adding /$value to a primitive property addresses its raw value instead of its OData-formatted representation, for example .../Address/City/$value. In the metadata, these segments are described by the properties of the entity type or the complex type.",
+      "keyPoints": [
+        "Property segment: Categories(1)/Name.",
+        "ComplexType segment: Suppliers(1)/Address (the whole complex value).",
+        "Property inside a complex type: .../Address/City.",
+        "/$value: the raw value of a primitive property."
+      ],
+      "examples": [
+        {
+          "title": "Property paths",
+          "language": "text",
+          "code": "GET /OData/OData.svc/Categories(1)/Name\nGET /OData/OData.svc/Categories(1)/Products(1)/Supplier/Address/City\nGET /OData/OData.svc/Categories(1)/Products(1)/Supplier/Address/City/$value"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        }
+      ]
+    },
+    {
+      "id": "addressing-service-operations",
+      "level": "elementary",
+      "title": "How are service operations (function imports) addressed in a URI?",
+      "description": "A service operation is addressed like a resource: the service root URI followed by the name of the operation, optionally followed by a question mark and its parameters as ParamName=ParamValue pairs. Parameter values use the URI literal forms of the primitive types, so a string is written in single quotes. The order of parameters does not matter, and query string parameters that the operation does not define are ignored for the invocation. If the operation returns a collection of entries, it acts as a pseudo collection: further path segments such as a key predicate or a navigation property can follow it, as in ProductsByColor(3)/Category/Name?color='red'. An operation without parameters is addressed by its name only, for example ProductColors.",
+      "keyPoints": [
+        "serviceRoot/OperationName?param1=value1&param2=value2.",
+        "Values use URI literal forms (strings in single quotes).",
+        "Parameter order is insignificant; undefined parameters are ignored.",
+        "An operation returning entries can be followed by more path segments."
+      ],
+      "examples": [
+        {
+          "title": "Service operation URIs",
+          "language": "text",
+          "code": "GET /OData/OData.svc/ProductsByColor?color='red'\nGET /OData/OData.svc/ProductsByColor(3)/Category/Name?color='red'\nGET /OData/OData.svc/ProductColors"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        }
+      ]
+    },
+    {
+      "id": "addressing-links",
+      "level": "basic",
+      "title": "How do you address the links between entries with $links in OData V2?",
+      "description": "OData treats relationships as first-class constructs, so associations between entries can be addressed just like the entries themselves. The URI is the URI of a single entry, followed by /$links/ and the name of a navigation property declared on that entry. Categories(1)/$links/Products identifies the set of links to the products related to Category 1, and Products(1)/$links/Category identifies the link to the category of Product 1. Compared with Categories(1)/Products, which returns the related entries themselves, the $links URI returns only references (URIs) to them. The link resources are what you use to create, replace or remove relationships directly: POST to add a link, PUT to replace a single-valued link, and DELETE to remove one, with the target URI in the request body. In OData V4 the $links segment was replaced by /$ref.",
+      "keyPoints": [
+        "Syntax: Entry URI + /$links/ + NavigationProperty.",
+        "Returns link references (URIs), not the related entries.",
+        "Used to create (POST), replace (PUT) and delete (DELETE) relationships.",
+        "Replaced by /$ref in OData V4."
+      ],
+      "examples": [
+        {
+          "title": "Reading and changing links",
+          "language": "text",
+          "code": "GET    /OData/OData.svc/Categories(1)/$links/Products\nGET    /OData/OData.svc/Products(1)/$links/Category\n\nPOST   /OData/OData.svc/Categories(1)/$links/Products        (body: URI of Products(10))\nDELETE /OData/OData.svc/Categories(1)/$links/Products(10)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        }
+      ]
+    }
+  ]
+}

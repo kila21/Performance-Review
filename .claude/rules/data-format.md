@@ -1,0 +1,64 @@
+# Data format
+
+All content lives in `webapp/model/data/` and is loaded by `webapp/model/DataRepository.ts`.
+
+## Adding a subject
+1. Add `{ "id": "<subject>", "title": "<Title>" }` to `webapp/model/data/subjects.json`.
+2. Create `webapp/model/data/<subject>/index.json` and one JSON file per topic.
+3. Cover only the levels the user asks for. So far that is Elementary and Basic from the subject's `docs/*.docx` matrix.
+
+## index.json
+```json
+{
+  "id": "odata",
+  "title": "OData",
+  "groups": [
+    {
+      "id": "v2-batch-group",
+      "title": "OData V2: Batch processing",
+      "topics": [
+        {
+          "id": "v2-batch",
+          "title": "Batch processing",
+          "file": "v2-batch.json",
+          "questionCount": 4,
+          "resources": [{ "type": "Specification", "title": "...", "url": "https://..." }]
+        }
+      ]
+    }
+  ]
+}
+```
+- Group IDs and topic IDs must all be unique within a subject. When a group has the same name as its only topic, add `-group` to the group ID (`dwc-group`, `v2-batch-group`).
+- `questionCount` must equal the number of questions in the topic file.
+- Resource `type` values in use: `Documentation`, `Specification`, `API`, `Tutorial`, `Guideline`, `Package README`, `Architecture Center`, `video`.
+
+## Topic file
+```json
+{
+  "topicId": "v2-batch",
+  "title": "Batch processing",
+  "questions": [
+    {
+      "id": "what-is-batch",
+      "level": "elementary",
+      "title": "What is batch processing in OData V2...?",
+      "description": "Plain-text answer...",
+      "keyPoints": ["...", "..."],
+      "examples": [{ "title": "...", "language": "text", "code": "..." }],
+      "assignment": null,
+      "sources": [{ "title": "...", "url": "https://..." }]
+    }
+  ]
+}
+```
+- `level` is `elementary`, `basic` or `advanced`.
+- A placeholder question uses `"pending": true` and `resources` (title and url) instead of an answer.
+- `examples[].language` is a CodeEditor mode: `javascript`, `typescript`, `json`, `xml`, `yaml`, `sh`, `html`, `properties`, `ini`, `sql`, `text`. Use `text` for raw HTTP requests and responses.
+- `assignment` is `null` or `{ task, starterCode, solution }`. Assignment code is shown as JavaScript.
+
+## Writing descriptions
+`description` is plain text. `proseHtml` in `webapp/model/Formatter.ts` bolds the first sentence, splits the rest into short paragraphs and marks code-like tokens (`Edm.String`, `camelCase`, `fn()`) as inline code. Because of that:
+- Write a clear first sentence. It becomes the bold lead.
+- Sentences are split on `. ` before a capital letter, so avoid `e.g.` or `i.e.` followed by a capital letter.
+- Don't use Markdown or HTML. It is shown as escaped text.

@@ -1,0 +1,179 @@
+{
+  "topicId": "v2-query-options",
+  "title": "Query options",
+  "questions": [
+    {
+      "id": "orderby-top-skip",
+      "level": "elementary",
+      "title": "What do the $orderby, $top and $skip system query options do?",
+      "description": "System query options are query string parameters, prefixed with $, that control the amount and order of the data returned. $orderby specifies an expression for ordering the collection of entries identified by the resource path; it is only supported on collections. The default direction is ascending, asc and desc can be written explicitly, and several sort keys can be comma-separated, including properties of related entries such as Category/Name. $top selects only the first N entries, and $skip seeks N entries into the collection and returns the rest, starting with entry N+1; N must be an integer greater than or equal to zero, otherwise the URI is malformed. Combined, $skip and $top implement paging. If $top or $skip is used without $orderby, the service must still apply a stable full ordering of its own, so that results are repeatable across requests.",
+      "keyPoints": [
+        "$orderby: sort a collection; asc (default) or desc; comma-separated keys.",
+        "$top=N: first N entries.",
+        "$skip=N: skip N entries, return the rest (from N+1).",
+        "$skip + $top = paging; without $orderby the service uses its own stable order."
+      ],
+      "examples": [
+        {
+          "title": "Sorting and paging",
+          "language": "text",
+          "code": "https://services.odata.org/OData/OData.svc/Products?$orderby=Rating\nhttps://services.odata.org/OData/OData.svc/Products?$orderby=Rating,Category/Name desc\nhttps://services.odata.org/OData/OData.svc/Products?$top=5&$orderby=Name desc\nhttps://services.odata.org/OData/OData.svc/Products?$skip=2&$top=2&$orderby=Rating     (3rd and 4th product)"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        }
+      ]
+    },
+    {
+      "id": "expand-select",
+      "level": "elementary",
+      "title": "What do $expand and $select do in OData V2?",
+      "description": "$expand indicates that entries associated with the addressed entry or collection must be represented inline, that is, eagerly loaded. Instead of two requests, one for Categories(1) and one for Categories(1)/Products, a single request with $expand=Products returns the category together with its products. Its value is a comma-separated list of navigation properties, and each can be followed by a slash and another navigation property for multi-level expansion, as in Products/Suppliers. $select (supported from OData V2) returns the same entries but only a subset of their properties: a comma-separated list of property names, navigation property names or *. If a selected property is of a complex type, all its fields are returned; selecting a navigation property returns only a link to it unless it is also expanded; and * returns all properties without traversing associations. Together they let a client fetch exactly the graph and the fields it needs.",
+      "keyPoints": [
+        "$expand: return related entries inline (one request instead of several).",
+        "Multi-level: $expand=Products/Suppliers; several: $expand=Category,Suppliers.",
+        "$select: only the listed properties (V2 and later); * = all properties.",
+        "A selected navigation property returns a link unless it is also expanded."
+      ],
+      "examples": [
+        {
+          "title": "Expand and select",
+          "language": "text",
+          "code": "https://services.odata.org/OData/OData.svc/Categories?$expand=Products\nhttps://services.odata.org/OData/OData.svc/Categories?$expand=Products/Suppliers\nhttps://services.odata.org/OData/OData.svc/Products?$select=Price,Name\nhttps://services.odata.org/OData/OData.svc/Categories?$select=Name,Products&$expand=Products"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        }
+      ]
+    },
+    {
+      "id": "format-count",
+      "level": "elementary",
+      "title": "What do $format and $count do in OData V2?",
+      "description": "$format specifies the media type the response must use, and it takes precedence over the Accept request header. Valid values are atom (application/atom+xml), xml (application/xml), json (application/json), any other IANA-defined content type, or a service-specific value. It exists because in some scenarios clients cannot control request headers. $count is used as a path segment in V2: appending /$count to a collection, for example Products/$count or Categories(1)/Products/$count, addresses the number of entries in that collection instead of the entries themselves. If you need the entries and the total count in one response, V2 uses the separate $inlinecount option.",
+      "keyPoints": [
+        "$format=json | atom | xml: forces the response format; overrides the Accept header.",
+        "Useful when the client cannot set request headers.",
+        "/$count after a collection returns only the number of entries.",
+        "Entries plus total count in one response: $inlinecount=allpages."
+      ],
+      "examples": [
+        {
+          "title": "Format and count",
+          "language": "text",
+          "code": "https://services.odata.org/OData/OData.svc/Products?$format=json\nhttps://services.odata.org/OData/OData.svc/Products?$format=atom\nhttps://services.odata.org/OData/OData.svc/Products/$count\nhttps://services.odata.org/OData/OData.svc/Categories(1)/Products/$count"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        }
+      ]
+    },
+    {
+      "id": "service-operation-parameters",
+      "level": "elementary",
+      "title": "How are parameters passed to a service operation (function import)?",
+      "description": "The query options part of an OData URI carries three kinds of information: system query options, custom query options and service operation parameters. Service operations accept zero or more parameters of primitive types. They are passed as name/value pairs in the query string of the URI that identifies the operation, for example GetProductsByRating?rating=5. The parameter name is used as is, without a $ prefix, because $ is reserved for OData's own options, and the value is written in the OData literal form of its type. For a nullable parameter, a null value is passed by leaving the parameter out of the query string.",
+      "keyPoints": [
+        "Parameters are query string name=value pairs on the operation's URI.",
+        "No $ prefix ($ is reserved for system query options).",
+        "Values in URI literal form: rating=5, color='red'.",
+        "Null for a nullable parameter: omit it."
+      ],
+      "examples": [
+        {
+          "title": "Passing parameters",
+          "language": "text",
+          "code": "https://services.odata.org/OData/OData.svc/GetProductsByRating?rating=5\nhttps://services.odata.org/OData/OData.svc/ProductsByColor?color='red'"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        }
+      ]
+    },
+    {
+      "id": "inlinecount-value",
+      "level": "basic",
+      "title": "What do $inlinecount and $value do in OData V2?",
+      "description": "$inlinecount (OData V2 and later) asks the service to include, in the same response, the count of entries in the collection identified by the resource path. The count is calculated after applying $filter but before $top and $skip, so it gives the total number of matching entries, which a client needs for paging. Its values are allpages (include the count) and none (no count, the same as leaving the option out); any other value makes the URI malformed. In V2 JSON the count appears as __count. $value is a path segment appended to a primitive property to address its raw value, which the service returns in its raw media type (for example text/plain) instead of wrapping it in Atom, XML or JSON. In OData V4, $inlinecount=allpages became $count=true.",
+      "keyPoints": [
+        "$inlinecount=allpages: total count of entries matching $filter, alongside the entries.",
+        "$inlinecount=none: no count (default).",
+        "Count ignores $top/$skip, which makes it useful for paging; JSON field __count.",
+        "/$value: raw value of a primitive property (for example text/plain).",
+        "V4 replaces $inlinecount=allpages with $count=true."
+      ],
+      "examples": [
+        {
+          "title": "Inline count and raw value",
+          "language": "text",
+          "code": "https://services.odata.org/OData/OData.svc/Products?$inlinecount=allpages\nhttps://services.odata.org/OData/OData.svc/Products?$inlinecount=allpages&$top=10&$filter=Price gt 200\nhttps://services.odata.org/OData/OData.svc/Products(1)/Description/$value"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        }
+      ]
+    },
+    {
+      "id": "custom-query-options",
+      "level": "basic",
+      "title": "What are custom query options in OData V2?",
+      "description": "Custom query options are an extension point for service-specific information in the query string of a URI. A custom query option is any name/value pair whose name does not begin with the $ character; names with $ are reserved for system query options. Any URI exposed by an OData service may include one or more custom query options, and their meaning is defined by the service, not by OData. For example, Products?x=y identifies all products and passes an option x whose meaning is service-specific.",
+      "keyPoints": [
+        "Any query parameter whose name does not start with $.",
+        "Meaning is defined by the service, not by the protocol.",
+        "Can be added to any OData URI.",
+        "Service operation parameters also have no $, but they belong to the operation's URI."
+      ],
+      "examples": [
+        {
+          "title": "Custom query option",
+          "language": "text",
+          "code": "https://services.odata.org/OData/OData.svc/Products?x=y"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        }
+      ]
+    }
+  ]
+}

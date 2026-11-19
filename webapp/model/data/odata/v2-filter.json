@@ -1,0 +1,88 @@
+{
+  "topicId": "v2-filter",
+  "title": "$filter expressions",
+  "questions": [
+    {
+      "id": "filter-logical",
+      "level": "elementary",
+      "title": "Which logical operators can be used in $filter, and how are they written?",
+      "description": "$filter selects only the entries of a collection that satisfy a predicate expression. The expression can reference properties (also through navigation, as in Address/City) and literals: strings in single quotes, numbers, true and false, and the other primitive literal forms. The logical and comparison operators are eq (equal), ne (not equal), gt (greater than), ge (greater than or equal), lt (less than), le (less than or equal), and (logical and), or (logical or) and not (logical negation). Operators are written as words, not symbols, so Price > 20 is written Price gt 20. There are no ISNULL or COALESCE operators; you compare against the null literal instead.",
+      "keyPoints": [
+        "Comparison: eq, ne, gt, ge, lt, le.",
+        "Logical: and, or, not.",
+        "Operators are words: Price gt 20, not Price > 20.",
+        "Strings in single quotes; compare with null instead of ISNULL."
+      ],
+      "examples": [
+        {
+          "title": "Logical operators",
+          "language": "text",
+          "code": "/Suppliers?$filter=Address/City eq 'Redmond'\n/Suppliers?$filter=Address/City ne 'London'\n/Products?$filter=Price gt 20\n/Products?$filter=Price le 200 and Price gt 3.5\n/Products?$filter=Price le 3.5 or Price gt 200\n/Products?$filter=not endswith(Description,'milk')"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        }
+      ]
+    },
+    {
+      "id": "filter-arithmetic",
+      "level": "elementary",
+      "title": "Which arithmetic operators does $filter support?",
+      "description": "The $filter expression language includes arithmetic operators that compute a value which is then compared: add (addition), sub (subtraction), mul (multiplication), div (division) and mod (modulo). Like the logical operators, they are written as words. A typical use is filtering on a calculated value, for example Price add 5 gt 10 or Price mod 2 eq 0 for even prices.",
+      "keyPoints": [
+        "add, sub, mul, div, mod.",
+        "The result is used inside a comparison: Price mul 2 gt 2000.",
+        "Written as words, like the logical operators."
+      ],
+      "examples": [
+        {
+          "title": "Arithmetic operators",
+          "language": "text",
+          "code": "/Products?$filter=Price add 5 gt 10\n/Products?$filter=Price sub 5 gt 10\n/Products?$filter=Price mul 2 gt 2000\n/Products?$filter=Price div 2 gt 4\n/Products?$filter=Price mod 2 eq 0"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        }
+      ]
+    },
+    {
+      "id": "filter-grouping-functions",
+      "level": "basic",
+      "title": "What are the grouping operator and the built-in functions of $filter in OData V2?",
+      "description": "Parentheses are the grouping operator: they set precedence, as in (Price sub 5) gt 10, and are needed whenever you mix and with or in a way that differs from the default precedence. Besides operators, $filter offers built-in functions. String functions are substringof, endswith, startswith, length, indexof, replace, substring, tolower, toupper, trim and concat. Date functions extract parts of an Edm.DateTime: day, hour, minute, month, second and year. Math functions are round, floor and ceiling, for both double and decimal values. Type functions are isof(type) and isof(expression, type). Note the argument order of substringof in V2: the searched-for string comes first, as in substringof('Alfreds', CompanyName); V4 replaced it with contains.",
+      "keyPoints": [
+        "Grouping: ( ) changes precedence: (Price sub 5) gt 10.",
+        "String: substringof, startswith, endswith, length, indexof, replace, substring, tolower, toupper, trim, concat.",
+        "Date: year, month, day, hour, minute, second.",
+        "Math: round, floor, ceiling. Type: isof.",
+        "substringof('x', Field): search string first; V4 uses contains(Field,'x')."
+      ],
+      "examples": [
+        {
+          "title": "Grouping and functions on the Northwind service",
+          "language": "text",
+          "code": "/Products?$filter=(Price sub 5) gt 10\n/Customers?$filter=substringof('Alfreds', CompanyName) eq true\n/Customers?$filter=startswith(CompanyName, 'Alfr') eq true\n/Customers?$filter=tolower(CompanyName) eq 'alfreds futterkiste'\n/Employees?$filter=year(BirthDate) eq 1948\n/Orders?$filter=round(Freight) eq 32\n/Orders?$filter=isof('NorthwindModel.Order')"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        }
+      ]
+    }
+  ]
+}

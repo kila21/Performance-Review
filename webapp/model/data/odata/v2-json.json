@@ -1,0 +1,164 @@
+{
+  "topicId": "v2-json",
+  "title": "JSON format",
+  "questions": [
+    {
+      "id": "json-primitive-values",
+      "level": "elementary",
+      "title": "How are primitive type values represented in the OData V2 JSON format?",
+      "description": "In JSON, primitive values are JSON literals, but not every EDM type maps to a JSON number. Edm.Boolean is true or false, Edm.String is any JSON string, and Edm.Int16 and Edm.Int32 are JSON numbers. Edm.Int64, Edm.Decimal, Edm.Double, Edm.Single, Edm.Byte, Edm.SByte, Edm.Guid, Edm.Time and Edm.DateTimeOffset are written as JSON strings containing their URI literal form; for Int64 and Decimal this avoids losing precision in JavaScript numbers. Edm.Binary is a Base64-encoded string. Edm.DateTime has a special form, \"/Date(<ticks>)/\", where ticks is the number of milliseconds since midnight January 1, 1970, optionally followed by an offset in minutes.",
+      "keyPoints": [
+        "Boolean: true/false; String: JSON string; Int16/Int32: JSON numbers.",
+        "Int64, Decimal, Double, Single, Byte, SByte, Guid, Time, DateTimeOffset: JSON strings.",
+        "Binary: Base64 string.",
+        "DateTime: \"/Date(<milliseconds since 1970>)/\"."
+      ],
+      "examples": [
+        {
+          "title": "Primitive values in a Product entry",
+          "language": "json",
+          "code": "{\n  \"ID\": 0,\n  \"Name\": \"Bread\",\n  \"ReleaseDate\": \"/Date(694224000000)/\",\n  \"DiscontinuedDate\": null,\n  \"Rating\": 4,\n  \"Price\": \"2.5\"\n}"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        }
+      ]
+    },
+    {
+      "id": "json-collections",
+      "level": "elementary",
+      "title": "How is a collection of entries represented in OData V2 JSON (d, results, __count, __next)?",
+      "description": "In response payloads every OData JSON representation is wrapped in an outer object with a single name/value pair named d. This makes the payload valid JSON but not a valid JavaScript statement, which prevents an OData response from being executed as part of a cross-site scripting (XSS) attack. In OData V1 a collection was a plain array under d; in V2 the array of entries is the value of a results property, so that collection-level metadata can sit next to it. V2 defines two such pieces: __count, the number of entries in the collection, included only when the request used $inlinecount; and __next, a URI that identifies the next partial set of entries, included when the server returned only part of the collection (server-side paging).",
+      "keyPoints": [
+        "Outer wrapper d: response is valid JSON but not executable JavaScript (XSS protection).",
+        "V2: entries are in d.results (V1: d was the array itself).",
+        "__count: total number of entries; only with $inlinecount=allpages.",
+        "__next: URI of the next page when the response is partial."
+      ],
+      "examples": [
+        {
+          "title": "V2 collection with count and next link",
+          "language": "json",
+          "code": "{\n  \"d\": {\n    \"results\": [\n      {\n        \"__metadata\": {\n          \"uri\": \"https://services.odata.org/OData/OData.svc/Categories(0)\",\n          \"type\": \"DataServiceProviderDemo.Category\"\n        },\n        \"ID\": 0,\n        \"Name\": \"Food\",\n        \"Products\": {\n          \"__deferred\": { \"uri\": \"https://services.odata.org/OData/OData.svc/Categories(0)/Products\" }\n        }\n      }\n    ],\n    \"__count\": \"3\",\n    \"__next\": \"https://services.odata.org/OData/OData.svc$skiptoken=12\"\n  }\n}"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        }
+      ]
+    },
+    {
+      "id": "json-entry-metadata",
+      "level": "elementary",
+      "title": "How is an individual entry represented in V2 JSON, and what do __metadata uri, type and etag mean?",
+      "description": "An entry is a JSON object in which each property of the entry is a name/value pair; with $select, only the selected properties appear. The only pair that does not represent a property is the optional __metadata object, which carries metadata about the entry. Its uri is the canonical URI that identifies the entry and is always present. Its type is the name of the entity type of the entry; it is optional, but must be included if the entry is part of a type hierarchy and is not of the base type. Its etag, also optional, is the concurrency token of the entry. Media link entries have further fields such as media_src, edit_media, media_etag and content_type.",
+      "keyPoints": [
+        "Entry = JSON object; each property is a name/value pair.",
+        "__metadata.uri: canonical URI of the entry (required).",
+        "__metadata.type: entity type name (required for derived types).",
+        "__metadata.etag: concurrency token (optional).",
+        "Media link entries add media_src, edit_media, media_etag, content_type."
+      ],
+      "examples": [
+        {
+          "title": "A single Category entry",
+          "language": "json",
+          "code": "{\n  \"d\": {\n    \"__metadata\": {\n      \"uri\": \"https://services.odata.org/OData/OData.svc/Categories(0)\",\n      \"type\": \"DataServiceProviderDemo.Category\"\n    },\n    \"ID\": 0,\n    \"Name\": \"Food\",\n    \"Products\": {\n      \"__deferred\": { \"uri\": \"https://services.odata.org/OData/OData.svc/Categories(0)/Products\" }\n    }\n  }\n}"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        }
+      ]
+    },
+    {
+      "id": "json-property-values",
+      "level": "elementary",
+      "title": "How are property values, complex properties and raw values represented in V2 JSON?",
+      "description": "Inside an entry or complex value, a primitive property is a name/value pair whose value follows the primitive type rules. A complex-type property is a nested JSON object with one name/value pair per field of the complex type. When a single property is requested on its own, for example GET Categories(1)/Name or Suppliers(1)/Address, OData V2 wraps it in a results pair inside d, and a standalone complex value can carry its own __metadata with the complex type name. The raw value of a primitive property, requested with /$value, is not JSON at all: the service returns it in its raw media type, for example text/plain with the body Food.",
+      "keyPoints": [
+        "Primitive property: \"Name\": \"Bread\".",
+        "Complex property: nested object, one pair per field.",
+        "Standalone property response (V2): { \"d\": { \"results\": ... } }.",
+        "Raw value (/$value): plain body in its own media type, not JSON."
+      ],
+      "examples": [
+        {
+          "title": "Standalone complex property and raw value",
+          "language": "text",
+          "code": "GET .../Suppliers(0)/Address   (Accept: application/json)\n{\n  \"d\": {\n    \"results\": {\n      \"__metadata\": { \"type\": \"DataServiceProviderDemo.Address\" },\n      \"Street\": \"NE 228th\", \"City\": \"Sammamish\", \"State\": \"WA\",\n      \"ZipCode\": \"98074\", \"Country\": \"USA\"\n    }\n  }\n}\n\nGET .../Categories(0)/Name/$value\nHTTP/1.1 200 OK\nContent-Type: text/plain;charset=utf-8\n\nFood"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        }
+      ]
+    },
+    {
+      "id": "json-deferred-inline",
+      "level": "basic",
+      "title": "What is deferred content in V2 JSON, and how are expanded (inline) related entries represented?",
+      "description": "To save bandwidth and CPU, a service should not return the full graph of related entries by default. A navigation property is therefore represented as deferred content: an object with a __deferred pair whose uri points to the related entry or collection, for example \"Products\": { \"__deferred\": { \"uri\": \".../Categories(0)/Products\" } }. The uri must be present, and the client can follow it to load the related data later. The navigation property is represented inline instead of deferred only when the client asks for it with $expand: then the navigation property's value contains the related entries themselves, each with its own __metadata and properties, while their own unexpanded navigation properties stay deferred.",
+      "keyPoints": [
+        "Default: navigation properties are __deferred objects with a uri.",
+        "Deferred keeps payloads small; the client follows the uri when needed.",
+        "With $expand, related entries are serialized inline instead.",
+        "Inline entries have their own __metadata; their own links stay deferred."
+      ],
+      "examples": [
+        {
+          "title": "Category with its Products expanded (?$expand=Products)",
+          "language": "json",
+          "code": "{\n  \"d\": {\n    \"__metadata\": { \"uri\": \".../Categories(0)\", \"type\": \"DataServiceProviderDemo.Category\" },\n    \"ID\": 0,\n    \"Name\": \"Food\",\n    \"Products\": [\n      {\n        \"__metadata\": { \"uri\": \".../Products(0)\", \"etag\": \"W/\\\"0\\\"\", \"type\": \"DataServiceProviderDemo.Product\" },\n        \"ID\": 0,\n        \"Name\": \"Bread\",\n        \"Category\": { \"__deferred\": { \"uri\": \".../Products(0)/Category\" } },\n        \"Supplier\": { \"__deferred\": { \"uri\": \".../Products(0)/Supplier\" } }\n      }\n    ]\n  }\n}"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        }
+      ]
+    },
+    {
+      "id": "json-links-service-operations",
+      "level": "basic",
+      "title": "How are links and the results of service operations represented in V2 JSON?",
+      "description": "A single link, as returned for a $links URI with multiplicity 1, is a JSON object with a uri pair whose value identifies the linked entry. A collection of links is an array of such objects; in V2 it sits under results and may be accompanied by __count. Results of service operations reuse the existing rules: a single entry or a collection of entries is formatted like any entry or collection, a single primitive value like a standalone primitive property, and a single complex value like a standalone complex property. A collection of primitive values is returned as a JSON array, for example { \"d\": [0, 1, 2] }, and a collection of complex values as an array of objects, one per complex value.",
+      "keyPoints": [
+        "Single link: { \"d\": { \"uri\": \"...\" } }.",
+        "Link collection (V2): { \"d\": { \"results\": [ {\"uri\": ...}, ... ], \"__count\": ... } }.",
+        "Service operation returning entries: same as entries/collections.",
+        "Single primitive/complex result: same as a standalone property.",
+        "Collection of primitives: JSON array under d; collection of complex values: array of objects."
+      ],
+      "examples": [
+        {
+          "title": "Links and a primitive-collection result",
+          "language": "json",
+          "code": "{ \"d\": { \"uri\": \"https://services.odata.org/OData/OData.svc/Suppliers(0)\" } }\n\n{\n  \"d\": {\n    \"results\": [\n      { \"uri\": \"https://services.odata.org/OData/OData.svc/Products(0)\" },\n      { \"uri\": \"https://services.odata.org/OData/OData.svc/Products(7)\" }\n    ],\n    \"__count\": \"2\"\n  }\n}\n\n{ \"d\": [ 0, 1, 2 ] }"
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        }
+      ]
+    }
+  ]
+}

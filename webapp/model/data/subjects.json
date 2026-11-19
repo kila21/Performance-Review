@@ -1,5 +1,6 @@
 [
   { "id": "javascript", "title": "JavaScript" },
   { "id": "sapui5", "title": "SAPUI5" },
-  { "id": "btp", "title": "SAP BTP" }
+  { "id": "btp", "title": "SAP BTP" },
+  { "id": "odata", "title": "OData" }
 ]
