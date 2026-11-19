@@ -96,6 +96,37 @@
         </VBox>
       </Panel>
 
+      <!-- Side-by-side comparison of how the topic works in OData V2 and V4 (only on questions that have one). -->
+      <Panel
+        headerText="{i18n>versionDiffLabel}"
+        class="prCard"
+        width="auto"
+        visible="{= !!${topic>versionDiff} &amp;&amp; ${topic>versionDiff}.length > 0 }"
+      >
+        <Table items="{path: 'topic>versionDiff', templateShareable: false}" fixedLayout="false">
+          <columns>
+            <Column width="12rem">
+              <Text text="{i18n>versionDiffAspect}" />
+            </Column>
+            <Column minScreenWidth="Tablet" demandPopin="true">
+              <Text text="{i18n>versionDiffV2}" />
+            </Column>
+            <Column minScreenWidth="Tablet" demandPopin="true">
+              <Text text="{i18n>versionDiffV4}" />
+            </Column>
+          </columns>
+          <items>
+            <ColumnListItem>
+              <cells>
+                <Text text="{topic>aspect}" wrapping="true" />
+                <Text text="{topic>v2}" wrapping="true" />
+                <Text text="{topic>v4}" wrapping="true" />
+              </cells>
+            </ColumnListItem>
+          </items>
+        </Table>
+      </Panel>
+
       <!-- The official pages the answer was written from. -->
       <Panel
         headerText="{i18n>sourcesLabel}"

@@ -1,0 +1,98 @@
+{
+  "topicId": "v4-structural-types",
+  "title": "Structural types & type definitions",
+  "questions": [
+    {
+      "id": "v4-structural-property-types",
+      "level": "basic",
+      "title": "Which types can a structural property have in OData V4?",
+      "description": "Entity types and complex types are structured types, made of structural properties and navigation properties. A structural property must have a unique name and a type, and that type is one of four kinds: a primitive type (such as Edm.String or Edm.Decimal), a complex type (a keyless structured type such as Address), an enumeration type (a named set of members with underlying integer values, written by member name), or a collection of one of these. A collection-valued property is declared with the Collection(...) syntax, for example Type=\"Collection(Edm.String)\", and facets such as MaxLength then apply to the items of the collection.",
+      "keyPoints": [
+        "Structural property type = primitive, complex, enumeration, or a collection of these.",
+        "Collection syntax: Type=\"Collection(Edm.String)\".",
+        "Facets on a collection apply to its items.",
+        "Navigation properties are separate: they point to entity types."
+      ],
+      "examples": [
+        {
+          "title": "All four kinds in TripPin's Person entity type (excerpt of its $metadata)",
+          "language": "xml",
+          "code": "<EnumType Name=\"PersonGender\">\n  <Member Name=\"Male\" Value=\"0\" />\n  <Member Name=\"Female\" Value=\"1\" />\n  <Member Name=\"Unknown\" Value=\"2\" />\n</EnumType>\n\n<ComplexType Name=\"Location\" OpenType=\"true\">\n  <Property Name=\"Address\" Type=\"Edm.String\" Nullable=\"false\" />\n  <Property Name=\"City\" Type=\"Microsoft.OData.SampleService.Models.TripPin.City\" Nullable=\"false\" />\n</ComplexType>\n\n<EntityType Name=\"Person\" OpenType=\"true\">\n  <Key><PropertyRef Name=\"UserName\" /></Key>\n  <Property Name=\"UserName\" Type=\"Edm.String\" Nullable=\"false\" />                  <!-- primitive -->\n  <Property Name=\"Emails\" Type=\"Collection(Edm.String)\" />                         <!-- collection of primitive -->\n  <Property Name=\"AddressInfo\"\n            Type=\"Collection(Microsoft.OData.SampleService.Models.TripPin.Location)\" /> <!-- collection of complex -->\n  <Property Name=\"Gender\" Type=\"Microsoft.OData.SampleService.Models.TripPin.PersonGender\" /> <!-- enumeration -->\n  ...\n</EntityType>\n\nValues in a response (GET .../People('russellwhyte')):\n\"Emails\":[\"Russell@example.com\",\"Russell@contoso.com\"],\n\"AddressInfo\":[{\"Address\":\"187 Suffolk Ln.\",\"City\":{\"CountryRegion\":\"United States\",\"Name\":\"Boise\",\"Region\":\"ID\"}}],\n\"Gender\":\"Male\""
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Types of a structural property",
+          "v2": "Primitive or complex.",
+          "v4": "Primitive, complex or enumeration, or a collection of one of these."
+        },
+        {
+          "aspect": "Enumerations",
+          "v2": "-",
+          "v4": "EnumType with members; values are written by member name, for example \"Gender\":\"Male\"."
+        },
+        {
+          "aspect": "Collection-valued properties",
+          "v2": "-",
+          "v4": "Type=\"Collection(Edm.String)\", for example TripPin's Emails."
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
+        },
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        }
+      ]
+    },
+    {
+      "id": "v4-type-definition",
+      "level": "basic",
+      "title": "What is a type definition in OData V4, and what is its underlying primitive type?",
+      "description": "A type definition gives a new name to a primitive type and can fix some of its facets, following the \"don't repeat yourself\" idea: define the type once and use it wherever it applies. It is declared with edm:TypeDefinition, which must have a Name and an UnderlyingType. The underlying type must be a primitive type and cannot itself be another type definition. The type definition may fix facets of the underlying type (MaxLength, Unicode, Precision, Scale or SRID), and those facets cannot be specified again where it is used. Type definitions can be used wherever a primitive type is used, and can carry annotations, for example a unit of measure, that apply to every property using them. In responses, the type definition appears in place of the primitive type.",
+      "keyPoints": [
+        "Type definition = named specialization of a primitive type.",
+        "Required: Name and UnderlyingType (a primitive type, not another type definition).",
+        "May fix facets: MaxLength, Unicode, Precision, Scale, SRID.",
+        "Usable wherever a primitive type is; annotations travel with it."
+      ],
+      "examples": [
+        {
+          "title": "Type definitions with units (CSDL spec example; TripPin defines none)",
+          "language": "xml",
+          "code": "<TypeDefinition Name=\"Length\" UnderlyingType=\"Edm.Int32\">\n  <Annotation Term=\"Org.OData.Measures.V1.Unit\" String=\"Centimeters\" />\n</TypeDefinition>\n<TypeDefinition Name=\"Weight\" UnderlyingType=\"Edm.Int32\">\n  <Annotation Term=\"Org.OData.Measures.V1.Unit\" String=\"Kilograms\" />\n</TypeDefinition>\n\n<ComplexType Name=\"Size\">\n  <Property Name=\"Height\" Type=\"self.Length\" />\n  <Property Name=\"Weight\" Type=\"self.Weight\" />\n</ComplexType>"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Reusable named primitive types",
+          "v2": "-",
+          "v4": "TypeDefinition with an UnderlyingType and fixed facets; annotations on it apply wherever it is used."
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        }
+      ]
+    }
+  ]
+}

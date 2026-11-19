@@ -1,0 +1,219 @@
+{
+  "topicId": "v2-edm",
+  "title": "Entity Data Model",
+  "questions": [
+    {
+      "id": "entity-type-entity-key",
+      "level": "elementary",
+      "title": "What are an Entity Type, an Entity and an Entity Key in the OData V2 EDM?",
+      "description": "The central concepts of the Entity Data Model are entities and associations. An Entity Type (for example Customer or Employee) defines a structured record: a list of named and typed properties plus a key. An Entity is an instance of an Entity Type; in the protocol each Entry of a feed is described by an Entity Type, and entity types may be part of a type hierarchy. The Entity Key is formed from a subset of the properties of the Entity Type (for example CustomerId or OrderId). It is the fundamental concept for uniquely identifying instances of an Entity Type and for allowing those instances to take part in relationships. In URIs the key appears as the key predicate in parentheses. With a single key property the predicate may contain only the key value, as in Products(1); if the key is made up of two or more properties, the values must be given as comma-separated name=value pairs.",
+      "keyPoints": [
+        "Entity Type = structured type with named, typed properties and a key.",
+        "Entity = one instance of an Entity Type (an Entry in a feed).",
+        "Entity Key = subset of the type's properties that uniquely identifies an instance.",
+        "Single key in a URI: Products(1). Composite key: OrderItems(OrderID=10248,ItemNo=1).",
+        "The key makes instances addressable and lets them take part in relationships."
+      ],
+      "examples": [
+        {
+          "title": "Product entity type of the V2 demo service",
+          "language": "xml",
+          "code": "<EntityType Name=\"Product\">\n  <Key>\n    <PropertyRef Name=\"ID\" />                         <!-- the Entity Key -->\n  </Key>\n  <Property Name=\"ID\" Type=\"Edm.Int32\" Nullable=\"false\" />\n  <Property Name=\"Name\" Type=\"Edm.String\" />\n  <Property Name=\"Description\" Type=\"Edm.String\" />\n  <Property Name=\"ReleaseDate\" Type=\"Edm.DateTime\" Nullable=\"false\" />\n  <Property Name=\"DiscontinuedDate\" Type=\"Edm.DateTime\" />\n  <Property Name=\"Rating\" Type=\"Edm.Int32\" Nullable=\"false\" />\n  <Property Name=\"Price\" Type=\"Edm.Decimal\" Nullable=\"false\" />\n  <NavigationProperty Name=\"Category\" Relationship=\"ODataDemo.Product_Category_Category_Products\"\n                      ToRole=\"Category_Products\" FromRole=\"Product_Category\" />\n  <NavigationProperty Name=\"Supplier\" Relationship=\"ODataDemo.Product_Supplier_Supplier_Products\"\n                      ToRole=\"Supplier_Products\" FromRole=\"Product_Supplier\" />\n</EntityType>"
+        },
+        {
+          "title": "Addressing an entity by its key",
+          "language": "text",
+          "code": "Single key property (the key value alone):\nGET https://services.odata.org/V2/OData/OData.svc/Products(1)\n\nKey made of two properties (name=value pairs, comma-separated):\nGET /Service.svc/OrderItems(OrderID=10248,ItemNo=1)"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Key properties",
+          "v2": "A subset of the entity type's properties.",
+          "v4": "A subset of the entity type's primitive properties."
+        },
+        {
+          "aspect": "Keys of dependent entities in URLs",
+          "v2": "Each entity is addressed with its full key.",
+          "v4": "Paths from a parent to a child don't repeat key properties fixed by a referential constraint, for example ~/Orders(1)/Items(2)."
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        },
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        }
+      ]
+    },
+    {
+      "id": "entity-set-association",
+      "level": "elementary",
+      "title": "What are an Entity Set, an Association, an Association Set and a Navigation Property?",
+      "description": "Entities are grouped in Entity Sets; for example Customers is a set of Customer instances, and the feeds of a service correspond to its entity sets. Associations define the relationship between two or more Entity Types, for example Employee WorksFor Department, including the multiplicity of each end. Instances of associations are grouped in Association Sets, which tie the association to concrete entity sets. Navigation Properties are special properties on Entity Types that are bound to a specific association and are used to refer to the associated entities. A navigation property is not a structural part of the entry; it represents a Link, and following it gives either a single related entry or a feed of related entries, for example Categories(1)/Products.",
+      "keyPoints": [
+        "Entity Set = named group of entities of one type; it is what a top-level feed exposes.",
+        "Association = relationship between entity types, with a multiplicity on each end.",
+        "Association Set = groups association instances and binds the ends to entity sets.",
+        "Navigation Property = property bound to an association; it represents a Link, not data."
+      ],
+      "examples": [
+        {
+          "title": "Product-Category relationship in the V2 demo service metadata",
+          "language": "xml",
+          "code": "<!-- Association: the relationship between Product and Category, with a multiplicity per end -->\n<Association Name=\"Product_Category_Category_Products\">\n  <End Type=\"ODataDemo.Category\" Role=\"Category_Products\" Multiplicity=\"0..1\" />\n  <End Type=\"ODataDemo.Product\"  Role=\"Product_Category\"  Multiplicity=\"*\" />\n</Association>\n\n<!-- In the EntityContainer: the entity sets, and the association set that binds the ends to them -->\n<EntitySet Name=\"Products\"   EntityType=\"ODataDemo.Product\" />\n<EntitySet Name=\"Categories\" EntityType=\"ODataDemo.Category\" />\n<AssociationSet Name=\"Products_Category_Categories\"\n                Association=\"ODataDemo.Product_Category_Category_Products\">\n  <End Role=\"Product_Category\"  EntitySet=\"Products\" />\n  <End Role=\"Category_Products\" EntitySet=\"Categories\" />\n</AssociationSet>\n\n<!-- On Product: navigation property bound to the association -->\n<NavigationProperty Name=\"Category\" Relationship=\"ODataDemo.Product_Category_Category_Products\"\n                    ToRole=\"Category_Products\" FromRole=\"Product_Category\" />\n\n<!-- On Category: the opposite direction of the same association -->\n<NavigationProperty Name=\"Products\" Relationship=\"ODataDemo.Product_Category_Category_Products\"\n                    ToRole=\"Product_Category\" FromRole=\"Category_Products\" />"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Relationships",
+          "v2": "Association elements, intrinsically bidirectional.",
+          "v4": "Association, FromRole and ToRole were pruned; navigation properties are intrinsically unidirectional."
+        },
+        {
+          "aspect": "Navigation property attributes",
+          "v2": "Relationship, FromRole and ToRole point into an Association.",
+          "v4": "Type (the target entity type, which can even be in another service), plus Nullable, Partner, ReferentialConstraint and OnDelete."
+        },
+        {
+          "aspect": "Which set the related entities are in",
+          "v2": "AssociationSet binds each association end to an entity set.",
+          "v4": "AssociationSet was pruned; an optional NavigationPropertyBinding (Path, Target) on the entity set replaces it."
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        },
+        {
+          "title": "OData Version 2.0: Terminology (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/terminology/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        }
+      ]
+    },
+    {
+      "id": "function-import",
+      "level": "elementary",
+      "title": "What is a Function Import in OData V2 metadata?",
+      "description": "A Function Import is how the metadata document describes a Service Operation. Service Operations are simple, service-specific functions that accept input parameters and return entries or complex or primitive values; their semantics are defined by the author of the function. In the metadata, the Function Import declares the operation's name, its parameters (primitive types only), its return type and, for entries, the entity set they belong to. The OData annotation HttpMethod on the Function Import states which HTTP method must be used to invoke it. A Service Operation can return a single primitive, a single complex type, a collection of primitives, a collection of complex types, a single Entry, a Collection of Entries, or nothing (void).",
+      "keyPoints": [
+        "Function Import = metadata description of a Service Operation (custom function).",
+        "Declares name, primitive input parameters, return type and, for entries, the entity set.",
+        "m:HttpMethod tells the client which HTTP method to use (GET or POST).",
+        "Possible results: primitive(s), complex value(s), an entry, a collection of entries, or void."
+      ],
+      "examples": [
+        {
+          "title": "Function import of the V2 demo service, and its call",
+          "language": "xml",
+          "code": "<FunctionImport Name=\"GetProductsByRating\" ReturnType=\"Collection(ODataDemo.Product)\"\n                EntitySet=\"Products\" m:HttpMethod=\"GET\">\n  <Parameter Name=\"rating\" Type=\"Edm.Int32\" />\n</FunctionImport>\n\nInvocation:\nGET https://services.odata.org/V2/OData/OData.svc/GetProductsByRating?rating=5"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Kinds of custom operations",
+          "v2": "Service operations, described by Function Imports.",
+          "v4": "Functions (no side effects, composable) and actions (side effects allowed, not composable)."
+        },
+        {
+          "aspect": "Where they are declared",
+          "v2": "Only as a FunctionImport inside the entity container.",
+          "v4": "Actions and functions are declared at the schema level; ActionImport and FunctionImport import unbound ones into the service. Functions can then be used in $filter."
+        },
+        {
+          "aspect": "How parameters are passed",
+          "v2": "As query string name=value pairs, for example ?rating=5.",
+          "v4": "Function parameters as query options were pruned; use parameter aliases in the resource path. Actions are invoked with POST and take their parameters in the request body."
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        },
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        }
+      ]
+    },
+    {
+      "id": "complex-type-entity-container",
+      "level": "basic",
+      "title": "What are a Complex Type and an Entity Container in OData V2?",
+      "description": "A Complex Type is a structured type that, like an entity type, consists of a list of properties, but it has no key. It can therefore only exist as a property of a containing entity or as a temporary value (for example a return value of a service operation). It has no identity or URI of its own, but its value can be read through the property of its entity, for example Suppliers(0)/Address. A typical example is an Address with Street, City, State, ZipCode and Country used by a Supplier entity. The Entity Container groups all instance containers of a service: its Entity Sets and Association Sets, and in practice also its Function Imports. A CSDL document may include several entity containers; the OData annotation IsDefaultEntityContainer marks the default one, and entity sets in the default container do not need to be container-qualified when they are addressed in URIs.",
+      "keyPoints": [
+        "Complex Type = structured type without a key; lives only inside an entity or as a temporary value.",
+        "No identity of its own, but readable through its entity: Suppliers(0)/Address.",
+        "Entity Container = groups Entity Sets, Association Sets and Function Imports.",
+        "m:IsDefaultEntityContainer=\"true\" marks the default container; its sets need no container prefix in URIs."
+      ],
+      "examples": [
+        {
+          "title": "Address complex type and container of the V2 demo service",
+          "language": "xml",
+          "code": "<ComplexType Name=\"Address\">                 <!-- no <Key>: no identity of its own -->\n  <Property Name=\"Street\"  Type=\"Edm.String\" />\n  <Property Name=\"City\"    Type=\"Edm.String\" />\n  <Property Name=\"State\"   Type=\"Edm.String\" />\n  <Property Name=\"ZipCode\" Type=\"Edm.String\" />\n  <Property Name=\"Country\" Type=\"Edm.String\" />\n</ComplexType>\n\n<EntityType Name=\"Supplier\">\n  <Key><PropertyRef Name=\"ID\" /></Key>\n  <Property Name=\"ID\"      Type=\"Edm.Int32\" Nullable=\"false\" />\n  <Property Name=\"Name\"    Type=\"Edm.String\" />\n  <Property Name=\"Address\" Type=\"ODataDemo.Address\" Nullable=\"false\" />\n  ...\n</EntityType>\n\n<EntityContainer Name=\"DemoService\" m:IsDefaultEntityContainer=\"true\">\n  <EntitySet Name=\"Products\"   EntityType=\"ODataDemo.Product\" />\n  <EntitySet Name=\"Categories\" EntityType=\"ODataDemo.Category\" />\n  <EntitySet Name=\"Suppliers\"  EntityType=\"ODataDemo.Supplier\" />\n  <FunctionImport Name=\"GetProductsByRating\" ... />\n  <AssociationSet Name=\"Products_Category_Categories\" ... />\n  <AssociationSet Name=\"Products_Supplier_Suppliers\" ... />\n</EntityContainer>\n\nThe complex value is reached only through its entity:\nGET https://services.odata.org/V2/OData/OData.svc/Suppliers(0)/Address"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Entity containers per service",
+          "v2": "A CSDL document may include several; IsDefaultEntityContainer marks the default.",
+          "v4": "Exactly one per service; its name doesn't show up in URLs, so IsDefaultEntityContainer was pruned."
+        },
+        {
+          "aspect": "Container members",
+          "v2": "Entity sets, association sets, function imports.",
+          "v4": "Entity sets, singletons, function imports and action imports. Singletons are single entities addressed by name."
+        },
+        {
+          "aspect": "Navigation properties on complex types",
+          "v2": "Complex types have only structural properties.",
+          "v4": "Complex types can also have navigation properties."
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        }
+      ]
+    }
+  ]
+}

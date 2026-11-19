@@ -1,0 +1,337 @@
+{
+  "id": "odata",
+  "title": "OData",
+  "groups": [
+    {
+      "id": "v2-model",
+      "title": "OData V2: Data model",
+      "topics": [
+        {
+          "id": "v2-metadata",
+          "title": "Metadata & glossary",
+          "file": "v2-metadata.json",
+          "questionCount": 3,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0: Overview (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+            },
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0: Terminology (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/terminology/"
+            }
+          ]
+        },
+        {
+          "id": "v2-edm",
+          "title": "Entity Data Model",
+          "file": "v2-edm.json",
+          "questionCount": 4,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0: Overview (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+            },
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0: Terminology (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/terminology/"
+            }
+          ]
+        },
+        {
+          "id": "v2-primitive-types",
+          "title": "Primitive data types",
+          "file": "v2-primitive-types.json",
+          "questionCount": 3,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0: Overview (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+            },
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0: JSON Format (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "v2-uri",
+      "title": "OData V2: URI conventions",
+      "topics": [
+        {
+          "id": "v2-uri-components",
+          "title": "URI components",
+          "file": "v2-uri-components.json",
+          "questionCount": 2,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0: URI Conventions (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+            }
+          ]
+        },
+        {
+          "id": "v2-resource-path",
+          "title": "Resource path",
+          "file": "v2-resource-path.json",
+          "questionCount": 5,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0: URI Conventions (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+            },
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0: Operations (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+            }
+          ]
+        },
+        {
+          "id": "v2-query-options",
+          "title": "Query options",
+          "file": "v2-query-options.json",
+          "questionCount": 6,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0: URI Conventions (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+            }
+          ]
+        },
+        {
+          "id": "v2-filter",
+          "title": "$filter expressions",
+          "file": "v2-filter.json",
+          "questionCount": 3,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0: URI Conventions (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "v2-operations",
+      "title": "OData V2: Operations",
+      "topics": [
+        {
+          "id": "v2-reading",
+          "title": "Reading data",
+          "file": "v2-reading.json",
+          "questionCount": 3,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0: Operations (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+            }
+          ]
+        },
+        {
+          "id": "v2-crud",
+          "title": "CRUD operations",
+          "file": "v2-crud.json",
+          "questionCount": 5,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0: Operations (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+            }
+          ]
+        },
+        {
+          "id": "v2-function-imports",
+          "title": "Service operations",
+          "file": "v2-function-imports.json",
+          "questionCount": 2,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0: Operations (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+            },
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0: URI Conventions (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "v2-batch-group",
+      "title": "OData V2: Batch processing",
+      "topics": [
+        {
+          "id": "v2-batch",
+          "title": "Batch processing",
+          "file": "v2-batch.json",
+          "questionCount": 4,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0: Batch Processing (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/batch-processing/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "v2-json-group",
+      "title": "OData V2: JSON format",
+      "topics": [
+        {
+          "id": "v2-json",
+          "title": "JSON format",
+          "file": "v2-json.json",
+          "questionCount": 6,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "OData Version 2.0: JSON Format (odata.org)",
+              "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "v4-group",
+      "title": "OData V4 (Basic)",
+      "topics": [
+        {
+          "id": "v4-model-terms",
+          "title": "Model terms, types & formats",
+          "file": "v4-model-terms.json",
+          "questionCount": 3,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "What's New in OData Version 4.0 (OASIS)",
+              "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+            },
+            {
+              "type": "Specification",
+              "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+              "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
+            }
+          ]
+        },
+        {
+          "id": "v4-structural-types",
+          "title": "Structural types & type definitions",
+          "file": "v4-structural-types.json",
+          "questionCount": 2,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+              "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+            }
+          ]
+        },
+        {
+          "id": "v4-entity-container",
+          "title": "Entity container",
+          "file": "v4-entity-container.json",
+          "questionCount": 4,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+              "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+            }
+          ]
+        },
+        {
+          "id": "v4-annotations",
+          "title": "Vocabularies & annotations",
+          "file": "v4-annotations.json",
+          "questionCount": 4,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+              "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+            },
+            {
+              "type": "Package README",
+              "title": "SAP OData Vocabularies (SAP on GitHub)",
+              "url": "https://github.com/SAP/odata-vocabularies"
+            }
+          ]
+        },
+        {
+          "id": "v4-query-options",
+          "title": "V4 query options",
+          "file": "v4-query-options.json",
+          "questionCount": 4,
+          "resources": [
+            {
+              "type": "Specification",
+              "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+              "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
+            },
+            {
+              "type": "Specification",
+              "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+              "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tools-group",
+      "title": "Tools",
+      "topics": [
+        {
+          "id": "tools",
+          "title": "Tools",
+          "file": "tools.json",
+          "questionCount": 4,
+          "resources": [
+            {
+              "type": "API",
+              "title": "Reference Services (odata.org)",
+              "url": "https://www.odata.org/odata-services/"
+            },
+            {
+              "type": "Tutorial",
+              "title": "Learning OData on Postman (odata.org)",
+              "url": "https://www.odata.org/getting-started/learning-odata-on-postman/"
+            },
+            {
+              "type": "Documentation",
+              "title": "OData Ecosystem (odata.org)",
+              "url": "https://www.odata.org/ecosystem/"
+            },
+            {
+              "type": "Documentation",
+              "title": "Viewing Service Metadata (SAP Fiori tools, SAP Help Portal)",
+              "url": "https://help.sap.com/docs/SAP_FIORI_tools/17d50220bcd848aa854c9c182d65b699/e369c2c20c03458a92b24b9dcbcb470f.html"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

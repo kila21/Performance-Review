@@ -1,0 +1,154 @@
+{
+  "topicId": "tools",
+  "title": "Tools",
+  "questions": [
+    {
+      "id": "reference-services",
+      "level": "basic",
+      "title": "What are the OData reference services, and what are they used for?",
+      "description": "odata.org hosts public reference (sample) services that you can call directly to learn and test OData without building a service yourself. For OData V4 there are TripPin (read/write, designed for real scenarios and covering most V4 features, also available as the Restier-based TripPinRESTierService), a simple OData demo service in read-only and read/write variants, and the read-only Northwind service. For OData V2 and V3 there are the same OData demo service (read/write) and Northwind (read-only) variants under the /V2/ and /V3/ paths. Always use the versioned path: the unversioned https://services.odata.org/OData/OData.svc answers as an OData V3 service, not V2. The read/write variants work with a session key in the URL: opening /V2/(S(readwrite))/OData/OData.svc/ or TripPinServiceRW redirects to a URL such as /V2/(S(<key>))/OData/OData.svc/, and changes made through that URL stay in that session. They are useful for trying URI conventions, query options and payload formats in a browser or in a tool such as Postman.",
+      "keyPoints": [
+        "Public sample services on services.odata.org.",
+        "V4: TripPin (read/write), OData demo (read-only and read/write), Northwind (read-only).",
+        "V2/V3: OData demo (read/write) and Northwind (read-only).",
+        "Use the versioned path: unversioned /OData/OData.svc is OData V3.",
+        "Read/write variants redirect to a session URL (S(<key>)); write through that URL."
+      ],
+      "examples": [
+        {
+          "title": "Reference service roots (all checked live)",
+          "language": "text",
+          "code": "V2  https://services.odata.org/V2/OData/OData.svc/\nV2  https://services.odata.org/V2/Northwind/Northwind.svc/\nV2  https://services.odata.org/V2/Northwind/Northwind.svc/$metadata\nV2  https://services.odata.org/V2/(S(readwrite))/OData/OData.svc/   -> redirects to /V2/(S(<key>))/OData/OData.svc/\nV4  https://services.odata.org/V4/OData/OData.svc/\nV4  https://services.odata.org/V4/Northwind/Northwind.svc\nV4  https://services.odata.org/V4/TripPinServiceRW                  -> redirects to /V4/(S(<key>))/TripPinServiceRW/\nV4  https://services.odata.org/TripPinRESTierService/People('russellwhyte')\n\nNot V2: https://services.odata.org/OData/OData.svc/ answers with DataServiceVersion 3.0"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Demo service roots",
+          "v2": "/V2/OData/OData.svc and /V2/Northwind/Northwind.svc.",
+          "v4": "/V4/OData/OData.svc, /V4/Northwind/Northwind.svc and TripPin (/V4/TripPinServiceRW, /TripPinRESTierService)."
+        },
+        {
+          "aspect": "Richest sample model",
+          "v2": "OData demo (Products, Categories, Suppliers) and Northwind.",
+          "v4": "TripPin: singleton Me, enums, collection properties, functions and actions."
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
+        }
+      ]
+    },
+    {
+      "id": "postman",
+      "level": "basic",
+      "title": "How can Postman be used to work with and learn OData?",
+      "description": "Postman is a tool for composing and sending HTTP requests, which makes it a natural way to call an OData service: you choose the HTTP method, enter the OData URL with its query options, set headers such as Content-Type, Accept and the OData version headers, add a request body for create and update requests, and inspect the response. odata.org provides a Postman collection of OData requests against the reference services; you import it in Postman (Import, then paste the collection link), and it contains the requests grouped by category, each with its description, HTTP method, URL, headers and response payload. The Reference Services page also offers a Run in Postman button for the TripPin basic usage requests. Before you send data modification requests to a reference service, get a key first, as odata.org asks: open the service once and use the session URL it redirects you to. A POST to the plain URL is answered with a 302 redirect instead of creating anything.",
+      "keyPoints": [
+        "Send any OData request: method, URL with query options, headers, body.",
+        "odata.org publishes a Postman collection of tutorial requests; import it by link.",
+        "Run in Postman on the Reference Services page for TripPin.",
+        "For writes, first get a session key: use the (S(<key>)) URL the service redirects to.",
+        "Set the version headers: DataServiceVersion for V2, OData-Version for V4."
+      ],
+      "examples": [
+        {
+          "title": "Creating a person on TripPin RESTier from Postman",
+          "language": "text",
+          "code": "1. GET https://services.odata.org/TripPinRESTierService/\n   -> redirected to https://services.odata.org/TripPinRESTierService/(S(<key>))/\n\n2. POST https://services.odata.org/TripPinRESTierService/(S(<key>))/People\n   Content-Type: application/json\n\n   { \"UserName\":\"lewisblack\", \"FirstName\":\"Lewis\", \"LastName\":\"Black\",\n     \"Emails\":[\"lewisblack@example.com\"], ... }\n\nA POST to .../TripPinRESTierService/People without the key returns 302 Found."
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Version headers to set",
+          "v2": "DataServiceVersion: 2.0 and MaxDataServiceVersion: 2.0.",
+          "v4": "OData-Version: 4.0 and OData-MaxVersion: 4.0."
+        },
+        {
+          "aspect": "Partial update request",
+          "v2": "MERGE.",
+          "v4": "PATCH."
+        },
+        {
+          "aspect": "JSON body for a date",
+          "v2": "\"\\/Date(694224000000)\\/\"",
+          "v4": "\"2012-12-03T07:16:23Z\""
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Learning OData on Postman (odata.org)",
+          "url": "https://www.odata.org/getting-started/learning-odata-on-postman/"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
+        },
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        },
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        }
+      ]
+    },
+    {
+      "id": "xodata",
+      "level": "basic",
+      "title": "What is XOData?",
+      "description": "XOData is a generic, web-based tool for visualizing and exploring OData services, listed in the odata.org ecosystem. It assists in rapid design, prototyping, verification, testing and documentation of OData services. You can point it at a publicly accessible service or metadata URL to visualize and explore the service, or upload a metadata XML file to visualize the entity relationships offline. The online version of the tool is free.",
+      "keyPoints": [
+        "Web-based OData service visualization and exploration tool.",
+        "Input: a public service/metadata URL, or an uploaded metadata XML file.",
+        "Shows the entity relationships of the metadata.",
+        "Used for design, prototyping, verification, testing and documentation."
+      ],
+      "examples": [],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Ecosystem (odata.org)",
+          "url": "https://www.odata.org/ecosystem/"
+        }
+      ]
+    },
+    {
+      "id": "vscode-service-modeler",
+      "level": "basic",
+      "title": "Which Visual Studio Code extension from SAP helps you inspect OData services, and what can it do?",
+      "description": "In Visual Studio Code, SAP Fiori tools include the Service Modeler extension, which visualizes the service model of OData V2 and V4 services, based on .xml or .edmx metadata files and CAP CDS services. It lets you browse complex services and view their entity sets, entities and properties, with key properties marked by a key icon, and expand the Complex Types and Entity Containers sections. It also shows the annotations attached to entities and properties, and lets you search entities, properties and annotations. For SAP Fiori elements projects it manages the services and local annotation files of the project. You open it from the Command Palette with SAP Fiori tools: Service Modeler: Open Service Modeler, or from the editor when a metadata.xml file is open. SAP Fiori tools in VS Code need Node.js (an LTS version) and npm installed.",
+      "keyPoints": [
+        "SAP Fiori tools - Service Modeler: visualizes OData V2/V4 metadata (.xml/.edmx) and CAP CDS services.",
+        "Browse entity sets, entities, properties, complex types and entity containers.",
+        "Shows and searches annotations.",
+        "Open via Command Palette: SAP Fiori tools: Service Modeler: Open Service Modeler.",
+        "Prerequisites: VS Code, Node.js LTS and npm."
+      ],
+      "examples": [],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "Viewing Service Metadata (SAP Fiori tools, SAP Help Portal)",
+          "url": "https://help.sap.com/docs/SAP_FIORI_tools/17d50220bcd848aa854c9c182d65b699/e369c2c20c03458a92b24b9dcbcb470f.html"
+        },
+        {
+          "title": "Visual Studio Code (SAP Fiori tools, SAP Help Portal)",
+          "url": "https://help.sap.com/docs/SAP_FIORI_tools/17d50220bcd848aa854c9c182d65b699/17efa217f7f34a9eba53d7b209ca4280.html"
+        }
+      ]
+    }
+  ]
+}

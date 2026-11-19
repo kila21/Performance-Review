@@ -1,0 +1,52 @@
+{
+  "topicId": "v2-uri-components",
+  "title": "URI components",
+  "questions": [
+    {
+      "id": "uri-components",
+      "level": "elementary",
+      "title": "What are the main components of an OData URI?",
+      "description": "An OData URI has up to three significant parts: the service root URI, the resource path and the query string options. Written out, the structure is scheme, host, an optional colon and port, the service root, an optional resource path, and an optional question mark followed by query options. The scheme (http or https), the host and the port locate the server. The service root identifies the root of the OData service; requesting it returns the service document, which lists all collections of the service. The resource path identifies the resource to interact with: a collection, a single entry, a property, a link or a service operation. The query options, after the question mark, control the response, for example filtering, sorting and paging. Other URI constructs such as a fragment may appear, but OData gives them no further meaning.",
+      "keyPoints": [
+        "Structure: scheme://host[:port]/serviceRoot[/resourcePath][?queryOptions].",
+        "Scheme, host and port locate the server.",
+        "Service root = root of the OData service; returns the service document.",
+        "Resource path = what you address (collection, entry, property, link, service operation).",
+        "Query options = how the result is shaped (filter, sort, page, format, ...)."
+      ],
+      "examples": [
+        {
+          "title": "Two URIs of the V2 demo service split into their parts",
+          "language": "text",
+          "code": "https://services.odata.org/V2/OData/OData.svc\n\\___/   \\________________/\\_________________/\nscheme        host            service root\n\nhttps://services.odata.org/V2/OData/OData.svc/Categories(1)/Products?$top=2&$orderby=Name\n\\___________________________________________/\\______________________/\\__________________/\n               service root URI                    resource path          query options\n\nWith an explicit port:  https://host:8080/service.svc/..."
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        }
+      ]
+    },
+    {
+      "id": "uri-rules-required-optional",
+      "level": "elementary",
+      "title": "Which OData URI conventions must a service follow, and which are only recommended?",
+      "description": "The OData URI conventions are a set of recommended, but not required, rules for constructing URIs that identify the data and metadata of a service, plus a set of reserved query string operators. The resource path construction rules are optional: servers are encouraged to follow them, because consistent URIs promote reusable client components and libraries. The query string rules are different: all OData services must follow the parsing and construction rules for query options, and a service that does not support a particular system query option must reject requests that contain it. So a service may lay out its paths differently, but $filter, $top and the other reserved options always mean the same thing.",
+      "keyPoints": [
+        "Resource path conventions: optional, but strongly encouraged for interoperability.",
+        "Query string rules: mandatory for every OData service.",
+        "System query options start with $; an unsupported one must be rejected, not ignored."
+      ],
+      "examples": [],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "topicId": "v2-filter",
+  "title": "$filter expressions",
+  "questions": [
+    {
+      "id": "filter-logical",
+      "level": "elementary",
+      "title": "Which logical operators can be used in $filter, and how are they written?",
+      "description": "$filter selects only the entries of a collection that satisfy a predicate expression. The expression can reference properties (also through navigation, as in Address/City) and literals: strings in single quotes, numbers, true and false, and the other primitive literal forms. The logical and comparison operators are eq (equal), ne (not equal), gt (greater than), ge (greater than or equal), lt (less than), le (less than or equal), and (logical and), or (logical or) and not (logical negation). Operators are written as words, not symbols, so Price > 20 is written Price gt 20. Literals must match the type of the property: in V2 a number with a decimal point but no suffix, such as 3.5, is an Edm.Double, so comparing it with an Edm.Decimal property fails with 400 (incompatible types). Write 3.5M for a decimal; whole numbers such as 20 work as they are. There are no ISNULL or COALESCE operators; you compare against the null literal instead.",
+      "keyPoints": [
+        "Comparison: eq, ne, gt, ge, lt, le.",
+        "Logical: and, or, not.",
+        "Operators are words: Price gt 20, not Price > 20.",
+        "Decimal literals need M: Price gt 3.5M; plain 3.5 is a Double and fails against a Decimal property.",
+        "Strings in single quotes; compare with null instead of ISNULL."
+      ],
+      "examples": [
+        {
+          "title": "Logical operators on the V2 demo service",
+          "language": "text",
+          "code": "/V2/OData/OData.svc/Suppliers?$filter=Address/City eq 'Redmond'\n/V2/OData/OData.svc/Suppliers?$filter=Address/City ne 'London'\n/V2/OData/OData.svc/Products?$filter=Price gt 20\n/V2/OData/OData.svc/Products?$filter=Price le 200 and Price gt 3.5M\n/V2/OData/OData.svc/Products?$filter=Price le 3.5M or Price gt 200\n/V2/OData/OData.svc/Products?$filter=not endswith(Description,'milk')\n\nFails with 400 (Edm.Decimal compared with Edm.Double):\n/V2/OData/OData.svc/Products?$filter=Price gt 3.5"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Operators",
+          "v2": "eq, ne, gt, ge, lt, le, and, or, not.",
+          "v4": "Adds has (enumeration flags are set) and in (member of a list): Name in ('Milk','Cheese')."
+        },
+        {
+          "aspect": "Decimal literals",
+          "v2": "Need the M suffix: Price gt 3.5M.",
+          "v4": "No suffix needed: Price gt 3.5."
+        },
+        {
+          "aspect": "Conditions on collections",
+          "v2": "-",
+          "v4": "Lambda operators any and all: Orders?$filter=Items/any(d:d/Quantity gt 100)."
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        }
+      ]
+    },
+    {
+      "id": "filter-arithmetic",
+      "level": "elementary",
+      "title": "Which arithmetic operators does $filter support?",
+      "description": "The $filter expression language includes arithmetic operators that compute a value which is then compared: add (addition), sub (subtraction), mul (multiplication), div (division) and mod (modulo). Like the logical operators, they are written as words. A typical use is filtering on a calculated value, for example Price add 5 gt 10 or Price mod 2 eq 0 for even prices.",
+      "keyPoints": [
+        "add, sub, mul, div, mod.",
+        "The result is used inside a comparison: Price mul 2 gt 2000.",
+        "Written as words, like the logical operators."
+      ],
+      "examples": [
+        {
+          "title": "Arithmetic operators on the V2 demo service",
+          "language": "text",
+          "code": "/V2/OData/OData.svc/Products?$filter=Price add 5 gt 10\n/V2/OData/OData.svc/Products?$filter=Price sub 5 gt 10\n/V2/OData/OData.svc/Products?$filter=Price mul 2 gt 2000\n/V2/OData/OData.svc/Products?$filter=Price div 2 gt 4\n/V2/OData/OData.svc/Products?$filter=Price mod 2 eq 0"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Operators",
+          "v2": "add, sub, mul, div, mod.",
+          "v4": "Adds negation (-) and divby (4.01); mul and div also work with Edm.Duration values."
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
+        }
+      ]
+    },
+    {
+      "id": "filter-grouping-functions",
+      "level": "basic",
+      "title": "What are the grouping operator and the built-in functions of $filter in OData V2?",
+      "description": "Parentheses are the grouping operator: they set precedence, as in (Price sub 5) gt 10, and are needed whenever you mix and with or in a way that differs from the default precedence. Besides operators, $filter offers built-in functions. String functions are substringof, endswith, startswith, length, indexof, replace, substring, tolower, toupper, trim and concat. Date functions extract parts of an Edm.DateTime: day, hour, minute, month, second and year. Math functions are round, floor and ceiling, for both double and decimal values. Type functions are isof(type) and isof(expression, type). Note the argument order of substringof in V2: the searched-for string comes first, as in substringof('Alfreds', CompanyName); V4 replaced it with contains.",
+      "keyPoints": [
+        "Grouping: ( ) changes precedence: (Price sub 5) gt 10.",
+        "String: substringof, startswith, endswith, length, indexof, replace, substring, tolower, toupper, trim, concat.",
+        "Date: year, month, day, hour, minute, second.",
+        "Math: round, floor, ceiling. Type: isof.",
+        "substringof('x', Field): search string first; V4 uses contains(Field,'x')."
+      ],
+      "examples": [
+        {
+          "title": "Grouping and functions (V2 demo service and V2 Northwind)",
+          "language": "text",
+          "code": "/V2/OData/OData.svc/Products?$filter=(Price sub 5) gt 10\n/V2/Northwind/Northwind.svc/Products?$filter=(UnitPrice sub 5) gt 10\n/V2/Northwind/Northwind.svc/Customers?$filter=substringof('Alfreds', CompanyName) eq true\n/V2/Northwind/Northwind.svc/Customers?$filter=startswith(CompanyName, 'Alfr') eq true\n/V2/Northwind/Northwind.svc/Customers?$filter=tolower(CompanyName) eq 'alfreds futterkiste'\n/V2/Northwind/Northwind.svc/Employees?$filter=year(BirthDate) eq 1948\n/V2/Northwind/Northwind.svc/Orders?$filter=round(Freight) eq 32\n/V2/Northwind/Northwind.svc/Orders?$filter=isof('NorthwindModel.Order')"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Substring test",
+          "v2": "substringof('Alfreds', CompanyName): the searched-for string first.",
+          "v4": "contains(CompanyName,'Alfreds'): the long string first; substringof was replaced."
+        },
+        {
+          "aspect": "New functions",
+          "v2": "-",
+          "v4": "now, fractionalseconds, mindatetime, maxdatetime and totaloffsetminutes complete the date/time functions."
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
+        }
+      ]
+    }
+  ]
+}

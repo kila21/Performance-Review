@@ -1,0 +1,189 @@
+{
+  "topicId": "v4-model-terms",
+  "title": "Model terms, types & formats",
+  "questions": [
+    {
+      "id": "v4-edm-terms",
+      "level": "basic",
+      "title": "How do the OData resource terms Collection, Entry, Property, Complex Type, Link and Service Operation map to the Entity Data Model?",
+      "description": "OData describes its resources with protocol terms, and each of them corresponds to a construct of the Entity Data Model. A Collection is described by an entity set, or by a navigation property on an entity type that identifies a collection of entities. An Entry is described by an entity type (entity types may be part of a type hierarchy). A Property of an entry is a primitive or complex property of the entity type. A Complex Type is described by a complex type: a keyless structured type that exists only as part of its containing entity. A Link is a navigation property defined on an entity type, representing a relationship to related entities. A Service Operation is described by a function import; in OData V4, custom operations are split into functions (no side effects, composable) and actions (may have side effects), exposed at the service root through function imports and action imports.",
+      "keyPoints": [
+        "Collection -> entity set (or collection-valued navigation property).",
+        "Entry -> entity type.",
+        "Property of an entry -> primitive or complex property.",
+        "Complex Type -> complex type (keyless).",
+        "Link -> navigation property.",
+        "Service Operation -> function import; V4 adds actions/action imports."
+      ],
+      "examples": [],
+      "versionDiff": [
+        {
+          "aspect": "Service Operation",
+          "v2": "A FunctionImport in the entity container (GET or POST via m:HttpMethod).",
+          "v4": "Functions and actions declared in the schema, exposed through FunctionImport and ActionImport."
+        },
+        {
+          "aspect": "Link",
+          "v2": "A navigation property bound to an Association, grouped in an AssociationSet.",
+          "v4": "A navigation property alone, with its target Type; NavigationPropertyBinding names the target set."
+        },
+        {
+          "aspect": "Single top-level entity",
+          "v2": "Not available; modeled as an entity set with one entry.",
+          "v4": "Singleton."
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        }
+      ]
+    },
+    {
+      "id": "v4-new-primitive-types",
+      "level": "basic",
+      "title": "Which primitive data types were added in OData V4, and which V2 types were removed?",
+      "description": "OData V4 added Edm.Date (a date without a time part), Edm.TimeOfDay (a clock time from midnight to just before the next midnight) and Edm.Duration (a signed duration in days, hours, minutes and seconds). It also defines Edm.Stream for binary data streams, and the geography and geometry families (Edm.GeographyPoint, Edm.GeometryPolygon and so on) for round-earth and flat-earth spatial data. In return, Edm.DateTime was pruned, because a date and time without a time zone could be off by hours when the client guessed the zone wrongly; Edm.DateTimeOffset carries the time zone instead. Edm.Time was pruned because it was unclear whether it meant a time of day or a duration, which Edm.TimeOfDay and Edm.Duration now cover. Edm.Float, only a synonym for Edm.Single, was also removed. V4 URIs also no longer need the M, D, F or L suffixes on numeric literals.",
+      "keyPoints": [
+        "New: Edm.Date, Edm.TimeOfDay, Edm.Duration.",
+        "Also in V4: Edm.Stream and the Geography/Geometry types.",
+        "Pruned: Edm.DateTime (use Edm.DateTimeOffset), Edm.Time (use TimeOfDay/Duration), Edm.Float.",
+        "Numeric URI literals no longer need M/D/F/L suffixes."
+      ],
+      "examples": [
+        {
+          "title": "V4 literals of the new and changed types in $filter (URL Conventions example 102)",
+          "language": "text",
+          "code": "DateValue eq 2012-12-03\nDateTimeOffsetValue eq 2012-12-03T07:16:23Z\nTimeOfDayValue eq 07:59:59.999\nDurationValue eq duration'P12DT23H59M59.999999999999S'\nGuidValue eq 01234567-89ab-cdef-0123-456789abcdef\nDecimalValue eq 34.95\nInt64Value eq 0"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Date and time with time zone",
+          "v2": "Edm.DateTimeOffset",
+          "v4": "Edm.DateTimeOffset"
+        },
+        {
+          "aspect": "Date and time without time zone",
+          "v2": "Edm.DateTime",
+          "v4": "Pruned; use Edm.DateTimeOffset."
+        },
+        {
+          "aspect": "Date only",
+          "v2": "-",
+          "v4": "Edm.Date"
+        },
+        {
+          "aspect": "Time of day",
+          "v2": "Edm.Time",
+          "v4": "Edm.TimeOfDay"
+        },
+        {
+          "aspect": "Duration",
+          "v2": "Edm.Time (written as a duration)",
+          "v4": "Edm.Duration"
+        },
+        {
+          "aspect": "Binary stream, spatial data",
+          "v2": "-",
+          "v4": "Edm.Stream; Edm.Geography... and Edm.Geometry... types."
+        },
+        {
+          "aspect": "Numeric literal suffixes",
+          "v2": "Required: 2.5M, 64L, 2.0d, 2.0f.",
+          "v4": "Not needed: 2.5, 64, 2.0."
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        },
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
+        },
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        }
+      ]
+    },
+    {
+      "id": "v4-data-formats",
+      "level": "basic",
+      "title": "Which data representation formats does OData V4 use?",
+      "description": "In OData V4 the JSON format is the recommended format. OData 4.01 requires every service to support it and allows additional formats such as Atom; in OData 4.0 a service had to implement at least one of Atom or JSON, with JSON suggested. The client requests a response format with the Accept header or with the $format system query option; if both are present, $format wins, and an unsupported format gets 406 Not Acceptable. Services should advertise the formats they support by annotating their entity container with Capabilities.SupportedFormats, as TripPin does. The V4 JSON format was completely redesigned compared with V2, and the amount of metadata in a response is controlled with the format parameter odata.metadata, with the values minimal (the default), full or none; a TripPin response, for example, has the content type application/json;odata.metadata=minimal. Metadata is written as control information such as @odata.context. The metadata document itself exists in an XML representation (application/xml, CSDL XML) and a JSON representation (application/json, CSDL JSON); if the client states no preference, the XML representation is returned.",
+      "keyPoints": [
+        "JSON is recommended; required in 4.01. In 4.0 a service needed Atom or JSON.",
+        "Choose with Accept or $format ($format wins); 406 if unsupported.",
+        "Supported formats are advertised with the Capabilities.SupportedFormats annotation.",
+        "odata.metadata=minimal (default) | full | none controls the control information.",
+        "Metadata document: CSDL XML (default) or CSDL JSON."
+      ],
+      "examples": [
+        {
+          "title": "Minimal vs full metadata on TripPin",
+          "language": "text",
+          "code": "GET https://services.odata.org/V4/TripPinServiceRW/People('russellwhyte')?$select=UserName\nContent-Type: application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8\n\n{\"@odata.context\":\".../$metadata#People(UserName)/$entity\",\n \"@odata.id\":\".../People('russellwhyte')\",\"@odata.etag\":\"W/\\\"08DF4610F0DAC662\\\"\",\n \"@odata.editLink\":\".../People('russellwhyte')\",\"UserName\":\"russellwhyte\"}\n\nSame request with Accept: application/json;odata.metadata=full adds the type:\n \"@odata.type\":\"#Microsoft.OData.SampleService.Models.TripPin.Person\""
+        },
+        {
+          "title": "How TripPin advertises its formats (excerpt of its $metadata)",
+          "language": "xml",
+          "code": "<Annotations Target=\"Microsoft.OData.SampleService.Models.TripPin.DefaultContainer\">\n  <Annotation Term=\"Org.OData.Capabilities.V1.SupportedFormats\">\n    <Collection>\n      <String>application/json;odata.metadata=full;IEEE754Compatible=false;odata.streaming=true</String>\n      <String>application/json;odata.metadata=minimal;IEEE754Compatible=false;odata.streaming=true</String>\n      <String>application/json;odata.metadata=none;IEEE754Compatible=false;odata.streaming=true</String>\n    </Collection>\n  </Annotation>\n</Annotations>"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Default format",
+          "v2": "Atom when no Accept header is sent.",
+          "v4": "JSON."
+        },
+        {
+          "aspect": "JSON flavor",
+          "v2": "One fixed shape with d and __metadata; the V2 demo service labels it application/json;odata=verbose.",
+          "v4": "Redesigned format; odata.metadata=minimal (default), full or none."
+        },
+        {
+          "aspect": "Metadata document",
+          "v2": "XML only.",
+          "v4": "CSDL XML (default) or CSDL JSON."
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
+        },
+        {
+          "title": "OData JSON Format Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html"
+        }
+      ]
+    }
+  ]
+}
