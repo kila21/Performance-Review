@@ -56,6 +56,8 @@ All content lives in `webapp/model/data/` and is loaded by `webapp/model/DataRep
 - A placeholder question uses `"pending": true` and `resources` (title and url) instead of an answer.
 - `examples[].language` is a CodeEditor mode: `javascript`, `typescript`, `json`, `xml`, `yaml`, `sh`, `html`, `properties`, `ini`, `sql`, `text`. Use `text` for raw HTTP requests and responses.
 - `assignment` is `null` or `{ task, starterCode, solution }`. Assignment code is shown as JavaScript.
+- `versionDiff` (optional, OData) is a list of `{ "aspect": "...", "v2": "...", "v4": "..." }` rows. It is shown as an "OData V2 vs V4" table after the examples, only when the list is non-empty. Add it only where the versions really differ. Every V4 fact needs a source, and the V4 pages used go into the question's `sources`. Plain text only; use `-` when a version has no equivalent.
+- In OData examples, use the versioned demo services: `https://services.odata.org/V2/OData/OData.svc` and `/V2/Northwind/Northwind.svc` for V2, `/V4/...` for V4. The unversioned `services.odata.org/OData/OData.svc` serves OData V3. Examples that claim to show a demo service must match its live `$metadata`.
 
 ## Writing descriptions
 `description` is plain text. `proseHtml` in `webapp/model/Formatter.ts` bolds the first sentence, splits the rest into short paragraphs and marks code-like tokens (`Edm.String`, `camelCase`, `fn()`) as inline code. Because of that:

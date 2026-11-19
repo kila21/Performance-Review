@@ -16,9 +16,26 @@
       ],
       "examples": [
         {
-          "title": "Abbreviated metadata document of the odata.org demo service",
+          "title": "Excerpt of https://services.odata.org/V2/OData/OData.svc/$metadata",
           "language": "xml",
-          "code": "GET https://services.odata.org/OData/OData.svc/$metadata\n\n<edmx:Edmx Version=\"1.0\" xmlns:edmx=\"http://schemas.microsoft.com/ado/2007/06/edmx\">\n  <edmx:DataServices m:DataServiceVersion=\"2.0\"\n      xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\">\n    <Schema Namespace=\"ODataDemo\" xmlns=\"http://schemas.microsoft.com/ado/2008/09/edm\">\n      <EntityType Name=\"Product\"> ... </EntityType>      <!-- structure of entries -->\n      <ComplexType Name=\"Address\"> ... </ComplexType>    <!-- keyless structured type -->\n      <Association Name=\"Product_Category\"> ... </Association>\n      <EntityContainer Name=\"DemoService\" m:IsDefaultEntityContainer=\"true\">\n        <EntitySet Name=\"Products\" EntityType=\"ODataDemo.Product\" />\n        <AssociationSet Name=\"Products_Category\" Association=\"ODataDemo.Product_Category\"> ... </AssociationSet>\n        <FunctionImport Name=\"GetProductsByRating\" EntitySet=\"Products\"\n                        ReturnType=\"Collection(ODataDemo.Product)\" m:HttpMethod=\"GET\"> ... </FunctionImport>\n      </EntityContainer>\n    </Schema>\n  </edmx:DataServices>\n</edmx:Edmx>"
+          "code": "<edmx:Edmx Version=\"1.0\" xmlns:edmx=\"http://schemas.microsoft.com/ado/2007/06/edmx\">\n  <edmx:DataServices m:DataServiceVersion=\"2.0\" m:MaxDataServiceVersion=\"2.0\"\n      xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\">\n    <Schema Namespace=\"ODataDemo\" xmlns=\"http://schemas.microsoft.com/ado/2007/05/edm\">\n      <EntityType Name=\"Product\"> ... </EntityType>        <!-- structure of entries -->\n      <EntityType Name=\"Category\"> ... </EntityType>\n      <EntityType Name=\"Supplier\"> ... </EntityType>\n      <ComplexType Name=\"Address\"> ... </ComplexType>      <!-- keyless structured type -->\n      <Association Name=\"Product_Category_Category_Products\"> ... </Association>\n      <EntityContainer Name=\"DemoService\" m:IsDefaultEntityContainer=\"true\">\n        <EntitySet Name=\"Products\" EntityType=\"ODataDemo.Product\" />\n        <EntitySet Name=\"Categories\" EntityType=\"ODataDemo.Category\" />\n        <EntitySet Name=\"Suppliers\" EntityType=\"ODataDemo.Supplier\" />\n        <FunctionImport Name=\"GetProductsByRating\" ReturnType=\"Collection(ODataDemo.Product)\"\n                        EntitySet=\"Products\" m:HttpMethod=\"GET\"> ... </FunctionImport>\n        <AssociationSet Name=\"Products_Category_Categories\"\n                        Association=\"ODataDemo.Product_Category_Category_Products\"> ... </AssociationSet>\n      </EntityContainer>\n    </Schema>\n  </edmx:DataServices>\n</edmx:Edmx>"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Formats of the metadata document",
+          "v2": "XML only (CSDL packed in EDMX); no format negotiation.",
+          "v4": "CSDL XML (application/xml, returned by default) or CSDL JSON (application/json)."
+        },
+        {
+          "aspect": "Referencing other documents",
+          "v2": "Not available.",
+          "v4": "edmx:Reference with edmx:Include (a whole schema) and edmx:IncludeAnnotations (selected annotations)."
+        },
+        {
+          "aspect": "Metadata as a service",
+          "v2": "Only the monolithic $metadata document.",
+          "v4": "Services may also expose metadata as an OData service at ~/$metadata/ that can be queried."
         }
       ],
       "assignment": null,
@@ -30,6 +47,14 @@
         {
           "title": "OData Version 2.0: Operations (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
         }
       ]
     },
@@ -49,9 +74,21 @@
       ],
       "examples": [
         {
-          "title": "Terms mapped to URIs of the demo service",
+          "title": "Terms mapped to URIs of the V2 demo service",
           "language": "text",
-          "code": "https://services.odata.org/OData/OData.svc/             -> Service Document\nhttps://services.odata.org/OData/OData.svc/$metadata    -> Service Metadata Document\nhttps://services.odata.org/OData/OData.svc/Products     -> Collection (Feed of Product Entries)\nhttps://services.odata.org/OData/OData.svc/Products(1)  -> Entry\n.../Products(1)/Name                                    -> Property of an Entry\n.../Products(1)/Category                                -> follows a Link (Navigation Property)"
+          "code": "https://services.odata.org/V2/OData/OData.svc/             -> Service Document\nhttps://services.odata.org/V2/OData/OData.svc/$metadata    -> Service Metadata Document\nhttps://services.odata.org/V2/OData/OData.svc/Products     -> Collection (Feed of Product Entries)\nhttps://services.odata.org/V2/OData/OData.svc/Products(1)  -> Entry\n.../Products(1)/Name                                       -> Property of an Entry\n.../Products(1)/Category                                   -> follows a Link (Navigation Property)"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Addressing links",
+          "v2": "Links between entries are addressed with the /$links/ segment.",
+          "v4": "/$links/ was pruned; /$ref addresses entity references (short representations that are basically a link to an entity)."
+        },
+        {
+          "aspect": "Payload formats",
+          "v2": "Atom (the default when no Accept header is sent) and JSON.",
+          "v4": "JSON is the recommended format and, in 4.01, every service must support it; Atom is optional."
         }
       ],
       "assignment": null,
@@ -63,6 +100,14 @@
         {
           "title": "OData Version 2.0: Overview (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
         }
       ]
     },
@@ -84,11 +129,31 @@
           "code": "<EntityType Name=\"Supplier\">                  <!-- structured: entity type (has a key) -->\n  <Key><PropertyRef Name=\"ID\" /></Key>\n  <Property Name=\"ID\"      Type=\"Edm.Int32\" Nullable=\"false\" />   <!-- primitive -->\n  <Property Name=\"Name\"    Type=\"Edm.String\" />                   <!-- primitive -->\n  <Property Name=\"Address\" Type=\"ODataDemo.Address\" />            <!-- structured: complex type -->\n</EntityType>"
         }
       ],
+      "versionDiff": [
+        {
+          "aspect": "Types a property can have",
+          "v2": "A primitive type or a complex type.",
+          "v4": "A primitive, complex or enumeration type, or a collection of one of these."
+        },
+        {
+          "aspect": "Named primitive types",
+          "v2": "Not available.",
+          "v4": "Enumeration types (named constants with integer values) and type definitions (a primitive type with a new name and fixed facets)."
+        }
+      ],
       "assignment": null,
       "sources": [
         {
           "title": "OData Version 2.0: Overview (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        },
+        {
+          "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
         }
       ]
     }

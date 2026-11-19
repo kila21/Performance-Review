@@ -6,18 +6,35 @@
       "id": "boolean-decimal-datetime",
       "level": "elementary",
       "title": "What are Edm.Boolean, Edm.Decimal and Edm.DateTime, and how are their values written in a request URI?",
-      "description": "Edm.Boolean represents binary-valued logic; its literal form is true or false. Edm.Decimal represents numeric values with fixed precision and scale, which makes it the type for amounts and prices where rounding errors are not acceptable; in a URI it is written as digits with a decimal point followed by the suffix M or m, for example 2.345M. Edm.DateTime represents a date and time (from midnight, January 1, 1753 A.D. through December 9999 A.D.); in a URI it is written as datetime'yyyy-mm-ddThh:mm[:ss[.fffffff]]', for example datetime'2000-12-12T12:00'. No spaces are allowed between datetime and the quoted part, and the datetime prefix is case-insensitive. These literal forms apply in URIs (key predicates, $filter, service operation parameters) and HTTP headers; payload formats define their own representation, for example JSON writes Edm.DateTime as \"/Date(<ticks>)/\".",
+      "description": "Edm.Boolean represents binary-valued logic; its literal form is true or false, and it is used for yes/no facts such as whether a product is discontinued. Edm.Decimal represents numeric values with fixed precision and scale, which makes it the type for exact values such as amounts and prices; in a URI it is written as digits with a decimal point followed by the suffix M or m, for example 2.345M. Edm.DateTime represents a date and time (from midnight, January 1, 1753 A.D. through 11:59:59 P.M., December 9999 A.D.) and carries no time-zone offset; it is used for values such as a release or birth date. In a URI it is written as datetime'yyyy-mm-ddThh:mm[:ss[.fffffff]]', for example datetime'2000-12-12T12:00'. No spaces are allowed between datetime and the quoted part, and the datetime prefix is case-insensitive. These literal forms apply in URIs (key predicates, $filter, service operation parameters) and HTTP headers; payload formats define their own representation, for example JSON writes Edm.DateTime as \"/Date(<ticks>)/\".",
       "keyPoints": [
-        "Edm.Boolean: true | false.",
-        "Edm.Decimal: fixed precision and scale; URI literal 2.345M (suffix M or m).",
-        "Edm.DateTime: date and time; URI literal datetime'2000-12-12T12:00' (no space after datetime).",
+        "Edm.Boolean: true | false; for yes/no facts.",
+        "Edm.Decimal: fixed precision and scale, for exact values like prices; URI literal 2.345M (suffix M or m).",
+        "Edm.DateTime: date and time without time zone; URI literal datetime'2000-12-12T12:00' (no space after datetime).",
         "URI literal forms differ from payload formats (JSON uses \"/Date(<ticks>)/\" for Edm.DateTime)."
       ],
       "examples": [
         {
-          "title": "Literal forms used in $filter",
+          "title": "Literal forms used in $filter (V2 Northwind and V2 demo service)",
           "language": "text",
-          "code": "Edm.Boolean   true | false\n              /Products?$filter=Discontinued eq false\n\nEdm.Decimal   [0-9]+.[0-9]+M|m\n              /Products?$filter=Price gt 2.345M\n\nEdm.DateTime  datetime'yyyy-mm-ddThh:mm[:ss[.fffffff]]'\n              /Products?$filter=ReleaseDate gt datetime'2000-12-12T12:00'"
+          "code": "Edm.Boolean   true | false\n              /V2/Northwind/Northwind.svc/Products?$filter=Discontinued eq false\n\nEdm.Decimal   [0-9]+.[0-9]+M|m\n              /V2/OData/OData.svc/Products?$filter=Price gt 2.345M\n\nEdm.DateTime  datetime'yyyy-mm-ddThh:mm[:ss[.fffffff]]'\n              /V2/OData/OData.svc/Products?$filter=ReleaseDate gt datetime'2000-12-12T12:00'"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Date and time types",
+          "v2": "Edm.DateTime (no time zone) and Edm.DateTimeOffset.",
+          "v4": "Edm.DateTime was pruned; use Edm.DateTimeOffset (with time zone) or the new Edm.Date (date only)."
+        },
+        {
+          "aspect": "URI literals",
+          "v2": "datetime'2000-12-12T12:00', 2.345M.",
+          "v4": "No prefixes or suffixes: 2012-12-03T07:16:23Z, 2012-12-03, 34.95."
+        },
+        {
+          "aspect": "JSON values",
+          "v2": "Decimal as a string (\"2.5\"); DateTime as \"/Date(694224000000)/\".",
+          "v4": "Decimal as a JSON number (a string only with IEEE754Compatible=true); DateTimeOffset as a string like \"2012-12-03T07:16:23Z\"."
         }
       ],
       "assignment": null,
@@ -29,6 +46,22 @@
         {
           "title": "OData Version 2.0: JSON Format (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
+        },
+        {
+          "title": "OData JSON Format Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html"
         }
       ]
     },
@@ -36,19 +69,31 @@
       "id": "numeric-types",
       "level": "basic",
       "title": "Which integer and floating-point primitive types does OData V2 define, and how are their URI literals written?",
-      "description": "OData V2 defines four integer types and two binary floating-point types besides Edm.Decimal. Edm.Byte is an unsigned 8-bit integer and Edm.SByte a signed 8-bit integer; Edm.Int16, Edm.Int32 and Edm.Int64 are signed 16-, 32- and 64-bit integers. In URIs the integer types are plain digits with an optional minus sign, except Edm.Int64, which takes the suffix L (64L). Edm.Double is a floating-point number with 15 digits of precision (approximate range 2.23e-308 to 1.79e+308) and uses the suffix d, for example 2.029d or 1E+10d. Edm.Single is a floating-point number with 7 digits of precision and uses the suffix f, for example 2.0f. Use Double or Single for measured or scientific values where approximate precision is acceptable, and Decimal for exact values such as money. In the V2 JSON format, Edm.Int16 and Edm.Int32 are JSON numbers, while Edm.Int64, Edm.Byte, Edm.SByte, Edm.Double, Edm.Single and Edm.Decimal are written as JSON strings.",
+      "description": "OData V2 defines five integer types and two binary floating-point types besides Edm.Decimal. Edm.Byte is an unsigned 8-bit integer (0 to 255) and Edm.SByte a signed 8-bit integer; Edm.Int16, Edm.Int32 and Edm.Int64 are signed 16-, 32- and 64-bit integers. In URIs, Edm.Byte is plain digits, the signed integer types are digits with an optional minus sign, and Edm.Int64 also takes the suffix L (64L). Edm.Double is a floating-point number with 15 digits of precision (approximate range 2.23e-308 to 1.79e+308) and uses the suffix d, for example 2.029d or 1E+10d. Edm.Single is a floating-point number with 7 digits of precision and uses the suffix f, for example 2.0f. Pick the smallest integer type that fits: Byte or SByte for small codes and flags, Int16 or Int32 for counts and identifiers, Int64 for very large numbers. Use Double or Single for measured or scientific values where approximate precision is acceptable, and Decimal for exact values such as money. In the V2 JSON format, Edm.Int16 and Edm.Int32 are JSON numbers, while Edm.Int64, Edm.Byte, Edm.SByte, Edm.Double, Edm.Single and Edm.Decimal are written as JSON strings.",
       "keyPoints": [
-        "Edm.Byte (unsigned 8-bit), Edm.SByte (signed 8-bit), Edm.Int16/Int32/Int64 (signed).",
-        "Int64 literal takes the suffix L: 64L.",
+        "Five integer types: Edm.Byte (unsigned 8-bit), Edm.SByte (signed 8-bit), Edm.Int16/Int32/Int64 (signed).",
+        "Byte has no minus sign; Int64 literal takes the suffix L: 64L.",
         "Edm.Double (15 digits, suffix d: 2.029d) and Edm.Single (7 digits, suffix f: 2.0f).",
         "Decimal for exact values (money), Double/Single for approximate values.",
         "V2 JSON: Int16/Int32 are numbers; Int64, Byte, SByte, Double, Single and Decimal are strings."
       ],
       "examples": [
         {
-          "title": "URI literal forms",
+          "title": "URI literal forms (from the V2 spec)",
           "language": "text",
-          "code": "Type          Literal form in a URI     Example\nEdm.Byte      [0-9]+                    255\nEdm.SByte     [-][0-9]+                 -8\nEdm.Int16     [-][0-9]+                 -16\nEdm.Int32     [-][0-9]+                 32\nEdm.Int64     [-][0-9]+L                64L\nEdm.Double    ...d                      1E+10d   2.029d\nEdm.Single    [0-9]+.[0-9]+f            2.0f"
+          "code": "Type          Literal form in a URI                           Example\nEdm.Byte      [0-9]+                                          255\nEdm.SByte     [-][0-9]+                                       -8\nEdm.Int16     [-][0-9]+                                       -16\nEdm.Int32     [-][0-9]+                                       32\nEdm.Int64     [-][0-9]+L                                      64L\nEdm.Double    [0-9]+ ((.[0-9]+) | [E[+ | -][0-9]+])d          1E+10d   2.029d   2.0d\nEdm.Single    [0-9]+.[0-9]+f                                  2.0f"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "URI literal suffixes",
+          "v2": "Int64 needs L, Double d, Single f, Decimal M: 64L, 2.029d, 2.0f.",
+          "v4": "No suffixes needed: 64, 2.029, 2.0. Special values INF, -INF and NaN for Double and Single."
+        },
+        {
+          "aspect": "JSON values",
+          "v2": "Int16 and Int32 are numbers; Int64, Byte, SByte, Double, Single and Decimal are strings.",
+          "v4": "All are JSON numbers; with IEEE754Compatible=true, Int64 and Decimal are written as strings."
         }
       ],
       "assignment": null,
@@ -60,6 +105,18 @@
         {
           "title": "OData Version 2.0: JSON Format (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
+        },
+        {
+          "title": "OData JSON Format Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html"
         }
       ]
     },
@@ -67,19 +124,36 @@
       "id": "other-types-null",
       "level": "basic",
       "title": "What are Edm.DateTimeOffset, Edm.Time, Edm.Guid, Edm.Binary and Null, and how are they written in a URI?",
-      "description": "Edm.DateTimeOffset represents a date and time together with its offset from GMT, so the time zone is part of the value; its literal is datetimeoffset'...' using the XML Schema datetime form with a time zone, for example 2002-10-10T17:00:00Z. Edm.Time represents a time of day (0:00:00 to 23:59:59), written as time'...' with an XML Schema dayTimeDuration such as PT13H20M. Edm.Guid is a 16-byte (128-bit) unique identifier, written as guid'dddddddd-dddd-dddd-dddd-dddddddddddd'. Edm.Binary is fixed- or variable-length binary data, written as X'23AB' or binary'23ABFF'; X and binary are case-sensitive, no space is allowed before the quote, and the hex digits must come in pairs. Null represents the absence of a value and is written null; OData has no ISNULL or COALESCE operators, so you compare with the null literal instead. In V2 JSON, Edm.Binary is a Base64 string, and DateTimeOffset, Time and Guid are their URI literal forms as JSON strings.",
+      "description": "Edm.DateTimeOffset represents a date and time together with its offset from GMT, so the time zone is part of the value, which suits timestamps such as when an order was placed; its literal is datetimeoffset'...' using the XML Schema datetime form with a time zone, for example datetimeoffset'2002-10-10T17:00:00Z'. Edm.Time represents a time of day (0:00:00 to 23:59:59), such as an opening hour, written as time'...' with an XML Schema dayTimeDuration such as time'PT13H20M'. Edm.Guid is a 16-byte (128-bit) unique identifier, typically used as a key that is unique without a central counter, written as guid'dddddddd-dddd-dddd-dddd-dddddddddddd'. Edm.Binary is fixed- or variable-length binary data such as an image, a file or a hash, written as X'23AB' or binary'23ABFF'; X and binary are case-sensitive, no space is allowed before the quote, and the hex digits must come in pairs. Null represents the absence of a value and is written null; OData has no ISNULL or COALESCE operators, so you compare with the null literal instead. In V2 JSON, Edm.Binary is a Base64 string, and DateTimeOffset, Time and Guid are their URI literal forms as JSON strings.",
       "keyPoints": [
-        "Edm.DateTimeOffset: date/time plus offset from GMT, e.g. 2002-10-10T17:00:00Z.",
+        "Edm.DateTimeOffset: date/time plus offset from GMT, for zoned timestamps: datetimeoffset'2002-10-10T17:00:00Z'.",
         "Edm.Time: time of day as a duration, time'PT13H20M'.",
-        "Edm.Guid: 128-bit identifier, guid'12345678-aaaa-bbbb-cccc-ddddeeeeffff'.",
-        "Edm.Binary: X'23AB' or binary'23ABFF' (case-sensitive prefix, hex pairs); Base64 string in JSON.",
-        "Null: literal null, used in comparisons such as eq null."
+        "Edm.Guid: 128-bit unique identifier, guid'12345678-aaaa-bbbb-cccc-ddddeeeeffff'.",
+        "Edm.Binary: images, files, hashes; X'23AB' or binary'23ABFF' (case-sensitive prefix, hex pairs); Base64 string in JSON.",
+        "Null: literal null, used in comparisons such as DiscontinuedDate eq null."
       ],
       "examples": [
         {
-          "title": "URI literal forms",
+          "title": "URI literal forms (null example on the V2 demo service)",
           "language": "text",
-          "code": "Edm.DateTimeOffset  datetimeoffset'2002-10-10T17:00:00Z'\nEdm.Time            time'PT13H20M'\nEdm.Guid            guid'12345678-aaaa-bbbb-cccc-ddddeeeeffff'\nEdm.Binary          X'23AB'   or   binary'23ABFF'\nNull                null      e.g. /Products?$filter=DiscontinuedDate eq null"
+          "code": "Edm.DateTimeOffset  datetimeoffset'2002-10-10T17:00:00Z'\nEdm.Time            time'PT13H20M'\nEdm.Guid            guid'12345678-aaaa-bbbb-cccc-ddddeeeeffff'\nEdm.Binary          X'23AB'   or   binary'23ABFF'\nNull                null\n                    /V2/OData/OData.svc/Products?$filter=DiscontinuedDate eq null"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Time of day",
+          "v2": "Edm.Time, written as a duration (time'PT13H20M').",
+          "v4": "Edm.Time was pruned; use Edm.TimeOfDay (07:59:59.999) or Edm.Duration (duration'P12DT23H59M59S')."
+        },
+        {
+          "aspect": "URI literals",
+          "v2": "datetimeoffset'...', guid'...', X'23AB' or binary'23ABFF' (hex).",
+          "v4": "No prefixes for DateTimeOffset and Guid (2012-12-03T07:16:23Z, 01234567-89ab-cdef-0123-456789abcdef); binary'T0RhdGE' is base64url."
+        },
+        {
+          "aspect": "New types",
+          "v2": "-",
+          "v4": "Edm.Date, Edm.TimeOfDay, Edm.Duration, Edm.Stream, and the Geography and Geometry types."
         }
       ],
       "assignment": null,
@@ -95,6 +169,18 @@
         {
           "title": "OData Version 2.0: JSON Format (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
+        },
+        {
+          "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
         }
       ]
     }
