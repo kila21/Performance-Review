@@ -1,5 +1,8 @@
 import { Route$PatternMatchedEvent } from "sap/ui/core/routing/Route";
 import JSONModel from "sap/ui/model/json/JSONModel";
+import View from "sap/ui/core/mvc/View";
+import UIComponent from "sap/ui/core/UIComponent";
+import Page from "sap/m/Page";
 import BaseController, { QuestionNav, QuestionRouteArgs } from "./BaseController";
 import {
   loadSubjects,
@@ -32,20 +35,31 @@ export default class QuestionDetail extends BaseController {
 
   // Every Previous/Next click re-creates this view fresh (see manifest.json's
   // clearControlAggregation), so this fires once per question -- exactly when we
-  // want to move focus (and, as a side effect, the scroll position) back to the top.
+  // want to move focus to the new question and scroll back to the top.
   public onAfterRendering(): void {
     // UI5's FocusHandler tries to restore focus to the previously focused control
     // (e.g. the Previous/Next button just clicked) shortly after rendering; this runs
-    // after that, so it wins and moves focus (and the scroll position) back to the top.
+    // after that, so it wins.
     setTimeout(() => {
       const domRef = this.getView()?.byId("detailContent")?.getDomRef() as HTMLElement | null;
       if (domRef) {
         if (!domRef.hasAttribute("tabindex")) {
           domRef.setAttribute("tabindex", "-1");
         }
-        domRef.focus();
+        // Don't let focus scroll the content to the top edge: that would hide the
+        // question title, which lives above it in the shell header.
+        domRef.focus({ preventScroll: true });
       }
+      this.scrollShellToTop();
     }, 100);
+  }
+
+  /** Scrolls the shell page to the very top, so the header with the question title is visible. */
+  private scrollShellToTop(): void {
+    const component = this.getOwnerComponent() as UIComponent | undefined;
+    const rootView = component?.getRootControl() as View | undefined;
+    const shellPage = rootView?.byId("shellBody") as Page | undefined;
+    shellPage?.scrollTo(0, 0);
   }
 
   private onRouteMatched(event: Route$PatternMatchedEvent): void {
