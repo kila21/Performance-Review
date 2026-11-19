@@ -14,12 +14,48 @@
         "Benefit: ChangeSets make a group of changes atomic (all or nothing).",
         "Responses come back in one multipart response, in request order."
       ],
-      "examples": [],
+      "examples": [
+        {
+          "title": "A batch with two reads on the V2 demo service (one part fails with 404)",
+          "language": "text",
+          "code": "POST /V2/OData/OData.svc/$batch HTTP/1.1\nHost: services.odata.org\nContent-Type: multipart/mixed; boundary=batch_1\nDataServiceVersion: 2.0\nMaxDataServiceVersion: 2.0\n\n--batch_1\nContent-Type: application/http\nContent-Transfer-Encoding: binary\n\nGET Categories(1)?$select=ID,Name HTTP/1.1\nAccept: application/json\n\n--batch_1\nContent-Type: application/http\nContent-Transfer-Encoding: binary\n\nGET Products(99) HTTP/1.1\nAccept: application/json\n\n--batch_1--\n\nHTTP/1.1 202 Accepted\nContent-Type: multipart/mixed; boundary=batchresponse_2a69d4b6-8cd0-4960-a51b-11b19fe55c0e\n\n--batchresponse_2a69d4b6-8cd0-4960-a51b-11b19fe55c0e\nContent-Type: application/http\nContent-Transfer-Encoding: binary\n\nHTTP/1.1 200 OK\nContent-Type: application/json;odata=verbose;charset=utf-8\n\n{\"d\":{\"__metadata\":{\"uri\":\".../Categories(1)\",\"type\":\"ODataDemo.Category\"},\"ID\":1,\"Name\":\"Beverages\"}}\n--batchresponse_2a69d4b6-8cd0-4960-a51b-11b19fe55c0e\nContent-Type: application/http\nContent-Transfer-Encoding: binary\n\nHTTP/1.1 404 Not Found\nContent-Type: application/json;odata=verbose;charset=utf-8\n\n{\"error\":{\"code\":\"\",\"message\":{\"lang\":\"en-US\",\"value\":\"Resource not found for the segment 'Products'.\"}}}\n--batchresponse_2a69d4b6-8cd0-4960-a51b-11b19fe55c0e--"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Batch formats",
+          "v2": "Multipart MIME only.",
+          "v4": "Multipart MIME, or (4.01) a JSON batch format."
+        },
+        {
+          "aspect": "Changes outside a ChangeSet",
+          "v2": "Insert, update and delete must be inside a ChangeSet.",
+          "v4": "Single data modification requests can be members of the batch without a ChangeSet."
+        },
+        {
+          "aspect": "After an error",
+          "v2": "Processing continues with the next part.",
+          "v4": "By default processing stops at the first error; the odata.continue-on-error preference asks the service to continue."
+        },
+        {
+          "aspect": "Asynchronous processing",
+          "v2": "-",
+          "v4": "Clients can ask for the batch to be processed asynchronously."
+        }
+      ],
       "assignment": null,
       "sources": [
         {
           "title": "OData Version 2.0: Batch Processing (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/batch-processing/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
         }
       ]
     },
@@ -37,9 +73,21 @@
       ],
       "examples": [
         {
-          "title": "Batch request headers",
+          "title": "Batch request headers for the V2 demo service",
           "language": "text",
-          "code": "POST /OData/OData.svc/$batch HTTP/1.1\nHost: services.odata.org\nDataServiceVersion: 1.0\nMaxDataServiceVersion: 2.0\nContent-Type: multipart/mixed; boundary=batch_36522ad7-fc75-4b56-8c71-56071383e77b\n\n<Batch Request Body>"
+          "code": "POST /V2/OData/OData.svc/$batch HTTP/1.1\nHost: services.odata.org\nDataServiceVersion: 1.0\nMaxDataServiceVersion: 2.0\nContent-Type: multipart/mixed; boundary=batch_36522ad7-fc75-4b56-8c71-56071383e77b\n\n<Batch Request Body>\n\nInside the body, request lines may be relative to the service root:\nGET Categories(1) HTTP/1.1"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Version headers",
+          "v2": "DataServiceVersion and MaxDataServiceVersion.",
+          "v4": "OData-Version and OData-MaxVersion."
+        },
+        {
+          "aspect": "Content-Type of the batch",
+          "v2": "multipart/mixed with a boundary.",
+          "v4": "multipart/mixed with a boundary for the multipart format; 4.01 adds a JSON batch format defined in the JSON Format spec."
         }
       ],
       "assignment": null,
@@ -47,6 +95,10 @@
         {
           "title": "OData Version 2.0: Batch Processing (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/batch-processing/"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
         }
       ]
     },
@@ -54,13 +106,13 @@
       "id": "batch-body-changeset",
       "level": "basic",
       "title": "How is a batch request body structured, what is a ChangeSet, and how does Content-ID referencing work?",
-      "description": "The body of a batch request is an ordered series of retrieve operations and ChangeSets, each in its own MIME part separated by the batch boundary. A ChangeSet is an atomic unit of work made of an unordered group of one or more insert, update or delete operations; it cannot contain retrieve requests and cannot be nested. A ChangeSet part is itself a multipart MIME document with its own changeset boundary and one part per operation. The order of ChangeSets and retrieve requests in the batch is significant, while the order of requests inside a ChangeSet is not, and the server must apply all requests of a ChangeSet or none of them. If an insert request inside a ChangeSet carries a Content-ID header, later requests in the same ChangeSet can refer to the new entity as $ followed by that value, for example POST $1/Orders, which creates an order for the customer inserted under Content-ID 1.",
+      "description": "The body of a batch request is an ordered series of retrieve operations and ChangeSets, each in its own MIME part separated by the batch boundary. A ChangeSet is an atomic unit of work made of an unordered group of one or more insert, update or delete operations; it cannot contain retrieve requests and cannot be nested. A ChangeSet part is itself a multipart MIME document with its own changeset boundary and one part per operation. The order of ChangeSets and retrieve requests in the batch is significant, while the order of requests inside a ChangeSet is not, and the server must apply all requests of a ChangeSet or none of them. If an insert request inside a ChangeSet carries a Content-ID header, later requests in the same ChangeSet can refer to the new entity as $ followed by that value, for example POST $1/Orders, which creates an order for the customer inserted under Content-ID 1. Support varies by server: the V2 demo service answers such a $1 request with 404 (Resource not found for the segment '$1'), so the example below follows the spec rather than a live service.",
       "keyPoints": [
         "Body = ordered retrieve requests and ChangeSets, separated by the batch boundary.",
         "ChangeSet = atomic group of inserts/updates/deletes; no GETs, no nesting.",
         "A ChangeSet is a nested multipart part with its own boundary.",
         "Batch order matters; order inside a ChangeSet does not.",
-        "Content-ID: n on an insert, then $n in later requests of the same ChangeSet."
+        "Content-ID: n on an insert, then $n in later requests of the same ChangeSet (not supported by the demo service)."
       ],
       "examples": [
         {
@@ -69,11 +121,27 @@
           "code": "POST /service/$batch HTTP/1.1\nHost: host\nDataServiceVersion: 1.0\nMaxDataServiceVersion: 2.0\nContent-Type: multipart/mixed; boundary=batch_36522ad7-fc75-4b56-8c71-56071383e77b\n\n--batch_36522ad7-fc75-4b56-8c71-56071383e77b\nContent-Type: application/http\nContent-Transfer-Encoding: binary\n\nGET /service/Customers('ALFKI') HTTP/1.1\nHost: host\n\n--batch_36522ad7-fc75-4b56-8c71-56071383e77b\nContent-Type: multipart/mixed; boundary=changeset_77162fcd-b8da-41ac-a9f8-9357efbbd621\n\n--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd621\nContent-Type: application/http\nContent-Transfer-Encoding: binary\nContent-ID: 1\n\nPOST /service/Customers HTTP/1.1\nHost: host\nContent-Type: application/atom+xml;type=entry\n\n<new Customer>\n--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd621\nContent-Type: application/http\nContent-Transfer-Encoding: binary\n\nPOST $1/Orders HTTP/1.1\nHost: host\nContent-Type: application/atom+xml;type=entry\n\n<new Order for the Customer created above>\n--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd621--\n--batch_36522ad7-fc75-4b56-8c71-56071383e77b--"
         }
       ],
+      "versionDiff": [
+        {
+          "aspect": "Content-ID",
+          "v2": "Optional; only needed when a later request refers to the new entity.",
+          "v4": "Every request in a ChangeSet needs a Content-ID, and the service returns it in the response so requests and responses can be matched."
+        },
+        {
+          "aspect": "Modifications outside a ChangeSet",
+          "v2": "Not allowed.",
+          "v4": "Allowed as individual members of the batch."
+        }
+      ],
       "assignment": null,
       "sources": [
         {
           "title": "OData Version 2.0: Batch Processing (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/batch-processing/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
         }
       ]
     },
@@ -81,7 +149,7 @@
       "id": "batch-response-format",
       "level": "basic",
       "title": "What does a batch response look like (headers and body)?",
-      "description": "If the headers of a batch request are valid, the server returns 202 Accepted, which means the request was accepted for processing; individual requests inside it may still fail. A batch with invalid headers gets a 4xx response and is not processed. The batch response must have a Content-Type header of multipart/mixed with a boundary, which may differ from the request's boundary. The body mirrors the request: it contains one response per retrieve request and per ChangeSet, in the same order as in the request. Each part has Content-Type: application/http and Content-Transfer-Encoding: binary, and holds an HTTP response formatted exactly as it would be outside a batch. For a ChangeSet the body contains either the responses for all its successfully processed requests, or a single response indicating that the whole ChangeSet failed.",
+      "description": "If the headers of a batch request are valid, the server returns 202 Accepted, which means the request was accepted for processing; individual requests inside it may still fail. A batch with invalid headers gets a 4xx response and is not processed. The batch response must have a Content-Type header of multipart/mixed with a boundary, which may differ from the request's boundary: the V2 demo service, for example, answers with its own boundary such as batchresponse_2a69d4b6-.... The body mirrors the request: it contains one response per retrieve request and per ChangeSet, in the same order as in the request. Each part has Content-Type: application/http and Content-Transfer-Encoding: binary, and holds an HTTP response formatted exactly as it would be outside a batch. For a ChangeSet the body contains either the responses for all its successfully processed requests, or a single response indicating that the whole ChangeSet failed.",
       "keyPoints": [
         "Status 202 Accepted when the batch headers are valid; 4xx if they are invalid.",
         "Content-Type: multipart/mixed with a (possibly different) boundary.",
@@ -96,11 +164,27 @@
           "code": "HTTP/1.1 202 Accepted\nDataServiceVersion: 1.0\nContent-Type: multipart/mixed; boundary=batch_36522ad7-fc75-4b56-8c71-56071383e77b\n\n--batch_36522ad7-fc75-4b56-8c71-56071383e77b\nContent-Type: application/http\nContent-Transfer-Encoding: binary\n\nHTTP/1.1 200 Ok\nContent-Type: application/atom+xml;type=entry\n\n<Customer ALFKI>\n--batch_36522ad7-fc75-4b56-8c71-56071383e77b\nContent-Type: multipart/mixed; boundary=changeset_77162fcd-b8da-41ac-a9f8-9357efbbd621\n\n--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd621\nContent-Type: application/http\nContent-Transfer-Encoding: binary\n\nHTTP/1.1 201 Created\nLocation: http://host/service.svc/Customer('POIUY')\n\n<new Customer>\n--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd621\nContent-Type: application/http\nContent-Transfer-Encoding: binary\n\nHTTP/1.1 204 No Content\n--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd621--\n--batch_36522ad7-fc75-4b56-8c71-56071383e77b\nContent-Type: application/http\nContent-Transfer-Encoding: binary\n\nHTTP/1.1 404 Not Found\nContent-Type: application/xml\n\n<Error message>\n--batch_36522ad7-fc75-4b56-8c71-56071383e77b--"
         }
       ],
+      "versionDiff": [
+        {
+          "aspect": "Matching responses to requests",
+          "v2": "By position: responses come in request order.",
+          "v4": "Responses to ChangeSet requests also repeat the request's Content-ID."
+        },
+        {
+          "aspect": "Errors",
+          "v2": "The batch continues after a failed part.",
+          "v4": "Processing stops at the first error unless the client sends the odata.continue-on-error preference."
+        }
+      ],
       "assignment": null,
       "sources": [
         {
           "title": "OData Version 2.0: Batch Processing (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/batch-processing/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
         }
       ]
     }

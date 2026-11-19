@@ -18,7 +18,19 @@
         {
           "title": "Addressing collections and entries",
           "language": "text",
-          "code": "GET /OData/OData.svc/Categories          all Categories (entity set \"Categories\")\nGET /OData/OData.svc/Categories(1)       the Category with key 1\nGET /OData/OData.svc/Products/$count     number of Products\n\nComposite key (two key properties):\nGET /Service.svc/OrderItems(OrderID=10248,ItemNo=1)"
+          "code": "GET https://services.odata.org/V2/OData/OData.svc/Categories          all Categories (entity set \"Categories\")\nGET https://services.odata.org/V2/OData/OData.svc/Categories(1)       the Category with key 1\nGET https://services.odata.org/V2/OData/OData.svc/Products/$count     number of Products (returns 9)\n\nComposite key (two key properties):\nGET /Service.svc/OrderItems(OrderID=10248,ItemNo=1)"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "/$count",
+          "v2": "Only as the last segment of a collection path: Products/$count.",
+          "v4": "Also inside $filter and $orderby: Categories?$filter=Products/$count gt 2, Categories?$orderby=Products/$count."
+        },
+        {
+          "aspect": "Keys of dependent entities",
+          "v2": "Every segment carries its full key.",
+          "v4": "Key properties fixed by a referential constraint aren't repeated: ~/Orders(1)/Items(2)."
         }
       ],
       "assignment": null,
@@ -26,6 +38,14 @@
         {
           "title": "OData Version 2.0: URI Conventions (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
         }
       ]
     },
@@ -42,9 +62,21 @@
       ],
       "examples": [
         {
-          "title": "Navigation in the demo service",
+          "title": "Navigation in the V2 demo service",
           "language": "text",
-          "code": "GET /OData/OData.svc/Categories(1)/Products            Products of Category 1 (NavPropCollection)\nGET /OData/OData.svc/Categories(1)/Products/$count     how many of them\nGET /OData/OData.svc/Categories(1)/Products(1)/Supplier  the Supplier of that Product (NavPropSingle)"
+          "code": "GET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Products              Products of Category 1 (NavPropCollection)\nGET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Products/$count       how many of them\nGET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Products(1)/Supplier  the Supplier of that Product (NavPropSingle)"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Where a navigation property leads",
+          "v2": "Defined by an Association and the AssociationSet that binds it to entity sets.",
+          "v4": "Navigation properties are unidirectional; an optional NavigationPropertyBinding names the target entity set."
+        },
+        {
+          "aspect": "Counting related entities",
+          "v2": "Categories(1)/Products/$count as a path only.",
+          "v4": "Also in expressions: Categories?$filter=Products/$count gt 2."
         }
       ],
       "assignment": null,
@@ -52,6 +84,14 @@
         {
           "title": "OData Version 2.0: URI Conventions (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
         }
       ]
     },
@@ -59,7 +99,7 @@
       "id": "complex-property-segments",
       "level": "elementary",
       "title": "How do you address a property, a complex-type property and a raw value in a resource path?",
-      "description": "To address a property, you append the property name to the path of the entry. A Property segment is the name of a declared or dynamic property of the entry or complex type from the prior segment, for example Categories(1)/Name. If the property is of a complex type, a ComplexType segment addresses the whole structured value, for example Suppliers(1)/Address, and a further Property segment addresses one field inside it, for example .../Supplier/Address/City. Adding /$value to a primitive property addresses its raw value instead of its OData-formatted representation, for example .../Address/City/$value. In the metadata, these segments are described by the properties of the entity type or the complex type.",
+      "description": "To address a property, you append the property name to the path of the entry. A Property segment is the name of a declared or dynamic property of the entry or complex type from the prior segment, for example Categories(1)/Name. If the property is of a complex type, a ComplexType segment addresses the whole structured value, for example Suppliers(1)/Address, and a further Property segment addresses one field inside it, for example .../Supplier/Address/City. Adding /$value to a primitive property addresses its raw value instead of its OData-formatted representation, for example .../Address/City/$value returns just Sammamish as plain text. In the metadata, these segments are described by the properties of the entity type or the complex type.",
       "keyPoints": [
         "Property segment: Categories(1)/Name.",
         "ComplexType segment: Suppliers(1)/Address (the whole complex value).",
@@ -68,9 +108,21 @@
       ],
       "examples": [
         {
-          "title": "Property paths",
+          "title": "Property paths in the V2 demo service",
           "language": "text",
-          "code": "GET /OData/OData.svc/Categories(1)/Name\nGET /OData/OData.svc/Categories(1)/Products(1)/Supplier/Address/City\nGET /OData/OData.svc/Categories(1)/Products(1)/Supplier/Address/City/$value"
+          "code": "GET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Name\nGET https://services.odata.org/V2/OData/OData.svc/Suppliers(1)/Address\nGET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Products(1)/Supplier/Address/City\nGET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Products(1)/Supplier/Address/City/$value      -> Sammamish"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "/$value",
+          "v2": "Raw value of a primitive property.",
+          "v4": "Raw value of a primitive or enumeration property, for example People('russellwhyte')/Gender/$value on TripPin."
+        },
+        {
+          "aspect": "Navigation inside complex values",
+          "v2": "Complex types have only structural properties.",
+          "v4": "Complex types can also have navigation properties, so a path can continue from a complex property to related entities."
         }
       ],
       "assignment": null,
@@ -78,6 +130,14 @@
         {
           "title": "OData Version 2.0: URI Conventions (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
         }
       ]
     },
@@ -85,18 +145,35 @@
       "id": "addressing-service-operations",
       "level": "elementary",
       "title": "How are service operations (function imports) addressed in a URI?",
-      "description": "A service operation is addressed like a resource: the service root URI followed by the name of the operation, optionally followed by a question mark and its parameters as ParamName=ParamValue pairs. Parameter values use the URI literal forms of the primitive types, so a string is written in single quotes. The order of parameters does not matter, and query string parameters that the operation does not define are ignored for the invocation. If the operation returns a collection of entries, it acts as a pseudo collection: further path segments such as a key predicate or a navigation property can follow it, as in ProductsByColor(3)/Category/Name?color='red'. An operation without parameters is addressed by its name only, for example ProductColors.",
+      "description": "A service operation is addressed like a resource: the service root URI followed by the name of the operation, optionally followed by a question mark and its parameters as ParamName=ParamValue pairs. Parameter values use the URI literal forms of the primitive types, so a string is written in single quotes. The order of parameters does not matter, and query string parameters that the operation does not define are ignored for the invocation. If the operation returns a collection of entries and the service author enables query composition, it acts as a pseudo collection: further path segments such as a key predicate or a navigation property can follow it. The spec shows this with ProductsByColor(3)/Category/Name?color='red'; the V2 demo service does not enable it, so there GetProductsByRating(1)/Category returns 404. An operation without parameters is addressed by its name only, as in the spec example ProductColors.",
       "keyPoints": [
         "serviceRoot/OperationName?param1=value1&param2=value2.",
         "Values use URI literal forms (strings in single quotes).",
         "Parameter order is insignificant; undefined parameters are ignored.",
-        "An operation returning entries can be followed by more path segments."
+        "More path segments after the operation only if the service enables composition."
       ],
       "examples": [
         {
-          "title": "Service operation URIs",
+          "title": "Calling the real operation of the V2 demo service",
           "language": "text",
-          "code": "GET /OData/OData.svc/ProductsByColor?color='red'\nGET /OData/OData.svc/ProductsByColor(3)/Category/Name?color='red'\nGET /OData/OData.svc/ProductColors"
+          "code": "GET https://services.odata.org/V2/OData/OData.svc/GetProductsByRating?rating=5\nGET https://services.odata.org/V2/OData/OData.svc/GetProductsByRating?rating=5&param=foo     (param is not defined: ignored)"
+        },
+        {
+          "title": "Examples from the V2 spec (its sample service, not live)",
+          "language": "text",
+          "code": "GET /OData/OData.svc/ProductsByColor?color='red'\nGET /OData/OData.svc/ProductsByColor(3)/Category/Name?color='red'     (needs composition)\nGET /OData/OData.svc/ProductColors                                    (no parameters)"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Kinds of operations",
+          "v2": "Service operations, invoked with GET or POST as m:HttpMethod says.",
+          "v4": "Functions (no side effects, may be composed further) and actions (side effects, invoked with POST, not composable)."
+        },
+        {
+          "aspect": "Passing parameters",
+          "v2": "Query string name=value: GetProductsByRating?rating=5.",
+          "v4": "Function parameters as plain query options were pruned; the call names @ parameter aliases whose values follow in the query: Products/Model.WithIngredients(Ingredients=@i)?@i=[\"Carrots\"]."
         }
       ],
       "assignment": null,
@@ -104,6 +181,22 @@
         {
           "title": "OData Version 2.0: URI Conventions (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
         }
       ]
     },
@@ -111,18 +204,30 @@
       "id": "addressing-links",
       "level": "basic",
       "title": "How do you address the links between entries with $links in OData V2?",
-      "description": "OData treats relationships as first-class constructs, so associations between entries can be addressed just like the entries themselves. The URI is the URI of a single entry, followed by /$links/ and the name of a navigation property declared on that entry. Categories(1)/$links/Products identifies the set of links to the products related to Category 1, and Products(1)/$links/Category identifies the link to the category of Product 1. Compared with Categories(1)/Products, which returns the related entries themselves, the $links URI returns only references (URIs) to them. The link resources are what you use to create, replace or remove relationships directly: POST to add a link, PUT to replace a single-valued link, and DELETE to remove one, with the target URI in the request body. In OData V4 the $links segment was replaced by /$ref.",
+      "description": "OData treats relationships as first-class constructs, so associations between entries can be addressed just like the entries themselves. The URI is the URI of a single entry, followed by /$links/ and the name of a navigation property declared on that entry. Categories(1)/$links/Products identifies the set of links to the products related to Category 1, and Products(1)/$links/Category identifies the link to the category of Product 1. Compared with Categories(1)/Products, which returns the related entries themselves, the $links URI returns only references (URIs) to them. The link resources are what you use to change relationships directly. A POST to a $links URI adds a link, with the URI of the target entry in the body. A PUT to a single-valued link, such as Products(1)/$links/Category, replaces it, again with the new URI in the body. A DELETE on a URI that names one link, such as Categories(1)/$links/Products(10), removes it and has no body. In OData V4 the $links segment was replaced by /$ref.",
       "keyPoints": [
         "Syntax: Entry URI + /$links/ + NavigationProperty.",
         "Returns link references (URIs), not the related entries.",
-        "Used to create (POST), replace (PUT) and delete (DELETE) relationships.",
+        "POST adds a link and PUT replaces one (new URI in the body); DELETE removes one (no body).",
         "Replaced by /$ref in OData V4."
       ],
       "examples": [
         {
-          "title": "Reading and changing links",
+          "title": "Reading and changing links in the V2 demo service",
           "language": "text",
-          "code": "GET    /OData/OData.svc/Categories(1)/$links/Products\nGET    /OData/OData.svc/Products(1)/$links/Category\n\nPOST   /OData/OData.svc/Categories(1)/$links/Products        (body: URI of Products(10))\nDELETE /OData/OData.svc/Categories(1)/$links/Products(10)"
+          "code": "GET    https://services.odata.org/V2/OData/OData.svc/Categories(1)/$links/Products\nGET    https://services.odata.org/V2/OData/OData.svc/Products(1)/$links/Category\n\nPOST   /V2/OData/OData.svc/Categories(1)/$links/Products     body: <uri>.../Products(10)</uri>\nPUT    /V2/OData/OData.svc/Products(1)/$links/Category       body: <uri>.../Categories(2)</uri>\nDELETE /V2/OData/OData.svc/Categories(1)/$links/Products(10)  (no body)"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Addressing references",
+          "v2": "/$links/ segment: Categories(1)/$links/Products.",
+          "v4": "/$links/ was pruned; append /$ref to a path instead: Categories(1)/Products/$ref."
+        },
+        {
+          "aspect": "Resolving a reference",
+          "v2": "-",
+          "v4": "~/$entity?$id=<entity-id> returns the current representation of the referenced entity."
         }
       ],
       "assignment": null,

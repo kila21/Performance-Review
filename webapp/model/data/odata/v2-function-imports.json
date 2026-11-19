@@ -15,9 +15,26 @@
       ],
       "examples": [
         {
-          "title": "Calling a function import",
+          "title": "Calling the function import of the V2 demo service",
           "language": "text",
-          "code": "GET /odata/odata.svc/GetProductsByRating?rating=4 HTTP/1.1\nHost: services.odata.org\nDataServiceVersion: 1.0\nMaxDataServiceVersion: 2.0\n\nHTTP/1.1 200 OK\nContent-Type: application/atom+xml;charset=utf-8\n\n<feed ...> ...the matching Product entries... </feed>"
+          "code": "GET /V2/OData/OData.svc/GetProductsByRating?rating=4 HTTP/1.1\nHost: services.odata.org\n\nHTTP/1.1 200 OK\nContent-Type: application/atom+xml;type=feed;charset=utf-8\n\n<feed ...> ...the matching Product entries... </feed>\n\nWrong HTTP method (the metadata says m:HttpMethod=\"GET\"):\nPOST /V2/OData/OData.svc/GetProductsByRating?rating=4\n-> 405 Method Not Allowed"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "How operations are invoked",
+          "v2": "GET or POST, whichever m:HttpMethod declares.",
+          "v4": "Functions with GET, actions with POST."
+        },
+        {
+          "aspect": "Bound operations",
+          "v2": "-",
+          "v4": "Functions and actions can be bound to a type and called on an instance by appending their qualified name to its URL."
+        },
+        {
+          "aspect": "Passing parameters",
+          "v2": "Query string: ?rating=4.",
+          "v4": "Inline in parentheses after the function name, or as @ parameter aliases; action parameters go in the request body."
         }
       ],
       "assignment": null,
@@ -29,6 +46,14 @@
         {
           "title": "OData Version 2.0: Overview (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
         }
       ]
     },
@@ -36,17 +61,34 @@
       "id": "service-operation-return-types",
       "level": "elementary",
       "title": "What can a service operation return, and how is it described in the metadata?",
-      "description": "A service operation is a function whose semantics are defined by the service author. It accepts primitive input parameters and can be defined to return a single primitive value, a single complex type, a collection of primitives, a collection of complex types, a single entry, a collection of entries, or nothing (void). In the metadata document it is described by a Function Import, which names the operation, lists its parameters, declares its return type and, when it returns entries, the entity set they belong to. For example, ProductsByColor takes a string parameter color and returns Products, while ProductColors takes no parameters and returns a collection of strings.",
+      "description": "A service operation is a function whose semantics are defined by the service author. It accepts primitive input parameters and can be defined to return a single primitive value, a single complex type, a collection of primitives, a collection of complex types, a single entry, a collection of entries, or nothing (void). In the metadata document it is described by a Function Import, which names the operation, lists its parameters, declares its ReturnType and, when it returns entries, the EntitySet they belong to. The V2 demo service has one: GetProductsByRating takes an Edm.Int32 parameter rating and returns Collection(ODataDemo.Product) from the Products entity set. The V2 spec's own examples are ProductsByColor, which returns products, and ProductColors, which takes no parameters and returns a collection of strings.",
       "keyPoints": [
         "Returns: primitive(s), complex value(s), an entry, a collection of entries, or void.",
         "Described in $metadata by a Function Import (name, parameters, ReturnType, EntitySet).",
-        "ProductsByColor(color) returns entries; ProductColors returns strings."
+        "Demo service: GetProductsByRating(rating) returns Collection(ODataDemo.Product)."
       ],
       "examples": [
         {
-          "title": "Two function imports",
+          "title": "Function import in the V2 demo service metadata",
           "language": "xml",
-          "code": "<FunctionImport Name=\"ProductsByColor\" EntitySet=\"Products\"\n                ReturnType=\"Collection(ODataDemo.Product)\" m:HttpMethod=\"GET\">\n  <Parameter Name=\"color\" Type=\"Edm.String\" Mode=\"In\" />\n</FunctionImport>\n\n<FunctionImport Name=\"ProductColors\" ReturnType=\"Collection(Edm.String)\" m:HttpMethod=\"GET\" />"
+          "code": "<FunctionImport Name=\"GetProductsByRating\" ReturnType=\"Collection(ODataDemo.Product)\"\n                EntitySet=\"Products\" m:HttpMethod=\"GET\">\n  <Parameter Name=\"rating\" Type=\"Edm.Int32\" />\n</FunctionImport>"
+        },
+        {
+          "title": "Other return types, as in the V2 spec examples (not live)",
+          "language": "xml",
+          "code": "<!-- returns entries -->\n<FunctionImport Name=\"ProductsByColor\" ReturnType=\"Collection(ODataDemo.Product)\"\n                EntitySet=\"Products\" m:HttpMethod=\"GET\">\n  <Parameter Name=\"color\" Type=\"Edm.String\" />\n</FunctionImport>\n\n<!-- no parameters, returns a collection of strings -->\n<FunctionImport Name=\"ProductColors\" ReturnType=\"Collection(Edm.String)\" m:HttpMethod=\"GET\" />"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Declaration",
+          "v2": "FunctionImport with ReturnType and m:HttpMethod inside the entity container.",
+          "v4": "Function or Action element at the schema level with a ReturnType child element; FunctionImport or ActionImport in the container points to it."
+        },
+        {
+          "aspect": "Nullable return values",
+          "v2": "Not declared.",
+          "v4": "The return type can state Nullable."
         }
       ],
       "assignment": null,
@@ -58,6 +100,14 @@
         {
           "title": "OData Version 2.0: Overview (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        },
+        {
+          "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
         }
       ]
     }

@@ -6,19 +6,41 @@
       "id": "crud-overview-create",
       "level": "elementary",
       "title": "How do the CRUD operations map to HTTP in OData V2, and how do you create a new entry?",
-      "description": "OData has a fixed set of uniform operations, retrieve, create, update and delete, which map to the HTTP methods GET, POST, PUT/MERGE and DELETE; each acts on a resource identified by a URI. To create an entry, the client sends a POST to the URI of the collection where the entry should be created, with the new entry in the request body; it sets Content-Type for the body and Accept for the response format. The server creates the resource, assigns default values to optional properties that were not sent, and answers 201 Created with the final state of the entry in the body and a Location header containing the URL of the new entry. The new entry may contain links to existing entries, and posting to a navigation URL such as Categories(10)/Products creates the product and links it to that category automatically. Several related new entries can also be created in one POST as a tree of inline entries (deep insert).",
+      "description": "OData has a fixed set of uniform operations, retrieve, create, update and delete, which map to the HTTP methods GET, POST, PUT/MERGE and DELETE; each acts on a resource identified by a URI. To create an entry, the client sends a POST to the URI of the collection where the entry should be created, with the new entry in the request body; it sets Content-Type for the body and Accept for the response format. The server creates the resource, assigns default values to optional properties that were not sent, and answers 201 Created with the final state of the entry in the body and a Location header containing the URL of the new entry. The new entry may contain links to existing entries, and posting to a navigation URL such as Categories(1)/Products creates the product and links it to that category automatically. Several related new entries can also be created in one POST as a tree of inline entries (deep insert). In a V2 JSON request body, DateTime values must be written with escaped slashes, \"\\/Date(694224000000)\\/\"; the V2 demo service rejects the unescaped \"/Date(...)/\" with 400. To try writes, use the read/write demo service at /V2/(S(readwrite))/OData/OData.svc/, which redirects to a session URL with its own copy of the data.",
       "keyPoints": [
         "Retrieve = GET, Create = POST, Update = PUT/MERGE, Delete = DELETE.",
         "Create: POST to the collection URI with the entry in the body.",
         "Success: 201 Created, entry in the body, Location header with its URL.",
-        "POST to Categories(10)/Products creates the product and links it to the category.",
-        "Deep insert: one POST with inline related entries."
+        "POST to Categories(1)/Products creates the product and links it to the category; deep insert creates a tree.",
+        "JSON dates in requests: \"\\/Date(ticks)\\/\" (escaped slashes)."
       ],
       "examples": [
         {
-          "title": "Creating a Category entry in JSON",
+          "title": "Creating a Category on the V2 read/write demo service",
           "language": "text",
-          "code": "POST /OData/OData.svc/Categories HTTP/1.1\nHost: services.odata.org\nContent-Type: application/json\nAccept: application/json\n\n{ \"ID\": 10, \"Name\": \"Clothing\" }\n\nHTTP/1.1 201 Created\nLocation: https://services.odata.org/OData/OData.svc/Categories(10)\nContent-Type: application/json;charset=utf-8\n\n{ \"d\" : { \"__metadata\": { \"uri\": \".../Categories(10)\", ... }, \"ID\": 10, \"Name\": \"Clothing\", ... } }"
+          "code": "POST /V2/(S(readwrite))/OData/OData.svc/Categories HTTP/1.1      (redirects to /V2/(S(<session>))/...)\nHost: services.odata.org\nContent-Type: application/json\nAccept: application/json\n\n{\"ID\":10,\"Name\":\"Clothing\"}\n\nHTTP/1.1 201 Created\nLocation: https://services.odata.org/(S(<session>))/V2/OData/OData.svc/Categories(10)\nContent-Type: application/json;odata=verbose;charset=utf-8\n\n{\"d\":{\"__metadata\":{\"uri\":\".../Categories(10)\",\"type\":\"ODataDemo.Category\"},\n      \"Products\":{\"__deferred\":{\"uri\":\".../Categories(10)/Products\"}},\"ID\":10,\"Name\":\"Clothing\"}}"
+        },
+        {
+          "title": "Creating a Product linked to Category 1, and a deep insert",
+          "language": "text",
+          "code": "POST .../Categories(1)/Products\nContent-Type: application/json\n\n{\"ID\":20,\"Name\":\"Shirt\",\"ReleaseDate\":\"\\/Date(694224000000)\\/\",\"Rating\":3,\"Price\":\"9.5\"}\n-> 201 Created; GET .../Products(20)/Category returns Category 1\n\nPOST .../Categories\n{\"ID\":11,\"Name\":\"Toys\",\"Products\":[\n  {\"ID\":21,\"Name\":\"Ball\",\"ReleaseDate\":\"\\/Date(694224000000)\\/\",\"Rating\":1,\"Price\":\"1.0\"}]}\n-> 201 Created; GET .../Categories(11)/Products/$count returns 1"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Update methods",
+          "v2": "PUT (replace) and MERGE (partial).",
+          "v4": "PUT (replace) and PATCH (partial); MERGE was pruned."
+        },
+        {
+          "aspect": "Upsert",
+          "v2": "-",
+          "v4": "PATCH or PUT can create the entity if the client can build a valid URL for it and sends all needed data."
+        },
+        {
+          "aspect": "Dates in the JSON body",
+          "v2": "\"\\/Date(694224000000)\\/\" for Edm.DateTime.",
+          "v4": "ISO strings such as \"2012-12-03T07:16:23Z\" for Edm.DateTimeOffset."
         }
       ],
       "assignment": null,
@@ -30,6 +52,18 @@
         {
           "title": "OData Version 2.0: JSON Format (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData JSON Format Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html"
         }
       ]
     },
@@ -46,9 +80,21 @@
       ],
       "examples": [
         {
-          "title": "Reading one entry",
+          "title": "Reading one entry on the V2 demo service, and an unknown key",
           "language": "text",
-          "code": "GET /OData/OData.svc/Products(1) HTTP/1.1\nHost: services.odata.org\nAccept: application/json\n\nHTTP/1.1 200 OK\nContent-Type: application/json;charset=utf-8\n\n{ \"d\" : { \"__metadata\": { ... }, \"ID\": 1, \"Name\": \"Milk\", ... } }"
+          "code": "GET /V2/OData/OData.svc/Products(1) HTTP/1.1\nHost: services.odata.org\nAccept: application/json\n\nHTTP/1.1 200 OK\nContent-Type: application/json;odata=verbose;charset=utf-8\n\n{\"d\":{\"__metadata\":{\"uri\":\".../Products(1)\",\"type\":\"ODataDemo.Product\"},\"ID\":1,\"Name\":\"Milk\", ... }}\n\nGET /V2/OData/OData.svc/Products(99)\nHTTP/1.1 404 Not Found\n{\"error\":{\"code\":\"\",\"message\":{\"lang\":\"en-US\",\"value\":\"Resource not found for the segment 'Products'.\"}}}"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Null value vs not found",
+          "v2": "No dedicated rule.",
+          "v4": "204 No Content for a null value (for example a null property); 404 Not Found for things that don't exist, like an unmatched key."
+        },
+        {
+          "aspect": "JSON error body",
+          "v2": "{\"error\":{\"code\":...,\"message\":{\"lang\":...,\"value\":...}}}",
+          "v4": "{\"error\":{\"code\":...,\"message\":...}}, with message as a plain string."
         }
       ],
       "assignment": null,
@@ -56,6 +102,14 @@
         {
           "title": "OData Version 2.0: Operations (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData JSON Format Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html"
         }
       ]
     },
@@ -73,9 +127,62 @@
       ],
       "examples": [
         {
-          "title": "Partial update with MERGE",
+          "title": "PUT vs MERGE on the V2 read/write demo service",
           "language": "text",
-          "code": "MERGE /OData/OData.svc/Products(1) HTTP/1.1\nHost: services.odata.org\nContent-Type: application/json\n\n{ \"Price\": \"3.5\", \"Rating\": 5 }\n\nHTTP/1.1 204 No Content"
+          "code": "MERGE .../Products(1)\nContent-Type: application/json\n\n{\"Price\":\"3.5\",\"Rating\":5}\n-> 204 No Content; only Price and Rating changed, Description is still \"Low fat milk\"\n\nPUT .../Products(1)\nContent-Type: application/json\n\n{\"ID\":1,\"Name\":\"Milk\",\"ReleaseDate\":\"\\/Date(694224000000)\\/\",\"Rating\":4,\"Price\":\"3.5\"}\n-> 204 No Content; Description was not sent, so it is now null"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Partial update",
+          "v2": "MERGE (a custom HTTP method).",
+          "v4": "PATCH (standard HTTP); MERGE was pruned."
+        },
+        {
+          "aspect": "Recommended method",
+          "v2": "PUT or MERGE.",
+          "v4": "Services SHOULD support PATCH as the preferred way; clients are advised to use PATCH instead of PUT."
+        }
+      ],
+      "assignment": null,
+      "sources": [
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
+        }
+      ]
+    },
+    {
+      "id": "update-individual-property",
+      "level": "elementary",
+      "title": "How do you update a single property of an entry?",
+      "description": "An individual property can be updated through the same address used to read it. The client sends a PUT to the property URI, for example Products(1)/Rating, with the value in an OData format, or a PUT to the raw value URI, Products(1)/Rating/$value, with the value in its native form (for example text/plain). The raw form is natural for content such as an image or an HTML document that can be replaced without encoding it. The server updates the property and returns 204 No Content, or 200 OK with the updated property. MERGE is not defined for individual properties, because properties are atomic, and the spec says servers should reject it with 405 Method Not Allowed; the V2 demo service accepts it anyway (204), so don't rely on either behavior.",
+      "keyPoints": [
+        "PUT <entry>/<Property> with the value in an OData format.",
+        "Or PUT <entry>/<Property>/$value with the raw value.",
+        "Success: 204 No Content (or 200 OK with the property).",
+        "MERGE on a property: 405 per spec, but the demo service accepts it."
+      ],
+      "examples": [
+        {
+          "title": "Updating only the rating on the V2 read/write demo service",
+          "language": "text",
+          "code": "PUT .../Products(1)/Rating/$value\nContent-Type: text/plain\n\n5\n-> 204 No Content\n\nPUT .../Products(1)/Rating\nContent-Type: application/json\n\n{\"Rating\":2}\n-> 204 No Content"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Partial update of a complex property",
+          "v2": "Only PUT is defined for a single property.",
+          "v4": "PATCH on a complex property changes only the fields sent, like PATCH on an entity."
         }
       ],
       "assignment": null,
@@ -91,47 +198,33 @@
       ]
     },
     {
-      "id": "update-individual-property",
-      "level": "elementary",
-      "title": "How do you update a single property of an entry?",
-      "description": "An individual property can be updated through the same address used to read it. The client sends a PUT to the property URI, for example Products(1)/Rating, with the value in an OData format, or a PUT to the raw value URI, Products(1)/Rating/$value, with the value in its native form (for example text/plain). The raw form is natural for content such as an image or an HTML document that can be replaced without encoding it. The server updates the property and returns 204 No Content, or 200 OK with the updated property. MERGE is not defined for individual properties, because properties are atomic; servers should reject it with 405 Method Not Allowed.",
-      "keyPoints": [
-        "PUT <entry>/<Property> with the value in an OData format.",
-        "Or PUT <entry>/<Property>/$value with the raw value.",
-        "Success: 204 No Content (or 200 OK with the property).",
-        "MERGE on a property is not allowed: 405 Method Not Allowed."
-      ],
-      "examples": [
-        {
-          "title": "Updating only the rating",
-          "language": "text",
-          "code": "PUT /OData/OData.svc/Products(1)/Rating/$value HTTP/1.1\nHost: services.odata.org\nContent-Type: text/plain\n\n5\n\nHTTP/1.1 204 No Content"
-        }
-      ],
-      "assignment": null,
-      "sources": [
-        {
-          "title": "OData Version 2.0: Operations (odata.org)",
-          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
-        }
-      ]
-    },
-    {
       "id": "delete-entry",
       "level": "elementary",
       "title": "How do you delete an entry, and what happens to related entries?",
-      "description": "An entry is deleted with an HTTP DELETE request to a URI that points at the entry, for example DELETE /Products(1). According to the OData V2 operations specification, a successful delete should return 200 OK with no response body. If the entry has dependent entries, such as entries linked to it, the server decides what happens: it may cascade the delete, reject it because dependents exist, or leave the links dangling; this depends on the server, its storage model and the application. Deleting a media link entry also deletes its media resource.",
+      "description": "An entry is deleted with an HTTP DELETE request to a URI that points at the entry, for example DELETE /Products(1). The OData V2 operations specification says a successful delete should return 200 OK with no response body; real servers, including the V2 demo service, answer 204 No Content, which V4 later made mandatory. If the entry has dependent entries, such as entries linked to it, the server decides what happens: it may cascade the delete, reject it because dependents exist, or leave the links dangling; this depends on the server, its storage model and the application. Deleting a media link entry also deletes its media resource.",
       "keyPoints": [
         "DELETE on the entry URI.",
-        "Success: 200 OK with no body (per the V2 spec).",
+        "Success: 200 OK per the V2 spec; the demo service (and V4) answer 204 No Content.",
         "Dependent entries: cascade, fail, or dangling links, depending on the server.",
         "Deleting a media link entry also deletes the media resource."
       ],
       "examples": [
         {
-          "title": "Deleting an entry",
+          "title": "Deleting an entry on the V2 read/write demo service",
           "language": "text",
-          "code": "DELETE /OData/OData.svc/Products(1) HTTP/1.1\nHost: services.odata.org"
+          "code": "DELETE .../Products(20) HTTP/1.1\n-> 204 No Content\n\nGET .../Products(20)\n-> 404 Not Found"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Success status",
+          "v2": "200 OK in the spec; servers commonly send 204.",
+          "v4": "Must be 204 No Content with an empty body."
+        },
+        {
+          "aspect": "Relations of the deleted entity",
+          "v2": "Server-specific: cascade, fail or dangling links.",
+          "v4": "Services must remove relations to and from the entity; they may also delete or modify related entities."
         }
       ],
       "assignment": null,
@@ -139,6 +232,10 @@
         {
           "title": "OData Version 2.0: Operations (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
         }
       ]
     }

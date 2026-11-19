@@ -6,7 +6,7 @@
       "id": "v4-search",
       "level": "basic",
       "title": "What does the $search system query option do in OData V4?",
-      "description": "$search requests the items of a collection that match a free-text search expression. It can be applied to a collection of entity, complex or primitive typed instances, and applied to the $all resource it searches all entities of the service. A search expression is made of terms (single words), phrases in double quotes and parenthesized groups, combined with the case-sensitive keywords NOT, AND and OR, evaluated in that order; two expressions separated only by a space mean AND. What counts as a match is decided by the service. If $search and $filter are both used, only items matching both are returned.",
+      "description": "$search requests the items of a collection that match a free-text search expression. It can be applied to a collection of entity, complex or primitive typed instances, and applied to the $all resource it searches all entities of the service. A search expression is made of terms (single words), phrases in double quotes and parenthesized groups, combined with the case-sensitive keywords NOT, AND and OR, evaluated in that order; two expressions separated only by a space mean AND. What counts as a match is decided by the service: on TripPin, People?$search=Russell returns russellwhyte. If $search and $filter are both used, only items matching both are returned. Services can state which sets are searchable with the Capabilities.SearchRestrictions annotation, as TripPin does in its metadata.",
       "keyPoints": [
         "Free-text search over a collection; on ~/$all over the whole service.",
         "Terms, \"phrases\", (groups); keywords NOT, AND, OR (case-sensitive).",
@@ -15,9 +15,21 @@
       ],
       "examples": [
         {
-          "title": "Search requests",
+          "title": "Search on TripPin",
           "language": "text",
-          "code": "GET http://host/service/Products?$search=blue OR green\nGET http://host/service/Products?$search=\"dark blue\" NOT cotton"
+          "code": "GET https://services.odata.org/V4/TripPinServiceRW/People?$search=Russell&$select=UserName\n-> \"value\":[{ ..., \"UserName\":\"russellwhyte\"}]"
+        },
+        {
+          "title": "Search expressions (spec syntax)",
+          "language": "text",
+          "code": "GET http://host/service/Products?$search=blue OR green\nGET http://host/service/Products?$search=\"dark blue\" NOT cotton\nGET http://host/service/$all?$search=red"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Free-text search",
+          "v2": "-; only string functions inside $filter, such as substringof('milk', Description).",
+          "v4": "$search with terms, phrases, NOT/AND/OR; the service decides what matches."
         }
       ],
       "assignment": null,
@@ -29,6 +41,14 @@
         {
           "title": "What's New in OData Version 4.0 (OASIS)",
           "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
+        },
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
         }
       ]
     },
@@ -45,9 +65,16 @@
       ],
       "examples": [
         {
-          "title": "Filter and sort by a computed total",
+          "title": "Filter and sort by a computed total (URL Conventions example 134; needs a 4.01 service, TripPin is 4.0)",
           "language": "text",
           "code": "GET http://host/service/Orders(10)/Items\n    ?$select=Product/Description,Total\n    &$filter=Total gt 100\n    &$orderby=Total\n    &$compute=Product/Price mul Quantity as Total"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Computed values",
+          "v2": "Arithmetic only inside a $filter expression: Price mul 2 gt 2000.",
+          "v4": "$compute defines a named dynamic property usable in $select, $filter and $orderby (4.01)."
         }
       ],
       "assignment": null,
@@ -55,6 +82,10 @@
         {
           "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
           "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
+        },
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
         }
       ]
     },
@@ -71,7 +102,7 @@
       ],
       "examples": [
         {
-          "title": "Positional insert and versioned request",
+          "title": "Positional insert and versioned request (spec examples; both are 4.01 features)",
           "language": "text",
           "code": "POST http://host/service/Customers('ALFKI')/EmailAddresses?$index=1   insert at the 2nd position\nGET  http://host/service/$metadata?$schemaversion=*                  current schema version\nGET  http://host/service/Products?$schemaversion=2                   request against schema version 2"
         }
@@ -92,7 +123,7 @@
       "id": "v4-lambda-operators",
       "level": "basic",
       "title": "What are the lambda operators any and all, and how do you filter parent entities by their children?",
-      "description": "OData V4 defines two lambda operators that evaluate a Boolean expression on a collection, and both are written after a navigation path that identifies the collection. Their argument is a lambda variable name, a colon and a Boolean expression that uses the variable to refer to members of the collection. any returns true if the expression is true for at least one member, so it is always false for an empty collection; used without an argument, it simply tests whether the collection is non-empty. all returns true if the expression is true for every member, so it is always true for an empty collection, and it requires an argument. This is how you filter parent entities by their children: Orders?$filter=Items/any(d:d/Quantity gt 100) returns orders that have at least one item with a quantity above 100, while Items/all(...) returns orders whose items all match.",
+      "description": "OData V4 defines two lambda operators that evaluate a Boolean expression on a collection, and both are written after a navigation path that identifies the collection. Their argument is a lambda variable name, a colon and a Boolean expression that uses the variable to refer to members of the collection. any returns true if the expression is true for at least one member, so it is always false for an empty collection; used without an argument, it simply tests whether the collection is non-empty. all returns true if the expression is true for every member, so it is always true for an empty collection, and it requires an argument. This is how you filter parent entities by their children: Orders?$filter=Items/any(d:d/Quantity gt 100) returns orders that have at least one item with a quantity above 100, while Items/all(...) returns orders whose items all match. On TripPin, People?$filter=Friends/any(f:f/FirstName eq 'Scott') returns the people who have a friend called Scott. Service support varies: TripPin answers the argument-less form any() with a 500 error, even though the spec allows it.",
       "keyPoints": [
         "Syntax: NavPath/any(v:expression) and NavPath/all(v:expression).",
         "any: at least one child matches (false for empty); any() = has children.",
@@ -101,9 +132,21 @@
       ],
       "examples": [
         {
-          "title": "Filtering orders by their items",
+          "title": "Filtering people by their friends on TripPin",
+          "language": "text",
+          "code": "GET https://services.odata.org/V4/TripPinServiceRW/People?$filter=Friends/any(f:f/FirstName eq 'Scott')&$select=UserName\nGET https://services.odata.org/V4/TripPinServiceRW/People?$filter=Friends/all(f:f/Gender eq Microsoft.OData.SampleService.Models.TripPin.PersonGender'Male')&$select=UserName"
+        },
+        {
+          "title": "Filtering orders by their items (spec examples)",
           "language": "text",
           "code": "GET http://host/service/Orders?$filter=Items/any(d:d/Quantity gt 100)\nGET http://host/service/Orders?$filter=Items/all(d:d/Quantity gt 100)\nGET http://host/service/Customers?$filter=Orders/any(o:o/ShippingAddress ne Address)"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Conditions on related collections",
+          "v2": "-; the V2 $filter language has no operators for collections.",
+          "v4": "any and all over collection-valued navigation (and collection) properties."
         }
       ],
       "assignment": null,
@@ -111,6 +154,14 @@
         {
           "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
           "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
+        },
+        {
+          "title": "OData Version 2.0: URI Conventions (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
         }
       ]
     }

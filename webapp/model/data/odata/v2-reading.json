@@ -6,19 +6,41 @@
       "id": "retrieve-collections",
       "level": "elementary",
       "title": "How do you retrieve a collection (feed) from an OData V2 service, and how do you choose the format?",
-      "description": "A client retrieves a feed, an entry or the service document by sending an HTTP GET request to its URI, and the server returns it in the response body. The format is chosen with standard HTTP content negotiation: Accept: application/json asks for JSON, while application/atom+xml (feeds and entries) together with application/xml asks for Atom. Without an Accept header the server should default to Atom, and if it cannot produce a requested format it should fail with 406 Not Acceptable. Where headers cannot be controlled, the $format query option overrides Accept. The request can be refined with query options such as $filter, $orderby and $select. When a collection is too large for one response, the server can return a partial list together with a next link, for example ...Customers?$skiptoken='ERNSH'; the client follows it to get the next page, and should be prepared for missing or repeated entries, because data stability across pages is not guaranteed.",
+      "description": "A client retrieves a feed, an entry or the service document by sending an HTTP GET request to its URI, and the server returns it in the response body. The format is chosen with standard HTTP content negotiation: Accept: application/json asks for JSON, while application/atom+xml (feeds and entries) together with application/xml asks for Atom. Without an Accept header the server should default to Atom. If it cannot produce a requested format, the spec says it should fail with 406 Not Acceptable; the V2 demo service answers 415 Unsupported Media Type instead. Where headers cannot be controlled, the $format query option overrides Accept. Clients should also send the version headers: DataServiceVersion states the protocol version used to build the request, and MaxDataServiceVersion the highest version the client can read in the response. A request that uses a V2 feature such as $select or $inlinecount must state DataServiceVersion 2.0; the V2 demo service rejects it with 400 if it says 1.0. The request can be refined with query options such as $filter, $orderby and $select. When a collection is too large for one response, the server returns a partial list plus a next link, for example ...Customers?$skiptoken='ERNSH' on Northwind; the client follows it to get the next page, and should be prepared for missing or repeated entries, because data stability across pages is not guaranteed.",
       "keyPoints": [
-        "GET on the collection URI, for example GET /OData/OData.svc/Products.",
+        "GET on the collection URI, for example GET /V2/OData/OData.svc/Products.",
         "Format via Accept (application/json or application/atom+xml) or $format.",
-        "No Accept header: Atom by default; unsupported format: 406 Not Acceptable.",
-        "Large collections: partial list plus a next link ($skiptoken) to follow.",
-        "Refine with $filter, $orderby, $select, $expand, ..."
+        "No Accept header: Atom by default. Unsupported format: 406 per spec (the demo service sends 415).",
+        "DataServiceVersion = version of the request; MaxDataServiceVersion = highest version accepted. V2 features need 2.0.",
+        "Large collections: partial list plus a next link ($skiptoken) to follow."
       ],
       "examples": [
         {
-          "title": "Requesting a feed as JSON",
+          "title": "Requesting a feed as JSON from the V2 demo service",
           "language": "text",
-          "code": "GET /OData/OData.svc/Products?$filter=Rating gt 2&$orderby=Price&$select=Rating,Price HTTP/1.1\nHost: services.odata.org\nAccept: application/json\nDataServiceVersion: 1.0\nMaxDataServiceVersion: 2.0\n\nHTTP/1.1 200 OK\nContent-Type: application/json;charset=utf-8\nDataServiceVersion: 1.0;\n\n{ \"d\" : ... }"
+          "code": "GET /V2/OData/OData.svc/Products?$filter=Rating gt 2&$orderby=Price&$select=Rating,Price&$top=2 HTTP/1.1\nHost: services.odata.org\nAccept: application/json\nDataServiceVersion: 2.0          <- with 1.0 this request fails: \"$select needs 2.0\"\nMaxDataServiceVersion: 2.0\n\nHTTP/1.1 200 OK\nContent-Type: application/json;odata=verbose;charset=utf-8\nDataServiceVersion: 1.0;\n\n{\"d\":[\n  {\"__metadata\":{\"uri\":\".../Products(0)\",\"type\":\"ODataDemo.Product\"},\"Rating\":4,\"Price\":\"2.5\"},\n  {\"__metadata\":{\"uri\":\".../Products(1)\",\"type\":\"ODataDemo.Product\"},\"Rating\":3,\"Price\":\"3.5\"}\n]}"
+        },
+        {
+          "title": "Server-side paging on V2 Northwind",
+          "language": "text",
+          "code": "GET https://services.odata.org/V2/Northwind/Northwind.svc/Customers?$select=CustomerID&$format=json\n\n{\"d\":{\n  \"results\":[ ...20 customers, the last one ERNSH... ],\n  \"__next\":\"https://services.odata.org/V2/Northwind/Northwind.svc/Customers?$select=CustomerID&$skiptoken='ERNSH'\"\n}}"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Version headers",
+          "v2": "DataServiceVersion and MaxDataServiceVersion.",
+          "v4": "OData-Version and OData-MaxVersion."
+        },
+        {
+          "aspect": "Next page link",
+          "v2": "\"__next\" inside d, with a $skiptoken URL.",
+          "v4": "The odata.nextLink control information next to the value array."
+        },
+        {
+          "aspect": "Default format",
+          "v2": "Atom when no Accept header is sent.",
+          "v4": "JSON; services must support it, Atom is optional."
         }
       ],
       "assignment": null,
@@ -26,6 +48,22 @@
         {
           "title": "OData Version 2.0: Operations (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        },
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
+        },
+        {
+          "title": "OData JSON Format Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
         }
       ]
     },
@@ -33,18 +71,30 @@
       "id": "retrieve-property-metadata",
       "level": "elementary",
       "title": "How do you retrieve an individual property and the metadata document?",
-      "description": "Servers may support retrieving individual properties of an entry. With the OData URL conventions, the property's address is the entry URI followed by the property name, for example Products(1)/Description. The client sends a GET to that URI and uses content negotiation for the format; because a single property is not a whole Atom entry, Atom clients should ask for application/xml and expect a plain XML element such as <Description>Low fat milk</Description>. The metadata document is conventionally located at /$metadata relative to the service root and is retrieved with a GET request. In V2 only an XML serialization of the EDM schema exists, so no content-type negotiation is supported for it; other HTTP aspects such as caching and character set encoding still apply.",
+      "description": "Servers may support retrieving individual properties of an entry. With the OData URL conventions, the property's address is the entry URI followed by the property name, for example Products(1)/Description. The client sends a GET to that URI and uses content negotiation for the format; because a single property is not a whole Atom entry, Atom clients should ask for application/xml and expect a plain XML element such as <d:Description>Low fat milk</d:Description>. With Accept: application/json the V2 demo service answers {\"d\":{\"Description\":\"Low fat milk\"}}. The metadata document is conventionally located at /$metadata relative to the service root and is retrieved with a GET request. In V2 only an XML serialization of the EDM schema exists, so no content-type negotiation is supported for it: asking the V2 demo service for $metadata as JSON fails with 415. Other HTTP aspects such as caching and character set encoding still apply.",
       "keyPoints": [
         "Property: GET <entry URI>/<PropertyName>, for example Products(1)/Description.",
         "Atom clients use Accept: application/xml for a single property.",
         "Metadata: GET <service root>/$metadata.",
-        "V2 metadata is XML only; no format negotiation."
+        "V2 metadata is XML only; Accept: application/json gets 415."
       ],
       "examples": [
         {
-          "title": "Property and metadata requests",
+          "title": "Property and metadata requests on the V2 demo service",
           "language": "text",
-          "code": "GET /OData/OData.svc/Products(1)/Description HTTP/1.1\nHost: services.odata.org\nAccept: application/xml\n\nHTTP/1.1 200 OK\nContent-Type: application/xml;charset=utf-8\n\n<Description xmlns=\"http://schemas.microsoft.com/ado/2007/08/dataservices\">Low fat milk</Description>\n\nGET /OData/OData.svc/$metadata HTTP/1.1\nHost: services.odata.org"
+          "code": "GET /V2/OData/OData.svc/Products(1)/Description HTTP/1.1\nHost: services.odata.org\nAccept: application/xml\n\nHTTP/1.1 200 OK\nContent-Type: application/xml;charset=utf-8\n\n<d:Description xmlns:d=\"http://schemas.microsoft.com/ado/2007/08/dataservices\"\n               xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\">Low fat milk</d:Description>\n\nSame request with Accept: application/json:\n{\"d\":{\"Description\":\"Low fat milk\"}}\n\nGET /V2/OData/OData.svc/$metadata HTTP/1.1\nHost: services.odata.org"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Single property in JSON",
+          "v2": "{\"d\":{\"Description\":\"Low fat milk\"}}",
+          "v4": "{\"@odata.context\":\".../$metadata#Airports('KSFO')/Name\",\"value\":\"San Francisco International Airport\"} (TripPin)."
+        },
+        {
+          "aspect": "Metadata formats",
+          "v2": "XML only.",
+          "v4": "CSDL XML (the default) or CSDL JSON (application/json)."
         }
       ],
       "assignment": null,
@@ -52,6 +102,14 @@
         {
           "title": "OData Version 2.0: Operations (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
         }
       ]
     },
@@ -68,9 +126,21 @@
       ],
       "examples": [
         {
-          "title": "Raw value request",
+          "title": "Raw value request on the V2 demo service",
           "language": "text",
-          "code": "GET /OData/OData.svc/Products(1)/Description/$value HTTP/1.1\nHost: services.odata.org\n\nHTTP/1.1 200 OK\nContent-Type: text/plain;charset=utf-8\n\nLow fat milk"
+          "code": "GET /V2/OData/OData.svc/Products(1)/Description/$value HTTP/1.1\nHost: services.odata.org\n\nHTTP/1.1 200 OK\nContent-Type: text/plain;charset=utf-8\n\nLow fat milk"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Which properties have a raw value",
+          "v2": "Primitive properties.",
+          "v4": "Primitive and enumeration properties."
+        },
+        {
+          "aspect": "Null value vs not found",
+          "v2": "Not distinguished by a specific status code.",
+          "v4": "204 No Content consistently means a null value; 404 Not Found means the resource doesn't exist."
         }
       ],
       "assignment": null,
@@ -82,6 +152,14 @@
         {
           "title": "OData Version 2.0: JSON Format (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
         }
       ]
     }

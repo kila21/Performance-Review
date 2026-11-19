@@ -16,9 +16,9 @@
       ],
       "examples": [
         {
-          "title": "Two URIs split into their parts",
+          "title": "Two URIs of the V2 demo service split into their parts",
           "language": "text",
-          "code": "https://services.odata.org/OData/OData.svc\n\\___/   \\_______________/\\_______________/\nscheme       host          service root\n\nhttps://services.odata.org/OData/OData.svc/Category(1)/Products?$top=2&$orderby=name\n\\_________________________________________/\\__________________/\\__________________/\n               service root URI                resource path        query options\n\nWith an explicit port:  https://services.odata.org:8080/..."
+          "code": "https://services.odata.org/V2/OData/OData.svc\n\\___/   \\________________/\\_________________/\nscheme        host            service root\n\nhttps://services.odata.org/V2/OData/OData.svc/Categories(1)/Products?$top=2&$orderby=Name\n\\___________________________________________/\\______________________/\\__________________/\n               service root URI                    resource path          query options\n\nWith an explicit port:  https://host:8080/service.svc/..."
         }
       ],
       "assignment": null,

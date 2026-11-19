@@ -15,9 +15,31 @@
       ],
       "examples": [
         {
-          "title": "Extending a container",
+          "title": "TripPin's one entity container (excerpt of its $metadata)",
+          "language": "xml",
+          "code": "<EntityContainer Name=\"DefaultContainer\">\n  <EntitySet Name=\"Photos\"   EntityType=\"Microsoft.OData.SampleService.Models.TripPin.Photo\"> ... </EntitySet>\n  <EntitySet Name=\"People\"   EntityType=\"Microsoft.OData.SampleService.Models.TripPin.Person\"> ... </EntitySet>\n  <EntitySet Name=\"Airlines\" EntityType=\"Microsoft.OData.SampleService.Models.TripPin.Airline\"> ... </EntitySet>\n  <EntitySet Name=\"Airports\" EntityType=\"Microsoft.OData.SampleService.Models.TripPin.Airport\"> ... </EntitySet>\n  <Singleton Name=\"Me\" Type=\"Microsoft.OData.SampleService.Models.TripPin.Person\"> ... </Singleton>\n  <FunctionImport Name=\"GetNearestAirport\"\n                  Function=\"Microsoft.OData.SampleService.Models.TripPin.GetNearestAirport\"\n                  EntitySet=\"Airports\" IncludeInServiceDocument=\"true\" />\n  <ActionImport Name=\"ResetDataSource\" Action=\"Microsoft.OData.SampleService.Models.TripPin.ResetDataSource\" />\n</EntityContainer>"
+        },
+        {
+          "title": "Extending a container (CSDL spec example)",
           "language": "xml",
           "code": "<EntityContainer Name=\"Extending\" Extends=\"Some.Other.Schema.Base\">\n  <!-- contains its own children plus all children of Base -->\n</EntityContainer>"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Containers per service",
+          "v2": "Several allowed; m:IsDefaultEntityContainer marks the default.",
+          "v4": "Exactly one; its name doesn't appear in URLs."
+        },
+        {
+          "aspect": "Members",
+          "v2": "EntitySet, AssociationSet, FunctionImport.",
+          "v4": "EntitySet, Singleton, FunctionImport, ActionImport; AssociationSet was pruned."
+        },
+        {
+          "aspect": "Extending another container",
+          "v2": "-",
+          "v4": "Extends=\"<qualified container name>\" adds all its children."
         }
       ],
       "assignment": null,
@@ -29,6 +51,14 @@
         {
           "title": "What's New in OData Version 4.0 (OASIS)",
           "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
+        },
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
         }
       ]
     },
@@ -45,9 +75,21 @@
       ],
       "examples": [
         {
-          "title": "Entity set and singleton",
+          "title": "An entity set and a singleton in TripPin",
           "language": "text",
-          "code": "<EntitySet Name=\"Products\" EntityType=\"self.Product\" />\n<Singleton Name=\"MainSupplier\" Type=\"self.Supplier\" />\n\nGET http://host/service/Products(1)\nGET http://host/service/MainSupplier"
+          "code": "<EntitySet Name=\"People\" EntityType=\"Microsoft.OData.SampleService.Models.TripPin.Person\"> ... </EntitySet>\n<Singleton Name=\"Me\" Type=\"Microsoft.OData.SampleService.Models.TripPin.Person\"> ... </Singleton>\n\nGET https://services.odata.org/V4/TripPinServiceRW/People('russellwhyte')     an entity by key\nGET https://services.odata.org/V4/TripPinServiceRW/Me                         the singleton, no key\n-> {\"@odata.context\":\".../$metadata#Me\", ...}"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "A single, well-known entity",
+          "v2": "Modeled as an entity set with one entry and a key.",
+          "v4": "A Singleton addressed by name: ~/Me."
+        },
+        {
+          "aspect": "Hiding a set from the service document",
+          "v2": "-",
+          "v4": "IncludeInServiceDocument=\"false\" on the entity set."
         }
       ],
       "assignment": null,
@@ -59,6 +101,10 @@
         {
           "title": "What's New in OData Version 4.0 (OASIS)",
           "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
         }
       ]
     },
@@ -75,9 +121,26 @@
       ],
       "examples": [
         {
-          "title": "Bindings with a simple and a qualified target",
+          "title": "Bindings of TripPin's People entity set (excerpt of its $metadata)",
           "language": "xml",
-          "code": "<EntitySet Name=\"Categories\" EntityType=\"self.Category\">\n  <NavigationPropertyBinding Path=\"Products\" Target=\"Products\" />\n</EntitySet>\n\n<EntitySet Name=\"Categories\" EntityType=\"self.Category\">\n  <NavigationPropertyBinding Path=\"Products\" Target=\"SomeModel.SomeContainer/SomeSet\" />\n</EntitySet>"
+          "code": "<EntitySet Name=\"People\" EntityType=\"Microsoft.OData.SampleService.Models.TripPin.Person\">\n  <NavigationPropertyBinding Path=\"Friends\" Target=\"People\" />\n  <NavigationPropertyBinding Path=\"Photo\" Target=\"Photos\" />\n  <!-- path with a type-cast segment: the Airline navigation property of the Flight type -->\n  <NavigationPropertyBinding Path=\"Microsoft.OData.SampleService.Models.TripPin.Flight/Airline\" Target=\"Airlines\" />\n  <NavigationPropertyBinding Path=\"Microsoft.OData.SampleService.Models.TripPin.Flight/From\" Target=\"Airports\" />\n  ...\n</EntitySet>"
+        },
+        {
+          "title": "Target in another container (CSDL spec example)",
+          "language": "xml",
+          "code": "<EntitySet Name=\"Categories\" EntityType=\"self.Category\">\n  <NavigationPropertyBinding Path=\"Products\" Target=\"SomeModel.SomeContainer/SomeSet\" />\n</EntitySet>"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Which set related entities are in",
+          "v2": "AssociationSet with an End per entity set.",
+          "v4": "Optional NavigationPropertyBinding (Path, Target) on the entity set or singleton."
+        },
+        {
+          "aspect": "Direction",
+          "v2": "Associations are bidirectional.",
+          "v4": "Bindings are unidirectional; each direction gets its own."
         }
       ],
       "assignment": null,
@@ -89,6 +152,10 @@
         {
           "title": "What's New in OData Version 4.0 (OASIS)",
           "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
         }
       ]
     },
@@ -106,9 +173,26 @@
       ],
       "examples": [
         {
-          "title": "A complete V4 entity container",
+          "title": "A function, an action and their imports in TripPin (excerpt of its $metadata)",
           "language": "xml",
-          "code": "<EntityContainer Name=\"DemoService\">\n  <EntitySet Name=\"Products\" EntityType=\"self.Product\">\n    <NavigationPropertyBinding Path=\"Category\" Target=\"Categories\" />\n    <NavigationPropertyBinding Path=\"Supplier\" Target=\"Suppliers\" />\n  </EntitySet>\n  <EntitySet Name=\"Categories\" EntityType=\"self.Category\">\n    <NavigationPropertyBinding Path=\"Products\" Target=\"Products\" />\n  </EntitySet>\n  <EntitySet Name=\"Suppliers\" EntityType=\"self.Supplier\">\n    <NavigationPropertyBinding Path=\"Products\" Target=\"Products\" />\n  </EntitySet>\n  <Singleton Name=\"MainSupplier\" Type=\"self.Supplier\" />\n  <ActionImport Name=\"LeaveRequestApproval\" Action=\"self.Approval\" />\n  <FunctionImport Name=\"ProductsByRating\" Function=\"self.ProductsByRating\"\n                  EntitySet=\"Products\" />\n</EntityContainer>"
+          "code": "<!-- declared at the schema level -->\n<Function Name=\"GetNearestAirport\" IsComposable=\"true\">\n  <Parameter Name=\"lat\" Type=\"Edm.Double\" Nullable=\"false\" />\n  <Parameter Name=\"lon\" Type=\"Edm.Double\" Nullable=\"false\" />\n  <ReturnType Type=\"Microsoft.OData.SampleService.Models.TripPin.Airport\" Nullable=\"false\" />\n</Function>\n<Action Name=\"ResetDataSource\" />\n\n<!-- imported into the entity container -->\n<FunctionImport Name=\"GetNearestAirport\"\n                Function=\"Microsoft.OData.SampleService.Models.TripPin.GetNearestAirport\"\n                EntitySet=\"Airports\" IncludeInServiceDocument=\"true\" />\n<ActionImport Name=\"ResetDataSource\" Action=\"Microsoft.OData.SampleService.Models.TripPin.ResetDataSource\" />\n\nCalling the function import (GET):\nGET https://services.odata.org/V4/TripPinServiceRW/GetNearestAirport(lat=33,lon=-118)   -> Airports('KLAX')"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Kinds of operations",
+          "v2": "Service operations only.",
+          "v4": "Functions (no side effects, composable) and actions (side effects)."
+        },
+        {
+          "aspect": "Declaration",
+          "v2": "FunctionImport in the container with ReturnType, parameters and m:HttpMethod.",
+          "v4": "Function or Action at the schema level (with Parameter and ReturnType); FunctionImport or ActionImport references it."
+        },
+        {
+          "aspect": "HTTP method",
+          "v2": "Whatever m:HttpMethod says.",
+          "v4": "Functions are invoked with GET, actions with POST."
         }
       ],
       "assignment": null,
@@ -124,6 +208,14 @@
         {
           "title": "What's New in OData Version 4.0 (OASIS)",
           "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
+        },
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
         }
       ]
     }

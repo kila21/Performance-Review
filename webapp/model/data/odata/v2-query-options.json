@@ -15,9 +15,21 @@
       ],
       "examples": [
         {
-          "title": "Sorting and paging",
+          "title": "Sorting and paging on the V2 demo service",
           "language": "text",
-          "code": "https://services.odata.org/OData/OData.svc/Products?$orderby=Rating\nhttps://services.odata.org/OData/OData.svc/Products?$orderby=Rating,Category/Name desc\nhttps://services.odata.org/OData/OData.svc/Products?$top=5&$orderby=Name desc\nhttps://services.odata.org/OData/OData.svc/Products?$skip=2&$top=2&$orderby=Rating     (3rd and 4th product)"
+          "code": "https://services.odata.org/V2/OData/OData.svc/Products?$orderby=Rating\nhttps://services.odata.org/V2/OData/OData.svc/Products?$orderby=Rating,Category/Name desc\nhttps://services.odata.org/V2/OData/OData.svc/Products?$top=5&$orderby=Name desc\nhttps://services.odata.org/V2/OData/OData.svc/Products?$skip=2&$top=2&$orderby=Rating     (3rd and 4th product)"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Sorting by related counts",
+          "v2": "Not possible.",
+          "v4": "$orderby can use /$count: Categories?$orderby=Products/$count."
+        },
+        {
+          "aspect": "Inside $expand",
+          "v2": "$orderby, $top and $skip apply only to the collection in the resource path.",
+          "v4": "They can also be nested in $expand: People('russellwhyte')?$expand=Trips($top=1)."
         }
       ],
       "assignment": null,
@@ -25,6 +37,14 @@
         {
           "title": "OData Version 2.0: URI Conventions (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
         }
       ]
     },
@@ -32,18 +52,41 @@
       "id": "expand-select",
       "level": "elementary",
       "title": "What do $expand and $select do in OData V2?",
-      "description": "$expand indicates that entries associated with the addressed entry or collection must be represented inline, that is, eagerly loaded. Instead of two requests, one for Categories(1) and one for Categories(1)/Products, a single request with $expand=Products returns the category together with its products. Its value is a comma-separated list of navigation properties, and each can be followed by a slash and another navigation property for multi-level expansion, as in Products/Suppliers. $select (supported from OData V2) returns the same entries but only a subset of their properties: a comma-separated list of property names, navigation property names or *. If a selected property is of a complex type, all its fields are returned; selecting a navigation property returns only a link to it unless it is also expanded; and * returns all properties without traversing associations. Together they let a client fetch exactly the graph and the fields it needs.",
+      "description": "$expand indicates that entries associated with the addressed entry or collection must be represented inline, that is, eagerly loaded. Instead of two requests, one for Categories(1) and one for Categories(1)/Products, a single request with $expand=Products returns the category together with its products. Its value is a comma-separated list of navigation properties, and each can be followed by a slash and another navigation property for multi-level expansion, as in Products/Supplier. The names must match the navigation properties in the metadata exactly; in the V2 demo service a Product has a single Supplier, so $expand=Products/Suppliers fails with 400. $select (supported from OData V2) returns the same entries but only a subset of their properties: a comma-separated list of property names, navigation property names or *. If a selected property is of a complex type, all its fields are returned; selecting a navigation property returns only a link to it unless it is also expanded; and * returns all properties without traversing associations. Together they let a client fetch exactly the graph and the fields it needs.",
       "keyPoints": [
         "$expand: return related entries inline (one request instead of several).",
-        "Multi-level: $expand=Products/Suppliers; several: $expand=Category,Suppliers.",
+        "Multi-level: $expand=Products/Supplier; several: $expand=Category,Supplier.",
+        "Names must match the metadata exactly (Supplier, not Suppliers).",
         "$select: only the listed properties (V2 and later); * = all properties.",
         "A selected navigation property returns a link unless it is also expanded."
       ],
       "examples": [
         {
-          "title": "Expand and select",
+          "title": "Expand and select on the V2 demo service",
           "language": "text",
-          "code": "https://services.odata.org/OData/OData.svc/Categories?$expand=Products\nhttps://services.odata.org/OData/OData.svc/Categories?$expand=Products/Suppliers\nhttps://services.odata.org/OData/OData.svc/Products?$select=Price,Name\nhttps://services.odata.org/OData/OData.svc/Categories?$select=Name,Products&$expand=Products"
+          "code": "https://services.odata.org/V2/OData/OData.svc/Categories?$expand=Products\nhttps://services.odata.org/V2/OData/OData.svc/Categories?$expand=Products/Supplier\nhttps://services.odata.org/V2/OData/OData.svc/Products?$expand=Category,Supplier\nhttps://services.odata.org/V2/OData/OData.svc/Products?$select=Price,Name\nhttps://services.odata.org/V2/OData/OData.svc/Categories?$select=Name,Products&$expand=Products"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Multi-level expand",
+          "v2": "Slash path: $expand=Products/Supplier.",
+          "v4": "Nested option: $expand=Products($expand=Supplier)."
+        },
+        {
+          "aspect": "Options on expanded entities",
+          "v2": "Not available.",
+          "v4": "$filter, $select, $orderby, $skip, $top, $count, $search and $expand in parentheses: Categories?$expand=Products($filter=DiscontinuedDate eq null)."
+        },
+        {
+          "aspect": "$select with $expand",
+          "v2": "One $select covers the whole graph: $select=Name,Products&$expand=Products.",
+          "v4": "$select projects only the current set; expanded entities get their own: $expand=Products($select=Name)."
+        },
+        {
+          "aspect": "Recursive expand",
+          "v2": "-",
+          "v4": "$levels: Employees?$expand=ReportsTo($levels=3)."
         }
       ],
       "assignment": null,
@@ -51,6 +94,14 @@
         {
           "title": "OData Version 2.0: URI Conventions (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
         }
       ]
     },
@@ -58,18 +109,36 @@
       "id": "format-count",
       "level": "elementary",
       "title": "What do $format and $count do in OData V2?",
-      "description": "$format specifies the media type the response must use, and it takes precedence over the Accept request header. Valid values are atom (application/atom+xml), xml (application/xml), json (application/json), any other IANA-defined content type, or a service-specific value. It exists because in some scenarios clients cannot control request headers. $count is used as a path segment in V2: appending /$count to a collection, for example Products/$count or Categories(1)/Products/$count, addresses the number of entries in that collection instead of the entries themselves. If you need the entries and the total count in one response, V2 uses the separate $inlinecount option.",
+      "description": "$format specifies the media type the response must use, and it takes precedence over the Accept request header. Valid values are atom (application/atom+xml), xml (application/xml), json (application/json), any other IANA-defined content type, or a service-specific value. Which values actually work depends on the service: the V2 demo service accepts atom and json but rejects xml with 400. $format exists because in some scenarios clients cannot control request headers. $count is used as a path segment in V2: appending /$count to a collection, for example Products/$count or Categories(1)/Products/$count, addresses the number of entries in that collection instead of the entries themselves. If you need the entries and the total count in one response, V2 uses the separate $inlinecount option.",
       "keyPoints": [
         "$format=json | atom | xml: forces the response format; overrides the Accept header.",
+        "Supported values depend on the service (the V2 demo service rejects xml).",
         "Useful when the client cannot set request headers.",
         "/$count after a collection returns only the number of entries.",
         "Entries plus total count in one response: $inlinecount=allpages."
       ],
       "examples": [
         {
-          "title": "Format and count",
+          "title": "Format and count on the V2 demo service",
           "language": "text",
-          "code": "https://services.odata.org/OData/OData.svc/Products?$format=json\nhttps://services.odata.org/OData/OData.svc/Products?$format=atom\nhttps://services.odata.org/OData/OData.svc/Products/$count\nhttps://services.odata.org/OData/OData.svc/Categories(1)/Products/$count"
+          "code": "https://services.odata.org/V2/OData/OData.svc/Products?$format=json\nhttps://services.odata.org/V2/OData/OData.svc/Products?$format=atom\nhttps://services.odata.org/V2/OData/OData.svc/Products/$count                       -> 9\nhttps://services.odata.org/V2/OData/OData.svc/Categories(1)/Products/$count         -> 6"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Count together with the entries",
+          "v2": "$inlinecount=allpages.",
+          "v4": "$count=true."
+        },
+        {
+          "aspect": "/$count",
+          "v2": "Last segment of a collection path.",
+          "v4": "Also usable inside $filter and $orderby expressions."
+        },
+        {
+          "aspect": "Default format",
+          "v2": "Atom when no Accept header is sent.",
+          "v4": "JSON is the recommended format and required in 4.01; $format still overrides Accept."
         }
       ],
       "assignment": null,
@@ -81,6 +150,14 @@
         {
           "title": "OData Version 2.0: Operations (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData Version 4.01 Part 1: Protocol (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html"
         }
       ]
     },
@@ -88,7 +165,7 @@
       "id": "service-operation-parameters",
       "level": "elementary",
       "title": "How are parameters passed to a service operation (function import)?",
-      "description": "The query options part of an OData URI carries three kinds of information: system query options, custom query options and service operation parameters. Service operations accept zero or more parameters of primitive types. They are passed as name/value pairs in the query string of the URI that identifies the operation, for example GetProductsByRating?rating=5. The parameter name is used as is, without a $ prefix, because $ is reserved for OData's own options, and the value is written in the OData literal form of its type. For a nullable parameter, a null value is passed by leaving the parameter out of the query string.",
+      "description": "The query options part of an OData URI carries three kinds of information: system query options, custom query options and service operation parameters. Service operations accept zero or more parameters of primitive types. They are passed as name/value pairs in the query string of the URI that identifies the operation, for example GetProductsByRating?rating=5 on the V2 demo service. The parameter name is used as is, without a $ prefix, because $ is reserved for OData's own options, and the value is written in the OData literal form of its type, so a string goes in single quotes, as in the spec example ProductsByColor?color='red'. For a nullable parameter, a null value is passed by leaving the parameter out of the query string.",
       "keyPoints": [
         "Parameters are query string name=value pairs on the operation's URI.",
         "No $ prefix ($ is reserved for system query options).",
@@ -99,7 +176,19 @@
         {
           "title": "Passing parameters",
           "language": "text",
-          "code": "https://services.odata.org/OData/OData.svc/GetProductsByRating?rating=5\nhttps://services.odata.org/OData/OData.svc/ProductsByColor?color='red'"
+          "code": "https://services.odata.org/V2/OData/OData.svc/GetProductsByRating?rating=5                 (V2 demo service)\n/OData/OData.svc/ProductsByColor?color='red'     (example from the V2 spec, not live)"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Passing parameters",
+          "v2": "Query string name=value: GetProductsByRating?rating=5.",
+          "v4": "Plain query-option parameters were pruned; the call uses @ aliases whose values follow in the query: Model.WithIngredients(Ingredients=@i)?@i=[\"Carrots\"]."
+        },
+        {
+          "aspect": "Aliases elsewhere",
+          "v2": "-",
+          "v4": "Aliases can also stand in for literals in keys, $filter and $orderby: Movies?$filter=Title eq @title&@title='Wizard of Oz'."
         }
       ],
       "assignment": null,
@@ -111,6 +200,14 @@
         {
           "title": "OData Version 2.0: Operations (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
+        },
+        {
+          "title": "What's New in OData Version 4.0 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
         }
       ]
     },
@@ -128,9 +225,26 @@
       ],
       "examples": [
         {
-          "title": "Inline count and raw value",
+          "title": "Inline count and raw value on the V2 demo service",
           "language": "text",
-          "code": "https://services.odata.org/OData/OData.svc/Products?$inlinecount=allpages\nhttps://services.odata.org/OData/OData.svc/Products?$inlinecount=allpages&$top=10&$filter=Price gt 200\nhttps://services.odata.org/OData/OData.svc/Products(1)/Description/$value"
+          "code": "https://services.odata.org/V2/OData/OData.svc/Products?$inlinecount=allpages\nhttps://services.odata.org/V2/OData/OData.svc/Products?$inlinecount=allpages&$top=10&$filter=Price gt 200\nhttps://services.odata.org/V2/OData/OData.svc/Products(1)/Description/$value          -> Low fat milk"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Count with the entries",
+          "v2": "$inlinecount=allpages (none = no count).",
+          "v4": "$count=true (false = no count)."
+        },
+        {
+          "aspect": "Count in a JSON response",
+          "v2": "\"__count\" inside d, written as a string.",
+          "v4": "The odata.count control information next to the value array."
+        },
+        {
+          "aspect": "$value",
+          "v2": "Primitive properties.",
+          "v4": "Primitive and enumeration properties (TripPin: People('russellwhyte')/Gender/$value)."
         }
       ],
       "assignment": null,
@@ -146,6 +260,14 @@
         {
           "title": "What's New in OData Version 4.0 (OASIS)",
           "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData JSON Format Version 4.01 (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
         }
       ]
     },
@@ -162,9 +284,16 @@
       ],
       "examples": [
         {
-          "title": "Custom query option",
+          "title": "Custom query option on the V2 demo service",
           "language": "text",
-          "code": "https://services.odata.org/OData/OData.svc/Products?x=y"
+          "code": "https://services.odata.org/V2/OData/OData.svc/Products?x=y"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Allowed names",
+          "v2": "Any name that does not start with $.",
+          "v4": "Must not begin with $ or @ (@ marks parameter aliases): Products?debug-mode=true."
         }
       ],
       "assignment": null,
@@ -172,6 +301,10 @@
         {
           "title": "OData Version 2.0: URI Conventions (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
+          "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
         }
       ]
     }

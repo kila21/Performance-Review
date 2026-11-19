@@ -15,9 +15,26 @@
       ],
       "examples": [
         {
-          "title": "All four kinds of structural property",
+          "title": "All four kinds in TripPin's Person entity type (excerpt of its $metadata)",
           "language": "xml",
-          "code": "<EnumType Name=\"Color\">\n  <Member Name=\"Red\" />\n  <Member Name=\"Green\" />\n</EnumType>\n\n<EntityType Name=\"Product\">\n  <Key><PropertyRef Name=\"ID\" /></Key>\n  <Property Name=\"ID\"         Type=\"Edm.Int32\" Nullable=\"false\" />   <!-- primitive -->\n  <Property Name=\"Dimensions\" Type=\"self.Dimensions\" />              <!-- complex -->\n  <Property Name=\"Color\"      Type=\"self.Color\" />                   <!-- enumeration -->\n  <Property Name=\"Units\"      Type=\"Collection(Edm.String)\" />       <!-- collection -->\n</EntityType>"
+          "code": "<EnumType Name=\"PersonGender\">\n  <Member Name=\"Male\" Value=\"0\" />\n  <Member Name=\"Female\" Value=\"1\" />\n  <Member Name=\"Unknown\" Value=\"2\" />\n</EnumType>\n\n<ComplexType Name=\"Location\" OpenType=\"true\">\n  <Property Name=\"Address\" Type=\"Edm.String\" Nullable=\"false\" />\n  <Property Name=\"City\" Type=\"Microsoft.OData.SampleService.Models.TripPin.City\" Nullable=\"false\" />\n</ComplexType>\n\n<EntityType Name=\"Person\" OpenType=\"true\">\n  <Key><PropertyRef Name=\"UserName\" /></Key>\n  <Property Name=\"UserName\" Type=\"Edm.String\" Nullable=\"false\" />                  <!-- primitive -->\n  <Property Name=\"Emails\" Type=\"Collection(Edm.String)\" />                         <!-- collection of primitive -->\n  <Property Name=\"AddressInfo\"\n            Type=\"Collection(Microsoft.OData.SampleService.Models.TripPin.Location)\" /> <!-- collection of complex -->\n  <Property Name=\"Gender\" Type=\"Microsoft.OData.SampleService.Models.TripPin.PersonGender\" /> <!-- enumeration -->\n  ...\n</EntityType>\n\nValues in a response (GET .../People('russellwhyte')):\n\"Emails\":[\"Russell@example.com\",\"Russell@contoso.com\"],\n\"AddressInfo\":[{\"Address\":\"187 Suffolk Ln.\",\"City\":{\"CountryRegion\":\"United States\",\"Name\":\"Boise\",\"Region\":\"ID\"}}],\n\"Gender\":\"Male\""
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Types of a structural property",
+          "v2": "Primitive or complex.",
+          "v4": "Primitive, complex or enumeration, or a collection of one of these."
+        },
+        {
+          "aspect": "Enumerations",
+          "v2": "-",
+          "v4": "EnumType with members; values are written by member name, for example \"Gender\":\"Male\"."
+        },
+        {
+          "aspect": "Collection-valued properties",
+          "v2": "-",
+          "v4": "Type=\"Collection(Edm.String)\", for example TripPin's Emails."
         }
       ],
       "assignment": null,
@@ -25,6 +42,14 @@
         {
           "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
           "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
+        },
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
         }
       ]
     },
@@ -41,9 +66,16 @@
       ],
       "examples": [
         {
-          "title": "Type definitions with units",
+          "title": "Type definitions with units (CSDL spec example; TripPin defines none)",
           "language": "xml",
           "code": "<TypeDefinition Name=\"Length\" UnderlyingType=\"Edm.Int32\">\n  <Annotation Term=\"Org.OData.Measures.V1.Unit\" String=\"Centimeters\" />\n</TypeDefinition>\n<TypeDefinition Name=\"Weight\" UnderlyingType=\"Edm.Int32\">\n  <Annotation Term=\"Org.OData.Measures.V1.Unit\" String=\"Kilograms\" />\n</TypeDefinition>\n\n<ComplexType Name=\"Size\">\n  <Property Name=\"Height\" Type=\"self.Length\" />\n  <Property Name=\"Weight\" Type=\"self.Weight\" />\n</ComplexType>"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "Reusable named primitive types",
+          "v2": "-",
+          "v4": "TypeDefinition with an UnderlyingType and fixed facets; annotations on it apply wherever it is used."
         }
       ],
       "assignment": null,
@@ -55,6 +87,10 @@
         {
           "title": "What's New in OData Version 4.0 (OASIS)",
           "url": "https://docs.oasis-open.org/odata/new-in-odata/v4.0/cn01/new-in-odata-v4.0-cn01.html"
+        },
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
         }
       ]
     }

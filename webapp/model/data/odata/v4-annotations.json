@@ -16,9 +16,26 @@
       ],
       "examples": [
         {
-          "title": "Inline and external annotations",
+          "title": "Inline and external annotations in TripPin's $metadata (excerpts)",
           "language": "xml",
-          "code": "<!-- nested inside the annotated element -->\n<Property Name=\"AmountInTransactionCurrency\" Type=\"Edm.Decimal\">\n  <Annotation Term=\"Measures.ISOCurrency\" Path=\"Currency\" />\n</Property>\n\n<!-- external targeting, possibly in another schema or file -->\n<Annotations Target=\"MySchema.MyEntityType/MyProperty\">\n  <Annotation Term=\"Core.Description\" String=\"Shown as tooltip\" />\n</Annotations>"
+          "code": "<!-- nested inside the annotated property -->\n<Property Name=\"Concurrency\" Type=\"Edm.Int64\" Nullable=\"false\">\n  <Annotation Term=\"Org.OData.Core.V1.Computed\" Bool=\"true\" />\n</Property>\n\n<!-- on an entity set: Capabilities vocabulary, record value -->\n<EntitySet Name=\"Photos\" EntityType=\"Microsoft.OData.SampleService.Models.TripPin.Photo\">\n  <Annotation Term=\"Org.OData.Capabilities.V1.SearchRestrictions\">\n    <Record>\n      <PropertyValue Property=\"Searchable\" Bool=\"true\" />\n      ...\n    </Record>\n  </Annotation>\n</EntitySet>\n\n<!-- external targeting: an Annotations element pointing at the container -->\n<Annotations Target=\"Microsoft.OData.SampleService.Models.TripPin.DefaultContainer\">\n  <Annotation Term=\"Org.OData.Core.V1.DereferenceableIDs\" Bool=\"true\" />\n  <Annotation Term=\"Org.OData.Capabilities.V1.AsynchronousRequestsSupported\" Bool=\"true\" />\n  ...\n</Annotations>"
+        }
+      ],
+      "versionDiff": [
+        {
+          "aspect": "How extra metadata is added",
+          "v2": "Fixed attributes in a namespace: OData's m:HasStream, m:MimeType, m:HttpMethod; SAP's own \"SAP Annotations for OData Version 2.0\".",
+          "v4": "Terms from vocabularies (OASIS Core, Capabilities, Measures; SAP UI, Common, ...) applied with Annotation elements."
+        },
+        {
+          "aspect": "SAP annotations",
+          "v2": "SAP Annotations for OData Version 2.0.",
+          "v4": "SAP's vocabulary-based annotations, which SAP says fully replace the old V2 annotations."
+        },
+        {
+          "aspect": "Annotations in a separate document",
+          "v2": "-",
+          "v4": "edm:Annotations with a Target, included via edmx:Reference / edmx:IncludeAnnotations."
         }
       ],
       "assignment": null,
@@ -38,6 +55,14 @@
         {
           "title": "SAP OData Vocabularies (SAP on GitHub)",
           "url": "https://github.com/SAP/odata-vocabularies"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
+        },
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
         }
       ]
     },
@@ -59,11 +84,22 @@
           "code": "<Term Name=\"IsURL\" Type=\"Core.Tag\" Nullable=\"false\" DefaultValue=\"true\"\n      AppliesTo=\"Property Term\">\n  <Annotation Term=\"Core.Description\">\n    <String>Properties and terms annotated with this term MUST contain a valid URL</String>\n  </Annotation>\n  <Annotation Term=\"Core.RequiresType\" String=\"Edm.String\" />\n</Term>"
         }
       ],
+      "versionDiff": [
+        {
+          "aspect": "Who can define metadata extensions",
+          "v2": "OData defines fixed attributes (m:HttpMethod, m:HasStream, ...); vendors such as SAP add their own attribute annotations.",
+          "v4": "Anyone: a vocabulary is a schema of terms; shared ones include the OData Core vocabulary."
+        }
+      ],
       "assignment": null,
       "sources": [
         {
           "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
           "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        },
+        {
+          "title": "OData Version 2.0: Overview (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
         }
       ]
     },
@@ -105,9 +141,9 @@
       ],
       "examples": [
         {
-          "title": "The same constant in both notations",
+          "title": "The same constant in both notations, and constants used by TripPin",
           "language": "xml",
-          "code": "<Annotation Term=\"org.example.display.ReadOnly\" Bool=\"true\" />\n\n<Annotation Term=\"org.example.display.ReadOnly\">\n  <Bool>true</Bool>\n</Annotation>\n\n<Annotation Term=\"org.example.display.Thumbnail\" Binary=\"T0RhdGE\" />\n<Annotation Term=\"Measures.ISOCurrency\" String=\"USD\" />"
+          "code": "<Annotation Term=\"org.example.display.ReadOnly\" Bool=\"true\" />\n\n<Annotation Term=\"org.example.display.ReadOnly\">\n  <Bool>true</Bool>\n</Annotation>\n\n<Annotation Term=\"org.example.display.Thumbnail\" Binary=\"T0RhdGE\" />\n<Annotation Term=\"Measures.ISOCurrency\" String=\"USD\" />\n\nTripPin ($metadata):\n<Annotation Term=\"Org.OData.Core.V1.Computed\" Bool=\"true\" />\n<Annotation Term=\"Org.OData.Core.V1.ResourcePath\" String=\"People\" />\n<Annotation Term=\"Org.OData.Core.V1.Permissions\">\n  <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>\n</Annotation>"
         }
       ],
       "assignment": null,
@@ -115,6 +151,10 @@
         {
           "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",
           "url": "https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/odata-csdl-xml-v4.01.html"
+        },
+        {
+          "title": "Reference Services (odata.org)",
+          "url": "https://www.odata.org/odata-services/"
         }
       ]
     }
