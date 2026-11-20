@@ -24,6 +24,19 @@
       />
     </HBox>
 
+    <!-- What the question asks: shown even in self-test mode, since it frames the question, not the answer. -->
+    <HBox
+      visible="{= !${topic>pending} &amp;&amp; !!${topic>focus} }"
+      alignItems="Start"
+      class="prCard prFocus"
+    >
+      <core:Icon src="sap-icon://question-mark" class="prFocusIcon" />
+      <VBox>
+        <Text text="{i18n>focusLabel}" class="prFocusLabel" />
+        <FormattedText htmlText="{path: 'topic>focus', formatter: '.formatter.inlineTextHtml'}" class="prProse" />
+      </VBox>
+    </HBox>
+
     <!-- Placeholder question: no verified public source yet, so only the internal resources are shown. -->
     <VBox visible="{= !!${topic>pending} }">
       <MessageStrip text="{i18n>pendingMessage}" type="Information" showIcon="true" class="prCard" />
@@ -61,6 +74,44 @@
         <FormattedText htmlText="{path: 'topic>description', formatter: '.formatter.proseHtml'}" class="prProse" />
       </Panel>
 
+      <!-- Highlighted background notes ("What is EDM?") that belong to the answer. -->
+      <VBox
+        items="{path: 'topic>notes', templateShareable: false}"
+        visible="{= !!${topic>notes} &amp;&amp; ${topic>notes}.length > 0 }"
+      >
+        <VBox class="prCard prNote">
+          <HBox alignItems="Center" class="sapUiSmallMarginBottom">
+            <core:Icon src="sap-icon://lightbulb" class="prNoteIcon" />
+            <Title text="{topic>title}" level="H3" wrapping="true" />
+          </HBox>
+          <FormattedText htmlText="{path: 'topic>text', formatter: '.formatter.proseHtml'}" class="prProse" />
+        </VBox>
+      </VBox>
+
+      <!-- Glossary-style overview: groups of term cards (term, short definition, optional example). -->
+      <Panel
+        headerText="{i18n>termListsLabel}"
+        class="prCard"
+        width="auto"
+        visible="{= !!${topic>termLists} &amp;&amp; ${topic>termLists}.length > 0 }"
+      >
+        <VBox items="{path: 'topic>termLists', templateShareable: false}">
+          <VBox class="prTermGroup">
+            <Title text="{topic>title}" level="H4" wrapping="true" class="sapUiSmallMarginBottom" />
+            <FlexBox renderType="Bare" class="prTermGrid" items="{path: 'topic>items', templateShareable: false}">
+              <VBox class="prTerm">
+                <Text text="{topic>term}" class="prTermName" />
+                <FormattedText
+                  htmlText="{path: 'topic>definition', formatter: '.formatter.inlineTextHtml'}"
+                  class="prTermText"
+                />
+                <Text text="{topic>example}" visible="{= !!${topic>example} }" class="prTermExample" />
+              </VBox>
+            </FlexBox>
+          </VBox>
+        </VBox>
+      </Panel>
+
       <Panel headerText="{i18n>keyPointsLabel}" class="prCard" width="auto">
         <List items="{path: 'topic>keyPoints', templateShareable: false}" mode="None" showSeparators="None">
           <items>
@@ -91,6 +142,45 @@
               type="{topic>language}"
               editable="false"
               height="{path: 'topic>code', formatter: '.formatter.codeEditorHeight'}"
+            />
+          </VBox>
+        </VBox>
+      </Panel>
+
+      <!-- What the service sends back for the requests in the examples: status, content type, note and body. -->
+      <Panel
+        headerText="{i18n>responsesLabel}"
+        class="prCard"
+        width="auto"
+        visible="{= !!${topic>responses} &amp;&amp; ${topic>responses}.length > 0 }"
+      >
+        <VBox items="{path: 'topic>responses', templateShareable: false}">
+          <VBox class="prExample">
+            <FormattedText
+              htmlText="{path: 'topic>title', formatter: '.formatter.inlineTextHtml'}"
+              class="prExampleTitle sapUiSmallMarginBottom"
+            />
+            <Text text="{topic>request}" renderWhitespace="true" class="prRequest" />
+            <HBox alignItems="Center" wrap="Wrap" visible="{= !!${topic>status} }" class="sapUiSmallMarginTopBottom">
+              <ObjectStatus
+                text="{topic>status}"
+                state="{path: 'topic>status', formatter: '.formatter.httpStatusState'}"
+                inverted="true"
+                class="sapUiSmallMarginEnd"
+              />
+              <Text text="{topic>contentType}" visible="{= !!${topic>contentType} }" class="prMuted prMono" />
+            </HBox>
+            <FormattedText
+              htmlText="{path: 'topic>note', formatter: '.formatter.inlineTextHtml'}"
+              visible="{= !!${topic>note} }"
+              class="prProse prResponseNote sapUiSmallMarginBottom"
+            />
+            <codeeditor:CodeEditor
+              value="{topic>body}"
+              type="{topic>language}"
+              editable="false"
+              visible="{= !!${topic>body} }"
+              height="{path: 'topic>body', formatter: '.formatter.codeEditorHeight'}"
             />
           </VBox>
         </VBox>

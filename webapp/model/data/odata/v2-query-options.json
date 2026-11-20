@@ -20,6 +20,26 @@
           "code": "https://services.odata.org/V2/OData/OData.svc/Products?$orderby=Rating\nhttps://services.odata.org/V2/OData/OData.svc/Products?$orderby=Rating,Category/Name desc\nhttps://services.odata.org/V2/OData/OData.svc/Products?$top=5&$orderby=Name desc\nhttps://services.odata.org/V2/OData/OData.svc/Products?$skip=2&$top=2&$orderby=Rating     (3rd and 4th product)"
         }
       ],
+      "responses": [
+        {
+          "title": "$skip and $top return just that slice of the sorted collection",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Products?$skip=2&$top=2&$orderby=Rating&$select=ID,Name,Rating\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "$select is added only to keep the answer short. You get the 3rd and 4th product by rating and nothing else: $top and $skip add no paging information, so the response does not tell you how many entries exist in total. Add $inlinecount=allpages for that.",
+          "language": "json",
+          "body": "{\n  \"d\": [\n    {\n      \"__metadata\": {\n        \"id\": \"https://services.odata.org/V2/OData/OData.svc/Products(3)\",\n        \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(3)\",\n        \"type\": \"ODataDemo.Product\"\n      },\n      \"ID\": 3,\n      \"Name\": \"Havina Cola\",\n      \"Rating\": 3\n    },\n    {\n      \"__metadata\": {\n        \"id\": \"https://services.odata.org/V2/OData/OData.svc/Products(4)\",\n        \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(4)\",\n        \"type\": \"ODataDemo.Product\"\n      },\n      \"ID\": 4,\n      \"Name\": \"Fruit Punch\",\n      \"Rating\": 3\n    }\n  ]\n}"
+        },
+        {
+          "title": "$orderby with desc and $top=5",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Products?$top=5&$orderby=Name desc&$select=ID,Name\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "Five entries come back, sorted by Name from Z to A. The array is plain because the demo service answers as DataServiceVersion 1.0.",
+          "language": "json",
+          "body": "{\n  \"d\": [\n    {\n      \"__metadata\": {\n        \"id\": \"https://services.odata.org/V2/OData/OData.svc/Products(2)\",\n        \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(2)\",\n        \"type\": \"ODataDemo.Product\"\n      },\n      \"ID\": 2,\n      \"Name\": \"Vint soda\"\n    },\n    {\n      \"__metadata\": {\n        \"id\": \"https://services.odata.org/V2/OData/OData.svc/Products(6)\",\n        \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(6)\",\n        \"type\": \"ODataDemo.Product\"\n      },\n      \"ID\": 6,\n      \"Name\": \"Pink Lemonade\"\n    },\n    ... 3 more entries\n  ]\n}"
+        }
+      ],
       "versionDiff": [
         {
           "aspect": "Sorting by related counts",
@@ -37,6 +57,10 @@
         {
           "title": "OData Version 2.0: URI Conventions (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
         },
         {
           "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
@@ -65,6 +89,35 @@
           "title": "Expand and select on the V2 demo service",
           "language": "text",
           "code": "https://services.odata.org/V2/OData/OData.svc/Categories?$expand=Products\nhttps://services.odata.org/V2/OData/OData.svc/Categories?$expand=Products/Supplier\nhttps://services.odata.org/V2/OData/OData.svc/Products?$expand=Category,Supplier\nhttps://services.odata.org/V2/OData/OData.svc/Products?$select=Price,Name\nhttps://services.odata.org/V2/OData/OData.svc/Categories?$select=Name,Products&$expand=Products"
+        }
+      ],
+      "responses": [
+        {
+          "title": "$expand puts the related entries inline instead of __deferred",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Products(1)?$expand=Category,Supplier\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "Without $expand, Category and Supplier are only __deferred links. With it, each is a full entry inside the product. The expanded Category still has its own Products as __deferred: only the listed navigation properties are expanded.",
+          "language": "json",
+          "body": "{\n  \"d\": {\n    \"__metadata\": {\n      \"id\": \"https://services.odata.org/V2/OData/OData.svc/Products(1)\",\n      \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(1)\",\n      \"type\": \"ODataDemo.Product\"\n    },\n    \"Category\": {\n      \"__metadata\": {\n        \"id\": \"https://services.odata.org/V2/OData/OData.svc/Categories(1)\",\n        \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Categories(1)\",\n        \"type\": \"ODataDemo.Category\"\n      },\n      \"Products\": {\n        \"__deferred\": {\n          \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Categories(1)/Products\"\n        }\n      },\n      \"ID\": 1,\n      \"Name\": \"Beverages\"\n    },\n    \"Supplier\": {\n      \"__metadata\": {\n        \"id\": \"https://services.odata.org/V2/OData/OData.svc/Suppliers(0)\",\n        \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Suppliers(0)\",\n        \"etag\": \"W/\\\"0\\\"\",\n        \"type\": \"ODataDemo.Supplier\"\n      },\n      \"Products\": {\n        \"__deferred\": {\n          \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Suppliers(0)/Products\"\n        }\n      },\n      \"ID\": 0,\n      \"Name\": \"Exotic Liquids\",\n      \"Address\": {\n        \"__metadata\": {\n          \"type\": \"ODataDemo.Address\"\n        },\n        \"Street\": \"NE 228th\",\n        \"City\": \"Sammamish\",\n        \"State\": \"WA\",\n        \"ZipCode\": \"98074\",\n        \"Country\": \"USA\"\n      },\n      \"Concurrency\": 0\n    },\n    \"ID\": 1,\n    \"Name\": \"Milk\",\n    \"Description\": \"Low fat milk\",\n    \"ReleaseDate\": \"/Date(812505600000)/\",\n    \"DiscontinuedDate\": null,\n    \"Rating\": 3,\n    \"Price\": \"3.5\"\n  }\n}"
+        },
+        {
+          "title": "Expanding a to-many navigation property gives an array of entries",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Categories(1)?$expand=Products&$select=Name,Products\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "Products is now an array of Product entries inside the category, the inline form the V2 JSON spec shows for both V1 and V2. $select=Name,Products keeps the category short, but the expanded products still come with all their properties.",
+          "language": "json",
+          "body": "{\n  \"d\": {\n    \"__metadata\": {\n      \"id\": \"https://services.odata.org/V2/OData/OData.svc/Categories(1)\",\n      \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Categories(1)\",\n      \"type\": \"ODataDemo.Category\"\n    },\n    \"Products\": [\n      {\n        \"__metadata\": {\n          \"id\": \"https://services.odata.org/V2/OData/OData.svc/Products(1)\",\n          \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(1)\",\n          \"type\": \"ODataDemo.Product\"\n        },\n        \"Category\": {\n          \"__deferred\": {\n            \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(1)/Category\"\n          }\n        },\n        \"Supplier\": {\n          \"__deferred\": {\n            \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(1)/Supplier\"\n          }\n        },\n        \"ID\": 1,\n        \"Name\": \"Milk\",\n        \"Description\": \"Low fat milk\",\n        \"ReleaseDate\": \"/Date(812505600000)/\",\n        \"DiscontinuedDate\": null,\n        \"Rating\": 3,\n        \"Price\": \"3.5\"\n      },\n      ... 5 more products\n    ],\n    \"Name\": \"Beverages\"\n  }\n}"
+        },
+        {
+          "title": "$select returns only the listed properties",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Products?$select=Price,Name\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "Each entry has only __metadata, Name and Price. Even the navigation properties Category and Supplier are left out, because they were not selected.",
+          "language": "json",
+          "body": "{\n  \"d\": [\n    {\n      \"__metadata\": {\n        \"id\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)\",\n        \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)\",\n        \"type\": \"ODataDemo.Product\"\n      },\n      \"Name\": \"Bread\",\n      \"Price\": \"2.5\"\n    },\n    {\n      \"__metadata\": {\n        \"id\": \"https://services.odata.org/V2/OData/OData.svc/Products(1)\",\n        \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(1)\",\n        \"type\": \"ODataDemo.Product\"\n      },\n      \"Name\": \"Milk\",\n      \"Price\": \"3.5\"\n    },\n    ... 7 more entries\n  ]\n}"
         }
       ],
       "versionDiff": [
@@ -96,6 +149,10 @@
           "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
         },
         {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        },
+        {
           "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
           "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html"
         },
@@ -124,6 +181,44 @@
           "code": "https://services.odata.org/V2/OData/OData.svc/Products?$format=json\nhttps://services.odata.org/V2/OData/OData.svc/Products?$format=atom\nhttps://services.odata.org/V2/OData/OData.svc/Products/$count                       -> 9\nhttps://services.odata.org/V2/OData/OData.svc/Categories(1)/Products/$count         -> 6"
         }
       ],
+      "responses": [
+        {
+          "title": "$format=json returns JSON without any Accept header",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Products?$format=json",
+          "status": "200 OK",
+          "contentType": "application/json;odata=verbose",
+          "note": "The query option alone is enough, which is why $format exists: some clients cannot set request headers.",
+          "language": "json",
+          "body": "{\n  \"d\": [\n    {\n      \"__metadata\": {\n        \"id\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)\",\n        \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)\",\n        \"type\": \"ODataDemo.Product\"\n      },\n      \"Category\": {\n        \"__deferred\": {\n          \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)/Category\"\n        }\n      },\n      \"Supplier\": {\n        \"__deferred\": {\n          \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)/Supplier\"\n        }\n      },\n      \"ID\": 0,\n      \"Name\": \"Bread\",\n      \"Description\": \"Whole grain bread\",\n      \"ReleaseDate\": \"/Date(694224000000)/\",\n      \"DiscontinuedDate\": null,\n      \"Rating\": 4,\n      \"Price\": \"2.5\"\n    },\n    ... 8 more entries\n  ]\n}"
+        },
+        {
+          "title": "$format=atom returns an Atom feed",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Products?$format=atom",
+          "status": "200 OK",
+          "contentType": "application/atom+xml;type=feed",
+          "note": "Each product is an <entry>; its properties are in <m:properties> inside <content>, and the navigation properties are <link> elements. This is also what you get when you send no Accept header and no $format.",
+          "language": "xml",
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<feed xmlns=\"http://www.w3.org/2005/Atom\" xmlns:d=\"http://schemas.microsoft.com/ado/2007/08/dataservices\" xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\" xml:base=\"https://services.odata.org/V2/OData/OData.svc/\">\n  <id>https://services.odata.org/V2/OData/OData.svc/Products</id>\n  <title type=\"text\">Products</title>\n  <updated>...</updated>\n  <link rel=\"self\" title=\"Products\" href=\"Products\"/>\n  <entry>\n    <id>https://services.odata.org/V2/OData/OData.svc/Products(0)</id>\n    <category term=\"ODataDemo.Product\" scheme=\"http://schemas.microsoft.com/ado/2007/08/dataservices/scheme\"/>\n    <link rel=\"edit\" title=\"Product\" href=\"Products(0)\"/>\n    <link rel=\"http://schemas.microsoft.com/ado/2007/08/dataservices/related/Category\" type=\"application/atom+xml;type=entry\" title=\"Category\" href=\"Products(0)/Category\"/>\n    <link rel=\"http://schemas.microsoft.com/ado/2007/08/dataservices/related/Supplier\" type=\"application/atom+xml;type=entry\" title=\"Supplier\" href=\"Products(0)/Supplier\"/>\n    <title type=\"text\">Bread</title>\n    <summary type=\"text\">Whole grain bread</summary>\n    <updated>...</updated>\n    <author>\n      <name/>\n    </author>\n    <content type=\"application/xml\">\n      <m:properties>\n        <d:ID m:type=\"Edm.Int32\">0</d:ID>\n        <d:ReleaseDate m:type=\"Edm.DateTime\">1992-01-01T00:00:00</d:ReleaseDate>\n        <d:DiscontinuedDate m:type=\"Edm.DateTime\" m:null=\"true\"/>\n        <d:Rating m:type=\"Edm.Int32\">4</d:Rating>\n        <d:Price m:type=\"Edm.Decimal\">2.5</d:Price>\n      </m:properties>\n    </content>\n  </entry>\n  <!-- ... 8 more entries -->\n</feed>"
+        },
+        {
+          "title": "$format=xml is not supported by the demo service",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Products?$format=xml",
+          "status": "400 Bad Request",
+          "contentType": "text/html",
+          "note": "xml is a valid $format value in the spec, but this service rejects it, and the body is a generic HTML error page instead of an OData error. Which formats work is up to the service.",
+          "language": "text",
+          "body": ""
+        },
+        {
+          "title": "/$count returns a bare number as plain text",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Products/$count",
+          "status": "200 OK",
+          "contentType": "text/plain",
+          "note": "No JSON or XML around it. The demo service answers 415 Unsupported Media Type if you send Accept: application/json.",
+          "language": "text",
+          "body": "9"
+        }
+      ],
       "versionDiff": [
         {
           "aspect": "Count together with the entries",
@@ -146,6 +241,14 @@
         {
           "title": "OData Version 2.0: URI Conventions (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        },
+        {
+          "title": "OData Version 2.0: Atom Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/atom-format/"
         },
         {
           "title": "OData Version 2.0: Operations (odata.org)",
@@ -179,6 +282,26 @@
           "code": "https://services.odata.org/V2/OData/OData.svc/GetProductsByRating?rating=5                 (V2 demo service)\n/OData/OData.svc/ProductsByColor?color='red'     (example from the V2 spec, not live)"
         }
       ],
+      "responses": [
+        {
+          "title": "With the parameter: the matching entries",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/GetProductsByRating?rating=4\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "The operation returns Collection(ODataDemo.Product), so the answer looks like any feed. With rating=5, as in the example above, no product matches and you get {\"d\": []}.",
+          "language": "json",
+          "body": "{\n  \"d\": [\n    {\n      \"__metadata\": {\n        \"id\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)\",\n        \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)\",\n        \"type\": \"ODataDemo.Product\"\n      },\n      \"Category\": {\n        \"__deferred\": {\n          \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)/Category\"\n        }\n      },\n      \"Supplier\": {\n        \"__deferred\": {\n          \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)/Supplier\"\n        }\n      },\n      \"ID\": 0,\n      \"Name\": \"Bread\",\n      \"Description\": \"Whole grain bread\",\n      \"ReleaseDate\": \"/Date(694224000000)/\",\n      \"DiscontinuedDate\": null,\n      \"Rating\": 4,\n      \"Price\": \"2.5\"\n    }\n  ]\n}"
+        },
+        {
+          "title": "Without the parameter: an error",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/GetProductsByRating\nAccept: application/json",
+          "status": "400 Bad Request",
+          "contentType": "application/json",
+          "note": "The operation is not called when its parameter is missing. OData errors in JSON have the shape error.code and error.message.value.",
+          "language": "json",
+          "body": "{\n  \"error\": {\n    \"code\": \"\",\n    \"message\": {\n      \"lang\": \"en-US\",\n      \"value\": \"Bad Request - Error in query syntax.\"\n    }\n  }\n}"
+        }
+      ],
       "versionDiff": [
         {
           "aspect": "Passing parameters",
@@ -196,6 +319,10 @@
         {
           "title": "OData Version 2.0: URI Conventions (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
         },
         {
           "title": "OData Version 2.0: Operations (odata.org)",
@@ -230,6 +357,44 @@
           "code": "https://services.odata.org/V2/OData/OData.svc/Products?$inlinecount=allpages\nhttps://services.odata.org/V2/OData/OData.svc/Products?$inlinecount=allpages&$top=10&$filter=Price gt 200\nhttps://services.odata.org/V2/OData/OData.svc/Products(1)/Description/$value          -> Low fat milk"
         }
       ],
+      "responses": [
+        {
+          "title": "$inlinecount=allpages adds __count next to the results",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Products?$inlinecount=allpages&$top=2&$select=ID,Name\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "Only 2 entries come back because of $top=2, but __count is 9: the total, counted before $top and $skip. The count is a string, and because $inlinecount is a V2 feature the response is V2, so the entries are in results.",
+          "language": "json",
+          "body": "{\n  \"d\": {\n    \"results\": [\n      {\n        \"__metadata\": {\n          \"id\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)\",\n          \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)\",\n          \"type\": \"ODataDemo.Product\"\n        },\n        \"ID\": 0,\n        \"Name\": \"Bread\"\n      },\n      {\n        \"__metadata\": {\n          \"id\": \"https://services.odata.org/V2/OData/OData.svc/Products(1)\",\n          \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(1)\",\n          \"type\": \"ODataDemo.Product\"\n        },\n        \"ID\": 1,\n        \"Name\": \"Milk\"\n      }\n    ],\n    \"__count\": \"9\"\n  }\n}"
+        },
+        {
+          "title": "The count is taken after $filter",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Products?$inlinecount=allpages&$top=10&$filter=Price gt 200\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "Only one product costs more than 200, so __count is 1 even though $top allows 10.",
+          "language": "json",
+          "body": "{\n  \"d\": {\n    \"results\": [\n      {\n        \"__metadata\": {\n          \"id\": \"https://services.odata.org/V2/OData/OData.svc/Products(8)\",\n          \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(8)\",\n          \"type\": \"ODataDemo.Product\"\n        },\n        \"Category\": {\n          \"__deferred\": {\n            \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(8)/Category\"\n          }\n        },\n        \"Supplier\": {\n          \"__deferred\": {\n            \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(8)/Supplier\"\n          }\n        },\n        \"ID\": 8,\n        \"Name\": \"LCD HDTV\",\n        \"Description\": \"42 inch 1080p LCD with Built-in Blu-ray Disc Player\",\n        \"ReleaseDate\": \"/Date(1210204800000)/\",\n        \"DiscontinuedDate\": null,\n        \"Rating\": 3,\n        \"Price\": \"1088.8\"\n      }\n    ],\n    \"__count\": \"1\"\n  }\n}"
+        },
+        {
+          "title": "Any value other than allpages or none is an error",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Products?$inlinecount=foo\nAccept: application/json",
+          "status": "400 Bad Request",
+          "contentType": "application/json",
+          "note": "",
+          "language": "json",
+          "body": "{\n  \"error\": {\n    \"code\": \"\",\n    \"message\": {\n      \"lang\": \"en-US\",\n      \"value\": \"Unknown $inlinecount option, only \\\"allpages\\\" and \\\"none\\\" are supported\"\n    }\n  }\n}"
+        },
+        {
+          "title": "$value returns the raw value of a property",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Products(1)/Description/$value",
+          "status": "200 OK",
+          "contentType": "text/plain",
+          "note": "Just the text, no JSON or XML around it. Without /$value the same property comes back in OData format: {\"d\": {\"Description\": \"Low fat milk\"}}.",
+          "language": "text",
+          "body": "Low fat milk"
+        }
+      ],
       "versionDiff": [
         {
           "aspect": "Count with the entries",
@@ -252,6 +417,10 @@
         {
           "title": "OData Version 2.0: URI Conventions (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
         },
         {
           "title": "OData Version 2.0: JSON Format (odata.org)",
@@ -287,6 +456,17 @@
           "title": "Custom query option on the V2 demo service",
           "language": "text",
           "code": "https://services.odata.org/V2/OData/OData.svc/Products?x=y"
+        }
+      ],
+      "responses": [
+        {
+          "title": "An unknown custom option changes nothing on the demo service",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Products?x=y&$select=ID,Name\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "The answer is exactly the same as without x=y ($select only keeps it short): the demo service defines no custom options, so it just ignores x. On a service that does define one, the meaning and effect are up to that service.",
+          "language": "json",
+          "body": "{\n  \"d\": [\n    {\n      \"__metadata\": {\n        \"id\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)\",\n        \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)\",\n        \"type\": \"ODataDemo.Product\"\n      },\n      \"ID\": 0,\n      \"Name\": \"Bread\"\n    },\n    {\n      \"__metadata\": {\n        \"id\": \"https://services.odata.org/V2/OData/OData.svc/Products(1)\",\n        \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(1)\",\n        \"type\": \"ODataDemo.Product\"\n      },\n      \"ID\": 1,\n      \"Name\": \"Milk\"\n    },\n    ... 7 more entries\n  ]\n}"
         }
       ],
       "versionDiff": [
