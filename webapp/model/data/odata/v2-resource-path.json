@@ -21,6 +21,35 @@
           "code": "GET https://services.odata.org/V2/OData/OData.svc/Categories          all Categories (entity set \"Categories\")\nGET https://services.odata.org/V2/OData/OData.svc/Categories(1)       the Category with key 1\nGET https://services.odata.org/V2/OData/OData.svc/Products/$count     number of Products (returns 9)\n\nComposite key (two key properties):\nGET /Service.svc/OrderItems(OrderID=10248,ItemNo=1)"
         }
       ],
+      "responses": [
+        {
+          "title": "A collection returns a feed: all its entries",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Categories\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "The demo service answers this request as DataServiceVersion 1.0, so the entries are a plain array under d. In a V2 response the array is the value of a results name/value pair, next to __count (with $inlinecount) and __next (for partial listings). Without an Accept header the service should answer with an Atom feed instead.",
+          "language": "json",
+          "body": "{\n  \"d\": [\n    {\n      \"__metadata\": {\n        \"id\": \"https://services.odata.org/V2/OData/OData.svc/Categories(0)\",\n        \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Categories(0)\",\n        \"type\": \"ODataDemo.Category\"\n      },\n      \"Products\": {\n        \"__deferred\": {\n          \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Categories(0)/Products\"\n        }\n      },\n      \"ID\": 0,\n      \"Name\": \"Food\"\n    },\n    ... 2 more entries\n  ]\n}"
+        },
+        {
+          "title": "A key predicate returns one entry",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Categories(1)\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "A single entry is one object under d. Its __metadata holds the canonical uri and the type; the navigation property Products is not sent inline but as a __deferred link you can follow.",
+          "language": "json",
+          "body": "{\n  \"d\": {\n    \"__metadata\": {\n      \"id\": \"https://services.odata.org/V2/OData/OData.svc/Categories(1)\",\n      \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Categories(1)\",\n      \"type\": \"ODataDemo.Category\"\n    },\n    \"Products\": {\n      \"__deferred\": {\n        \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Categories(1)/Products\"\n      }\n    },\n    \"ID\": 1,\n    \"Name\": \"Beverages\"\n  }\n}"
+        },
+        {
+          "title": "$count returns only a number, as plain text",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Products/$count",
+          "status": "200 OK",
+          "contentType": "text/plain",
+          "note": "The body is the bare number, not JSON or XML. The demo service answers 415 Unsupported Media Type if you send Accept: application/json, so send no Accept header (or */*).",
+          "language": "text",
+          "body": "9"
+        }
+      ],
       "versionDiff": [
         {
           "aspect": "/$count",
@@ -38,6 +67,14 @@
         {
           "title": "OData Version 2.0: URI Conventions (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        },
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
         },
         {
           "title": "OData Version 4.01 Part 2: URL Conventions (OASIS)",
@@ -67,6 +104,35 @@
           "code": "GET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Products              Products of Category 1 (NavPropCollection)\nGET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Products/$count       how many of them\nGET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Products(1)/Supplier  the Supplier of that Product (NavPropSingle)"
         }
       ],
+      "responses": [
+        {
+          "title": "NavPropCollection returns a feed of the related entries",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Products\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "The response has the same shape as an entity set: an array of Product entries. In a V2 response the array is the value of a results name/value pair, next to __count (with $inlinecount) and __next (for partial listings).",
+          "language": "json",
+          "body": "{\n  \"d\": [\n    {\n      \"__metadata\": {\n        \"id\": \"https://services.odata.org/V2/OData/OData.svc/Products(1)\",\n        \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(1)\",\n        \"type\": \"ODataDemo.Product\"\n      },\n      \"Category\": {\n        \"__deferred\": {\n          \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(1)/Category\"\n        }\n      },\n      \"Supplier\": {\n        \"__deferred\": {\n          \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(1)/Supplier\"\n        }\n      },\n      \"ID\": 1,\n      \"Name\": \"Milk\",\n      \"Description\": \"Low fat milk\",\n      \"ReleaseDate\": \"/Date(812505600000)/\",\n      \"DiscontinuedDate\": null,\n      \"Rating\": 3,\n      \"Price\": \"3.5\"\n    },\n    ... 5 more entries\n  ]\n}"
+        },
+        {
+          "title": "$count after a NavPropCollection returns the number of related entries",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Products/$count",
+          "status": "200 OK",
+          "contentType": "text/plain",
+          "note": "Category 1 has 6 products. Like every $count, the answer is plain text.",
+          "language": "text",
+          "body": "6"
+        },
+        {
+          "title": "NavPropSingle returns one entry",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Products(1)/Supplier\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "You get the Supplier entry itself. Its __metadata uri is the canonical address Suppliers(0), not the navigation path you used.",
+          "language": "json",
+          "body": "{\n  \"d\": {\n    \"__metadata\": {\n      \"id\": \"https://services.odata.org/V2/OData/OData.svc/Suppliers(0)\",\n      \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Suppliers(0)\",\n      \"etag\": \"W/\\\"0\\\"\",\n      \"type\": \"ODataDemo.Supplier\"\n    },\n    \"Products\": {\n      \"__deferred\": {\n        \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Suppliers(0)/Products\"\n      }\n    },\n    \"ID\": 0,\n    \"Name\": \"Exotic Liquids\",\n    \"Address\": {\n      \"__metadata\": {\n        \"type\": \"ODataDemo.Address\"\n      },\n      \"Street\": \"NE 228th\",\n      \"City\": \"Sammamish\",\n      \"State\": \"WA\",\n      \"ZipCode\": \"98074\",\n      \"Country\": \"USA\"\n    },\n    \"Concurrency\": 0\n  }\n}"
+        }
+      ],
       "versionDiff": [
         {
           "aspect": "Where a navigation property leads",
@@ -84,6 +150,10 @@
         {
           "title": "OData Version 2.0: URI Conventions (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
         },
         {
           "title": "What's New in OData Version 4.0 (OASIS)",
@@ -113,6 +183,44 @@
           "code": "GET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Name\nGET https://services.odata.org/V2/OData/OData.svc/Suppliers(1)/Address\nGET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Products(1)/Supplier/Address/City\nGET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Products(1)/Supplier/Address/City/$value      -> Sammamish"
         }
       ],
+      "responses": [
+        {
+          "title": "A primitive property returns its name and value",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Name\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "The demo answers as DataServiceVersion 1.0. Starting with V2, a standalone property in a response is wrapped in results: {\"d\": {\"results\": {\"Name\": \"Bread\"}}} is the spec example.",
+          "language": "json",
+          "body": "{\n  \"d\": {\n    \"Name\": \"Beverages\"\n  }\n}"
+        },
+        {
+          "title": "A complex property returns the whole structured value",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Suppliers(1)/Address\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "The complex value comes with its type in __metadata, but without a uri: a complex value has no address of its own.",
+          "language": "json",
+          "body": "{\n  \"d\": {\n    \"Address\": {\n      \"__metadata\": {\n        \"type\": \"ODataDemo.Address\"\n      },\n      \"Street\": \"NE 40th\",\n      \"City\": \"Redmond\",\n      \"State\": \"WA\",\n      \"ZipCode\": \"98052\",\n      \"Country\": \"USA\"\n    }\n  }\n}"
+        },
+        {
+          "title": "A property inside a complex type returns just that field",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Products(1)/Supplier/Address/City\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "",
+          "language": "json",
+          "body": "{\n  \"d\": {\n    \"City\": \"Sammamish\"\n  }\n}"
+        },
+        {
+          "title": "$value returns the raw value, without any OData format",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Categories(1)/Products(1)/Supplier/Address/City/$value",
+          "status": "200 OK",
+          "contentType": "text/plain",
+          "note": "Raw values usually have a fixed content type, so clients should send Accept: */* or no Accept header. The demo service answers 415 Unsupported Media Type to Accept: application/json.",
+          "language": "text",
+          "body": "Sammamish"
+        }
+      ],
       "versionDiff": [
         {
           "aspect": "/$value",
@@ -130,6 +238,14 @@
         {
           "title": "OData Version 2.0: URI Conventions (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
+        },
+        {
+          "title": "OData Version 2.0: Operations (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/operations/"
         },
         {
           "title": "Reference Services (odata.org)",
@@ -164,6 +280,17 @@
           "code": "GET /OData/OData.svc/ProductsByColor?color='red'\nGET /OData/OData.svc/ProductsByColor(3)/Category/Name?color='red'     (needs composition)\nGET /OData/OData.svc/ProductColors                                    (no parameters)"
         }
       ],
+      "responses": [
+        {
+          "title": "An operation that returns entries answers like a collection",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/GetProductsByRating?rating=4\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "GetProductsByRating returns Collection(ODataDemo.Product), so the result is formatted exactly like a feed of entries. With rating=5, as in the example above, no product matches and the answer is an empty array: {\"d\": []}. Other return types follow the same rules: a single entry like an entry, a primitive or complex value like a property, and a collection of primitive values as a JSON array such as {\"d\": [0, 1, 2]}.",
+          "language": "json",
+          "body": "{\n  \"d\": [\n    {\n      \"__metadata\": {\n        \"id\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)\",\n        \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)\",\n        \"type\": \"ODataDemo.Product\"\n      },\n      \"Category\": {\n        \"__deferred\": {\n          \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)/Category\"\n        }\n      },\n      \"Supplier\": {\n        \"__deferred\": {\n          \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(0)/Supplier\"\n        }\n      },\n      \"ID\": 0,\n      \"Name\": \"Bread\",\n      \"Description\": \"Whole grain bread\",\n      \"ReleaseDate\": \"/Date(694224000000)/\",\n      \"DiscontinuedDate\": null,\n      \"Rating\": 4,\n      \"Price\": \"2.5\"\n    }\n  ]\n}"
+        }
+      ],
       "versionDiff": [
         {
           "aspect": "Kinds of operations",
@@ -181,6 +308,10 @@
         {
           "title": "OData Version 2.0: URI Conventions (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
         },
         {
           "title": "OData Version 2.0: Operations (odata.org)",
@@ -218,6 +349,44 @@
           "code": "GET    https://services.odata.org/V2/OData/OData.svc/Categories(1)/$links/Products\nGET    https://services.odata.org/V2/OData/OData.svc/Products(1)/$links/Category\n\nPOST   /V2/OData/OData.svc/Categories(1)/$links/Products     body: <uri>.../Products(10)</uri>\nPUT    /V2/OData/OData.svc/Products(1)/$links/Category       body: <uri>.../Categories(2)</uri>\nDELETE /V2/OData/OData.svc/Categories(1)/$links/Products(10)  (no body)"
         }
       ],
+      "responses": [
+        {
+          "title": "Links to many entries, default format: a <links> list of URIs",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Categories(1)/$links/Products",
+          "status": "200 OK",
+          "contentType": "application/xml",
+          "note": "Without an Accept header you get XML: one <uri> element per related Product. Compare with Categories(1)/Products, which returns the full Product entries; $links returns only their addresses.",
+          "language": "xml",
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<links xmlns=\"http://schemas.microsoft.com/ado/2007/08/dataservices\">\n  <uri>https://services.odata.org/V2/OData/OData.svc/Products(1)</uri>\n  <uri>https://services.odata.org/V2/OData/OData.svc/Products(2)</uri>\n  <uri>https://services.odata.org/V2/OData/OData.svc/Products(3)</uri>\n  <uri>https://services.odata.org/V2/OData/OData.svc/Products(4)</uri>\n  <uri>https://services.odata.org/V2/OData/OData.svc/Products(5)</uri>\n  <uri>https://services.odata.org/V2/OData/OData.svc/Products(6)</uri>\n</links>"
+        },
+        {
+          "title": "The same links as JSON",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Categories(1)/$links/Products\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "Each link is an object with one uri name/value pair. This is the V1 shape the demo service returns; in a V2 response the array sits in results, and with $inlinecount=allpages the demo answers {\"d\": {\"__count\": \"6\", \"results\": [ ... ]}}.",
+          "language": "json",
+          "body": "{\n  \"d\": [\n    {\"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(1)\"},\n    {\"uri\": \"https://services.odata.org/V2/OData/OData.svc/Products(2)\"},\n    ... 4 more links\n  ]\n}"
+        },
+        {
+          "title": "A single link (to-one navigation property)",
+          "request": "GET https://services.odata.org/V2/OData/OData.svc/Products(1)/$links/Category\nAccept: application/json",
+          "status": "200 OK",
+          "contentType": "application/json",
+          "note": "A single link is one object, not an array. In XML (no Accept header) it is a single element: <uri xmlns=\"http://schemas.microsoft.com/ado/2007/08/dataservices\">https://services.odata.org/V2/OData/OData.svc/Categories(1)</uri>.",
+          "language": "json",
+          "body": "{\n  \"d\": {\n    \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Categories(1)\"\n  }\n}"
+        },
+        {
+          "title": "Adding, replacing and deleting links: 204 No Content",
+          "request": "POST   /V2/OData/OData.svc/Categories(1)/$links/Products\nPUT    /V2/OData/OData.svc/Products(1)/$links/Category\nDELETE /V2/OData/OData.svc/Categories(1)/$links/Products(10)",
+          "status": "204 No Content",
+          "contentType": "",
+          "note": "The server confirms each change with 204 No Content and an empty body: no entry and no link list comes back. To see the result, read the $links URI again. (Taken from the spec; the public demo service is read-only.)",
+          "language": "text",
+          "body": ""
+        }
+      ],
       "versionDiff": [
         {
           "aspect": "Addressing references",
@@ -235,6 +404,14 @@
         {
           "title": "OData Version 2.0: URI Conventions (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/uri-conventions/"
+        },
+        {
+          "title": "OData Version 2.0: Atom Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/atom-format/"
+        },
+        {
+          "title": "OData Version 2.0: JSON Format (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/json-format/"
         },
         {
           "title": "OData Version 2.0: Operations (odata.org)",

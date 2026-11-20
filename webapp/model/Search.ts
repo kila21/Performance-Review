@@ -28,8 +28,12 @@ export interface RawQuestion {
   id: string;
   title: string;
   description?: string;
+  focus?: string;
+  notes?: { title?: string; text?: string }[];
+  termLists?: { title?: string; items?: { term?: string; definition?: string; example?: string }[] }[];
   keyPoints?: string[];
   examples?: { title?: string; code?: string }[];
+  responses?: { title?: string; request?: string; note?: string; body?: string }[];
   assignment?: { task?: string; starterCode?: string; solution?: string } | null;
 }
 
@@ -41,9 +45,21 @@ export function toSearchEntry(topicId: string, topicTitle: string, q: RawQuestio
     questionId: q.id,
     title: q.title,
     fields: {
-      description: q.description ?? "",
+      description: [
+        q.description,
+        q.focus,
+        ...(q.notes ?? []).flatMap((n) => [n.title, n.text]),
+        ...(q.termLists ?? []).flatMap((list) =>
+          (list.items ?? []).map((i) => [i.term, i.definition, i.example].filter(Boolean).join(": "))
+        )
+      ]
+        .filter(Boolean)
+        .join("\n"),
       keyPoints: (q.keyPoints ?? []).join("\n"),
-      examples: (q.examples ?? []).map((e) => `${e.title ?? ""}\n${e.code ?? ""}`).join("\n"),
+      examples: [
+        ...(q.examples ?? []).map((e) => `${e.title ?? ""}\n${e.code ?? ""}`),
+        ...(q.responses ?? []).map((r) => [r.title, r.request, r.note, r.body].filter(Boolean).join("\n"))
+      ].join("\n"),
       assignment: q.assignment ? [q.assignment.task, q.assignment.starterCode].filter(Boolean).join("\n") : ""
     }
   };
