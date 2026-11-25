@@ -62,15 +62,81 @@
       "id": "odata-glossary",
       "level": "elementary",
       "title": "Explain the core OData V2 glossary terms: Collection, Feed, Entry, Property, Link and Resource.",
-      "description": "OData reuses AtomPub terminology. A Resource is a network-accessible data object or service identified by an IRI. A Collection is a Resource that contains a set of Member Resources; in OData it is represented as an Atom Feed or as an array of JSON objects, and Feed is the name of that representation. An Entry is a member of a Collection, represented as an Atom Entry Document or a JSON object. Property is the generic term for a declared or dynamic property of an Entry: a Declared Property is statically declared on an Entity or Complex Type, while a Dynamic Property is an extra nullable property an Entry of an open type may carry, without a representation in the metadata document. A Link describes an association between two Entries (one direction of it), and a Navigation Property is the property of an Entry that represents such a Link to related Entries. A Media Resource is a member of a Collection with a non-Atom/JSON representation (typically a BLOB), described by a Media Link Entry. Finally, the Service Document lists the Collections of a service, while the Service Metadata Document describes its data model.",
+      "focus": "Explain the basic words OData uses for its data and how they fit together: a Collection holds Entries and is sent as a Feed, an Entry has Properties, and Links connect Entries.",
+      "termLists": [
+        {
+          "title": "Data terms",
+          "items": [
+            {
+              "term": "Resource",
+              "definition": "Any data object or service on the network that has its own address (IRI).",
+              "example": "/Products(1)"
+            },
+            {
+              "term": "Collection",
+              "definition": "A Resource that contains a set of member resources: a group of similar items.",
+              "example": "/Products"
+            },
+            {
+              "term": "Feed",
+              "definition": "The way a Collection is written in a response: an Atom feed or a JSON array of objects.",
+              "example": "GET /Products returns a Feed"
+            },
+            {
+              "term": "Entry",
+              "definition": "One member of a Collection. It is written as an Atom entry or a JSON object.",
+              "example": "/Products(1)"
+            },
+            {
+              "term": "Property",
+              "definition": "One value of an Entry. A declared property is defined in the metadata; a dynamic property is an extra, nullable one on an open type.",
+              "example": "/Products(1)/Name"
+            },
+            {
+              "term": "Link",
+              "definition": "A connection between two Entries, in one direction.",
+              "example": "Product 1 -> its Category"
+            },
+            {
+              "term": "Navigation Property",
+              "definition": "The property of an Entry that represents a Link to one or more related Entries. It is not part of the Entry's own data.",
+              "example": "/Products(1)/Category"
+            },
+            {
+              "term": "Media Resource",
+              "definition": "A member of a Collection that is not an Atom entry or JSON object, usually a BLOB such as an image, a video or a document."
+            },
+            {
+              "term": "Media Link Entry",
+              "definition": "A special Entry that holds the metadata of a Media Resource."
+            }
+          ]
+        },
+        {
+          "title": "Documents of a service",
+          "items": [
+            {
+              "term": "Service Document",
+              "definition": "Describes where the Collections of the service are and what they can do.",
+              "example": "GET /"
+            },
+            {
+              "term": "Service Metadata Document",
+              "definition": "A CSDL document that describes the data model (structure and organization of all resources) of the service.",
+              "example": "GET /$metadata"
+            }
+          ]
+        }
+      ],
+      "description": "OData has a small set of words for the data a service shows, and most of them come from AtomPub (the Atom Publishing Protocol). It helps to picture an OData service as a database you read over HTTP. A Resource is anything you can reach with an address (an IRI or URI). A Collection is a group of similar items, for example all products. When the service sends you a Collection in Atom or JSON, that response is called a Feed. An Entry is one item inside a Collection, for example one product. A Property is one value of an Entry, such as the name or the price. Most properties are declared in the metadata; an open type may also add extra, dynamic properties. A Link connects one Entry to another, for example a product to its category. The Navigation Property is the property of the Entry that holds this Link, and it is not part of the Entry's own data. Two words are for files: a Media Resource is binary content such as an image or a video, and a Media Link Entry is the Entry that describes it. Finally, a service has two documents about itself: the Service Document lists its Collections, and the Service Metadata Document ($metadata) describes its data model.",
       "keyPoints": [
-        "Resource: anything addressable by an IRI.",
-        "Collection = set of Entries; its Atom/JSON representation is a Feed.",
-        "Entry = one member of a Collection (a structured record).",
-        "Property: declared (in metadata) or dynamic (extra, only on open types).",
-        "Link = association between Entries; Navigation Property = the property that represents it.",
-        "Media Resource (BLOB) + Media Link Entry (its structured description).",
-        "Service Document lists Collections; Service Metadata Document describes the model."
+        "Resource: anything you can reach with a URI.",
+        "Collection: a group of Entries, for example all products. Its Atom or JSON form is a Feed.",
+        "Entry: one item of a Collection, for example one product.",
+        "Property: one value of an Entry. Declared in metadata, or dynamic (extra) on open types.",
+        "Link: a connection between two Entries. The Navigation Property is the property that holds it.",
+        "Media Resource: binary content (image, video). Media Link Entry: the Entry that describes it.",
+        "Service Document lists the Collections; Service Metadata Document ($metadata) describes the model."
       ],
       "examples": [
         {
@@ -115,18 +181,153 @@
       "id": "structured-vs-primitive",
       "level": "elementary",
       "title": "What are the two kinds of types in OData, structured and primitive, and how do they differ?",
-      "description": "OData data is built from two kinds of types. Structured types are composed of named, typed properties: entity types (structured records with a key, such as Customer or Product) and complex types (structured types with a list of properties but no key, which can therefore only exist as a property of a containing entity or as a temporary value). Primitive types are the scalar types of the EDM type system, such as Edm.String, Edm.Int32, Edm.Boolean or Edm.DateTime; each has a defined literal form for use in URIs and HTTP headers, and its own representation in Atom and JSON payloads. Every entry is a structured record with a key that has a list of properties of primitive or complex types, so properties are either primitive values or nested structured values.",
+      "focus": "Name the two families of types in OData, give an example of each, and explain the difference: structured types are made of several properties, primitive types are single values.",
+      "notes": [
+        {
+          "title": "What is EDM, and why do primitive types start with Edm.?",
+          "text": "EDM stands for Entity Data Model: the abstract data model that every OData service uses to describe the resources it exposes. It gives clients one shared vocabulary (entity types, complex types, associations and primitive types), so a client can read the $metadata document and know the shape and type of every property. The service writes its model in CSDL (Conceptual Schema Definition Language), an XML language for describing models. The EDM does not force any storage format, so the data can live in any database or system, as long as the HTTP interface follows the protocol. In OData V2 the primitive type system is defined in the separate [MC-CSDL] specification (section 2.2.1), and the V2 XML namespaces are still Microsoft addresses under schemas.microsoft.com/ado. OData V4 was later standardized by OASIS. Edm is the namespace of the built-in types, which is why every primitive type name starts with it, as in Edm.String. In V4 CSDL, Edm is a reserved name that a service may not use for its own schema, so Edm.String always means the built-in type."
+        }
+      ],
+      "termLists": [
+        {
+          "title": "Structured types",
+          "items": [
+            {
+              "term": "Entity type",
+              "definition": "Structured record of named, typed properties with a key. Its instances (entities) are grouped in entity sets.",
+              "example": "Supplier (key ID) -> /Suppliers(0)"
+            },
+            {
+              "term": "Complex type",
+              "definition": "Structured type with a list of properties but no key. It exists only as a property of an entity or as a temporary value.",
+              "example": "Address: Street, City, State, ZipCode, Country"
+            }
+          ]
+        },
+        {
+          "title": "Primitive types: text and logic",
+          "items": [
+            {
+              "term": "Edm.String",
+              "definition": "Fixed- or variable-length character data.",
+              "example": "'Hello OData'"
+            },
+            {
+              "term": "Edm.Boolean",
+              "definition": "Binary-valued logic: true or false.",
+              "example": "true"
+            }
+          ]
+        },
+        {
+          "title": "Primitive types: whole numbers",
+          "items": [
+            {
+              "term": "Edm.Byte",
+              "definition": "Unsigned 8-bit integer.",
+              "example": "255"
+            },
+            {
+              "term": "Edm.SByte",
+              "definition": "Signed 8-bit integer.",
+              "example": "-8"
+            },
+            {
+              "term": "Edm.Int16",
+              "definition": "Signed 16-bit integer.",
+              "example": "-16"
+            },
+            {
+              "term": "Edm.Int32",
+              "definition": "Signed 32-bit integer.",
+              "example": "32"
+            },
+            {
+              "term": "Edm.Int64",
+              "definition": "Signed 64-bit integer. The URI literal needs the suffix L.",
+              "example": "64L"
+            }
+          ]
+        },
+        {
+          "title": "Primitive types: decimal and floating-point numbers",
+          "items": [
+            {
+              "term": "Edm.Decimal",
+              "definition": "Numeric value with fixed precision and scale. Suffix M or m.",
+              "example": "2.345M"
+            },
+            {
+              "term": "Edm.Double",
+              "definition": "Floating-point number with 15 digits of precision. Suffix d.",
+              "example": "2.029d"
+            },
+            {
+              "term": "Edm.Single",
+              "definition": "Floating-point number with 7 digits of precision. Suffix f.",
+              "example": "2.0f"
+            }
+          ]
+        },
+        {
+          "title": "Primitive types: date and time",
+          "items": [
+            {
+              "term": "Edm.DateTime",
+              "definition": "Date and time, from the year 1753 to 9999.",
+              "example": "datetime'2000-12-12T12:00'"
+            },
+            {
+              "term": "Edm.DateTimeOffset",
+              "definition": "Date and time with an offset in minutes from GMT.",
+              "example": "datetimeoffset'2002-10-10T17:00:00Z'"
+            },
+            {
+              "term": "Edm.Time",
+              "definition": "Time of day, from 0:00:00 to 23:59:59.",
+              "example": "time'PT13H20M'"
+            }
+          ]
+        },
+        {
+          "title": "Primitive types: identifiers, binary data and null",
+          "items": [
+            {
+              "term": "Edm.Guid",
+              "definition": "16-byte (128-bit) unique identifier.",
+              "example": "guid'12345678-aaaa-bbbb-cccc-ddddeeeeffff'"
+            },
+            {
+              "term": "Edm.Binary",
+              "definition": "Fixed- or variable-length binary data, written as pairs of hex digits.",
+              "example": "X'23AB'"
+            },
+            {
+              "term": "Null",
+              "definition": "The absence of a value.",
+              "example": "null"
+            }
+          ]
+        }
+      ],
+      "description": "OData has two kinds of types: structured types, which are built from several named properties, and primitive types, which hold one simple value. There are two structured types. An entity type is a structured record with a key, such as Product or Supplier, so every instance can be found on its own, for example with Suppliers(0). A complex type also has a list of properties but no key, so it can only exist as a property of an entity or as a temporary value. The Address of a Supplier in the demo service is a complex type: it groups Street, City, State, ZipCode and Country, but you cannot address an Address by itself. Primitive types are the built-in single-value types of the EDM, such as Edm.String, Edm.Int32 or Edm.DateTime. Each one has a fixed literal form that must be used in URIs and HTTP headers, and the Atom and JSON formats define how it is written in payloads. So every entry is a structured record with a key, and each of its properties is either a primitive value or a complex (nested structured) value.",
       "keyPoints": [
-        "Structured: entity types (with key) and complex types (no key).",
-        "Primitive: scalar Edm.* types (Edm.String, Edm.Int32, Edm.Boolean, ...).",
-        "A property's type is either primitive or complex.",
-        "Primitive types have a fixed literal form in URIs and a defined format in Atom/JSON payloads."
+        "Structured types: entity type (has a key, for example Product) and complex type (no key, for example Address).",
+        "A complex value lives only inside an entity (or as a temporary value); it has no own URI.",
+        "Primitive types: built-in single values named Edm.*, such as Edm.String, Edm.Int32, Edm.DateTime.",
+        "Each primitive type has a fixed literal form for URIs, such as 2.345M for Edm.Decimal.",
+        "EDM (Entity Data Model) is the abstract model OData uses to describe a service; $metadata shows it in CSDL."
       ],
       "examples": [
         {
-          "title": "One entity type using both kinds",
+          "title": "Entity type and complex type in https://services.odata.org/V2/OData/OData.svc/$metadata (excerpt)",
           "language": "xml",
-          "code": "<EntityType Name=\"Supplier\">                  <!-- structured: entity type (has a key) -->\n  <Key><PropertyRef Name=\"ID\" /></Key>\n  <Property Name=\"ID\"      Type=\"Edm.Int32\" Nullable=\"false\" />   <!-- primitive -->\n  <Property Name=\"Name\"    Type=\"Edm.String\" />                   <!-- primitive -->\n  <Property Name=\"Address\" Type=\"ODataDemo.Address\" />            <!-- structured: complex type -->\n</EntityType>"
+          "code": "<EntityType Name=\"Supplier\">                       <!-- structured: entity type (has a key) -->\n  <Key><PropertyRef Name=\"ID\" /></Key>\n  <Property Name=\"ID\"      Type=\"Edm.Int32\" Nullable=\"false\" />          <!-- primitive -->\n  <Property Name=\"Name\"    Type=\"Edm.String\" />                          <!-- primitive -->\n  <Property Name=\"Address\" Type=\"ODataDemo.Address\" Nullable=\"false\" /> <!-- complex -->\n  ...\n</EntityType>\n\n<ComplexType Name=\"Address\">                      <!-- structured: complex type (no key) -->\n  <Property Name=\"Street\"  Type=\"Edm.String\" />\n  <Property Name=\"City\"    Type=\"Edm.String\" />\n  <Property Name=\"State\"   Type=\"Edm.String\" />\n  <Property Name=\"ZipCode\" Type=\"Edm.String\" />\n  <Property Name=\"Country\" Type=\"Edm.String\" />\n</ComplexType>"
+        },
+        {
+          "title": "The same Supplier as JSON: the complex Address is nested inside the entry",
+          "language": "text",
+          "code": "GET https://services.odata.org/V2/OData/OData.svc/Suppliers(0)?$format=json&$select=ID,Name,Address\n\n{\"d\": {\n  \"__metadata\": { \"uri\": \"https://services.odata.org/V2/OData/OData.svc/Suppliers(0)\", \"type\": \"ODataDemo.Supplier\", ... },\n  \"ID\": 0,                                  <- Edm.Int32\n  \"Name\": \"Exotic Liquids\",                 <- Edm.String\n  \"Address\": {                              <- ODataDemo.Address (complex, no own URI)\n    \"__metadata\": { \"type\": \"ODataDemo.Address\" },\n    \"Street\": \"NE 228th\", \"City\": \"Sammamish\", \"State\": \"WA\",\n    \"ZipCode\": \"98074\", \"Country\": \"USA\"\n  }\n}}"
         }
       ],
       "versionDiff": [
@@ -146,6 +347,10 @@
         {
           "title": "OData Version 2.0: Overview (odata.org)",
           "url": "https://www.odata.org/documentation/odata-version-2-0/overview/"
+        },
+        {
+          "title": "OData Version 2.0: Terminology (odata.org)",
+          "url": "https://www.odata.org/documentation/odata-version-2-0/terminology/"
         },
         {
           "title": "OData Common Schema Definition Language (CSDL) XML Representation Version 4.01 (OASIS)",

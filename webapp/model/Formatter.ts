@@ -27,6 +27,15 @@ export function levelState(level: string): string {
   return level === "advanced" ? "Warning" : "Information";
 }
 
+/** HTTP status text ("200 OK", "204 No Content", "404 Not Found") -> ObjectStatus state. */
+export function httpStatusState(status: string): string {
+  const code = Number.parseInt(status ?? "", 10);
+  if (code >= 200 && code < 300) {
+    return "Success";
+  }
+  return code >= 400 ? "Error" : "Information";
+}
+
 const LINE_HEIGHT_PX = 19;
 const PADDING_PX = 24;
 
